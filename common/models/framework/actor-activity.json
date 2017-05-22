@@ -1,0 +1,23 @@
+{
+  "name": "ActorActivity",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "properties": {
+    "entityId": {
+    "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    }, 
+    "modelName": {
+           "type": "string"
+    },
+    "instructionType": {
+      "type":"string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,59 @@
+{
+  "name": "DataACL",
+  "plural": "DataACLs",
+  "description": "Stores Filter conditions on data for specific role or user",
+  "base": "BaseEntity",
+  "properties": {
+    "model": {
+      "type": "string",
+      "required": true,
+      "description": "The name of the model",
+      "max": 60
+    },
+    "accessType": {
+      "type": "string",
+      "required": false,
+      "description": "Valid values are READ, WRITE, EXECUTE, *",
+      "default": "*",
+      "max": 30
+    },
+    "principalType": {
+      "type": "string",
+      "required": true,
+      "description": "USER or ROLE",
+      "max": 30
+    },
+    "property": {
+      "type": "string",
+      "default": "*",
+      "required": false,
+      "description": "Method name of model, for all methods * can be given"
+    },
+    "principalId": {
+      "type": "string",
+      "max": 60,
+      "required": true,
+      "description": "userId or roleId depending upon principalType"
+    },
+    "filter": {
+      "type": "object",
+      "required": true,
+      "description": "Loopback style filter, additionaly you can use @CC.<field> syntax for call context values in value field of conditions."
+    },
+    "group": {
+      "type": "string",
+      "required": false,
+      "max": 30,
+      "description": "If group name is different then each group is and condition in overall filter. Each condition in same group name is alsways or condition"
+    },
+    "errorCode": {
+      "type": "string",
+      "required": false,
+      "description": "errorCode to be used for unauthorised data access"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

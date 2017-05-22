@@ -1,0 +1,16 @@
+{
+	"name": "UIManager",
+	"base": "Model",
+	"strict": false,
+	"idInjection": false,
+	"options": {
+		"validateUpsert": true
+	},
+    "VersionMixin":true,
+	"properties": {
+	},
+	"validations": [],
+	"relations": {},
+	"acls": [],
+	"methods": {}
+}

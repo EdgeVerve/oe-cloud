@@ -1,0 +1,40 @@
+{
+    "nullsrc": {
+        "name": "nullsrc",
+        "connector": "memory"
+    },
+    "transient": {
+   	 "name": "transient",
+   	 "connector": "transient"
+    },
+    "db": {
+        "host": "localhost",
+        "port": 27017,
+        "url": "mongodb://localhost:27017/db",
+        "database": "db",
+        "password": "admin",
+        "name": "db",
+        "connector": "mongodb",
+        "user": "admin",
+        "connectionTimeout": 50000
+    },
+    "emailDs": {
+        "name": "emailDs",
+        "connector": "mail",
+        "transports": [{
+            "type": "smtp",
+            "host": "smtp.gmail.com",
+            "port": 587,
+            "auth": {
+                "user": "yourGmailAccount@gmail.com",
+                "pass": "yourSecretPassword"
+            }
+        }]
+    },
+    "gridfs_db": {
+		"name": "gridfs_db",
+		"connector": "loopback-component-storage",
+		"provider": "filesystem",
+		"root": "./"
+    }
+}

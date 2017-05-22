@@ -1,0 +1,11 @@
+{
+    "name": "MinimumState",
+    "base": "PersistedModel",
+    "properties": 
+    {
+        "time": {
+            "type": "Date",
+            "required": true
+        }
+    }
+}

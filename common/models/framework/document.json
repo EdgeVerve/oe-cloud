@@ -1,0 +1,28 @@
+{
+  "name": "Document",
+  "plural": "documents",
+  "base": "Model",
+  "idInjection": false,
+  "description": "Functionality to upload any file",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {},
+  "oeValidations": [],
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$authenticated",
+      "permission": "ALLOW"
+    }
+  ],
+  "methods": {}
+}

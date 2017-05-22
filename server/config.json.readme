@@ -1,0 +1,86 @@
+{
+  "restApiRoot": "/api",
+  "host": "0.0.0.0",
+  "port": 3000,
+  "cookieSecret": "246bace2-9876-4321-1234-0ae8160b07c8",
+  "remoting": {
+    "context": {
+      "enableHttpContext": true
+    },
+    "rest": {
+      "normalizeHttpPath": false,
+      "xml": false
+    },
+    "json": {
+      "strict": false,
+      "limit": "2048kb"
+    },
+    "urlencoded": {
+      "extended": true,
+      "limit": "2048kb"
+    },
+    "cors": false,
+    "errorHandler": {
+      "disableStackTrace": false
+    }
+  },
+  "legacyExplorer": false,
+  
+  "log": {                              // The 'log' value is a JSON which is used as the
+    "type": "rotating-file",            // configuration for the 'bunyan' logging component 
+    "path": "./fw-log.log",
+    "period": "1d",
+    "count": 3
+  },
+  
+  "frameworkdsname": "db",           // The value of "frameworkdsname" is used as the 
+                                        // datasource associated with the "Framework Database"
+                                        // An actual datasource with this name should exist 
+                                        // in the application, either configured via datasources.json
+                                        // or via the DataSourceDefinition Model.  
+  
+  "systemId" : "temporaryId",
+   
+  "disablecaching": false,              // Setting 'disablecaching' to true disables 
+                                        // caching globally (see 'modelstocache' below).
+                                        // Default is false.
+                                        // To actually cache a Model 'M", two requirements 
+                                        // should be satisfied: 1) 'disablecaching' should 
+                                        // be set to false 2) "M" should either be marked 
+                                        // as cacheable by a 'cacheable': true property in
+                                        // its definition or "M" should be in the 
+                                        // 'modelstocache' array (see below)
+  
+  "modelstocache": ["ACL",                  // The value of 'modelstocache' should be an
+                    "ModelDefinition",      // String array of model names. The data saved 
+                    "PersonalizationRule"], // using these models will be cached in memory
+                                            // upon access.
+  
+  "tenantsource": "HEADER",             // The value of 'tenantsource' can be one of
+                                        // USERPROFILE, USER, REQUEST, HEADER, CALLCONTEXT,
+                                        // or CTX. This determines the place from where 
+                                        // 'tenant ID' will be fetched from.  
+                                        
+                                        
+  "tenantkey": "tenant_id",             // The value of 'tenantkey' determines the key
+                                        // within 'tenantsource' whose value will be
+                                        // taken as the tenant ID. 
+  
+  "disablenodered": true,               // Setting 'disablenodered' to true disables
+                                        // node-red. Default is false.
+                                        
+  "app": "ev-foundation",
+  
+  "enableJWTAssertion":false,
+  
+  "encryptionAlgorithm": "crypto.aes256",   // Encryption/Decryption Algorithm that will 
+                                            // be used globally to encrypt properties of
+                                            // models. For this, model property should be 
+                                            // tagged "encrypted" : true
+                                            // Possible values: "crypto.aes256", 
+                                            // "crypto.aes-256-ctr", "crypto.aes-256-cbc",
+                                            // "aes128", "aes192"
+                                        
+  "encryptionPassword": "SomePassword"  // The password that will be used with the
+                                        // encryptionAlgorithm  
+}

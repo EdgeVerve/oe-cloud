@@ -1,0 +1,23 @@
+{
+    "name": "DocumentData",
+    "base": "PersistedModel",
+    "options": {
+        "validateUpsert": true,
+        "isFrameworkModel": true
+    },
+    "properties": {
+        "documentName":{
+            "type": "String",
+            "required": true
+        },
+        "documentData": {
+            "type": "String",
+            "required": true
+        }
+    },
+    "oeValidations": [],
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}

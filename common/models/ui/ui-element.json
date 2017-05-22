@@ -1,0 +1,49 @@
+{
+	"name": "UIElement",
+	"base": "UIBase",
+	"idInjection": false,
+  "description" : "Field/Control level Personalization of UI components",
+	"options": {
+		"validateUpsert": true
+	},
+	"VersionMixin": true,
+	"properties": {
+		"component": {
+			"type": "string",
+			"required": true,
+			"description": "This is Polymer Component Name (prototype.is)",
+			"max": 30
+		},
+		"field": {
+			"type": "string",
+			"required": true,
+			"description": "field id, in case of model field, use dot convention, model.field",
+			"max": 50
+		},
+		"textContent": {
+			"type": "string",
+			"required": false,
+			"description": "textContent property of HTML Elements, or localise key",
+			"max": 500
+		},
+		"label": {
+			"type": "string",
+			"required": false,
+			"description": "caption/label or its localise key",
+			"max": 50
+		}
+	},
+	"validations": [],
+	"relations": {
+		"_attributes": {
+			"type": "embedsMany",
+			"model": "UIAttribute",
+			"property": "attributes",
+			"options": {
+				"validate": true
+			}
+		}
+	},
+	"acls": [],
+	"methods": {}
+}

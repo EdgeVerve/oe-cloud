@@ -1,0 +1,86 @@
+{
+    "initial:before": {
+        "loopback#favicon": {}
+    },
+    "initial": {
+        "compression": {},
+        "cors": {
+            "params": {
+                "origin": true,
+                "credentials": true,
+                "maxAge": 86400
+            }
+        }
+    },
+    "session:before": {
+        "loopback#context": {},
+        "./middleware/pre-auth-context-populator": {
+            "params": {
+                "excludeHeadersList": [
+                    "host",
+                    "accept-encoding",
+                    "accept",
+                    "content-type",
+                    "content-length",
+                    "connection",
+                    "user-agent",
+                    "x-jwt-assertion",
+                    "cookie",
+                    "if-none-match"
+                ],
+                "queryStringContext": [
+                    "device-type",
+                    "location",
+                    "language",
+                    "tenant-id"
+                ]
+            }
+        },
+        "./middleware/context-populator-filter": {
+            "enabled": true
+        }
+    },
+    "session": {},
+    "session:after": {},
+    "auth": {
+        "./middleware/jwt-assertion": {
+            "enabled": true
+        }
+    },
+    "auth:after": {
+        "./middleware/post-auth-context-populator": {}
+    },
+    "parse": {},
+    "routes:before": {
+        "./middleware/context-populator-filter": {"enabled": true},
+        "./middleware/http-method-overriding-filter": {},
+        "./middleware/req-logging-filter": {},
+        "./middleware/useragent-populator-filter": {},
+        "./middleware/model-discovery-filter": {
+            "enabled": true,
+            "paths": ["${restApiRoot}"]
+        },
+        "./middleware/otp-middleware": {
+            "enabled": true,
+            "paths": ["${restApiRoot}"]
+        },
+        "./middleware/recaptcha-validate": {}
+    },
+    "routes": {
+    },
+    "routes:after": {
+        "./middleware/res-logging-filter": {}
+    },
+    "files": {
+        "loopback#static": {
+            "params": "$!../client"
+        }
+    },
+    "final": {
+        "./middleware/res-logging-filter": {},
+        "./middleware/url-not-found": {}
+    },
+    "final:after": {
+        "errorhandler": {}
+    }
+}

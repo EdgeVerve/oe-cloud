@@ -1,0 +1,69 @@
+{
+    "local": {
+        "provider": "local",
+        "module": "passport-local",
+        "usernameField": "username",
+        "passwordField": "password",
+        "authPath": "/auth/local",
+        "successRedirect": "/",
+        "successReturnToOrRedirect": "/",
+        "failureRedirect": "/local",
+        "failureFlash": true,
+        "setAccessToken": true,
+        "session": false,
+        "forceDefaultCallback": true,
+        "cookie": true,
+        "json": true,
+        "failWithError": true
+    },
+    "google-login": {
+        "provider": "google",
+        "module": "passport-google-oauth",
+        "strategy": "OAuth2Strategy",
+        "clientID": "{google-client-id}.apps.googleusercontent.com",
+        "clientSecret": "{google-client-secret}",
+        "callbackURL": "/auth/google/callback",
+        "authPath": "/auth/google",
+        "callbackPath": "/auth/google/callback",
+        "successRedirect": "/auth/account",
+        "failureRedirect": "/login",
+        "scope": [
+            "email",
+            "profile"
+        ],
+        "failureFlash": true
+    },
+    "google-link": {
+        "provider": "google",
+        "module": "passport-google-oauth",
+        "strategy": "OAuth2Strategy",
+        "clientID": "{google-client-id}.apps.googleusercontent.com",
+        "clientSecret": "{google-client-secret}",
+        "callbackURL": "/link/google/callback",
+        "authPath": "/link/google",
+        "callbackPath": "/link/google/callback",
+        "successRedirect": "/auth/account",
+        "failureRedirect": "/login",
+        "scope": [
+            "email",
+            "profile"
+        ],
+        "link": true,
+        "failureFlash": true
+    },
+    "saml": {
+        "provider": "saml",
+        "module": "passport-saml",
+        "entryPoint": "http://localhost:8080/OpenAM-12.0.0/SSORedirect/metaAlias/idp",
+        "issuer": "http://localhost:3000",
+        "passReqToCallback": true,
+        "cert": "{certificate}",
+        "authScheme": "saml",
+        "callbackHTTPMethod": "post",
+        "callbackURL": "/saml/consume/callback",
+        "callbackPath": "/saml/consume/callback",
+        "authPath": "/saml/consume",
+        "failureRedirect": "/logout",
+        "successRedirect": "/"
+    }
+}

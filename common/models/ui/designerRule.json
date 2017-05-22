@@ -1,0 +1,36 @@
+{
+    "name": "DesignerRule",
+    "base": "BaseEntity",
+  "plural": "DesignerRules",
+  "description" :  "Temporary stores service personalization metadata created using designer tool",
+    "idInjection": false,
+    "options": {
+        "validateUpsert": true,
+        "isFrameworkModel": true
+    },
+    "properties": {
+		"modelName": {
+            "type": "string",
+            "required": true,
+            "max":30
+        },
+        "personalizationRule": {
+            "type": "object",
+            "required": true
+        },
+        "customScope": {
+            "type": "object",
+            "required": true
+        }
+	},
+    "mixins": {
+        "ServicePersonalizationMixin": false,
+		"DataPersonalizationMixin":true
+    },
+    "validations": [],
+    "relations": {
+	
+	},
+    "acls": [],
+    "methods": {}
+}

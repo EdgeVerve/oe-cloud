@@ -1,0 +1,23 @@
+{
+    "name": "RoutingRules",
+    "base": "BaseEntity",
+    "isFrameworkModel": true,
+    "properties": {
+        "uri": {
+            "required": "true",
+            "type": "String"
+        },
+        "method": {
+            "required": "true",
+            "type": "String"
+        },
+        "hashOn": {
+            "required": "true",
+            "type": ["object"]
+        }
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}

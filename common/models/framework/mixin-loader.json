@@ -1,0 +1,19 @@
+{
+	"name": "OTP",
+    "base": "BaseEntity",
+    "strict": false,
+    "mixins" : {
+   	    "ObserverMixin" : true,
+	    "HistoryMixin": true,
+	    "CacheMixin": true,
+		"ModelValidations": true
+    },
+    "properties": {
+    },
+    "hidden": [],
+    "validations": [],
+    "relations": {
+    },
+    "acls": [],
+    "methods": {}
+}

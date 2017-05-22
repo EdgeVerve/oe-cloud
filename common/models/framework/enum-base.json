@@ -1,0 +1,26 @@
+{
+  "name": "EnumBase",
+  "base": "Model",
+  "strict": false,
+  "description": "This Model acts as base model for the enum classes that an app may have",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "code": {
+      "type": "string",
+      "required": true,
+      "max": 30
+    },
+    "description": {
+      "type": "string",
+      "required": true,
+      "max": 500
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

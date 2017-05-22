@@ -1,0 +1,17 @@
+{
+    "name": "EventHistory",
+    "plural": "EventsHistroy",
+    "base": "PersistedModel",
+    "idInjection": false,
+    "properties": {
+        "eventHistoryArray": {
+            "type": "array"
+        },
+        "hostName": {
+            "type": "string"
+        },
+        "timestamp": {
+            "type": "Date"
+        }
+    }
+}

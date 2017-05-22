@@ -1,0 +1,282 @@
+{
+    "_meta": {
+        "sources": [
+            "loopback/common/models",
+            "loopback/server/models",
+            "../server/models",
+            "../common/models",
+            "../common/models/ui",
+            "../common/models/framework",
+             "../common/models/test",
+            "./models",
+            "loopback-component-passport/lib/models"
+        ],
+        "mixins": [
+            "loopback/common/mixins",
+            "loopback/server/mixins",
+            "../common/mixins",
+            "./mixins"
+        ]
+    },
+    "Admin": {
+        "dataSource": "transient",
+        "public": true
+    },
+    "AuthSession": {
+        "dataSource": "db",
+        "public": false
+    },
+    "BaseUser": {
+        "dataSource": "db",
+        "public": true
+    },
+    "ModelDefinition": {
+        "dataSource": "db",
+        "public": true
+    },
+    "DataSourceDefinition": {
+        "dataSource": "db",
+        "public": true
+    },
+    "PersonalizationRule": {
+        "dataSource": "db",
+        "public": true
+    },
+    "DbTransaction": {
+        "dataSource": "db",
+        "public": false
+    },
+    "UIMetadata": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Validation": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Field": {
+        "dataSource": "db",
+        "public": true
+    },
+    "UIRoute": {
+        "dataSource": "db",
+        "public": true
+    },
+    "userCredential": {
+        "dataSource": "db",
+        "public": false
+    },
+    "userIdentity": {
+        "dataSource": "db",
+        "public": false
+    },
+    "BaseACL": {
+        "dataSource": "db",
+        "public": true
+    },
+    "BaseRoleMapping": {
+        "dataSource": "db",
+        "public": true
+    },
+    "BaseRole": {
+        "dataSource": "db",
+        "public": true
+    },
+    "BaseEntity": {
+        "dataSource": "db",
+        "public": false
+    },
+    "DataACL": {
+        "dataSource": "db",
+        "public": true
+    },
+    "UIBase": {
+        "dataSource": "db",
+        "public": false
+    },
+    "Tenant": {
+        "dataSource": "db",
+        "public": true
+    },
+    "UserProfile": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Literal": {
+        "dataSource": "db",
+        "public": true
+    },
+    "CacheManager": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Error": {
+        "dataSource": "db",
+        "public": true
+    },
+    "EnumBase": {
+        "dataSource": "db",
+        "public": false
+    },
+    "NavigationLink": {
+        "dataSource": "db",
+        "public": true
+    },
+    "ChangeRequest": {
+        "dataSource": "db",
+        "public": true
+    },
+    "UIResource": {
+        "dataSource": "db",
+        "public": true
+    },
+    "TypeMapping": {
+        "dataSource": "db",
+        "public": true
+    },
+    "GridMetaData": {
+        "dataSource": "db",
+        "public": true
+    },
+    "GridConfig": {
+        "dataSource": "db",
+        "public": true
+    },
+    "GridColumnConfig": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Email": {
+        "dataSource": "emailDs"
+    },
+    "RefCodeBase": {
+        "dataSource": "db",
+        "public": false
+    },
+    "OTP": {
+        "dataSource": "db",
+        "public": true
+    },
+    "Document": {
+        "dataSource": "gridfs_db",
+        "public": true,
+        "$promise": {},
+        "$resolved": true
+    },
+    "BusinessRule": {
+        "dataSource": "db",
+        "public": true
+    },
+    "JobScheduler": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DataSourceMapping": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "LoggerConfig": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "AppConfig": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DesignerPage": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "ModelView": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "UIManager": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "dev": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DesignerRule": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "UIComponent": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "UIElement": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "UIAttribute": {
+        "public": false,
+        "dataSource": "db"
+    },
+    "BaseType": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "NodeRedFlow": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "ReconciliationEvent": {
+        "public": false,
+        "dataSource": "db"
+    },
+    "BaseActorEntity": {
+        "dataSource": "db",
+        "public": true
+    },
+    "BaseJournalEntity": {
+        "dataSource": "db",
+        "public": true
+    },
+    "ActorActivity": {
+        "dataSource": "db",
+        "public": true
+    },
+    "State": {
+        "dataSource": "db",
+        "public": false
+    },
+    "EventHistory": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "BaseReplayableEntity": {
+        "public": false,
+        "dataSource": "db"
+    },
+    "RoutingRules": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DecisionTable": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DocumentData": {
+        "public": false,
+        "dataSource": "db"
+    },
+    "DesignerElement": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "MinimumState": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "SystemConfig": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "Note" : {
+        "public": true,
+        "dataSource": "db"
+    }
+}

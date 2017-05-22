@@ -1,0 +1,25 @@
+{
+  "name": "Literal",
+  "base": "UIBase",
+  "plural": "Literals",
+  "description": "This model stores the literal translations",
+  "properties": {
+    "key": {
+      "type": "string",
+      "unique": true,
+      "max": 80
+    },
+    "value": {
+      "type": "string",
+      "max": 250
+    },
+    "placeholders": {
+      "type": [ "string" ]
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": [],
+  "unique": [ "key" ]
+}

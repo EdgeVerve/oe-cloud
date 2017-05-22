@@ -1,0 +1,62 @@
+{
+  "name": "GridColumnConfig",
+  "base": "UIBase",
+  "idInjection": false,
+  "description": "Column metadata that is used in GridConfig",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "key": {
+      "type": "string",
+      "required": true,
+      "max": 30
+    },
+    "label": {
+      "type": "string"
+    },
+    "type": {
+      "type": "string"
+    },
+    "uiType": {
+      "type": "string"
+    },
+    "width": {
+      "type": "number"
+    },
+    "minWidth": {
+      "type": "number"
+    },
+    "sort": {
+      "type": "string"
+    },
+    "firstToSort": {
+      "type": "string"
+    },
+    "formatter": {
+      "type": "string"
+    },
+    "renderer": {
+      "type": "string"
+    },
+    "href": {
+      "type": "string"
+    },
+    "cellClass": {
+      "type": "string"
+    },
+    "cellClassRules": {
+      "type": "string"
+    },
+    "valueGetter": {
+      "type": "string"
+    },
+    "hidden": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

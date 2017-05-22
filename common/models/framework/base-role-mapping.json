@@ -1,0 +1,34 @@
+{
+    "name": "BaseRoleMapping",
+    "plural": "BaseRoleMappings",
+    "base": "RoleMapping",
+    "properties": {},
+    "autoscope": [
+        "tenantId"
+    ],
+    "mixins": {
+        "ObserverMixin": true,
+        "HistoryMixin": true,
+        "CacheMixin": true,
+        "ModelValidations": true,
+        "ExpressionAstPopulatorMixin": true,
+        "AuditFieldsMixin": true,
+        "DataPersonalizationMixin": true,
+        "ServicePersonalizationMixin": true,
+        "SwitchDatasourceMixin": true,
+        "VersionMixin": false,
+        "WorkflowMixin": true,
+        "BusinessRuleMixin": true,
+        "SoftDeleteMixin": true
+    },
+    "validations": [],
+    "relations": {
+        "role": {
+            "type": "belongsTo",
+            "model": "BaseRole",
+            "foreignKey": "roleId"
+        }
+    },
+    "acls": [],
+    "methods": {}
+}

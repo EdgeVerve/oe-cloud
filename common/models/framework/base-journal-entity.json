@@ -1,0 +1,26 @@
+{
+  "name": "BaseJournalEntity",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "properties": {
+    "nonAtomicWait": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "atomicActivities": {
+      "type": "embedsMany",
+      "model": "ActorActivity",
+      "property": "atomicActivitiesList"
+    },
+    "nonAtomicActivities": {
+      "type": "embedsMany",
+      "model": "ActorActivity",
+      "property": "nonAtomicActivitiesList"
+
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

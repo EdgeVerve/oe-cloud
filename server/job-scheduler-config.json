@@ -1,0 +1,34 @@
+{  
+    "configs": [
+      {
+    	 "name" : "workflowtest",
+         "schedule" : "15 * * * * 0-6",
+         "modelQuery" : {"attribute":"definition.settings.enableWorkflow","operation":"NotEqualsTo"},
+         "dataQuery" : {"where":{"_ownerRef":null},"fields":{"id":true}},
+         "eventName" : "sendToWorkflow",
+         "payload" : {"isReconciliation":true},
+         "enable" : false,
+         "_newVersion": "35aec784-d01d-4f4f-9380-9b1d3cc4b8a6"
+      },
+      {
+     	 "name" : "workflowtestNew",
+          "schedule" : "45 * * * * 0-6",
+          "modelQuery" : {"attribute":"definition.settings.enableWorkflow","operation":"NotEqualsTo"},
+          "dataQuery" : {"where":{"_ownerRef":null},"fields":{"id":true}},
+          "eventName" : "sendToWorkflow",
+          "payload" : {"isReconciliation":true},
+          "enable" : false,
+          "_newVersion": "97e16369-c3a1-4b53-85d5-1cc3eabd7ad9"
+       },
+      {
+            "name": "2phasereconcile",
+            "schedule": "15 * * * * 0-6",
+            "modelQuery": { "attribute": "definition.settings.dbTxn", "value": false, "operation": "NotEqualsTo" },
+            "dataQuery": { "where": { "and": [ { "status": { "neq": "done" } }, { "opData": null } ] } },
+            "eventName": "reconcile",
+            "payload": { },
+            "enable": false,
+            "_newVersion": "c5134a12-8f80-40c1-852f-6c2c2d506f3d"
+       }
+   ]
+}

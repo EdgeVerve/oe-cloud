@@ -1,0 +1,24 @@
+{
+	"name": "UIAttribute",
+	"base": "Model",
+	"idInjection": false,
+	"options": {
+		"validateUpsert": true
+	},
+	"properties": {
+		"name": {
+			"type": "string",
+			"required": true,
+            "max":30
+		},
+		"value":{
+			"type": "any",
+			"required": true
+		}
+	},
+	"validations": [],
+	"relations": {},
+	"acls": [
+	],
+	"methods": {}
+}

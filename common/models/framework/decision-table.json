@@ -1,0 +1,31 @@
+{
+  "name": "DecisionTable",
+  "base": "BaseEntity",
+  "description": "This model is used to business rule",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "name": {
+      "type": "String",
+      "required": true,
+      "unique": true
+    },
+    "decisionRules": {
+      "type": "String",
+      "hidden": true
+    }
+  },
+  "oeValidations": [],
+  "validations": [],
+  "relations": {
+    "document": {
+      "type": "belongsTo",
+      "model": "DocumentData",
+      "foreignKey": ""
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

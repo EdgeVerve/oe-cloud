@@ -1,0 +1,5 @@
+{
+    "name": "BaseReplayableEntity",
+    "base": "BaseEntity",
+    "mixins": {}
+}

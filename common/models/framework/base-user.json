@@ -1,0 +1,120 @@
+{
+  "name": "BaseUser",
+  "plural": "BaseUsers",
+  "base": "User",
+  "description": "User login details",
+  "autoscope": [
+    "tenantId"
+  ],
+  "mixins": {
+    "ObserverMixin": true,
+    "HistoryMixin": true,
+    "CacheMixin": true,
+    "ModelValidations": false,
+    "ExpressionAstPopulatorMixin": true,
+    "AuditFieldsMixin": true,
+    "DataPersonalizationMixin": true,
+    "ServicePersonalizationMixin": false,
+    "SwitchDatasourceMixin": true,
+    "VersionMixin": false,
+    "WorkflowMixin": true,
+    "BusinessRuleMixin": true,
+    "SoftDeleteMixin": true
+  },
+  "properties": {
+    "failedTries": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "default": "enabled"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "accessTokens": {
+      "type": "hasMany",
+      "model": "AuthSession",
+      "foreignKey": "userId"
+    },
+    "identities": {
+      "type": "hasMany",
+      "model": "userIdentity",
+      "foreignKey": "userId"
+    },
+    "credentials": {
+      "type": "hasMany",
+      "model": "userCredential",
+      "foreignKey": "userId"
+    },
+    "otp": {
+      "type": "hasMany",
+      "model": "OTP",
+      "foreignKey": "userId"
+    }
+  },
+  "acls": [
+    {
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "findById",
+      "accessType": "READ"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "find",
+      "accessType": "READ"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$evadmin",
+      "permission": "ALLOW",
+      "property": "findById",
+      "accessType": "READ"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$evadmin",
+      "permission": "ALLOW",
+      "property": "find",
+      "accessType": "READ"
+    },
+    {
+      "principalType": "USER",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "switchTenant",
+      "accessType": "*"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$evadmin",
+      "permission": "ALLOW",
+      "property": "switchTenant",
+      "accessType": "*"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW",
+      "property": "unlock",
+      "accessType": "*"
+    },
+    {
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "session",
+      "accessType": "*"
+    }
+  ],
+  "methods": {},
+  "hidden": [
+    "failedTries",
+    "status"
+  ]
+}

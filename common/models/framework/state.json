@@ -1,0 +1,14 @@
+{
+    "name": "State",
+    "base": "PersistedModel",
+    "properties": 
+    {
+        "stateObj": {
+            "type": "object",
+            "required": true
+        },
+        "lastUpdated": {
+            "type": "Date"
+        }
+    }
+}

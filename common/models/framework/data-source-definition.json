@@ -1,0 +1,58 @@
+{
+  "name": "DataSourceDefinition",
+  "base": "BaseEntity",
+  "description" : "Application Data Sources configuration",
+  "idinjection": true,
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+
+      "name": {
+    	      "type": "string",
+    	      "required": true,
+            "unique"  : true,
+            "max":100
+    	},
+    	"connector": {
+    	    "type": "string",
+          "max":100
+    	},
+    	"host": {
+    	      "type": "string",
+            "max":100
+    	 },
+    	 "port": { 
+    	      "type": "number"
+    	 },
+    	 "url": {
+    	      "type": "string",
+            "max":250
+    	 },
+    	 "database": {
+    	      "type": "string",
+            "max":100
+    	 },
+    	 "user": {
+    	     "type": "string",
+            "max":100
+    	  },
+    	 "password": {
+    	     "type": "string",
+            "max":100
+         },
+    "priority": {
+      "type": "Number",
+      "default": 0
+    },
+         "connectionTimeout" : {
+                "type" : "Number",
+                "default" : 5000
+         }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

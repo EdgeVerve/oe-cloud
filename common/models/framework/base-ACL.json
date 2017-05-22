@@ -1,0 +1,30 @@
+{
+  "name": "BaseACL",
+  "plural": "BaseACLs",
+  "base": "ACL",
+  "description": "Access Control List(ACL) for models",
+  "autoscope": [
+    "tenantId"
+  ],
+  "mixins": {
+    "ObserverMixin": true,
+    "HistoryMixin": true,
+    "CacheMixin": true,
+    "ModelValidations": true,
+    "ExpressionAstPopulatorMixin": true,
+    "AuditFieldsMixin": true,
+    "DataPersonalizationMixin": true,
+    "ServicePersonalizationMixin": true,
+    "SwitchDatasourceMixin": true,
+    "VersionMixin": true,
+    "WorkflowMixin": true,
+    "BusinessRuleMixin": true,
+    "SoftDeleteMixin": true
+  },
+  "properties": {},
+  "validations": [],
+  "relations": {
+  },
+  "acls": [],
+  "methods": {}
+}

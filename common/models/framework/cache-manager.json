@@ -1,0 +1,17 @@
+{
+    "name": "CacheManager",
+  "base": "BaseEntity",
+  "description" :  "Adds cache related remote utility API",
+    "idInjection": true,
+    "plural": "CacheManager",
+    "options": {
+        "validateUpsert": true,
+        "isFrameworkModel": true
+    },
+    "properties": {
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}

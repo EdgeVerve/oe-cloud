@@ -1,0 +1,13 @@
+{
+    "logStreams": [{
+        "type": "pretty"
+    }],
+
+    "levels": {
+        "default": "error",
+        "admin": "debug",
+        "db-migrate-helper": "debug"
+    },
+
+    "enableContextLogging": 1
+}

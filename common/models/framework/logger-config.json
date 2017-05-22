@@ -1,0 +1,14 @@
+{
+    "name": "LoggerConfig",
+    "base": "PersistedModel",
+    "isFrameworkModel": true,
+    "properties": {
+        "data": {
+            "type": "Object"
+        }
+    },
+    "mixins": {
+        "ObserverMixin": true,
+        "CacheMixin": true
+    }
+}

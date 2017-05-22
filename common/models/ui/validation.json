@@ -1,0 +1,29 @@
+{
+  "name": "Validation",
+  "base": "UIBase",
+  "idInjection": false,
+  "description": "This Model is used to store UI Level Validations",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "max": 100
+    },
+    "fields": {
+      "type": [ "string" ],
+      "required": false
+    },
+    "error": {
+      "type": "string",
+      "required": false,
+      "max": 100
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

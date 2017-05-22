@@ -1,0 +1,50 @@
+{
+    "name": "BaseEntity",
+    "base": "PersistedModel",
+  "idInjection": false,
+  "strict" :  true,
+    "autoscope": [
+        "tenantId"
+    ],
+    "options": {
+        "validateUpsert": true,
+        "trackChanges": false
+    },
+    "mixins": {
+        "ObserverMixin": true,
+        "HistoryMixin": true,
+        "CacheMixin": true,
+        "ModelValidations": true,
+        "PropertyExpressionMixin": true,
+        "ExpressionAstPopulatorMixin": true,
+        "AuditFieldsMixin": true,
+        "DataPersonalizationMixin": true,
+        "ServicePersonalizationMixin": true,
+        "SwitchDatasourceMixin": true,
+        "VersionMixin": true,
+        "BusinessRuleMixin": true,
+        "SoftDeleteMixin": true,
+        "IdempotentMixin": true,
+        "FailsafeObserverMixin": true,
+        "DataHierarchyMixin": false
+    },
+    "hidden": [
+        "_tenantId",
+        "_scope",
+        "_autoScope",
+        "score",
+        "weight",
+        "__oldVersion"
+    ],
+    "validations": [],
+    "relations": {},
+    "acls": [
+        {
+            "accessType": "WRITE",
+            "principalType": "ROLE",
+            "principalId": "$unauthenticated",
+            "permission": "DENY"
+        }
+    ],
+    "methods": {}
+}

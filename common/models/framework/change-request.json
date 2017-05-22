@@ -1,0 +1,35 @@
+{
+    "name": "ChangeRequest",
+    "plural": "changeRequests",
+  "base": "BaseEntity",
+  "description" :  "Can be used for approval workflow",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true,
+        "evEnableWorkflow": {
+            "create": "xyz"
+        },
+        "isFrameworkModel": true
+    },
+    "properties": {
+        "originalEntityId": {
+            "type": "string",
+            "required": true,
+            "index": true
+        },
+        "originalEntityType": {
+            "type": "string",
+            "required": true,
+            "max":30
+        },
+        "changedEntity": {
+            "type": "object",
+            "required": true,
+            "index": true
+        }
+    },
+    "oeValidations": [],
+    "validations": [],
+    "relations": {},
+    "methods": {}
+}

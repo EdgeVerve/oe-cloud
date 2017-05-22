@@ -1,0 +1,26 @@
+{
+  "name": "Tenant",
+  "base": "BaseEntity",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "tenantId": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "unique": true,
+      "max":30
+    },
+    "tenantName": {
+      "type": "string",
+      "required": true,
+      "index": true,
+      "unique": true,
+      "max":30
+    }
+  },
+  "validations": [],
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,38 @@
+{
+  "name": "DesignerPage",
+  "plural": "DesignerPages",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "description": "Temporary stores pages created using designer tool",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "pageName": {
+      "type": "string",
+      "unique": true,
+      "max": 30
+    },
+    "nodeTree": {
+      "type": "object"
+    },
+    "elementConfig": {
+      "type": "object"
+    },
+    "relatedScope": {
+      "type": "object"
+    },
+    "pageConfig": {
+      "type": "object"
+    }
+  },
+  "validations": [],
+  "mixins": {
+    "DataPersonalizationMixin": true
+  },
+  "autoscope": [ "tenantId" ],
+  "isFrameworkModel": true,
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

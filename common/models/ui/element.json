@@ -1,0 +1,36 @@
+{
+    "name": "DesignerElement",
+    "plural":"DesignerElements",
+    "base": "BaseEntity",
+    "idInjection": false,
+    "properties": {
+        "name": {
+            "type": "string",
+            "required": true
+        },
+        "tag": {
+            "type": "string"
+        },
+        "icon": {
+            "type": "string"
+        },
+        "description": {
+            "type": "string",
+            "required": true
+        },
+        "content": {
+            "type": "string"
+        },
+        "category": {
+            "type": "string",
+            "required": true
+        },
+        "config":{
+            "type" : "object"
+        }
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}

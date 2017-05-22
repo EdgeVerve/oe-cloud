@@ -1,0 +1,37 @@
+{
+  "name": "GridConfig",
+  "base": "UIBase",
+  "plural": "GridConfigs",
+  "idInjection": true,
+  "description": "This model stores Grid config used by ev-data-table",
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "code": {
+      "type": "string",
+      "max": 30
+    },
+    "label": {
+      "type": "string",
+      "max": 30
+    },
+    "editorFormUrl": {
+      "type": "string",
+      "max": 500
+    }
+  },
+  "validations": [],
+  "relations": {
+    "columnConfigs": {
+      "type": "embedsMany",
+      "model": "GridColumnConfig",
+      "property": "columns",
+      "options": {
+        "validate": true
+      }
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

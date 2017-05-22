@@ -1,0 +1,72 @@
+{
+  "name": "UIMetadata",
+  "base": "UIBase",
+  "description": "Stores screen or form metadata",
+  "strict": true,
+  "plural": "UIMetadata",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "VersionMixin": true,
+  "properties": {
+    "code": {
+      "type": "String",
+      "required": true,
+      "max": 100
+    },
+    "description": {
+      "type": "string",
+      "required": false,
+      "max": 500
+    },
+    "modeltype": {
+      "type": "string",
+      "required": false,
+      "max": 100
+    },
+    "skipMissingProperties": {
+      "type": "boolean"
+    },
+    "showTitleInNavbar": {
+      "type": "boolean"
+    },
+    "resturl": {
+      "type": "string",
+      "required": false,
+      "max": 250
+    },
+    "title": {
+      "type": "string"
+    },
+    "controls": {
+      "type": [
+        "any"
+      ],
+      "required": true
+    },
+    "exclude": {
+      "type": [ "string" ]
+    },
+    "properties": {
+      "type": "object"
+    },
+    "functions": {
+      "type": "object"
+    },
+    "behaviors": {
+      "type": [ "string" ]
+    },
+    "oeValidations": {
+      "type": [
+        "Validation"
+      ],
+      "required": false
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+  ],
+  "methods": {}
+}

@@ -1,0 +1,15 @@
+{
+    "name": "SystemConfig",
+    "base": "BaseEntity",
+    "properties": 
+    {
+        "key": {
+            "type": "string",
+            "required": true,
+            "unique": true
+        },
+        "value": {
+            "type": "object"
+        }
+    }
+}

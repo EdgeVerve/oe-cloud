@@ -1,0 +1,19 @@
+{
+  "name": "UIBase",
+  "plural": "",
+  "base": "BaseEntity",
+  "description" :  "This is base Model for all UI related models",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+	],
+  "hidden": [
+	   "tenantId"
+  ],
+  "methods": {}
+}
+

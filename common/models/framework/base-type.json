@@ -1,0 +1,9 @@
+{
+    "name": "BaseType",
+    "base": "Model",
+    "idInjection": false,
+    "mixins": {
+        "ModelValidations": true,
+        "ExpressionAstPopulatorMixin": true
+    }
+}

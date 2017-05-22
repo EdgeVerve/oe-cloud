@@ -1,0 +1,40 @@
+{
+  "name": "PersonalizationRule",
+  "base": "BaseEntity",
+  "plural": "PersonalizationRules",
+  "description": "Service Personalization metadata",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "ruleName": {
+      "type": "string"
+    },
+    "disableRule": {
+      "type": "boolean",
+      "default": false
+    },
+    "modelName": {
+      "type": "string",
+      "required": true,
+      "max": 30
+    },
+    "personalizationRule": {
+      "type": "object",
+      "required": true
+    },
+    "scope": {
+      "type": "object",
+      "required": true
+    }
+  },
+  "mixins": {
+    "ServicePersonalizationMixin": false
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

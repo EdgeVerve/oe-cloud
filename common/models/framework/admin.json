@@ -1,0 +1,13 @@
+{
+    "name": "Admin",
+    "plural": "admin",
+    "base": "Model",
+    "options": {
+        "validateUpsert": true
+    },
+    "properties": {
+    },
+    "validations": [],
+    "acls": [],
+    "methods": {}
+}

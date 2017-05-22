@@ -1,0 +1,31 @@
+{
+    "name": "ModelView",
+    "plural": "ModelViews",
+    "base": "BaseEntity",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
+    },
+    "properties": {
+        "name": {
+            "type": "string",
+            "unique": true,
+            "max":30
+        },
+        "models": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            }
+        }
+    },
+    "validations": [],
+    "mixins": {
+        "DataPersonalizationMixin": true
+    },
+	"isFrameworkModel": true,
+    "autoscope": ["tenantId"],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}

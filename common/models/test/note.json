@@ -1,0 +1,12 @@
+{
+    "name": "Note",
+    "base" : "BaseEntity",
+    "properties": {
+        "title": {
+            "type": "string"
+        },
+        "content": {
+            "type": "string"
+        }
+    }
+}

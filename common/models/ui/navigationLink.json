@@ -1,0 +1,60 @@
+{
+  "name": "NavigationLink",
+  "base": "UIBase",
+  "idInjection": false,
+  "description": "Configuration for navigation-links in UI",
+  "options": {
+    "validateUpsert": true
+  },
+  "VersionMixin": true,
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "max": 80,
+      "unique": {
+        "scopedTo": [
+          "group"
+        ]
+      }
+    },
+    "url": {
+      "type": "string",
+      "max": 250
+    },
+    "label": {
+      "type": "string",
+      "required": true,
+      "max": 80
+    },
+    "icon": {
+      "type": "string",
+      "required": false,
+      "max": 50
+    },
+    "group": {
+      "type": "string",
+      "max": 50
+    },
+    "topLevel": {
+      "type": "boolean",
+      "default": true
+    },
+    "sequence": {
+      "type": "number",
+      "numericality": "integer",
+      "default": 9999
+    }
+  },
+  "validations": [],
+  "relations": {
+    "children": {
+      "type": "hasMany",
+      "model": "NavigationLink",
+      "foreignKey": "parent",
+      "primaryKey": "name"
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

@@ -1,0 +1,23 @@
+{
+  "name": "GridColumnDefinition",
+  "base": "UIBase",
+  "idInjection": false,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "key": {
+      "type": "string",
+      "required": true,
+      "max":30
+    },
+    "visible": {
+      "type": "boolean"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+	],
+  "methods": {}
+}

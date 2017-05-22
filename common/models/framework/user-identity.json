@@ -1,0 +1,18 @@
+{
+  "name": "userIdentity",
+  "plural": "userIdentities",
+  "base": "UserIdentity",
+  "descriptino": "This model is used to store user credential identity information from 3rd party",
+  "properties": {},
+  "validations": [],
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "BaseUser",
+      "foreignKey": "userId"
+    }
+  },
+  "isFrameworkModel": true,
+  "acls": [],
+  "methods": {}
+}

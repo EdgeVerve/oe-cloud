@@ -1,0 +1,182 @@
+[{
+    "code": "validation-err-001",
+    "message": " minimum value criteria for this field is not met",
+    "moreInformation": "Minimum value/length rule violated, please check the rule and provide proper value",
+    "type": "min"
+}, {
+    "code": "validation-err-002",
+    "message": " maximum value criteria for this field is not met",
+    "moreInformation": "Maximum value/length rule violated, please check the rule and provide proper value",
+    "type": "max"
+}, {
+    "code": "validation-err-003",
+    "message": " length is wrong",
+    "moreInformation": "Length or value is not matching with the rule, please check the rule and provide proper value",
+    "type": "is"
+}, {
+    "code": "validation-err-004",
+    "message": " field is mandatory",
+    "moreInformation": "Data for mandatory field skipped, please check the rule and provide proper value",
+    "type": "presence"
+}, {
+    "code": "validation-err-005",
+    "message": "can\"t be set",
+    "moreInformation": "Data found for absent field, please check the rule and skip the appropriate field",
+    "type": "absence"
+}, {
+    "code": "validation-err-006",
+    "message": "is not included in the list",
+    "moreInformation": "Data do not match with the allowed values, please check the rule and provide proper value",
+    "type": "in"
+}, {
+    "code": "validation-err-007",
+    "message": "is reserved",
+    "moreInformation": "Data should not match with the restricted values, please check the rule and provide proper value",
+    "type": "notin"
+}, {
+    "code": "validation-err-008",
+    "message": "is not a number",
+    "moreInformation": "Given value is not a number, please check the rule and provide proper value",
+    "type": "number"
+}, {
+    "code": "validation-err-009",
+    "message": "is not an integer",
+    "moreInformation": "Given value is not a number or contains decimal value, please check the rule and provide proper value",
+    "type": "integer"
+}, {
+    "code": "validation-err-010",
+    "message": "unknown pattern - change the input pattern",
+    "moreInformation": "Data provided do not adhere to the allowed pattern, please check the rule and provide proper value",
+    "type": "pattern"
+}, {
+    "code": "validation-err-011",
+    "message": "duplicate value exist - data already exists",
+    "moreInformation": "Given value is not unique, please check the rule and provide proper value",
+    "type": "unique"
+}, {
+    "code": "validation-err-012",
+    "message": "no entry found for target model",
+    "moreInformation": "Data provided violates the relations defined on the model, please check the relation rule and provide proper value",
+    "type": "relation"
+}, {
+    "code": "validation-err-013",
+    "message": "custom validation rules violated",
+    "moreInformation": "Data provided violates inter-model validation rule, please check the rule and provide proper value",
+    "type": "oeValidation"
+}, {
+    "code": "validation-err-014",
+    "message": "enum name given in enumtype sub-property is not valid",
+    "moreInformation": "Model name given in enumtype property does not match with any model name",
+    "type": "invalidEnumType"
+}, {
+    "code": "validation-err-015",
+    "message": "is not valid enum",
+    "moreInformation": "Enum value should be valid, please check the enum list and provide proper value",
+    "type": "invalidEnumValue"
+}, {
+    "code": "validation-err-016",
+    "message": "has invalid characters. Only a-z and A-Z are allowed.",
+    "moreInformation": "Name provided is having unwanted characters, please check the rule and provide proper value",
+    "type": "absencechar"
+
+}, {
+    "code": "validation-err-017",
+    "message": "No target model found.Please define the model first",
+    "moreInformation": "Model you are trying to access is not defined, check your data and define the required Model first",
+    "type": "noModelExists"
+}, {
+    "code": "validation-err-018",
+    "message": "Foreign key can\"t be blank",
+    "moreInformation": "Value for the specified foreign key is missing, check the rule and provide proper data",
+    "type": "foreignKeyBlank"
+}, {
+    "code": "OTP-err-019",
+    "message": "OTP expired please try again",
+    "moreInformation": "OTP expired please try again",
+    "type": "otpExpired"
+}, {
+    "code": "OTP-err-020",
+    "message": "OTP not matching, please try again",
+    "moreInformation": "OTP not matching, please try again",
+    "type": "otpNotMatching"
+}, {
+    "code": "OTP-err-021",
+    "message": "OTP already used, please try again",
+    "moreInformation": "OTP already used, please try again",
+    "type": "otpUsed"
+}, {
+    "code": "validation-err-022",
+    "message": "is not valid reference code",
+    "moreInformation": "Reference code should be valid, please check the reference code values and provide proper value",
+    "type": "invalidRefCodeValue"
+}, {
+    "code": "validation-err-023",
+    "message": "Ref code name given in refcodetype sub-property is not valid",
+    "moreInformation": "Model name given in refcodetype property does not match with any model name",
+    "type": "invalidRefCodeType"
+}, {
+    "code": "expression-err-024",
+    "message": "validateWhen condition is not a valid expression",
+    "moreInformation": "Expression provided for the validateWhen condition is not a valid expression",
+    "type": "validateWhen"
+}, {
+    "code": "mustache-err-025",
+    "message": "refWhere clause is not a valid mustache template",
+    "moreInformation": "Mustache template provided for refWhere clause of reference type oeValidation is not a valid template",
+    "type": "reference"
+}, {
+    "code": "expression-err-026",
+    "message": "expression clause is not a valid expression",
+    "moreInformation": "Expression provided for the expression clause of custom type oeValidation is not a valid expression",
+    "type": "custom"
+},
+{
+    "code": "expression-err-027",
+    "message": "property name cannot be isValid",
+    "moreInformation": "One of the property in model's definition has an invalid name",
+    "type": "invalidName"
+},
+{
+    "code": "Data-Personalization-err-028",
+    "message": "insufficient data",
+    "moreInformation": "Autoscoped values not found the model",
+    "type": "autoScopeValueNotFound"
+},
+    {
+    "code": "Data-Personalization-err-029",
+    "message": "Cannot pass autoscoped values in payload",
+    "moreInformation": "Cannot pass autoscoped values in payload",
+    "type": "InvalidData"
+},
+{
+    "code": "validation-err-030",
+    "message": "script injection",
+    "moreInformation": "Cannot have script tag in this field",
+    "type": "scriptInjection"
+},
+{
+    "code": "data-acl-err-001",
+    "message": "Access Denied",
+    "moreInformation": "Data Access Control does not allow access",
+    "type": "dataaclError"
+},
+{
+    "code": "data-acl-err-002",
+    "message": "Data Access Error",
+    "moreInformation": "Data Access Control could not be determined",
+    "type": "dataaclError"
+},
+{
+    "code": "data-acl-err-003",
+    "message": "Data Access Error Custom Code",
+    "moreInformation": "Not authorised for the data",
+    "type": "dataaclError"
+},
+{
+    "code": "INVALID_MUSTACHE_EXPR",
+    "message": "Mustache expression or data is not valid",
+    "moreInformation": "Mustache expression provided in the model definition is not valid or the data posted for it is invalid.",
+    "type": "invalidMustache"
+}
+
+]

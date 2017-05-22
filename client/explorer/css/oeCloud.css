@@ -1,0 +1,18 @@
+/* oecloud customizations */
+
+body #header {
+  background-color: #1724BA !important;
+}
+
+body #header form#api_selector .input a#explore {
+    background-color: white !important;
+    color: #1724BA !important;
+}
+
+body #header form#api_selector .input a#explore:hover {
+    background-color: white !important;
+    cursor: pointer;
+}
+body #header form#api_selector .input a#explore:active {
+    background-color: #eeeeee !important;
+}

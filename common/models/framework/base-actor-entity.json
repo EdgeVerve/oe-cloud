@@ -1,0 +1,22 @@
+{
+  "name": "BaseActorEntity",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "validations": [],
+  "relations": {
+    "state": {
+        "type": "hasOne",
+        "model": "State",
+        "foreignKey": "actorId"
+    }
+  },
+  "options": {
+    "proxyEnabled": true,
+    "proxyMethods": [{"name":"initActor"},{"name":"validateAndReserveAtomicAction"},{"name":"nonAtomicAction"}]
+  },
+  "acls": [],
+  "methods": {},
+  "mixins": {
+    "RestApiActorsMixin": true
+  }
+}

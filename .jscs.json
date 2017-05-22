@@ -1,0 +1,12 @@
+{
+    "preset": "google",
+    "validateIndentation": 4,
+	"disallowMultipleLineBreaks" : false,
+	"maximumLineLength": null,
+	"requireCurlyBraces": false,
+	"jsDoc": null,
+	"requireLineFeedAtFileEnd": false,
+	"requireCamelCaseOrUpperCaseIdentifiers": {"ignoreProperties": true, "allowedPrefixes": ["opt_", "remote_", "tenant_", "control_", "module_"], "allExcept": ["var_args"]},
+    "maxErrors": 5000,
+    "excludeFiles": [".git/**","node_modules/**","client/scripts/jsPlumb-2.0.7-min.js","test/**","coverage/**","out/**", "test/**", "lib/expression-language/**", "tools/demo/**", "client/**", "demo/**", "db/**", "server/demo/**" ]
+}
