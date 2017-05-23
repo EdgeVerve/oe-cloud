@@ -43,12 +43,7 @@ TODO Guidelines goes here. These should include following -
 5. New lines  
 6. Control statements  
 7. Line wrapping  
-8. Comments  
-
-### Eclipse code formatter  
-Use attached eclipse code formatter to format .js and javascript files.  
-[ev-javascript-code-formatter.xml](http://10.73.53.167/ev/ev-foundation/uploads/16f183c0de18f23e1c018659d80d7241/ev-javascript-code-formatter.xml)
-
+8. Comments 
 
 # Coding guidelines
 ### Use JavaScript native functions instead of libraries like lodash.

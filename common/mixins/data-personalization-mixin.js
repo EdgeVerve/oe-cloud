@@ -6,7 +6,7 @@
  */
 /**
  * This mixin is attached to BaseEntity so that it applies to all Models used in
- * the EV-FOUNDATION framework.This is used to add data with autoscope and manual
+ * the oeCloud.io framework.This is used to add data with autoscope and manual
  * scope values. While POSTing the data manual scope values are sent by the user adding
  * a json attribute named scope : {} and autoscoped values are read from the model
  * settings and final scope will be calculated based on values of manual scope and auto scope

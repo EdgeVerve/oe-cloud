@@ -14,7 +14,7 @@
  */
 // app config file.
 var appconfig = null;
-// ev foundation config file.
+// oecloud.io config file.
 var config = null;
 
 try {

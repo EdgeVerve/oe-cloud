@@ -69,7 +69,7 @@
   "disablenodered": true,               // Setting 'disablenodered' to true disables
                                         // node-red. Default is false.
                                         
-  "app": "ev-foundation",
+  "app": "oecloud.io",
   
   "enableJWTAssertion":false,
   

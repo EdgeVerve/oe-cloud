@@ -11,7 +11,7 @@ var env = process.env.NODE_ENV;
 
 // app log-config file.
 var appLogConfig = null;
-// ev foundation log-config file.
+// oecloud.io log-config file.
 var logConfig = null;
 
 var useAppConfig = 0;

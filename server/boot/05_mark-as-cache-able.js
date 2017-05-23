@@ -91,7 +91,7 @@ module.exports = function MarkAsCacheable(app, cb) {
       }
     });
   } else {
-    log.debug(log.defaultContext(), 'EV_CACHE', 'markascacheable boot script:', 'Framework Model Caching is disabled via config (ev-foundation/server/config.json [\'disablecaching\': true])');
+    log.debug(log.defaultContext(), 'EV_CACHE', 'markascacheable boot script:', 'Framework Model Caching is disabled via config (/server/config.json [\'disablecaching\': true])');
   }
 
   // Callback to make the 'marking as cacheable' synchronous
