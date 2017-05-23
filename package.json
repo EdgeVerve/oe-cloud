@@ -1,6 +1,6 @@
 {
   "name": "oe-cloud",
-  "version": "0.8.5",
+  "version": "0.8.6",
   "main": "server/server.js",
   "engines": {
     "node": ">=6.9.0"
