@@ -14,6 +14,7 @@ npm-debug.log
 pids
 results
 test/sandbox
+test
 coverage
 Requirements
 client/bower_components
@@ -30,4 +31,3 @@ scripts
 .jshintignore
 .jshintrc
 .yo-rc.json
-p2p-engine.war
