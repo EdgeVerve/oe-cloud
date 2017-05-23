@@ -87,5 +87,10 @@
       "PersonalizationRule" : true
   },
   "memoryPoolSize": 10000,
-  "ruleEngine":"Drools"
+  "ruleEngine":"Drools",
+  "defaultUser":{
+    "userName":"admin",
+    "password":"admin",
+    "email":"admin@mycompany.com"
+  }
 }

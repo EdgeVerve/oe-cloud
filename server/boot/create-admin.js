@@ -7,14 +7,15 @@
 var loopback = require('loopback');
 var async = require('async');
 var log = require('../../lib/logger')('create-admin');
+var app = require('../server').app;
 
-var strvar = 'admin';
-
+var userDetails = app.get('defaultUser');
 var adminUser = {
-  username: strvar,
-  email: 'admin@mycompany.com',
+  username: userDetails.userName,
+  email: userDetails.email,
   emailVerified: true,
-  id: strvar
+  id: userDetails.userName,
+  password: userDetails.userName
 };
 
 var createAdminUser = function createAdminUser(done) {
@@ -43,7 +44,6 @@ var createAdminUser = function createAdminUser(done) {
     });
   }, function baseUserOp(cb) {
     var BaseUser = loopback.getModelByType('BaseUser');
-    adminUser.password = strvar;
     BaseUser.create(adminUser, adminUserContext, function baseUserCreate(err, res) {
       if (err) {
         if (err.code === 11000) {
@@ -108,10 +108,10 @@ var createAdminUser = function createAdminUser(done) {
         }
       });
     }],
-        function finalCallback() {
-          done();
-        }
-    );
+    function finalCallback() {
+      done();
+    }
+  );
 };
 
 module.exports = function CreateAdmin(app) {
