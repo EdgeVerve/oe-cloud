@@ -116,7 +116,7 @@ var createAdminUser = function createAdminUser(done) {
 
 module.exports = function CreateAdmin(app) {
   /**
-   * createAdminUser calls only when ev-foundation app boots.(Not for any apps which are dependent on ev-foundation)
+   * createAdminUser calls only when oecloud.io app boots.(Not for any apps which are dependent on oecloud.io)
    */
   var flag = app.locals.standAlone ;
   if (flag) {

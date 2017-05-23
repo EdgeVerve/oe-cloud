@@ -6,7 +6,7 @@
  */
 /**
  * This mixin is attached to BaseEntity so that it applies to all Models used in
- * the EV-FOUNDATION framework. The purpose of this mixin is as follows:
+ * the oeCloud.io framework. The purpose of this mixin is as follows:
  * At creation time of (each) model, check if its definition contains a property
  * called 'cacheable', and if its value is anything other than 'false'.
  * If so, mark the model as Cacheable by adding a property with this model's name
