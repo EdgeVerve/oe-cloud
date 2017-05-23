@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
  * @classdesc This is the companion js file of the DataSourceMapping Model, which gets executed

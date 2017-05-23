@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
  * This mixin is for expression language, where we collect all the grammar rules attached to the model
@@ -42,20 +42,20 @@ module.exports = function ExpressionAstPopulator(Model) {
 
   // process all the grammar rules present in oeValidations and and attach their ASTs to the model
   Object.keys(oeValidations).forEach(function validationsForEachCb(validationName) {
-      var validationRule = oeValidations[validationName];
+    var validationRule = oeValidations[validationName];
     // if oeValidation has a validateWhen condition then pick it up and create AST for it
-      if (validationRule.validateWhen) {
+    if (validationRule.validateWhen) {
       // validateWhen takes a string in case of ev validations
-          if (typeof validationRule.validateWhen === 'string') {
+      if (typeof validationRule.validateWhen === 'string') {
         // pick the validateWhen condition and attach its AST to the model
-              var validateWhenRule = validationRule.validateWhen;
+        var validateWhenRule = validationRule.validateWhen;
         Model._ast[validateWhenRule] = exprLang.createAST(validateWhenRule);
         log.info(log.defaultContext(), 'validateWhen ast building for oeValidation rule   ', Model.modelName, '->', validationName);
       }
     }
     // if the oeValidation is of 'custom' type then pick its expression which a grammar rule and create AST for that expression
-      if (validationRule.type === 'custom') {
-          var expression = validationRule.expression;
+    if (validationRule.type === 'custom') {
+      var expression = validationRule.expression;
       // pick the expression for custom type oeValidation and attach its AST to the model
       Model._ast[expression] = exprLang.createAST(expression);
       log.info(log.defaultContext(), 'ast building for oeValidation custom rule   ', Model.modelName, '->', validationName);

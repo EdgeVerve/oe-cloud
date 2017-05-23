@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
 * @classdesc This model stores the data to auto configure, application level client side routing using page.js

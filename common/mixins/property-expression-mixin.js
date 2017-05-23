@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 
 /* This mixin is for expression evaluations mentioned in properties and attaching the evaluated values to the properties*/

@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
  * These files are Middleware scripts. These are used to intercept request/responses

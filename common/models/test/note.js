@@ -1,9 +1,10 @@
 /**
- * 
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ *
+ * ï¿½2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
+
 module.exports = function note(Model) {
   Model.prototype.remote2 = function remote(cb) {
     cb(null, { message: 'remote 2 ok' });

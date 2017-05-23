@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 // var mongoHost = process.env.MONGO_HOST || 'localhost';

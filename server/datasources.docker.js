@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 module.exports = {
@@ -31,7 +31,7 @@ module.exports = {
       'host': 'smtp.gmail.com',
       'port': 587,
       'auth': {
-          'user': 'yourGmailAccount@gmail.com',
+        'user': 'yourGmailAccount@gmail.com',
         'pass': 'yourSecretPassword'
       }
     }]

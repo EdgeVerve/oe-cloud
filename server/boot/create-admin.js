@@ -1,8 +1,8 @@
 /**
- * 
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ *
+ * ï¿½2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var loopback = require('loopback');
 var async = require('async');
@@ -118,7 +118,7 @@ module.exports = function CreateAdmin(app) {
   /**
    * createAdminUser calls only when ev-foundation app boots.(Not for any apps which are dependent on ev-foundation)
    */
-  var flag = app.locals.standAlone ;
+  var flag = app.locals.standAlone;
   if (flag) {
     createAdminUser(function createAdminUser() {
       log.debug(log.defaultContext(), 'Admin user created for framework');

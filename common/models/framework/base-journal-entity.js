@@ -1,8 +1,8 @@
 /**
- * 
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ *
+ * ï¿½2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var async = require('async');
 var logger = require('../../../lib/logger');

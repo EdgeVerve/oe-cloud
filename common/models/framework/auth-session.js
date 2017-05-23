@@ -1,9 +1,10 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
+
 module.exports = function AuthSessionFn(AuthSession) {
   AuthSession.findForRequest = function authSessionFindForRequestFn(req, options, cb) {
     if (typeof cb === 'undefined' && typeof options === 'function') {

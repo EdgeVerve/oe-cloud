@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* eslint-disable no-console */
 var path = require('path');
@@ -27,8 +27,8 @@ module.exports = function Explorer(server) {
 
 
   var explorerApp = explorer.routes(server, {
-      basePath: restApiRoot,
-      uiDirs: explorerDir
+    basePath: restApiRoot,
+    uiDirs: explorerDir
   });
   server.use(explorerPathName, explorerApp);
   server.once('started', function explorerServerStarted() {

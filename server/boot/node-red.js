@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* eslint-disable no-console, no-loop-func */
 var nodeRed = require('loopback-connector-nodes-for-Node-RED');
@@ -71,31 +71,31 @@ module.exports = function startNodeRed(server, callback) {
   var redNodes = RED.nodes;
   var originalCreateNode = redNodes.createNode;
   var flagOnce = true;
-  redNodes.createNode = function (node, def) {
-      originalCreateNode(node, def);
-      node.callContext = def.callContext;
-      if (flagOnce) {
-          flagOnce = false;
-          node.constructor.super_.prototype._receive = node.constructor.super_.prototype.receive;
-          node.constructor.super_.prototype.receive = function (msg) {
-              if (!msg) {
-                  msg = {};
-              }
-              msg.callback = this.callContext;
-              this._receive(msg);
+  redNodes.createNode = function createNodes(node, def) {
+    originalCreateNode(node, def);
+    node.callContext = def.callContext;
+    if (flagOnce) {
+      flagOnce = false;
+      node.constructor.super_.prototype._receive = node.constructor.super_.prototype.receive;
+      node.constructor.super_.prototype.receive = function receiveFn(msg) {
+        if (!msg) {
+          msg = {};
+        }
+        msg.callback = this.callContext;
+        this._receive(msg);
+      };
+      node.constructor.super_.prototype._on_ = node.constructor.super_.prototype._on;
+      node.constructor.super_.prototype._on = function onEventHandlerFn(event, callback) {
+        return this._on_(event, function onEventCb(msg) {
+          if (!msg) {
+            msg = {};
           }
-          node.constructor.super_.prototype._on_ = node.constructor.super_.prototype._on;
-          node.constructor.super_.prototype._on = function (event, callback) {
-              return this._on_(event, function (msg) {
-                  if (!msg) {
-                      msg = {};
-                  }
-                  msg.callContext = this.callContext;
-                  callback.call(this, msg);
-              });
-          }
-      }
-  }
+          msg.callContext = this.callContext;
+          callback.call(this, msg);
+        });
+      };
+    }
+  };
   var flowModel = loopback.findModel('NodeRedFlow');
   flowModel.observe('after save', function flowModelAfterSave(ctx, next) {
     // Calling reload() directly in addition to message publish

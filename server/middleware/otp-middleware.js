@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var util = require('../../lib/common/util');
 var exprLang = require('../../lib/expression-language/expression-language.js');
@@ -51,7 +51,7 @@ module.exports = function otpMiddleware(options) {
     // Checking if otp authentication config is available for model.
     if (enableOTP) {
       // Get config if available for http method that is requested.
-        var config = enableOTP.filter(function getAuthConfig(configObj) {
+      var config = enableOTP.filter(function getAuthConfig(configObj) {
         if (configObj.method === httpMethod) {
           return configObj;
         }
