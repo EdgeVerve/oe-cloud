@@ -1,16 +1,16 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
-var loopback = require('loopback');
-var Passport = require('passport');
-var logger = require('../../lib/logger');
-var log = logger('JWT-Assertion');
-var path = require('path');
-var app = require('../server').app;
-var fs = require('fs');
+const loopback = require('loopback');
+const Passport = require('passport');
+const logger = require('../../lib/logger');
+const log = logger('JWT-Assertion');
+const path = require('path');
+const app = require('../server').app;
+const fs = require('fs');
 /**
  * This Auth middleware is responsible for JWT authentication strategy.
  * When JWT is enabled it reads the JWT from the authentication header and
@@ -22,17 +22,17 @@ var fs = require('fs');
  */
 
 module.exports = function JWTAssertionFn(options) {
-  var JwtStrategy = require('passport-jwt').Strategy;
-  var ExtractJwt = require('passport-jwt').ExtractJwt;
+  const JwtStrategy = require('passport-jwt').Strategy;
+  const ExtractJwt = require('passport-jwt').ExtractJwt;
 
-  var filepath = path.resolve(path.join(app.locals.apphome, 'jwt-config.json'));
-  var file = fs.existsSync(filepath) ? filepath : '../../server/jwt-config.json';
+  const filepath = path.resolve(path.join(app.locals.apphome, 'jwt-config.json'));
+  const file = fs.existsSync(filepath) ? filepath : '../../server/jwt-config.json';
 
-  var jwtConfig = require(file);
+  const jwtConfig = require(file);
 
-  var cachedTokens = {};
+  const cachedTokens = {};
 
-  var opts = {};
+  const opts = {};
   // secretOrKey is a REQUIRED string or buffer containing the secret (symmetric) or PEM-encoded public key
   opts.secretOrKey = jwtConfig.secretOrKey;
 
@@ -48,7 +48,7 @@ module.exports = function JWTAssertionFn(options) {
 
   // Registering jwt strategy for passport.
   // decodedToken  is an object literal containing the decoded JWT payload
-  Passport.use(new JwtStrategy(opts, function jwtAssertionPassportUseFn(decodedToken, done) {
+  Passport.use(new JwtStrategy(opts, (decodedToken, done) => {
     if (decodedToken) {
       done(null, decodedToken);
     } else {
@@ -57,7 +57,7 @@ module.exports = function JWTAssertionFn(options) {
   }));
 
   return function jwtAssertionPassportAuthenticateCb(req, res, next) {
-    Passport.authenticate('jwt', function passportCb(err, user, info) {
+    Passport.authenticate('jwt', (err, user, info) => {
       if (err) {
         return next(err);
       }
@@ -65,8 +65,8 @@ module.exports = function JWTAssertionFn(options) {
         return next();
       }
       if (user) {
-        var User = loopback.getModelByType('BaseUser');
-        var username = user.username || user.email || '';
+        const User = loopback.getModelByType('BaseUser');
+        const username = user.username || user.email || '';
         req.accessToken = cachedTokens[username];
         // TODO check validity of token @kpraveen
         if (req.accessToken) {
@@ -75,19 +75,19 @@ module.exports = function JWTAssertionFn(options) {
         // User login.
         User.findOne({
           where: {
-            username: username
+            username
           }
-        }, req.callContext, function jwtFindUserFn(err, user) {
+        }, req.callContext, (err, user) => {
           if (err) {
             next(null);
             // Here you can ask for password reset or signup.
           } else if (user) {
-            user.createAccessToken(User.DEFAULT_TTL, req.callContext, function createAccessTokenFn(err, token) {
+            user.createAccessToken(User.DEFAULT_TTL, req.callContext, (err, token) => {
               if (err) {
                 next(err);
               }
               if (token) {
-                var data = {};
+                const data = {};
                 data.id = username;
                 data.token = token;
                 req.accessToken = token;

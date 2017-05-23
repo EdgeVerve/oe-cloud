@@ -1,16 +1,16 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 
-var mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
-var toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
-var _ = require('lodash');
-var uuid = require('node-uuid');
-var async = require('async');
-var ROOT_PATH = ',root,';
+const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
+const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
+const _ = require('lodash');
+const uuid = require('node-uuid');
+const async = require('async');
+const ROOT_PATH = ',root,';
 module.exports = function DataHierarchyMixin(Model) {
   Model.defineProperty('_hierarchyScope', {
     type: 'object',
@@ -44,7 +44,7 @@ module.exports = function DataHierarchyMixin(Model) {
  * @function
  */
 function hierarchyBeforeSave(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for DataHierarchyMixin is applied or not.
   if (modelSettings.mixins.DataHierarchyMixin === false) {
@@ -56,31 +56,31 @@ function hierarchyBeforeSave(ctx, next) {
     return next();
   }
 
-  var callContext = ctx.options;
+  const callContext = ctx.options;
 
   // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
-  var context = Object.assign({}, callContext.ctx);
+  let context = Object.assign({}, callContext.ctx);
 
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
 
-  var data = ctx.data || ctx.instance;
-  var _hierarchyScope = {};
-  var hierarchyScope = modelSettings.hierarchyScope;
+  const data = ctx.data || ctx.instance;
+  const _hierarchyScope = {};
+  const hierarchyScope = modelSettings.hierarchyScope;
 
-  async.each(hierarchyScope, function dataHierarchyEachBeforeSave(key, cb) {
+  async.each(hierarchyScope, (key, cb) => {
     if (typeof key === 'string') {
       setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb);
     } else {
-      var err = new Error();
+      const err = new Error();
       err.name = 'Hierarchy Scope Definition Error';
-      err.message = 'The Hierarchy scope in model should be of type string for the model ' + ctx.Model.modelName + ' key ' + key;
+      err.message = `The Hierarchy scope in model should be of type string for the model ${ctx.Model.modelName} key ${key}`;
       err.code = 'DATA_HIERARCHY_ERROR_001';
       err.type = 'Type mismatch in Declaration';
       err.retriable = false;
       return next(err);
     }
-  }, function callbackfn(err) {
+  }, (err) => {
     if (err) {
       return next(err);
     }
@@ -102,7 +102,7 @@ function hierarchyBeforeSave(ctx, next) {
  * @function
  */
 function hierarchyAccess(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for DataHierarchyMixin is applied or not
   if (modelSettings.mixins.DataHierarchyMixin === false) {
@@ -114,25 +114,25 @@ function hierarchyAccess(ctx, next) {
     return next();
   }
 
-  var callContext = ctx.options;
+  const callContext = ctx.options;
 
   // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
-  var context = Object.assign({}, callContext.ctx);
+  let context = Object.assign({}, callContext.ctx);
 
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
 
-  var hierarchyScope = modelSettings.hierarchyScope;
+  const hierarchyScope = modelSettings.hierarchyScope;
 
-  hierarchyScope.forEach(function dataHierarchyAccessForEach(key) {
+  hierarchyScope.forEach((key) => {
     if (typeof key === 'string') {
       if (context && context[key]) {
         createQuery(ctx, context, key);
       }
     } else {
-      var err = new Error();
+      const err = new Error();
       err.name = 'Hierarchy Scope Definition Error';
-      err.message = 'The Hierarchy scope in model should be of type string for the model ' + ctx.Model.modelName + ' key ' + key;
+      err.message = `The Hierarchy scope in model should be of type string for the model ${ctx.Model.modelName} key ${key}`;
       err.code = 'DATA_HIERARCHY_ERROR_001';
       err.type = 'Type mismatch in Declaration';
       err.retriable = false;
@@ -151,7 +151,7 @@ function hierarchyAccess(ctx, next) {
  * @function
  */
 function hierarchyAfterAccess(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for HierarchyMixin is applied or not.
   if (modelSettings.mixins.DataHierarchyMixin === false) {
@@ -163,28 +163,28 @@ function hierarchyAfterAccess(ctx, next) {
     return next();
   }
 
-  var upward = modelSettings.upward || false;
+  const upward = modelSettings.upward || false;
 
-  var resultData = [];
-  var result = ctx.accdata;
+  let resultData = [];
+  const result = ctx.accdata;
 
   if (result.length && upward) {
-    var uniq = [];
-    var modelProp = ctx.Model.definition.properties;
+    let uniq = [];
+    const modelProp = ctx.Model.definition.properties;
 
-    result.forEach(function dataAfterAccessResultForEach(obj) {
-      var weight = 0;
-      Object.keys(obj._hierarchyScope).forEach(function hierarchyScopeForEachFn(item) {
-        var value = obj._hierarchyScope[item];
-        weight = weight + value.split(',').length;
+    result.forEach((obj) => {
+      let weight = 0;
+      Object.keys(obj._hierarchyScope).forEach((item) => {
+        const value = obj._hierarchyScope[item];
+        weight += value.split(',').length;
       });
       obj.weight = weight;
       resultData.push(obj);
     });
 
     // Reads each property for unique and populates uniq array.
-    Object.keys(modelProp).forEach(function dataAfterAccessCtxPropForEach(key) {
-      var prop = modelProp[key];
+    Object.keys(modelProp).forEach((key) => {
+      const prop = modelProp[key];
       if (prop.unique) {
         if (typeof prop.unique === 'boolean') {
           uniq.push(key);
@@ -202,11 +202,7 @@ function hierarchyAfterAccess(ctx, next) {
 
     // Filter out the redundent records from result by applying unique validation.
     if (uniq.length > 0) {
-      resultData = _.uniq(resultData, function dataAfterAccessResultUniqCb(value) {
-        return uniq.map(function dataAfterAccessResultUniqForEach(u) {
-          return value[u];
-        }).join('-');
-      });
+      resultData = _.uniq(resultData, value => uniq.map(u => value[u]).join('-'));
       // resultData = _.intersection.apply(this, _.chain(uniq).map(function (v) { return _.uniq(resultData, v) }).value());
     }
     ctx.accdata = resultData;
@@ -226,15 +222,15 @@ function hierarchyAfterAccess(ctx, next) {
 var convertToLowerCase = function convertToLowerCase(input) {
   // Check for type of input and branch accordingly.
   if (Array.isArray(input)) {
-    var resArr = [];
-    input.forEach(function convertToLowerCaseArray(value) {
+    const resArr = [];
+    input.forEach((value) => {
       resArr.push(value.toLowerCase());
     });
     return resArr;
   } else if (input && typeof input === 'object') {
-    var resObj = {};
-    Object.keys(input).forEach(function convertToLowerCaseObject(key) {
-      var value = input[key];
+    const resObj = {};
+    Object.keys(input).forEach((key) => {
+      const value = input[key];
       if (typeof value === 'string') {
         resObj[key] = value.toLowerCase();
       } else if (typeof value === 'object') {
@@ -271,36 +267,36 @@ function createPath(parentPath, childPath) {
  * @function
  */
 function createQuery(ctx, context, hierarchy) {
-  var upward = ctx.Model.definition.settings.upward || false;
-  var depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
-  var query = {};
-  var key = '_hierarchyScope.' + hierarchy;
-  var regexString = context[hierarchy];
-  var orParms = [];
-  var modifiedRegex;
+  const upward = ctx.Model.definition.settings.upward || false;
+  let depth = ctx.query && ctx.query.depth ? ctx.query.depth : '0';
+  let query = {};
+  const key = `_hierarchyScope.${hierarchy}`;
+  const regexString = context[hierarchy];
+  const orParms = [];
+  let modifiedRegex;
 
   if (!upward) {
     if (depth === '*') {
-      var regexObj = toRegExp(regexString);
+      const regexObj = toRegExp(regexString);
 
       query[key] = regexObj;
       mergeQuery(ctx.query, {
         where: query
       });
     } else {
-      for (var i = 0; i <= depth; i++) {
+      for (let i = 0; i <= depth; i++) {
         query = {};
         if (i === 0) {
-          modifiedRegex = regexString + '$';
+          modifiedRegex = `${regexString}$`;
         } else {
-          modifiedRegex = modifiedRegex.substr(0, modifiedRegex.length - 1) + '[[:alnum:]]*,$';
+          modifiedRegex = `${modifiedRegex.substr(0, modifiedRegex.length - 1)}[[:alnum:]]*,$`;
         }
         query[key] = toRegExp(modifiedRegex);
         orParms.push(query);
       }
       mergeQuery(ctx.query, {
         where: {
-          'or': orParms
+          or: orParms
         }
       });
     }
@@ -308,12 +304,12 @@ function createQuery(ctx, context, hierarchy) {
     if (depth === '*') {
       depth = regexString.split(',').length - 2;
     }
-    for (var j = 0; j <= depth; j++) {
+    for (let j = 0; j <= depth; j++) {
       query = {};
       if (j === 0) {
-        modifiedRegex = regexString + '$';
+        modifiedRegex = `${regexString}$`;
       } else {
-        var hierarchyArray = modifiedRegex.split(',');
+        const hierarchyArray = modifiedRegex.split(',');
         hierarchyArray.splice(hierarchyArray.length - 2, 1);
         modifiedRegex = hierarchyArray.join();
       }
@@ -325,7 +321,7 @@ function createQuery(ctx, context, hierarchy) {
     }
     mergeQuery(ctx.query, {
       where: {
-        'or': orParms
+        or: orParms
       }
     });
   }
@@ -350,17 +346,17 @@ function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) 
         data.id = uuid.v4();
       }
       if (data.parentId) {
-        ctx.Model.findById(data.parentId, ctx.options, function findByIdcb(err, parent) {
+        ctx.Model.findById(data.parentId, ctx.options, (err, parent) => {
           if (err) {
             return cb(err);
           }
           if (parent && parent._hierarchyScope && parent._hierarchyScope[key]) {
-            _hierarchyScope[key] = createPath(parent._hierarchyScope[key], ',' + data.id + ',');
+            _hierarchyScope[key] = createPath(parent._hierarchyScope[key], `,${data.id},`);
             cb();
           } else {
-            var err1 = new Error();
+            const err1 = new Error();
             err1.name = 'Parent Not Found';
-            err1.message = 'Parent Not Found for the given parentid ' + data.parentId;
+            err1.message = `Parent Not Found for the given parentid ${data.parentId}`;
             err1.code = 'DATA_HIERARCHY_ERROR_003';
             err1.type = 'ParentNotFound';
             err1.retriable = false;
@@ -368,7 +364,7 @@ function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) 
           }
         });
       } else {
-        _hierarchyScope[key] = createPath(ROOT_PATH, ',' + data.id + ',');
+        _hierarchyScope[key] = createPath(ROOT_PATH, `,${data.id},`);
         cb();
       }
     } else if (ctx.isNewInstance && data.id === 'root') {
@@ -381,9 +377,9 @@ function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) 
     _hierarchyScope[key] = context[key];
     cb();
   } else {
-    var err1 = new Error();
+    const err1 = new Error();
     err1.name = 'Hierarchy Personalization error';
-    err1.message = 'insufficient data! HierachyScope values not found for the model' + ctx.Model.modelName + ' key ' + key;
+    err1.message = `insufficient data! HierachyScope values not found for the model ${ctx.Model.modelName} key ${key}`;
     err1.code = 'DATA_HIERARCHY_ERROR_002';
     err1.type = 'Insufficient data';
     err1.retriable = false;

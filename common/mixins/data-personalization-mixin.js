@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
  * This mixin is attached to BaseEntity so that it applies to all Models used in
@@ -16,32 +16,37 @@
  * calculate score and sorted in descending order of the score.<br>
  *
  * <pre>
- * scope : While POSTing the data user can specify a scope manually by adding a json attribute named scope : {}
+ * scope : While POSTing the data user can specify a scope manually by adding a json attribute
+ *         named scope : {}
  *
- * autoscope : A setting in model.json where developer can force model to be automatically scoped at certain parameter.
- *             Specified as an array of strings in model definition.
+ * autoscope : A setting in model.json where developer can force model to be automatically scoped
+ *             at certain parameter.Specified as an array of strings in model definition.
  *
  * _scope : A final calculated scope which will be stored in the database.
  *          The final _scope will be a combination of autoscope and Manual Scope.
- *         _scope will be stored as an array of Integer bit positions reserved on first come first serve basis.
+ *         _scope will be stored as an array of Integer bit positions reserved on first
+ *         come first serve basis.
  *
  * _autoScope : A variable which contains the autoscoped values.
  *
  * Weightages : Weightages specified on request may be as an additional header.
- *              These weightages will be used while calculating the score while retrieving the records.
+ *              These weightages will be used while calculating the score while retrieving
+ *              the records.
  *
  * score : The final value calculated based on weightages of the matched records.
- *         The record with highest score will be given priority over the next highest score and so on.
+ *         The record with highest score will be given priority over the next highest score
+ *         and so on.
  * </pre>
  *
  * @mixin Data personalization mixin
  * @author Ramesh Choudhary.
  */
 
-var mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
-var _ = require('lodash');
-var log = require('../../lib/logger')('data-personalization-mixin');
-module.exports = function DataPersonalizationMixin(Model) {
+const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
+const _ = require('lodash');
+const log = require('../../lib/logger')('data-personalization-mixin');
+
+module.exports = Model => {
   // Defining a new _score, scope, _autoScope property
   Model.defineProperty('_scope', {
     type: ['string'],
@@ -89,23 +94,23 @@ module.exports = function DataPersonalizationMixin(Model) {
  * @returns {array} - array of strings of the form "key.value"
  * @function
  */
-var convertToKeyValueString = function convertToKeyValueString(scope) {
-  var _scope = [];
+const convertToKeyValueString = function convertToKeyValueString(scope) {
+  const _scope = [];
 
   // Loop through each key value pair and form an array of strings
   // each string in array will be of form "key.value"
-  Object.keys(scope).forEach(function convertToKeyValueStringForEach(key, index) {
-    var value = scope[key];
-    var keyValuestring;
-    value = value ? value : '';
+  Object.keys(scope).forEach((key, index) => {
+    let value = scope[key];
+    let keyValuestring;
+    value = value || '';
     // If array then the string will only have the "key" else it will have "key.value"
     if (Array.isArray(value)) {
-      value.forEach(function forEachArrayValue(item) {
-        keyValuestring = key + ':' + item;
+      value.forEach((item) => {
+        keyValuestring = `${key}:${item}`;
         _scope.push(keyValuestring);
       });
     } else {
-      keyValuestring = key + ':' + value.toString();
+      keyValuestring = `${key}:${value.toString()}`;
       _scope.push(keyValuestring);
     }
   });
@@ -121,18 +126,18 @@ var convertToKeyValueString = function convertToKeyValueString(scope) {
  * @returns {array|object} - array or object according to input.
  * @function
  */
-var convertToLowerCase = function convertToLowerCase(input) {
+const convertToLowerCase = function convertToLowerCase(input) {
   // Check for type of input and branch accordingly.
   if (Array.isArray(input)) {
-    var resArr = [];
-    input.forEach(function convertToLowerCaseArray(value) {
+    const resArr = [];
+    input.forEach((value) => {
       resArr.push(value.toLowerCase());
     });
     return resArr;
   } else if (input && typeof input === 'object') {
-    var resObj = {};
-    Object.keys(input).forEach(function convertToLowerCaseObject(key) {
-      var value = input[key];
+    const resObj = {};
+    Object.keys(input).forEach((key) => {
+      const value = input[key];
       if (typeof value === 'string') {
         resObj[key] = value.toLowerCase();
       } else if (typeof value === 'object') {
@@ -153,9 +158,9 @@ var convertToLowerCase = function convertToLowerCase(input) {
  * @returns {Object} - returns new execution scope.
  * @function
  */
-var filterAutoscopeFromCtx = function filterAutoscopeFromCtx(ctx, autoscope) {
-  var newCtx = {};
-  _.forEach(ctx, function filterAutoscopeFromCtxForEach(value, key) {
+const filterAutoscopeFromCtx = function filterAutoscopeFromCtx(ctx, autoscope) {
+  const newCtx = {};
+  _.forEach(ctx, (value, key) => {
     if (!(_.contains(autoscope, key))) {
       newCtx[key] = value;
     }
@@ -177,7 +182,7 @@ var filterAutoscopeFromCtx = function filterAutoscopeFromCtx(ctx, autoscope) {
  * @function
  */
 function dataPersonalizationBeforeSave(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for DataPersonalizationMixin is applied or not.
   // If mixin is applied to current model then only data wil be scoped.
@@ -185,36 +190,36 @@ function dataPersonalizationBeforeSave(ctx, next) {
     return next();
   }
 
-  var callContext = ctx.options;
+  const callContext = ctx.options;
 
   // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
-  var context = Object.assign({}, callContext.ctx);
+  let context = Object.assign({}, callContext.ctx);
 
   // Convert the callcontext to lowercase.
   context = convertToLowerCase(context);
 
   // Reading the autoscope values from the model definition settings.
-  var autoscope = modelSettings.autoscope;
+  const autoscope = modelSettings.autoscope;
 
-  var data = ctx.instance || ctx.data;
+  const data = ctx.instance || ctx.data;
   // log.debug('Raw data with manual scope - ' , JSON.stringify(data));
-  var scope = (data.scope && data.scope.__data) || data.scope || {};
+  let scope = (data.scope && data.scope.__data) || data.scope || {};
 
   // Converting scope to lowercase
   scope = convertToLowerCase(scope);
-  var _autoScope = {};
+  const _autoScope = {};
 
-  var currentAutoScope;
+  let currentAutoScope;
   if (!ctx.IsNewInstance && ctx.currentInstance) {
     currentAutoScope = ctx.currentInstance._autoScope;
   }
 
   // get default autoscope value from config files
-  var defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
+  const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
   if (callContext.ignoreAutoScope) {
     if (!callContext.useScopeAsIs) {
-      autoscope.forEach(function dataBeforeSaveForEach(key) {
+      autoscope.forEach((key) => {
         _autoScope[key] = defaultValue;
       });
     } else {
@@ -222,12 +227,12 @@ function dataPersonalizationBeforeSave(ctx, next) {
     }
   } else {
     // Loop through each value in autoscope.
-    autoscope.forEach(function dataBeforeSaveForEach(key) {
+    autoscope.forEach((key) => {
       if (currentAutoScope) {
-        var f1 = context[key] || '';
-        var f2 = currentAutoScope[key] || '';
+        const f1 = context[key] || '';
+        const f2 = currentAutoScope[key] || '';
         if (f1 !== f2) {
-          var error = new Error('could not find a model with id ' + ctx.currentInstance.id);
+          const error = new Error(`could not find a model with id ${ctx.currentInstance.id}`);
           error.statusCode = 404;
           error.code = 'MODEL_NOT_FOUND';
           error.retriable = false;
@@ -237,7 +242,7 @@ function dataPersonalizationBeforeSave(ctx, next) {
 
       if (scope[key]) {
         // If autoscoped values are passed in scope then data would not be saved.
-        var err = new Error();
+        const err = new Error();
         err.name = 'Data Personalization error';
         err.message = 'Cannot pass autoscoped values in payload';
         err.code = 'DATA_PERSONALIZATION_ERROR_028';
@@ -252,9 +257,9 @@ function dataPersonalizationBeforeSave(ctx, next) {
       } else {
         // throws an Error when model is autoscope on some contributor
         // but contributor values are not provided.
-        var err1 = new Error();
+        const err1 = new Error();
         err1.name = 'Data Personalization error';
-        err1.message = 'insufficient data! Autoscoped values not found for the model' + ctx.Model.modelName + ' key ' + key;
+        err1.message = `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`;
         err1.code = 'DATA_PERSONALIZATION_ERROR_029';
         err1.type = 'AutoScopeValuesNotFound';
         err1.retriable = false;
@@ -286,7 +291,7 @@ function dataPersonalizationBeforeSave(ctx, next) {
  * @function
  */
 function dataPersonalizationAccess(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for DataPersonalizationMixin is applied or not.
   // If mixin is applied to current model then only data wil be scoped.
@@ -298,27 +303,27 @@ function dataPersonalizationAccess(ctx, next) {
     return next();
   }
 
-  var callContext = ctx.options;
+  const callContext = ctx.options;
 
   // Reading the autoscope values from the model definition settings.
-  var autoscope = modelSettings.autoscope;
+  const autoscope = modelSettings.autoscope;
 
   // Clone callContext.ctxso the any changes locally made will not affect callContext.ctx.
-  var context = Object.assign({}, callContext.ctx);
+  let context = Object.assign({}, callContext.ctx);
 
   // Convert contextContributors to lowercase.
   context = convertToLowerCase(context);
 
   // Filter out autoscope from contextContributors.
-  var scopeVars = filterAutoscopeFromCtx(context, autoscope);
+  const scopeVars = filterAutoscopeFromCtx(context, autoscope);
 
   // adding manual scope to ctx for use in cache
   ctx.hookState.scopeVars = Object.assign({}, scopeVars);
 
-  var andParams = [];
+  const andParams = [];
 
   // Getting the ignore list from the callContext
-  var ignoreList = callContext.ignoreContextList || [];
+  let ignoreList = callContext.ignoreContextList || [];
 
   // Convert the ignore list to lowercase so that it will be easy to compare.
   ignoreList = convertToLowerCase(ignoreList);
@@ -328,14 +333,14 @@ function dataPersonalizationAccess(ctx, next) {
   // var autoscope = _.difference(autoscope, ignoreList);
 
   // get default autoscope value from config files
-  var defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
+  const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
   if (autoscope.length) {
-    autoscope.forEach(function dataAccessForEach(key) {
+    autoscope.forEach((key) => {
       if (!context[key] && !callContext.ignoreAutoScope) {
-        var err = new Error();
+        const err = new Error();
         err.name = 'Data Personalization error';
-        err.message = 'insufficient data! Autoscoped values not found for the model' + ctx.Model.modelName + ' key ' + key;
+        err.message = `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`;
         err.code = 'DATA_PERSONALIZATION_ERROR_029';
         err.type = 'AutoScopeValuesNotFound';
         err.retriable = false;
@@ -346,78 +351,78 @@ function dataPersonalizationAccess(ctx, next) {
 
   // pushing the query parameters into ignorelist.so tht manually passed query will not conflict with context inferred
   if (ctx.query && ctx.query.where) {
-    var arr = [];
-    var igList = [];
+    let arr = [];
+    const igList = [];
     getKeys(ctx.query.where, arr, igList);
     arr = _.unique(arr);
     ignoreList = ignoreList.concat(arr);
-    callContext['whereKeys' + ctx.Model.modelName] = _.unique(igList);
+    callContext[`whereKeys${ctx.Model.modelName}`] = _.unique(igList);
   }
 
   // This forms the second part of the 'and' condition in the query.
   // Check for the callContext.defaults
   // If callContext.defaults is false then query is formwed with manual scope parameters.
   // If callContext.defaults is true then query will be not be formed with manual scope parameters.
-  var finalQuery = {};
+  let finalQuery = {};
   if (ctx.Model.dataSource.connector.name === 'mongodb' || ctx.Model.dataSource.connector.name === 'postgresql') {
-    var exeContextArray = convertToKeyValueString(scopeVars);
-    var autoscopeArray = [];
-    autoscope.forEach(function addDefaultEntriesOfAutoscope(element) {
+    let exeContextArray = convertToKeyValueString(scopeVars);
+    const autoscopeArray = [];
+    autoscope.forEach((element) => {
       if (context && Array.isArray(context[element])) {
-        var valueArray = [];
-        context[element].forEach(function forEachAutoScopeValue(item) {
-          valueArray.push(element + ':' + item);
+        const valueArray = [];
+        context[element].forEach((item) => {
+          valueArray.push(`${element}:${item}`);
         });
         autoscopeArray.concat(valueArray);
-        exeContextArray.push(element + ':' + defaultValue);
+        exeContextArray.push(`${element}:${defaultValue}`);
         exeContextArray.concat(valueArray);
       } else {
-        exeContextArray.push(element + ':' + defaultValue);
+        exeContextArray.push(`${element}:${defaultValue}`);
         if (context) {
-          exeContextArray.push(element + ':' + context[element]);
-          autoscopeArray.push(element + ':' + context[element]);
+          exeContextArray.push(`${element}:${context[element]}`);
+          autoscopeArray.push(`${element}:${context[element]}`);
         }
       }
     });
     ctx.hookState.autoscopeArray = autoscopeArray;
-    exeContextArray = exeContextArray.concat(callContext['whereKeys' + ctx.Model.modelName]);
+    exeContextArray = exeContextArray.concat(callContext[`whereKeys${ctx.Model.modelName}`]);
     if (ctx.Model.dataSource.connector.name === 'mongodb') {
       finalQuery = {
-        'where': { '_scope': { 'not': { '$elemMatch': { '$nin': exeContextArray } } } }
+        where: { _scope: { not: { $elemMatch: { $nin: exeContextArray } } } }
       };
     } else {
       finalQuery = {
-        'where': { '_scope': { 'contains': exeContextArray } }
+        where: { _scope: { contains: exeContextArray } }
       };
     }
   } else {
     if (autoscope.length) {
-      var autoAnd = [];
+      const autoAnd = [];
 
       // This forms the first part of the 'and' condition in the query.
       // loops through each value in autoscope and forms an 'and' condition between each value.
-      autoscope.forEach(function dataAccessForEach(key) {
-        var asvals = {};
+      autoscope.forEach((key) => {
+        const asvals = {};
         if (callContext.ignoreAutoScope) {
           // When ignoreAutoScope is true then only query with autoscope deafult
           // is formed and only default records are sent.
           asvals._scope = {
-            'inq': [key + ':' + defaultValue]
+            inq: [`${key}:${defaultValue}`]
           };
         } else {
-          var value = context[key];
+          const value = context[key];
           if (Array.isArray(value)) {
-            var valueArray = [];
-            value.forEach(function forEachAutoScopeValue(item) {
-              valueArray.push(key + ':' + item);
+            const valueArray = [];
+            value.forEach((item) => {
+              valueArray.push(`${key}:${item}`);
             });
-            valueArray.push(key + ':' + defaultValue);
+            valueArray.push(`${key}:${defaultValue}`);
             asvals._scope = {
-              'inq': valueArray
+              inq: valueArray
             };
           } else {
             asvals._scope = {
-              'inq': [key + ':' + value, key + ':' + defaultValue]
+              inq: [`${key}:${value}`, `${key}:${defaultValue}`]
             };
           }
         }
@@ -426,65 +431,65 @@ function dataPersonalizationAccess(ctx, next) {
 
       // Push and condition formed with autoscopes into andParams array.
       andParams.push({
-        'and': autoAnd
+        and: autoAnd
       });
     }
 
 
     if (scopeVars && !(_.isEmpty(scopeVars))) {
-      var manualAnd = [];
+      const manualAnd = [];
       // loops through each value in scopeVars and forms an 'and' condition between each value in scopeVars.
-      Object.keys(scopeVars).forEach(function dataAccessScopeVarsForEach(key) {
-        var msVals = {};
-        var msRegExpVal = {};
-        var msOrParams = [];
-        var value = scopeVars[key];
+      Object.keys(scopeVars).forEach((key) => {
+        const msVals = {};
+        const msRegExpVal = {};
+        const msOrParams = [];
+        const value = scopeVars[key];
         // Filter for removing ignorelist values from scopeVars values.
         if (!(_.contains(ignoreList, key))) {
-          var regEx;
+          let regEx;
           if (Array.isArray(value)) {
             if (value.length) {
-              var valueArray = [];
-              value.forEach(function forEachAutoScopeValue(item) {
-                valueArray.push(key + ':' + item);
+              const valueArray = [];
+              value.forEach((item) => {
+                valueArray.push(`${key}:${item}`);
               });
               msVals._scope = {
-                'inq': valueArray
+                inq: valueArray
               };
-              regEx = new RegExp('^' + key + ':');
+              regEx = new RegExp(`^${key}:`);
               msRegExpVal._scope = {
-                'nin': [regEx]
+                nin: [regEx]
               };
               msOrParams.push(msVals);
               msOrParams.push(msRegExpVal);
               manualAnd.push({
-                'or': msOrParams
+                or: msOrParams
               });
             }
           } else {
             msVals._scope = {
-              'inq': [key + ':' + value]
+              inq: [`${key}:${value}`]
             };
-            regEx = new RegExp('^' + key + ':');
+            regEx = new RegExp(`^${key}:`);
             msRegExpVal._scope = {
-              'nin': [regEx]
+              nin: [regEx]
             };
             msOrParams.push(msVals);
             msOrParams.push(msRegExpVal);
             manualAnd.push({
-              'or': msOrParams
+              or: msOrParams
             });
           }
         }
       });
 
       andParams.push({
-        'and': manualAnd
+        and: manualAnd
       });
     }
     finalQuery = {
-      'where': {
-        'and': andParams
+      where: {
+        and: andParams
       }
     };
   }
@@ -508,7 +513,7 @@ function dataPersonalizationAccess(ctx, next) {
  * @function
  */
 function dataPersonalizationAfterAccess(ctx, next) {
-  var modelSettings = ctx.Model.definition.settings;
+  const modelSettings = ctx.Model.definition.settings;
 
   // Checking for DataPersonalizationMixin is applied or not.
   // If mixin is applied to current model then only data will be scoped.
@@ -521,12 +526,12 @@ function dataPersonalizationAfterAccess(ctx, next) {
   }
 
   // Reads the data which we get based the query fromed in dataAccess function.
-  var result = ctx.accdata;
+  const result = ctx.accdata;
 
   if (result && result.length) {
     // Get the loopback current context and reads the callContext from the context.
-    var callContext = {};
-    var callCtx = ctx.options;
+    const callContext = {};
+    const callCtx = ctx.options;
 
     // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
     callContext.ctx = Object.assign({}, callCtx.ctx);
@@ -541,54 +546,54 @@ function dataPersonalizationAfterAccess(ctx, next) {
     callContext.ctxWeights = convertToLowerCase(callContext.ctxWeights);
 
     // Reading the autoscope values from the model definition settings.
-    var autoscope = modelSettings.autoscope;
+    const autoscope = modelSettings.autoscope;
 
     // Reading the autoscope values from the model definition settings.
     // var scoreScheme = modelSettings.scoreScheme ? modelSettings.scoreScheme : 'sum';
 
-    var resultData = [];
-    var weights = {};
+    let resultData = [];
+    const weights = {};
 
 
     // get default autoscope value from config files
-    var defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
+    const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
     if (callContext.ctx) {
       // Loops through each value in callContext.ctx to calculate scope and
       // weights ignoring for the values in ignore list.
       if (callContext.ctxWeights) {
-        Object.keys(callContext.ctx).forEach(function dataAfterAccessCtxForEach(key) {
-          var value = callContext.ctx[key];
+        Object.keys(callContext.ctx).forEach((key) => {
+          const value = callContext.ctx[key];
           if (Array.isArray(value)) {
-            value.forEach(function eachElementWeightCalc(item, index) {
-              weights[key + ':' + item] = (callContext.ctxWeights[key] && callContext.ctxWeights[key][index]) || 1;
+            value.forEach((item, index) => {
+              weights[`${key}:${item}`] = (callContext.ctxWeights[key] && callContext.ctxWeights[key][index]) || 1;
             });
           } else {
-            weights[key + ':' + value] = callContext.ctxWeights[key] || 1;
+            weights[`${key}:${value}`] = callContext.ctxWeights[key] || 1;
           }
         });
       }
 
-      autoscope.forEach(function dataAfterAccessCtxForEach(key) {
-        var weight = (callContext.ctxWeights && callContext.ctxWeights[key]) ? callContext.ctxWeights[key] - 1 : -1;
-        weights[key + ':' + defaultValue] = weight.toString();
+      autoscope.forEach((key) => {
+        const weight = (callContext.ctxWeights && callContext.ctxWeights[key]) ? callContext.ctxWeights[key] - 1 : -1;
+        weights[`${key}:${defaultValue}`] = weight.toString();
       });
     }
 
     if (ctx.Model.dataSource.connector.name === 'mongodb' || ctx.Model.dataSource.connector.name === 'postgresql') {
       resultData = calculateScoreMongo(result, weights);
     } else {
-      var scope = {};
+      let scope = {};
       // Get the manually applied filter keys
-      var whereKeys = JSON.parse(JSON.stringify(callCtx['whereKeys' + ctx.Model.modelName] || []));
+      const whereKeys = JSON.parse(JSON.stringify(callCtx[`whereKeys${ctx.Model.modelName}`] || []));
 
       // Reads the ignore list from the callContext.
-      var ignoreList = JSON.parse(JSON.stringify(callCtx.ignoreContextList || []));
+      let ignoreList = JSON.parse(JSON.stringify(callCtx.ignoreContextList || []));
       // Converts ignore list to lowercase
       ignoreList = convertToLowerCase(ignoreList);
 
-      Object.keys(callContext.ctx).forEach(function dataAfterAccessCtxForEach(key) {
-        var value = callContext.ctx[key];
+      Object.keys(callContext.ctx).forEach((key) => {
+        const value = callContext.ctx[key];
         if (!(_.contains(ignoreList, key))) {
           scope[key] = value;
         }
@@ -598,23 +603,23 @@ function dataPersonalizationAfterAccess(ctx, next) {
       scope = convertToKeyValueString(scope);
 
       // Adding all autoscope.default values to scope.
-      autoscope.forEach(function addAutoScopeDefaultToScope(element) {
-        scope.push(element + ':' + defaultValue);
+      autoscope.forEach((element) => {
+        scope.push(`${element}:${defaultValue}`);
       });
       scope = scope.concat(whereKeys);
 
       // Loops through each record in result and calculate score based on subset
-      result.forEach(function dataAfterAccessResultForEach(obj) {
-        var score = 0;
-        var weight = 0;
+      result.forEach((obj) => {
+        let score = 0;
+        let weight = 0;
         // read _scope from record
-        var _scope = obj._scope || [];
+        const _scope = obj._scope || [];
         if (!(_.difference(_scope, scope).length)) {
           // Find out the intersection part of _scope and our own calculated scope.
           //  var intersection = _.intersection(_scope, scope);
-          _scope.forEach(function dataAfterAccessIntersectionForEach(element) {
+          _scope.forEach((element) => {
             score = Math.max(score, parseInt(weights[element] || '1', 10));
-            weight = weight + parseInt(weights[element] || '1', 10);
+            weight += parseInt(weights[element] || '1', 10);
           });
           obj.score = score;
           obj.weight = weight;
@@ -627,7 +632,7 @@ function dataPersonalizationAfterAccess(ctx, next) {
     // resultData =_.orderBy(resultData, ['score', 'weight'], ['desc', 'desc']);  //Lodash v4.6.1
     // Lodash v3.10.1
     resultData = _.sortByOrder(resultData, ['score', 'weight'], ['desc', 'desc']);
-    resultData.forEach(function resultDataForEach(obj) {
+    resultData.forEach((obj) => {
       delete obj.score;
       delete obj.weight;
     });
@@ -644,17 +649,17 @@ function dataPersonalizationAfterAccess(ctx, next) {
  * @function
  */
 var getKeys = function dataAccessGetKeys(data, arr, igList) {
-  _.forEach(data, function dataAccessGetKeysForEach(value, key) {
+  _.forEach(data, (value, key) => {
     if ((typeof key === 'string') && (key !== 'and' || key !== 'or')) {
       if (key.indexOf('.') > -1) {
         Array.prototype.splice.apply(arr, [0, 0].concat(key.split('.')));
         if (typeof value !== 'object') {
-          Array.prototype.splice.apply(igList, [0, 0].concat(key.split('.')[key.split('.').length - 1] + ':' + value));
+          Array.prototype.splice.apply(igList, [0, 0].concat(`${key.split('.')[key.split('.').length - 1]}:${value}`));
         }
       } else {
         arr.push(key);
         if (typeof value !== 'object') {
-          igList.push(key + ':' + value);
+          igList.push(`${key}:${value}`);
         }
       }
     }
@@ -674,17 +679,17 @@ var getKeys = function dataAccessGetKeys(data, arr, igList) {
  */
 var calculateScoreMongo = function calcScoreMongo(result, weights) {
   // Loops through each record in result and calculate score based on subset
-  result.forEach(function dataAfterAccessResultForEach(obj) {
-    var score = 0;
-    var weight = 0;
+  result.forEach((obj) => {
+    let score = 0;
+    let weight = 0;
     // read _scope from record
-    var _scope = obj._scope || [];
+    const _scope = obj._scope || [];
 
     // Find out the intersection part of _scope and our own calculated scope.
     //  var intersection = _.intersection(_scope, scope);
-    _scope.forEach(function dataAfterAccessIntersectionForEach(element) {
+    _scope.forEach((element) => {
       score = Math.max(score, parseInt(weights[element] || '1', 10));
-      weight = weight + parseInt(weights[element] || '1', 10);
+      weight += parseInt(weights[element] || '1', 10);
     });
     obj.score = score;
     obj.weight = weight;
@@ -701,11 +706,11 @@ var calculateScoreMongo = function calcScoreMongo(result, weights) {
  * @function
  */
 var calculateUnique = function calcUniqFn(modelProp, resultData) {
-  var uniq = [];
+  let uniq = [];
 
   // Reads each property for unique and populates uniq array.
-  Object.keys(modelProp).forEach(function dataAfterAccessCtxPropForEach(key) {
-    var prop = modelProp[key];
+  Object.keys(modelProp).forEach((key) => {
+    const prop = modelProp[key];
     if (prop.unique) {
       if (typeof prop.unique === 'boolean') {
         uniq.push(key);
@@ -718,11 +723,7 @@ var calculateUnique = function calcUniqFn(modelProp, resultData) {
 
   // Filter out the redundent records from result by applying unique validation.
   if (uniq.length > 0) {
-    resultData = _.uniq(resultData, function dataAfterAccessResultUniqCb(value) {
-      return uniq.map(function dataAfterAccessResultUniqForEach(u) {
-        return value[u];
-      }).join('-');
-    });
+    resultData = _.uniq(resultData, value => uniq.map(u => value[u]).join('-'));
     // resultData = _.intersection.apply(this, _.chain(uniq).map(function (v) { return _.uniq(resultData, v) }).value());
   }
 
