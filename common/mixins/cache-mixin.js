@@ -14,12 +14,12 @@
  * The global 'evcacheables' object is used to check whether a given model is cacheable
  * or not in the modified loopback-datasource-juggler
  *
- * @mixin EV Cache Mixin
+ * @mixin Cache Mixin
  * @author Ajith Vasudevan
  */
 
 var logger = require('../../lib/logger');
-var log = logger('ev-cache-mixin');
+var log = logger('cache-mixin');
 var messaging = require('../../lib/common/global-messaging');
 var uuid = require('node-uuid');
 
