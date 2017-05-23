@@ -274,9 +274,5 @@
     "SystemConfig": {
         "public": true,
         "dataSource": "db"
-    },
-    "Note" : {
-        "public": true,
-        "dataSource": "db"
     }
 }
