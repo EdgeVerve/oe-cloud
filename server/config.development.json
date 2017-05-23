@@ -56,5 +56,10 @@
       "installationPath":"client/bower_components",
       "mountPath":"/designer",
       "templatePath":[]
+  },
+  "defaultUser":{
+    "userName":"admin",
+    "password":"admin",
+    "email":"admin@mycompany.com"
   }
 }
