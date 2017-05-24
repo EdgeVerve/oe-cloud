@@ -16,3 +16,7 @@ body #header form#api_selector .input a#explore:hover {
 body #header form#api_selector .input a#explore:active {
     background-color: #eeeeee !important;
 }
+
+body #header #logo{
+    background-size: 36px !important;
+}
