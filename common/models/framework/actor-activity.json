@@ -1,19 +1,20 @@
 {
   "name": "ActorActivity",
   "base": "PersistedModel",
+  "description": "Represents an activity in a transcation",
   "idInjection": true,
   "properties": {
     "entityId": {
-    "type": "string"
+      "type": "string"
     },
     "payload": {
       "type": "object"
-    }, 
+    },
     "modelName": {
-           "type": "string"
+      "type": "string"
     },
     "instructionType": {
-      "type":"string"
+      "type": "string"
     }
   },
   "validations": [],

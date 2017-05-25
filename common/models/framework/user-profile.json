@@ -2,7 +2,7 @@
   "name": "UserProfile",
   "base": "BaseEntity",
   "idInjection": false,
-  "description": "Extended user data",
+  "description": "Stores extended user information like firstname",
   "options": {
     "validateUpsert": true
   },

@@ -195,10 +195,6 @@
         "public": true,
         "dataSource": "db"
     },
-    "dev": {
-        "public": true,
-        "dataSource": "db"
-    },
     "DesignerRule": {
         "public": true,
         "dataSource": "db"

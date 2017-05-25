@@ -24,15 +24,38 @@ describe('basic-crud', function () {
     var Note = app.models.Note;
     var baseurl = app.get('restApiRoot');
     var options = {};
-    var Note = app.models.Note;
     var data = {
         title: 'my note',
         content: 'Hello word',
         id: uuid.v4()
     };
 
-    var baseurl = app.get('restApiRoot');
+    before('Create Test Model and do cache test', function (done) {
+        var modelDetails = {
+            "name": "Note",
+            "base": "BaseEntity",
+            "strict": false,
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "content": {
+                    "type": "string"
+                }
+            }
+        };
+        app.models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function modelCreate(err, res) {
+            if (err) {
+                log.debug(bootstrap.defaultContext, 'unable to create Note model');
+                done(err);
+            } else {
+                Note = app.models.Note;
+                done();
+            }
+        });
+    });
 
+    var baseurl = app.get('restApiRoot');
 
     var inst;
 

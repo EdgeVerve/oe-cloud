@@ -3,6 +3,7 @@
     "plural": "ModelViews",
     "base": "BaseEntity",
     "idInjection": true,
+    "description" :  "Used in designer tool to save views of models",
     "options": {
         "validateUpsert": true
     },

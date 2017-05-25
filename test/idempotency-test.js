@@ -18,7 +18,6 @@ describe('basic-idempotency', function () {
 
     this.timeout(10000);
     var app = bootstrap.app;
-    var Note = app.models.Note;
     var baseurl = app.get('restApiRoot');
     var Note = app.models.Note;
     var options = bootstrap.defaultContext;
@@ -26,9 +25,31 @@ describe('basic-idempotency', function () {
     var accessToken;
     
      before('login', function (done) {
+         Note = app.models.Note;
          bootstrap.createAccessToken(bootstrap.defaultContext.ctx.remoteUser.username, function (err, token) {
-                accessToken = token;
-                done();
+             accessToken = token;
+             var modelDetails = {
+                 "name": "Note2",
+                 "base": "BaseEntity",
+                 "strict": false,
+                 "properties": {
+                     "title": {
+                         "type": "string"
+                     },
+                     "content": {
+                         "type": "string"
+                     }
+                 }
+             };
+             app.models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function modelCreate(err, res) {
+                 if (err) {
+                     log.debug(bootstrap.defaultContext, 'unable to create Note2 model');
+                     done(err);
+                 } else {
+                     Note = app.models.Note2;
+                     done();
+                 }
+             });
         });
     });
     
@@ -56,7 +77,7 @@ describe('basic-idempotency', function () {
             content: 'content abcd',
             _newVersion: uuid.v4()
         };
-        var url = baseurl + '/Notes' + '?access_token=' + accessToken;
+        var url = baseurl + '/Note2s' + '?access_token=' + accessToken;
         var api = defaults(supertest(app));
         api.set('Accept', 'application/json')
             .post(url)
@@ -66,7 +87,7 @@ describe('basic-idempotency', function () {
                 expect(response.body).to.be.defined;
                 var rec1 = response.body;
                 var api = defaults(supertest(app));
-                var url = baseurl + '/Notes/' + rec1.id + '?access_token=' + accessToken;
+                var url = baseurl + '/Note2s/' + rec1.id + '?access_token=' + accessToken;
                 rec1._newVersion = uuid.v4();
                 rec1.content = 'update1';
                 api.set('Accept', 'application/json')

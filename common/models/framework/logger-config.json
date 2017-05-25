@@ -1,6 +1,7 @@
 {
     "name": "LoggerConfig",
     "base": "PersistedModel",
+    "description" :  "Stores Logger configuration",
     "isFrameworkModel": true,
     "properties": {
         "data": {

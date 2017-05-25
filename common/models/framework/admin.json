@@ -2,6 +2,7 @@
     "name": "Admin",
     "plural": "admin",
     "base": "Model",
+    "description" :  "Used to download or upload metadata - Under Experiment",
     "options": {
         "validateUpsert": true
     },

@@ -1,6 +1,7 @@
 {
   "name": "Tenant",
   "base": "BaseEntity",
+  "description" :  "Stores tenant information",
   "options": {
     "validateUpsert": true
   },
