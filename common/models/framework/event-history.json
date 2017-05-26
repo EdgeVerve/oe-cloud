@@ -2,6 +2,7 @@
     "name": "EventHistory",
     "plural": "EventsHistroy",
     "base": "PersistedModel",
+    "description": "ensure reliability on failing events on all entities",
     "idInjection": false,
     "properties": {
         "eventHistoryArray": {

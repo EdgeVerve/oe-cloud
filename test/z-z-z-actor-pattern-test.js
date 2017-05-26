@@ -67,7 +67,10 @@ describe(chalk.blue('actor-pattern-test'), function () {
     var modelDefinition = loopback.findModel('ModelDefinition');
     var data = {
       'name': 'TestAccount',
-      'base': 'BaseActorEntity'
+      'base': 'BaseActorEntity',
+      'options': {
+        stateThreshold: 10
+      }
     };
 
     modelDefinition.create(data, bootstrap.defaultContext, createTransferModel);
@@ -94,12 +97,14 @@ describe(chalk.blue('actor-pattern-test'), function () {
 
       accountDefinition.prototype.validateCondition = function (stateObj, activity) {
         if (activity.instructionType === 'DEBIT') {
+          var quantityAfterReduce = stateObj.quantity - activity.payload.value;
           return stateObj.quantity >= activity.payload.value;
         }
       };
 
       accountDefinition.prototype.atomicInstructions = function (stateObj, activity) {
         if (activity.instructionType === 'DEBIT') {
+          var quantity = stateObj.quantity - activity.payload.value;
           stateObj.quantity = stateObj.quantity - activity.payload.value;
           return stateObj;
         }
@@ -107,6 +112,7 @@ describe(chalk.blue('actor-pattern-test'), function () {
 
       accountDefinition.prototype.nonAtomicInstructions = function (stateObj, activity) {
         if (activity.instructionType === 'CREDIT') {
+          var quantity = stateObj.quantity + activity.payload.value;
           stateObj.quantity = stateObj.quantity + activity.payload.value;
           return stateObj;
         }
@@ -194,26 +200,26 @@ describe(chalk.blue('actor-pattern-test'), function () {
             }
           ]
         },
-          {
-            'nonAtomicActivitiesList': [
-              {
-                'entityId': actors[1].result.body.id,
-                'payload': { 'value': 20 },
-                'modelName': 'TestAccount',
-                'instructionType': 'CREDIT'
-              }
-            ]
-          },
-          {
-            'nonAtomicActivitiesList': [
-              {
-                'entityId': actors[2].result.body.id,
-                'payload': { 'value': 20 },
-                'modelName': 'TestAccount',
-                'instructionType': 'CREDIT'
-              }
-            ]
-          }];
+        {
+          'nonAtomicActivitiesList': [
+            {
+              'entityId': actors[1].result.body.id,
+              'payload': { 'value': 20 },
+              'modelName': 'TestAccount',
+              'instructionType': 'CREDIT'
+            }
+          ]
+        },
+        {
+          'nonAtomicActivitiesList': [
+            {
+              'entityId': actors[2].result.body.id,
+              'payload': { 'value': 20 },
+              'modelName': 'TestAccount',
+              'instructionType': 'CREDIT'
+            }
+          ]
+        }];
 
       apiRequest('/TestTransfers/', postData, finishTestAndCheck, done);
     }
@@ -272,7 +278,7 @@ describe(chalk.blue('actor-pattern-test'), function () {
           if (err) {
             log.error(err);
           } else {
-            log.info(log.defaultContext(), 'the debit succeeded, altough it should not!');
+            log.debug(log.defaultContext(), 'the debit succeeded, altough it should not!');
           }
           return done();
         });
@@ -439,7 +445,7 @@ describe(chalk.blue('actor-pattern-test'), function () {
           if (err) {
             log.error(err);
           } else {
-            log.info(log.defaultContext(), 'the debit succeeded, altough it should not!');
+            log.debug(log.defaultContext(), 'the debit succeeded, altough it should not!');
           }
           return done();
         });
@@ -993,116 +999,274 @@ describe(chalk.blue('actor-pattern-test'), function () {
     }
   });
 
+   it('should create 10 accounts in parallel. Then credit them with 1000 in parallel. Then debit 3*10 from all of them in parallel', function(done) {
 
+        var ids = [];
+        ids.push('a');
+        ids.push('b');
+        ids.push('c');
+        ids.push('d');
+        ids.push('e');
+        ids.push('f');
+        ids.push('g');
+        ids.push('h');
+        ids.push('i');
+        //ids.push('j');
 
-  //commented out - not changed
-  xit('should delete an account ', function (done) {
-    var postData = {
-      id: 'TestAccount16'
-    };
-    var version;
-    api
-      .set('Accept', 'application/json')
-      .post(bootstrap.basePath + '/TestAccounts/' + '?access_token=' + accessToken)
-      .send(postData)
-      .end(function (err, res) {
-        if (err || res.body.error) {
-          return done(err || (new Error(JSON.stringify(res.body.error))));
-        } else {
-          version = res.body._version;
-          return postTransaction();
-        }
-      });
-
-    function postTransaction() {
-      var postData =
-        {
-          'nonAtomicActivitiesList': [
-            {
-              'entityId': 'TestAccount16',
-              'payload': { 'value': 20 },
-              'modelName': 'TestAccount',
-              'instructionType': 'CREDIT'
-            }
-          ]
+        var createData = {
+            stateObj: {quantity: 0}
         };
+        var functionArray = [];
 
-      apiRequest('/TestTransfers/', postData, deleteAccount, done);
-    }
+        function actorFactory(id) {
+            return function createOne(callback) {
+                createData.id = id;
+                apiRequest('/TestAccounts/', createData, function(data) {
+                    callback(null, data);
+                }, done);
+            };
+        }
 
-    function deleteAccount() {
-      api
-        .set('Accept', 'application/json')
-        .delete(bootstrap.basePath + '/TestAccounts/TestAccount16/' + version + '?access_token=' + accessToken)
-        .end(function (err, res) {
-          if (err || res.body.error) {
-            return done(err || (new Error(JSON.stringify(res.body.error))));
-          } else {
-            return finishTestAndCheck();
-          }
+        ids.forEach(function(id) {
+            functionArray.push(actorFactory(id));
         });
-    }
 
-    function finishTestAndCheck() {
-      checkBalance('TestAccount', 'TestAccount16', function (err, balance) {
-        expect(err.message).to.be.equal('actor not in memory');
-        return done();
-      });
-    }
-  });
+        async.parallel(functionArray, addInitialBudjet);
 
-  var deleteContext = { fetchAllScopes: true, ctx: { tenantId: 'test-tenant' } };
+        function addInitialBudjet() {
+            var addBudjetData = {
+                'payload': {'value': 1000},
+                'modelName': 'TestAccount',
+                'instructionType': 'CREDIT'
+            };
 
-  after('delete all the test accounts', function (done) {
-    var testAccount = loopback.getModel('TestAccount');
-    testAccount.destroyAll({}, deleteContext, function (err) {
-      if (err) {
-        log.error(err);
-        console.log('unable to delete all the TestAccount models');
-        return done(err);
-      } else {
-        log.info('deleted alltest accounts');
-        return done();
-      }
+            var addTrans = {};
+            addTrans.nonAtomicActivitiesList = [];
+
+            ids.forEach(function(id) {
+                var activity = JSON.parse(JSON.stringify(addBudjetData));
+                activity.entityId = id;
+                addTrans.nonAtomicActivitiesList.push(activity);
+            });
+
+            apiRequest('/TestTransfers/', addTrans, midCheck, done);
+        }
+
+        function midCheck() {
+            async.each(ids, getActorsAndMidCheck, continueMidLogic);
+        }
+
+        function getActorsAndMidCheck(id, cb) {
+            api
+                .set('Accept', 'application/json')
+                .get(bootstrap.basePath + '/TestAccounts?filter={"where":{"id": "' + id + '"}}&access_token=' + accessToken)
+                .send()
+                .end((err, res) => {
+                    if (err) {
+                        log.error(err);
+                        return cb(err);
+                    } else {
+                        expect(res.body[0].state.stateObj.quantity).to.be.equal(1000);
+                        expect(res.body[0].id).to.be.equal(id);
+                        return cb();
+                    }
+                });
+        }
+
+        function continueMidLogic(err) {
+            if (err) {
+                log.error(err);
+                return done(err);
+            } else {
+                atomicTransactions();
+            }
+        }
+
+        function atomicTransactions() {
+            var debitData = {
+                'payload': {'value': 3},
+                'modelName': 'TestAccount',
+                'instructionType': 'DEBIT'
+            };
+
+            var reduceTrans = {};
+            reduceTrans.atomicActivitiesList = [];
+
+            ids.forEach(function(id) {
+                var activity = JSON.parse(JSON.stringify(debitData));
+                activity.entityId = id;
+                reduceTrans.atomicActivitiesList.push(activity);
+            });
+
+            var functionArray = [];
+
+            function debitFactory() {
+                return function debitAll(callback) {
+                    apiRequest('/TestTransfers/', reduceTrans, function(data) {
+                        callback(null, data);
+                    }, done);
+                };
+            }
+
+            for (var y = 0; y < 10; y++) {
+                functionArray.push(debitFactory());
+            }
+
+            async.parallel(functionArray, finalCheck);
+        }
+
+        function finalCheck() {
+            async.each(ids, getActorsAndFinalCheck, continueFinalLogic);
+        }
+
+        function getActorsAndFinalCheck(id, cb) {
+            api
+                .set('Accept', 'application/json')
+                .get(bootstrap.basePath + '/TestAccounts?filter={"where":{"id": "' + id + '"}}&access_token=' + accessToken)
+                .send()
+                .end((err, res) => {
+                    if (err) {
+                        log.error(err);
+                        return cb(err);
+                    } else {
+                        expect(res.body[0].state.stateObj.quantity).to.be.equal(970);
+                        expect(res.body[0].id).to.be.equal(id);
+                        return cb();
+                    }
+                });
+        }
+
+        function continueFinalLogic(err) {
+            if (err) {
+                log.error(err);
+                return done(err);
+            } else {
+                return done();
+            }
+        }
     });
-  });
 
-  after('delete all the test transfers', function (done) {
-    var testTransfer = loopback.getModel('TestTransfer');
-    testTransfer.destroyAll({}, deleteContext, function (err) {
-      if (err) {
-        expect(err.message).to.be.equal('Cannot delete journal entry');
-        return done();
-      } else {
-        log.info('deleted alltest transfers');
-        return done(new Error('Should not be allowed to delete journal entries!'));
-      }
+    it('should delete an account ', function(done) {
+        var postData = {
+            id: 'TestAccount16',
+            'qqq': 0,
+            'stateObj': {
+                'quantity': 0
+            }
+        };
+        var version;
+        api
+            .set('Accept', 'application/json')
+            .post(bootstrap.basePath + '/TestAccounts/' + '?access_token=' + accessToken)
+            .send(postData)
+            .end(function(err, res) {
+                if (err || res.body.error) {
+                    return done(err || (new Error(JSON.stringify(res.body.error))));
+                } else {
+                    version = res.body._version;
+                    return postTransaction();
+                }
+            });
+
+        function postTransaction() {
+            var postData =
+                {
+                    'nonAtomicActivitiesList': [
+                        {
+                            'entityId': 'TestAccount16',
+                            'payload': {'value': 20},
+                            'modelName': 'TestAccount',
+                            'instructionType': 'CREDIT'
+                        }
+                    ]
+                };
+
+            apiRequest('/TestTransfers/', postData, deleteAccount, done);
+        }
+
+        function deleteAccount() {
+            api
+                .set('Accept', 'application/json')
+                .delete(bootstrap.basePath + '/TestAccounts/TestAccount16/' + version + '?access_token=' + accessToken)
+                .end(function(err, res) {
+                    if (err || res.body.error) {
+                        return done(err || (new Error(JSON.stringify(res.body.error))));
+                    } else {
+                        return finishTestAndCheck();
+                    }
+                });
+        }
+
+        function finishTestAndCheck() {
+            api
+                .set('Accept', 'application/json')
+                .get(bootstrap.basePath + '/TestAccounts?filter={"where":{"id": "' + postData.entityId + '"}}&access_token=' + accessToken)
+                .send()
+                .end((err, res) => {
+                    if (err) {
+                        log.error(err);
+                        return done(err);
+                    } else {
+                        expect(res.body.length).to.be.equal(0);
+                        return done();
+                    }
+                });
+        }
     });
-  });
 
+    var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
 
-  after('delete all the test states', function (done) {
-    var state = loopback.getModel('State');
-    state.destroyAll({}, deleteContext, function (err) {
-      if (err) {
-        log.error(err);
-        console.log('unable to delete all the TestState models');
-        return done(err);
-      } else {
-        log.info('deleted alltest states');
-        return done();
-      }
+    after('delete all the test accounts', function(done) {
+        var testAccount = loopback.getModel('TestAccount');
+        testAccount.destroyAll({}, deleteContext, function(err) {
+            if (err) {
+                log.error(err);
+                console.log('unable to delete all the TestAccount models');
+                return done(err);
+            } else {
+                log.debug('deleted alltest accounts');
+                return done();
+            }
+        });
     });
-  });
 
-  after('delete all modelDefinition models', function (done) {
-    //        models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function(err, res) {
-    //                    if (err) {
-    //                        done(err);
-    //                    } else {
-    //                        done();
-    //                    }
-    //           });
-    done();
-  });
+    after('delete all the test transfers', function(done) {
+        var testTransfer = loopback.getModel('TestTransfer');
+        testTransfer.destroyAll({}, deleteContext, function(err) {
+            if (err) {
+                expect(err.message).to.be.equal('Cannot delete journal entry');
+                return done();
+            } else {
+                log.debug('deleted alltest transfers');
+                return done(new Error('Should not be allowed to delete journal entries!'));
+            }
+        });
+    });
+
+
+    after('delete all the test states', function(done) {
+        done();
+        //   var state = loopback.getModel('State');
+        //   state.destroyAll({}, deleteContext, function(err) {
+        //       if (err) {
+        //           log.error(err);
+        //           console.log('unable to delete all the TestState models');
+        //           return done(err);
+        //       } else {
+        //           log.debug('deleted alltest states');
+        //           return done();
+        //       }
+        //  });
+    });
+
+    after('delete all modelDefinition models', function(done) {
+        //        models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function(err, res) {
+        //                    if (err) {
+        //                        done(err);
+        //                    } else {
+        //                        done();
+        //                    }
+        //           });
+        done();
+    });
 });

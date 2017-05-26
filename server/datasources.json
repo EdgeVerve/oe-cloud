@@ -4,8 +4,8 @@
         "connector": "memory"
     },
     "transient": {
-   	 "name": "transient",
-   	 "connector": "transient"
+        "name": "transient",
+        "connector": "transient"
     },
     "db": {
         "host": "localhost",
@@ -21,20 +21,19 @@
     "emailDs": {
         "name": "emailDs",
         "connector": "mail",
-        "transports": [{
-            "type": "smtp",
-            "host": "smtp.gmail.com",
-            "port": 587,
-            "auth": {
-                "user": "yourGmailAccount@gmail.com",
-                "pass": "yourSecretPassword"
+        "transports": [
+            {
+                "type": "smtp",
+                "host": "smtp.gmail.com",
+                "port": 587,
+                "auth": {}
             }
-        }]
+        ]
     },
     "gridfs_db": {
-		"name": "gridfs_db",
-		"connector": "loopback-component-storage",
-		"provider": "filesystem",
-		"root": "./"
+        "name": "gridfs_db",
+        "connector": "loopback-component-storage",
+        "provider": "filesystem",
+        "root": "./"
     }
 }

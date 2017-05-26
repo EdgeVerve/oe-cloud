@@ -12,6 +12,7 @@
 var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
+var app = bootstrap.app;
 var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
@@ -94,12 +95,17 @@ describe(chalk.blue('business-validations-tests'), function() {
             });
     });
 
+    var backupConstants = {};
+    var pendingId;
 
     before('create test models', function createModels(done) {
         var modelDefinition = loopback.findModel('ModelDefinition');
         var data = {
             'name': 'TestAccount',
-            'base': 'BaseActorEntity'
+            'base': 'BaseActorEntity',
+            'options': {
+                stateThreshold: 1
+            }
         };
 
         modelDefinition.create(data, bootstrap.defaultContext, createTransferModel);
@@ -159,7 +165,7 @@ describe(chalk.blue('business-validations-tests'), function() {
 
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'trivial implementation');
+            log.debug(log.defaultContext(), 'trivial implementation');
             cb();
         };
 
@@ -237,7 +243,7 @@ describe(chalk.blue('business-validations-tests'), function() {
 
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'trivial implementation');
+            log.debug(log.defaultContext(), 'trivial implementation');
             cb();
         };
 
@@ -273,7 +279,7 @@ describe(chalk.blue('business-validations-tests'), function() {
         var transferDefinition = loopback.getModel('TestTransfer');
 
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'synchronous implementation');
+            log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             cb();
         };
@@ -355,7 +361,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('synchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'synchronous implementation');
+            log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             cb();
         };
@@ -391,7 +397,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('synchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'synchronous implementation');
+            log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             log.error(log.defaultContext(), 'failing synchronous actions on purpose');
             cb(new Error('failing synchronous actions on purpose'));
@@ -428,7 +434,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('synchronous bussiness validation fails + atomic action should fail but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'synchronous implementation');
+            log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             log.error(log.defaultContext(), 'failing synchronous actions on purpose');
             cb(new Error('failing sync actions on purpose'));
@@ -465,7 +471,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('asynchronous bussiness validation pass + atomic action pass --> transaction should pass', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'asynchronous implementation');
+            log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActions(cb);
         };
 
@@ -542,7 +548,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('asynchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'asynchronous implementation');
+            log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActions(cb);
         };
 
@@ -577,7 +583,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('asynchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'asynchronous implementation');
+            log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActionsFail(cb);
         };
 
@@ -612,7 +618,7 @@ describe(chalk.blue('business-validations-tests'), function() {
     it('asynchronous bussiness validation fails + atomic action should fails but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer');
         transferDefinition.prototype.performBusinessValidations = function(cb) {
-            log.info(log.defaultContext(), 'asynchronous implementation');
+            log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActionsFail(cb);
         };
 
@@ -665,7 +671,7 @@ describe(chalk.blue('business-validations-tests'), function() {
                 expect(err.message).to.be.equal('Cannot delete journal entry');
                 return done();
             } else {
-                log.info('deleted alltest transfers');
+                log.debug('deleted alltest transfers');
                 return done(new Error('Should not be allowed to delete journal entries!'));
             }
         });

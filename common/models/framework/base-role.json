@@ -1,8 +1,8 @@
 {
     "name": "BaseRole",
     "plural": "BaseRoles",
-  "base": "Role",
-  "description" :  "Stores Authorization data of the user",
+    "base": "Role",
+    "description": "Stores Authorization data of the user",
     "autoscope": [
         "tenantId"
     ],

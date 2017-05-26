@@ -43,11 +43,11 @@ function mongoDeleteById(id, cb) {
     var url = 'mongodb://'+mongoHost+':27017/' + dbname;
     MongoClient.connect(url, function (err, db) {
         if (err) {
-            cb(err);
+            return cb(err);
         } else {
             db.collection(modelName).deleteOne({_id: id}, function (err, numberRemoved) {
                 if (err) {
-                    cb(err);
+                    return cb(err);
                 }
                 debug("Number of records removed " + numberRemoved);
                 cb();
@@ -66,6 +66,13 @@ describe('Instance Caching Test', function () {
             'name': modelName,
             'base': 'BaseEntity',
             'idInjection': true,
+            'options': {
+                instanceCacheSize: 2000,
+                instanceCacheExpiration: 100000,
+                queryCacheSize: 2000,
+                queryCacheExpiration: 5000,
+                disableManualPersonalization: true
+            },
             'properties': {
                 'name': {
                     'type': 'string'
@@ -78,7 +85,7 @@ describe('Instance Caching Test', function () {
             TestModel = loopback.getModel(modelName);
             TestModel.destroyAll({}, defaultContext, function (err, info) {
                 if (err) {
-                    done(err);
+                    return done(err);
                 }
                 done();
             });
@@ -258,18 +265,21 @@ describe('Instance Caching Test', function () {
             var result1, result2;
             TestModel.create({
                 name: 'Lior',
+                assign: {
+                    change: 'this field should be deleted'
+                },
                 id: id
             }, defaultContext, function (err, data) {
                 if (err) {
                     console.log(err);
                     return done(err);
                 } else {
-                    data.updateAttributes({name: 'Eduardo'}, defaultContext, function(err, data) {
+                    data.updateAttributes({name: 'Eduardo', assign:{new: 'should only see this field'}}, defaultContext, function(err, data) {
                         if (err) {
                             console.log(err);
                             return done(err);
                         }
-                        result1 = Object.assign({},data.toObject());
+                        result1 = Object.assign({}, data.toObject(), {name: 'Eduardo', assign:{new: 'should only see this field'}});
                         mongoDeleteById(id, function(err) {
                             if(err) {
                                 return done(err);

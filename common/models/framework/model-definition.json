@@ -8,9 +8,6 @@
     "validateUpsert": true,
     "isFrameworkModel": true
   },
-  "mixins": {
-        "ServicePersonalizationMixin": false
-    },
 	"properties": {
 		"properties":{
 			"type": "object"
@@ -22,7 +19,7 @@
 		"name": {
 			"type": "string",
 			"required": true,
-			"unique" : true,
+			"unique" : "ignoreCase",
 			"max":100,
 			"notin": ["Model", "PersistedModel","User", "AccessToken", "ACL", "RoleMapping", "Role"],
 			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
@@ -33,7 +30,7 @@
 		},
 		"plural": {
 			"type": "string",
-			"unique": true,
+			"unique": "ignoreCase",
 			"max":105,
 			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"	
 		},

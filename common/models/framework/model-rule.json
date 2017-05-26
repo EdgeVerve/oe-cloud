@@ -1,0 +1,34 @@
+{
+  "name": "ModelRule",
+  "base": "BaseEntity",
+  "strict": true,
+  "plural": "ModelRules",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "modelName": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "disabled": {
+      "type": "boolean",
+      "default": false
+    },
+    "defaultRules": {
+      "type": ["string"],
+      "default": []
+    },
+    "validationRules": {
+      "type": ["string"],
+      "default": []
+    }
+  },
+  "cacheable": true,
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}  
+}

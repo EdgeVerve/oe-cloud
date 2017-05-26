@@ -14,7 +14,6 @@
     "ExpressionAstPopulatorMixin": true,
     "AuditFieldsMixin": true,
     "DataPersonalizationMixin": true,
-    "ServicePersonalizationMixin": true,
     "SwitchDatasourceMixin": true,
     "VersionMixin": true,
     "WorkflowMixin": true,
