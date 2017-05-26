@@ -17,6 +17,7 @@ chai.use(require('chai-things'));
 var api = bootstrap.api;
 
 var productCatalogUrl = bootstrap.basePath;
+// Clean up is required for these test cases.
 describe(chalk.blue('service-personalization'), function () {
 
     var tenantId = 'test-tenant';

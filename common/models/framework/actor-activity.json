@@ -15,6 +15,9 @@
     },
     "instructionType": {
       "type": "string"
+    },
+    "seqNum": {
+      "type": "Number"
     }
   },
   "validations": [],

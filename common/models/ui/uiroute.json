@@ -28,7 +28,9 @@
       "max": 250,
       "description": "Express style URL pattern to be handled by this route",
       "unique": {
-        "scopedTo": [ "group" ]
+        "scopedTo": [
+          "group"
+        ]
       }
     },
     "import": {
@@ -59,7 +61,6 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [
-  ],
+  "acls": [],
   "methods": {}
 }

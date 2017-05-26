@@ -1,0 +1,26 @@
+﻿{
+  "name": "Lock",
+  "base": "BaseEntity",
+  "description": "used in lock implementation for no-sql databases",
+  "properties": {
+    "modelName": {
+      "type": "string",
+      "required": true
+    },
+    "modelId": {
+      "type": "string",
+      "required": true
+    },
+    "noddeId": {
+      "type": "string"
+    },
+    "lockStatus": {
+      "type": "string",
+      "required": true
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

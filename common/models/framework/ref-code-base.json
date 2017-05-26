@@ -9,6 +9,7 @@
   "properties": {
     "code": {
       "type": "string",
+      "unique": true,
       "required": true,
       "max": 30
     },

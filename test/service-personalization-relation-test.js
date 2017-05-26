@@ -277,8 +277,9 @@ describe(chalk.blue('service - personalization - relation test'), function () {
         });
     });
 
+    // TODO: Move this test case to enable
     //mask
-    it('Embeds One:should mask the given fields and not send them to the response', function (done) {
+    xit('Embeds One:should mask the given fields and not send them to the response', function (done) {
         // Setup personalization rule
         var ruleForAndroid = {
             'modelName': Customer,

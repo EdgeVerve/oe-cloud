@@ -11,6 +11,8 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 var api = bootstrap.api;
 var models = bootstrap.models;
+var logger = require('evf-logger');
+var log = logger('data-personalization-test');
 var loopback = require('loopback');
 var async = require('async');
 var app = bootstrap.app;

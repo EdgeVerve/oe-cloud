@@ -1,9 +1,8 @@
 {
     "name": "SystemConfig",
-  "base": "BaseEntity",
-  "description" :  "Stores system config",
-    "properties": 
-    {
+    "base": "BaseEntity",
+    "description": "Stores system config",
+    "properties": {
         "key": {
             "type": "string",
             "required": true,

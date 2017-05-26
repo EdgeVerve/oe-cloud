@@ -10,7 +10,6 @@
     "ExpressionAstPopulatorMixin": false,
     "AuditFieldsMixin": false,
     "DataPersonalizationMixin": false,
-    "ServicePersonalizationMixin": false,
     "SwitchDatasourceMixin": false,
     "VersionMixin": false,
     "WorkflowMixin": false,
