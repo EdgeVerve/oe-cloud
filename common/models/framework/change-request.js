@@ -137,17 +137,17 @@ function addMethods(Model) {
   // models
 
   Model.publish = function exposeAsRemoteMethodsPublishFn(ctx, id, options, cb) {
-    log.info(options, 'Base Entity\'s publish end point called for model [', this.modelName, ']');
+    log.debug(options, 'Base Entity\'s publish end point called for model [', this.modelName, ']');
     proceedUpdate(ctx, this.modelName, id, PUBLISHED, options, cb);
   };
 
   Model.reject = function exposeAsRemoteMethodsRejectFn(ctx, id, options, cb) {
-    log.info(options, 'Base Entity\'s reject end point called for model [', this.modelName, ']');
+    log.debug(options, 'Base Entity\'s reject end point called for model [', this.modelName, ']');
     proceedUpdate(ctx, this.modelName, id, REJECTED, options, cb);
   };
 
   Model.cancel = function exposeAsRemoteMethodsCancelFn(ctx, id, options, cb) {
-    log.info(options, 'Base Entity\'s cancel end point called for model [', this.modelName, ']');
+    log.debug(options, 'Base Entity\'s cancel end point called for model [', this.modelName, ']');
     proceedUpdate(ctx, this.modelName, id, CANCELLED, options, cb);
   };
 
@@ -180,7 +180,7 @@ function addMethods(Model) {
       }
     }
 
-    log.info(options, 'in change-request persistUpdates() called with id[', id, '] and status [', status, ']');
+    log.debug(options, 'in change-request persistUpdates() called with id[', id, '] and status [', status, ']');
     var CrModel = loopback.getModel('ChangeRequest');
     log.debug(options, 'Change Request with id [', id, ']');
 
@@ -193,12 +193,10 @@ function addMethods(Model) {
         return cb('No Change Request found with id [' + id + ']', null);
       }
       log.debug(options, 'CR instance found with status [', crResult._status, ']');
-      log.info(options, 'CR instance found with status [', crResult._status, ']');
 
       var crInstance = crResult;
       if (status === PUBLISHED) {
         log.debug(options, 'Published the changes to the original entity');
-        log.info(options, 'Published the changes to the original entity');
 
         var originalEntityId = crInstance.originalEntityId;
         var originalEntityType = crInstance.originalEntityType;
@@ -209,7 +207,6 @@ function addMethods(Model) {
 
         // Find model by id and update the requested
         log.debug(options, 'Change request updating for model [', originalEntityType, ']');
-        log.info(options, 'Change request updating for model [', originalEntityType, ']');
 
         var Model = loopback.getModel(originalEntityType);
         if (typeof Model === 'undefined') {
@@ -228,12 +225,10 @@ function addMethods(Model) {
 
         Model.upsert(updatedEntity, options, function changeRequestOriginalEntityFindUpdateCb(err, mInstance) {
           if (err) {
-            log.debug(options, 'Error occured while updating the changedModel model [', originalEntityType, ']', err);
             log.error(options, 'Error occured while updating the changedModel model [', originalEntityType, ']', err);
             cb(err, null);
           } else if (mInstance) {
             log.debug(options, 'CR model for Entity[', originalEntityType, '] is updated succesfully');
-            log.info(options, 'CR model for Entity[', originalEntityType, '] is updated succesfully');
 
             // Update the status of change-request
             // with the status send
@@ -242,12 +237,10 @@ function addMethods(Model) {
             crInstance._newVersion = uuid.v4();
             CrModel.upsert(crInstance, options, function changeRequestOriginalEntityFindUpdateUpsertCb(err, crInstance) {
               if (err) {
-                log.debug(options, 'Error occured while updating the CR model');
                 log.error(options, 'Error occured while updating the CR model');
                 cb(err, null);
               } else {
                 log.debug(options, 'CR instance updated with status [', crInstance._status, ']');
-                log.info(options, 'CR instance updated with status [', crInstance._status, ']');
                 cb(null, crInstance);
               }
             });
@@ -255,18 +248,15 @@ function addMethods(Model) {
         });
       } else {
         log.debug(options, 'No Action required for status [', status, ']');
-        log.info(options, 'No Action required for status [', status, ']');
         crInstance._status = status;
         crInstance._newVersion = uuid.v4();
         options.updatedByWorkflow = true;
         CrModel.upsert(crInstance, options, function changeRequestUpsertCb(err, crInstance) {
           if (err) {
-            log.debug(options, 'Error occured while updating the CR model');
             log.error(options, 'Error occured while updating the CR model');
             cb(err, null);
           } else {
             log.debug(options, 'CR instance updated with status [', crInstance._status, ']');
-            log.info(options, 'CR instance updated with status [', crInstance._status, ']');
             cb(null, crInstance);
           }
         });

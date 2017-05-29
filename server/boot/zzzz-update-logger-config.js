@@ -7,15 +7,15 @@
 var loopback = require('loopback');
 var loggingModule = require('./../../lib/logger');
 var log = loggingModule('update-logger-config');
-var config = require('./../log-config.js');
+var config = require('./../log-config');
 
 function getModelFromConfig(callback) {
   var levelMap = {
-    'debug': 10,
-    'info': 20,
-    'warn': 30,
-    'error': 40,
-    'none': 50,
+    'trace': 10,
+    'debug': 20,
+    'info': 30,
+    'warn': 40,
+    'error': 50,
     'fatal': 60
   };
 
@@ -51,7 +51,7 @@ module.exports = function getLoggerConfig(app, done) {
       return done(new Error('Loopback encountered an error when trying to find the model LoggerConfig'));
     }
     if (!model || model === {}) {
-      log.info(log.defaultContext(), 'did not find any logger configuration in the db.');
+      log.debug(log.defaultContext(), 'did not find any logger configuration in the db.');
       getModelFromConfig(function getModelFromConfig(err, result) {
         if (err) {
           return done(err);
@@ -79,7 +79,7 @@ module.exports = function getLoggerConfig(app, done) {
       return done(new Error('Tried fetching loggerConfig data from db, it came back empty'));
     }
 
-    log.info(log.defaultContext(), 'fetching log configuration from the db');
+    log.debug(log.defaultContext(), 'fetching log configuration from the db');
 
     if (data.all) {
       if ((!isNaN(parseFloat(loggerArray.all)) && isFinite(loggerArray.all))) {

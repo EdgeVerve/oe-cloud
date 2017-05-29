@@ -149,7 +149,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
    * Ajith
    */
   function encrypt(str) {
-    log.info(log.defaultContext(), 'INFO: Encryption Algorithm defined in config.json is', '\'', config.encryptionAlgorithm, '\'');
+    log.debug(log.defaultContext(), 'INFO: Encryption Algorithm defined in config.json is', '\'', config.encryptionAlgorithm, '\'');
     var module = config.encryptionAlgorithm.split('.')[0];
     var algo = config.encryptionAlgorithm.split('.')[1];
     var pwd = config.encryptionPassword;
@@ -180,7 +180,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
    * Ajith
    */
   function decrypt(str) {
-    log.info(log.defaultContext(), 'INFO: Encryption Algorithm defined in config.json is', '\'', config.encryptionAlgorithm, '\'');
+    log.debug(log.defaultContext(), 'INFO: Encryption Algorithm defined in config.json is', '\'', config.encryptionAlgorithm, '\'');
     var module = config.encryptionAlgorithm.split('.')[0];
     var algo = config.encryptionAlgorithm.split('.')[1];
     var pwd = config.encryptionPassword;

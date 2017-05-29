@@ -18,7 +18,7 @@ var exprLang = require('../../lib/expression-language/expression-language.js');
 
 module.exports = function ExpressionAstPopulator(Model) {
   Model._ast = {};
-  log.info(log.defaultContext(), 'building AST for   ', Model.modelName);
+  log.debug(log.defaultContext(), 'building AST for   ', Model.modelName);
   var properties = Model.definition.properties;
   // process all the validateWhen grammar rules at property level and attach their ASTs to the model
   Object.keys(properties).forEach(function propertiesForEachCb(propertyName) {
@@ -27,11 +27,11 @@ module.exports = function ExpressionAstPopulator(Model) {
         // pick the validateWhen condition if present for the validation rule
         var validateWhenRule = properties[propertyName].validateWhen[key];
         Model._ast[validateWhenRule] = exprLang.createAST(validateWhenRule);
-        log.info(log.defaultContext(), 'validateWhen ast building for   ', key, ' rule of ', Model.modelName, '->', propertyName);
+        log.debug(log.defaultContext(), 'validateWhen ast building for   ', key, ' rule of ', Model.modelName, '->', propertyName);
       }
       // this is for property expressions which will be evaluated and assigned to property
       if (properties[propertyName].propExpression) {
-        log.info(log.defaultContext(), 'applying expression to property name ', propertyName, ' for model ', Model.modelName);
+        log.debug(log.defaultContext(), 'applying expression to property name ', propertyName, ' for model ', Model.modelName);
         var propExpression = properties[propertyName].propExpression;
         Model._ast[propExpression] = exprLang.createAST(propExpression);
       }
@@ -50,7 +50,7 @@ module.exports = function ExpressionAstPopulator(Model) {
         // pick the validateWhen condition and attach its AST to the model
         var validateWhenRule = validationRule.validateWhen;
         Model._ast[validateWhenRule] = exprLang.createAST(validateWhenRule);
-        log.info(log.defaultContext(), 'validateWhen ast building for oeValidation rule   ', Model.modelName, '->', validationName);
+        log.debug(log.defaultContext(), 'validateWhen ast building for oeValidation rule   ', Model.modelName, '->', validationName);
       }
     }
     // if the oeValidation is of 'custom' type then pick its expression which a grammar rule and create AST for that expression
@@ -58,7 +58,7 @@ module.exports = function ExpressionAstPopulator(Model) {
       var expression = validationRule.expression;
       // pick the expression for custom type oeValidation and attach its AST to the model
       Model._ast[expression] = exprLang.createAST(expression);
-      log.info(log.defaultContext(), 'ast building for oeValidation custom rule   ', Model.modelName, '->', validationName);
+      log.debug(log.defaultContext(), 'ast building for oeValidation custom rule   ', Model.modelName, '->', validationName);
     }
   });
 

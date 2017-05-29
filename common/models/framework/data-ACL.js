@@ -33,7 +33,7 @@ var async = require('async');
 
 var loopbackAccessContext = require('loopback/lib/access-context');
 var AccessContext = loopbackAccessContext.AccessContext;
-var errorUtil = require('../../../lib/common/error-utils');
+var errorUtil = require('../../../lib/common/error-utils').getValidationError;
 
 // Gets specified `value` on `target` going levels down if required.
 function getValue(target, field) {

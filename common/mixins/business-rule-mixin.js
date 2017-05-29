@@ -36,14 +36,14 @@ module.exports = function BusinessRuleMixin(BusinessRuleModel) {
     var errCode = [];
     // convert the business rules into promises to be resolved by expression language
     if (rules && rules.length > 0) {
-      log.info(options, 'Creating business rule promises array');
+      log.trace(options, 'Creating business rule promises array');
       rules.forEach(function businessRuleMixinRulesForEach(bRule) {
         businessRulePromises.push(exprLang.traverseAST(ast[bRule.expression], inst, options));
       });
     }
     // when all promises are resolved filter out those which contains error code and pass it to the callback
     q.allSettled(businessRulePromises).then(function businessRuleMixinPromiseResolved(results) {
-      log.info(options, 'All business rule promises settled');
+      log.trace(options, 'All business rule promises settled');
       results.map(function businessRuleMixinMap(d) {
         return d.value;
       }).forEach(function businessRuleMixinAllSettledForEach(d, i) {

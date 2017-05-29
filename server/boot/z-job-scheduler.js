@@ -34,7 +34,7 @@ module.exports = function DBModels(app, cb) {
       if (err) {
         log.error(util.bootContext(), 'Error :', err);
       } else {
-        log.info(util.bootContext(), 'job configuration created', res);
+        log.debug(util.bootContext(), 'job configuration created', res);
       }
     });
   });

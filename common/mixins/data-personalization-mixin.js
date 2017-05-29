@@ -203,7 +203,12 @@ function dataPersonalizationBeforeSave(ctx, next) {
 
   const data = ctx.instance || ctx.data;
   // log.debug('Raw data with manual scope - ' , JSON.stringify(data));
-  let scope = (data.scope && data.scope.__data) || data.scope || {};
+  let scope;
+  if (modelSettings.disableManualPersonalization) {
+    scope = {};
+  } else {
+    scope = (data.scope && data.scope.__data) || data.scope || {};
+  }
 
   // Converting scope to lowercase
   scope = convertToLowerCase(scope);
@@ -272,7 +277,9 @@ function dataPersonalizationBeforeSave(ctx, next) {
   data._autoScope = _autoScope;
   data._scope = convertToKeyValueString(scope).concat(convertToKeyValueString(_autoScope));
 
-  ctx.hookState.scopeVars = filterAutoscopeFromCtx(callContext.ctx, autoscope);
+  if (!modelSettings.disableManualPersonalization) {
+    ctx.hookState.scopeVars = filterAutoscopeFromCtx(callContext.ctx, autoscope);
+  }
   // log.debug(ctx.options, 'Data with scope and _scope ' , JSON.stringify(data));
   next();
 }
@@ -303,19 +310,35 @@ function dataPersonalizationAccess(ctx, next) {
     return next();
   }
 
+  ctx.query = ctx.query || {};
   const callContext = ctx.options;
 
   // Reading the autoscope values from the model definition settings.
   const autoscope = modelSettings.autoscope;
 
   // Clone callContext.ctxso the any changes locally made will not affect callContext.ctx.
-  let context = Object.assign({}, callContext.ctx);
+  let context;
+  if (ctx.query.scope) {
+    context = Object.assign({}, ctx.query.scope);
+    if (autoscope.length) {
+      autoscope.forEach(function dataAccessForEach(key) {
+        context[key] = callContext.ctx[key];
+      });
+    }
+  } else {
+    context = Object.assign({}, callContext.ctx);
+  }
 
   // Convert contextContributors to lowercase.
   context = convertToLowerCase(context);
 
   // Filter out autoscope from contextContributors.
-  const scopeVars = filterAutoscopeFromCtx(context, autoscope);
+  var scopeVars;
+  if (modelSettings.disableManualPersonalization) {
+    scopeVars = {};
+  } else {
+    scopeVars = filterAutoscopeFromCtx(context, autoscope);
+  }
 
   // adding manual scope to ctx for use in cache
   ctx.hookState.scopeVars = Object.assign({}, scopeVars);
@@ -385,11 +408,19 @@ function dataPersonalizationAccess(ctx, next) {
       }
     });
     ctx.hookState.autoscopeArray = autoscopeArray;
-    exeContextArray = exeContextArray.concat(callContext[`whereKeys${ctx.Model.modelName}`]);
+    if (callContext['whereKeys' + ctx.Model.modelName]) {
+      exeContextArray = exeContextArray.concat(callContext['whereKeys' + ctx.Model.modelName]);
+    }
     if (ctx.Model.dataSource.connector.name === 'mongodb') {
-      finalQuery = {
-        where: { _scope: { not: { $elemMatch: { $nin: exeContextArray } } } }
-      };
+      if (ctx.query.scope) {
+        finalQuery = {
+          'where': {'_scope': {'exists': {'$in': exeContextArray}}}
+        };
+      } else {
+        finalQuery = {
+          'where': {'_scope': {'not': {'$elemMatch': {'$nin': exeContextArray}}}}
+        };
+      }
     } else {
       finalQuery = {
         where: { _scope: { contains: exeContextArray } }
@@ -636,13 +667,17 @@ function dataPersonalizationAfterAccess(ctx, next) {
       delete obj.score;
       delete obj.weight;
     });
-    ctx.accdata = calculateUnique(ctx.Model.definition.properties, resultData);
+    if (ctx.query.scope) {
+      ctx.accdata = resultData;
+    } else {
+      ctx.accdata = calculateUnique(ctx.Model.definition.properties, resultData);
+    }
   }
   next();
 }
 
 /**
- * Function to get keys and keyValue pairs from the query.
+ * Function to get "scope" keys and keyValue pairs from the query.
  * @param {object} data - query from which we need to gets keys.
  * @param {array} arr - Array to hold keys context keys from query.
  * @param {array} igList - Array to hold context keysValue pair formatted keys from the query.
@@ -651,15 +686,10 @@ function dataPersonalizationAfterAccess(ctx, next) {
 var getKeys = function dataAccessGetKeys(data, arr, igList) {
   _.forEach(data, (value, key) => {
     if ((typeof key === 'string') && (key !== 'and' || key !== 'or')) {
-      if (key.indexOf('.') > -1) {
+      if (key.indexOf('scope.') > -1) {
         Array.prototype.splice.apply(arr, [0, 0].concat(key.split('.')));
         if (typeof value !== 'object') {
           Array.prototype.splice.apply(igList, [0, 0].concat(`${key.split('.')[key.split('.').length - 1]}:${value}`));
-        }
-      } else {
-        arr.push(key);
-        if (typeof value !== 'object') {
-          igList.push(`${key}:${value}`);
         }
       }
     }

@@ -1,0 +1,104 @@
+stages:
+  - build
+  - test
+
+before_script:
+  - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
+  - export project=${nameGroupProject##*/}
+  - export group=${nameGroupProject%/*}
+  - export branch=${CI_BUILD_REF_NAME}
+  - export project=${project//[^[:alnum:]]/}
+  - export group=${group//[^[:alnum:]]/}
+  - export branch=${branch//[^[:alnum:]]/}
+  - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
+  - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+  - npm config set registry $NPM_REGISTRY
+  - npm config set fetch-retries 0
+  - npm config set loglevel warn
+  - evf-paas login -u admin -p Anything_f9 evfapp.dev -d && source $HOME/evf-paas/evfapp.dev/install_env.sh
+  - echo "Enviroment where app will be deployed in swarm - "$SWARM_HOST
+  - echo "Domain name - "$DOMAIN_NAME
+  - echo "App will be pushed to registry - "$REGISTRY
+  - echo "The image name in registry - "$APP_IMAGE_NAME
+
+buildjob:
+  stage: build
+  script:
+    - echo "Performing code style check..."
+    - status_jshint=0
+    - status_jscs=0
+    - exit_status=0
+    - if jshint .; then status_jshint=0; else status_jshint=1; fi
+    - if jscs .; then status_jscs=0; else status_jscs=1; fi
+    - if [ $status_jshint == 1 ]; then exit_status=1 && echo "JSHint errors exist"; fi
+    - if [ $status_jscs == 1 ]; then exit_status=1 && echo "JSCS errors exist"; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - echo "Code style check done successfully"
+    - echo "Building oe-cloud image..."
+    - time npm install --no-optional
+    - time evf-paas build & buildpid=$!
+    - mkdir -p /data/db
+    - mongod --dbpath /data/db &
+    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
+    - export APP_URL=http://localhost:8080/api
+    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - mocha test/consistenthash/server.js &
+    - sleep 60
+    - mocha test/consistenthash/server.js 3100 &
+    - sleep 60
+    - mocha test/consistenthash/client.js 3200
+    - wait ${buildpid}
+    - echo "Image ($REGISTRY/$APP_IMAGE_NAME:latest) built and pushed to registry"
+  tags:
+    - EVF-PAAS
+
+mongotest:
+  stage: test
+  script:
+    - export COMPOSE_HTTP_TIMEOUT=180
+    - export DB=mongo
+    - export PROJECT_NAME=test-$DB-$APP_IMAGE_NAME
+    - export NETWORK_NAME=${PROJECT_NAME//[^[:alnum:]]/}
+    - export WEB_CONTAINER_NAME=$NETWORK_NAME"_web_1"
+    - export FILE_NAME=docker-compose.test.$DB.yml
+    - export exit_status=0
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
+    - if docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME; then docker --tls -H $SWARM_HOST network rm $(docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME | awk -F" " '{ print $1 }'); else echo "Network doesn't exist"; fi
+    - docker --tls -H $SWARM_HOST pull $REGISTRY/$APP_IMAGE_NAME
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME up -d
+    - if docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME exec web grunt test-with-coverage; then echo "Test cases passed successfully"; else echo "Test cases are failing" && export exit_status=1; fi
+    - if echo $CI_BUILD_REPO | grep "10.73.53.167/oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
+    - if [ $MAIN_BRANCH -eq 0 ]; then echo "Not the main project, hence not sending coverage report to evgit..."; docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down; exit $exit_status; fi
+    - docker --tls -H $SWARM_HOST cp $WEB_CONTAINER_NAME:/home/src/coverage/ .
+    - echo "Sending coverage reports to evgit..."
+    - tar -cf oe-cloud.tar -C ./coverage/lcov-report/ .
+    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud'
+    - scp oe-cloud.tar root@evgit:/data/share/coverage/
+    - ssh root@evgit 'mkdir -p /data/share/coverage/oe-cloud'
+    - ssh root@evgit 'tar -xf /data/share/coverage/oe-cloud.tar -C /data/share/coverage/oe-cloud'
+    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud.tar'
+    - echo "Coverage report updated"
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
+    - exit $exit_status
+  tags:
+    - EVF-PAAS
+
+postgrestest:
+  stage: test
+  script:
+    - export COMPOSE_HTTP_TIMEOUT=180
+    - export DB=postgres
+    - export PROJECT_NAME=test-$DB-$APP_IMAGE_NAME
+    - export NETWORK_NAME=${PROJECT_NAME//[^[:alnum:]]/}
+    - export FILE_NAME=docker-compose.test.$DB.yml
+    - export exit_status=0
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
+    - if docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME; then docker --tls -H $SWARM_HOST network rm $(docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME | awk -F" " '{ print $1 }'); else echo "Network doesn't exist"; fi
+    - docker --tls -H $SWARM_HOST pull $REGISTRY/$APP_IMAGE_NAME
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME up -d
+    - if docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME exec web grunt mochaTest:postgres; then echo "Test cases passed successfully"; else echo "Test cases are failing" && export exit_status=1; fi
+    - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
+    - exit $exit_status
+  tags:
+    - EVF-PAAS
+

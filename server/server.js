@@ -19,6 +19,7 @@ var path = require('path');
 var helmet = require('helmet');
 var fs = require('fs');
 var logger = require('../lib/logger');
+var errorHandler = require('strong-error-handler');
 var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager = require('../lib/event-history-manager.js');
@@ -70,7 +71,8 @@ module.exports.boot = function serverBoot(appinstance, options, cb) {
       async.apply(loadClientModels, options, env),
       async.apply(loadClientDatasource, options, env),
       async.apply(loadClientMiddleware, options, env),
-      async.apply(loadClientComponents, options, env)
+      async.apply(loadClientComponents, options, env),
+      async.apply(loadClientProviders, options, env)
     ],
       function serverBootAsyncParallelCb(err, results) {
         if (err) {
@@ -93,6 +95,12 @@ function finalBoot(appinstance, options, cb) {
   module.exports.relativePath = path.relative(options.appRootDir, path.resolve(options.clientAppRootDir, ''));
   var env = options.env || process.env.NODE_ENV || 'development';
   preboot.setSharedCtor(appinstance);
+
+    // strong error handler to disable stack trace
+  appinstance.use(errorHandler({
+    debug: env === 'development' || appinstance.get('env') === 'development',
+    log: true
+  }));
 
   // datasource merge done by loopback-boot doesnt suffice our requirements.
   if (require.main === module) {
@@ -268,6 +276,15 @@ if (require.main === module) {
   // When any application uses this framework, it must set apphome variable in its boot directory
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
+
+    // Checking for app-list.json in app home directory and setting providerJson using
+    // value provided by loadAppProviders function in merge-util
+  var appListPath = path.resolve(path.join(lbapp.locals.apphome, 'app-list.json'));
+  var appListExists = fs.existsSync(appListPath) ? true : false;
+  if (appListExists) {
+    options.providerJson = mergeUtil.loadAppProviders(require(appListPath));
+  }
+
   finalBoot(lbapp, options, function frmworkFinalBoot() {
     lbapp.start();
   });
@@ -346,6 +363,32 @@ function loadClientModels(options, env, callback) {
     mergeUtil.mergeFn(modelConfig, clientmodels);
   }
   options.models = modelConfig;
+  callback();
+}
+
+/**
+ *
+ * Function provides functionality to select the provider file.
+ * It loads the app provider files from the client app.
+ * Loads the EVFoundation provider files and the provider.env file
+ * with client provider files and sets it to options.providerJson.
+ *
+ * @param {object}options Initialize an application from an options object(loopback-boot options object).
+ * @param {string}env Environment, usually `process.env.NODE_ENV`
+ * @param {Function} callback Callback function
+ * @function loadClientProviders
+ */
+function loadClientProviders(options, env, callback) {
+    // Read the EVFoundation's all provider files.
+  var providers = mergeUtil.loadFiles(__dirname, env, 'providers');
+  if (providers && providers.length) {
+        // Filter the list based on env.
+    providers = _.findLast(providers, function serverLoadClientProviderFn(d) {
+      return (d._filename === path.resolve(__dirname, 'providers.' + env + '.js') || d._filename === path.resolve(__dirname, 'providers.' + env + '.json') || d._filename === path.resolve(__dirname, 'providers.local.js') || d._filename === path.resolve(__dirname, 'providers.local.json') || d._filename === path.resolve(__dirname, 'providers.json'));
+    });
+  }
+
+  options.providerJson = providers;
   callback();
 }
 

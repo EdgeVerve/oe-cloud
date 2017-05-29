@@ -68,6 +68,6 @@ function clearCacheOnDelete(ctx, next) {
  * @param {function} next - The function to be called for letting Loopback know that it can proceed with the next hook.
  */
 var evictCache = function evCacheMixinEvictCacheCb(ctx, next) {
-  messaging.publish('evictCache', uuid.v4());
+  messaging.publish('evictCache', ctx.Model.modelName);
   next();
 };

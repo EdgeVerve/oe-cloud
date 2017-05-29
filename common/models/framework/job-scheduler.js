@@ -44,7 +44,7 @@ module.exports = function JobScheduler(jobScheduler) {
             scheduleJob(instance, ctx.options);
           });
         } else {
-          log.info(ctx.options, 'Job scheduler: No records found for query : ', ctx.where);
+          log.debug(ctx.options, 'Job scheduler: No records found for query : ', ctx.where);
         }
       });
     }
@@ -83,7 +83,7 @@ module.exports = function JobScheduler(jobScheduler) {
            * function finds out the applicable models and records and
            * emits the configured event on that model
            */
-          log.info(options, 'Job ', schedulerConfig.name, ' scheduled');
+          log.debug(options, 'Job ', schedulerConfig.name, ' scheduled');
           var modelQuery = schedulerConfig.modelQuery;
 
           var modelsToApply = getFilteredModels(models, modelQuery);
@@ -100,7 +100,7 @@ module.exports = function JobScheduler(jobScheduler) {
                   log.error(options, 'err in job scheduler', err);
                   return;
                 }
-                log.info(options, 'query result model ', modelname, ' : ', res);
+                log.debug(options, 'query result model ', modelname, ' : ', res);
                 res.forEach(function jobSchedulerOnScheduledJobResForEachFn(value) {
                   Object.keys(schedulerConfig.payload).forEach(function jobSchedulerOnScheduledJobResForEachKeysFn(key) {
                     value[key] = schedulerConfig.payload[key];

@@ -94,7 +94,7 @@ module.exports = function JWTAssertionFn(options) {
                 cachedTokens[username] = token;
                 next();
               } else {
-                log.info(req.callContext, 'could not create access token!!!!');
+                log.error(req.callContext, 'could not create access token!!!!');
                 next();
               }
             });

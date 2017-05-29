@@ -28,9 +28,9 @@ module.exports = function businessRule(BusinessRule) {
 
   BusinessRule.observe('after save', function businessRuleBeforeSaveCb(ctx, next) {
     var data = ctx.instance || ctx.currentInstance || ctx.data;
-    log.info(ctx.options, 'BusinessRule before save remote attaching expression to _ast');
+    log.debug(ctx.options, 'BusinessRule before save remote attaching expression to _ast');
     BusinessRule._ast[data.expression] = exprLang.createAST(data.expression);
-    log.info(ctx.options, 'expression : ', data.expression, 'attached to _ast of BusinessRule model');
+    log.debug(ctx.options, 'expression : ', data.expression, 'attached to _ast of BusinessRule model');
     next();
   });
 };

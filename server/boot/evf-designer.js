@@ -1,43 +1,44 @@
-/**
- *
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
- * Bangalore, India. All Rights Reserved.
- *
- */
+/*
+©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
+The EdgeVerve proprietary software program ("Program"), is protected by copyrights laws, international treaties and other pending or existing intellectual property rights in India, the United States and other countries.
+The Program may contain/reference third party or open source components, the rights to which continue to remain with the applicable third party licensors or the open source community as the case may be and nothing here transfers the rights to the third party and open source components, except as expressly permitted.
+Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+*/
 // Setting /designer route.
-// To install designer run bower install designer
-// Path to designer should be /client/bower_components or /public/bower_components or /web/bower_components
-// Or else the path to designer can be configured in configuration
-// Or else the application itself can add a route for /designer with the location of index.html from designer directory.
-/* eslint-disable no-console */
+// To install evf-designer run bower install evf-designer
+// Path to evf-designer should be /client/bower_components or /public/bower_components or /web/bower_components
+// Or else the path to evf-designer can be configured in configuration
+// Or else the application itself can add a route for /designer with the location of index.html from evf-designer directory.
 var loopback = require('loopback');
 var fs = require('fs');
 var path = require('path');
-var logger = require('../../lib/logger');
-var log = logger('designer');
+var logger = require('evf-logger');
+var log = logger('evf-designer');
 var _ = require('lodash');
-var util = require('../../lib/common/util');
+var evf = require('../../lib/evf');
 var appconfig = require('../config');
 var glob = require('glob');
 
 
-function setDesignerPath(DesignerPath, server) {
+function setEvfDesignerPath(evfDesignerPath, server) {
   if (!appconfig.designer.templatePath || appconfig.designer.templatePath.length === 0) {
-    appconfig.designer.templatePath = [DesignerPath + '/designer/templates'];
+    appconfig.designer.templatePath = [evfDesignerPath + '/evf-designer/templates'];
   }
   if (!appconfig.designer.stylePath || appconfig.designer.stylePath.length === 0) {
-    appconfig.designer.stylePath = [DesignerPath + '/designer/styles'];
+    appconfig.designer.stylePath = [evfDesignerPath + '/evf-designer/styles'];
   }
   if (!appconfig.designer.assetPath || appconfig.designer.assetPath.length === 0) {
     appconfig.designer.assetPath = ['client/images'];
   }
-
+  if (!appconfig.designer.initialStartupDataPath || appconfig.designer.initialStartupDataPath.length === 0) {
+    appconfig.designer.initialStartupDataPath = ['data'];
+  }
   var templatesData = [];
-  appconfig.designer.templatePath.forEach(function templatePathForEach(tPath) {
-    ifDirectoryExist(tPath, function ifDirectoryExistFn(dirName, status) {
+  appconfig.designer.templatePath.forEach(function (tPath) {
+    ifDirectoryExist(tPath, function (dirName, status) {
       if (status) {
         var templateFiles = fs.readdirSync(dirName);
-        templateFiles.forEach(function templateFilesForEach(fileName) {
+        templateFiles.forEach(function (fileName) {
           var tplRecord = {
             file: fileName,
             path: dirName,
@@ -63,11 +64,11 @@ function setDesignerPath(DesignerPath, server) {
   module.templatesData = templatesData;
 
   var stylesData = [];
-  appconfig.designer.stylePath.forEach(function stylePathForEach(sPath) {
-    ifDirectoryExist(sPath, function ifDirectoryExistFn(dirName, status) {
+  appconfig.designer.stylePath.forEach(function (sPath) {
+    ifDirectoryExist(sPath, function (dirName, status) {
       if (status) {
         var styleFiles = fs.readdirSync(dirName);
-        styleFiles.forEach(function styleFilesForEach(fileName) {
+        styleFiles.forEach(function (fileName) {
           var styleRecord = {
             file: fileName,
             path: dirName
@@ -88,11 +89,11 @@ function setDesignerPath(DesignerPath, server) {
   var imageTypes = ['.JPG', '.JPEG', '.BMP', '.GIF', '.PNG', '.SVG'];
   var videoTypes = ['.MP4', '.MPEG', '.AVI', '.WMV', '.OGG', '.OGM', '.OGV', '.WEBM', '.3GP'];
   var audioTypes = ['.MP3', '.AAC', '.OGG', '.M4A'];
-  appconfig.designer.assetPath.forEach(function assetPathForEach(aPath) {
-    ifDirectoryExist(aPath, function ifDirectoryExist(dirName, status) {
+  appconfig.designer.assetPath.forEach(function (aPath) {
+    ifDirectoryExist(aPath, function (dirName, status) {
       if (status) {
         var assetFiles = fs.readdirSync(dirName);
-        assetFiles.forEach(function assetFilesForEach(fileName) {
+        assetFiles.forEach(function (fileName) {
           var stats = fs.statSync(path.join(dirName, fileName));
           if (stats.isFile()) {
             var assetRecord = {
@@ -116,10 +117,10 @@ function setDesignerPath(DesignerPath, server) {
   module.assetData = assetData;
 
   var prospectElements = [];
-  glob('client/**/*.html', function globFn(err, files) {
+  glob('client/**/*.html', function (err, files) {
     if (!err && files && files.length > 0) {
-      files.forEach(function filesForEach(file) {
-        if (file.indexOf('designer') < 0 && file.indexOf('/demo/') < 0 && file.indexOf('/test/') < 0) {
+      files.forEach(function (file) {
+        if (file.indexOf('evf-designer') < 0 && file.indexOf('/demo/') < 0 && file.indexOf('/test/') < 0) {
           fs.readFile(file, function read(err3, data) {
             var regexp = /<dom-module\s*id\s*=\s*["'](.*)["']\s*>/g;
             if (!err3) {
@@ -158,10 +159,10 @@ function setDesignerPath(DesignerPath, server) {
     }
   };
 
-  server.use(loopback.static(DesignerPath));
+  server.use(loopback.static(evfDesignerPath));
   server.get(appconfig.designer.mountPath, evEnsureLoggedIn, function sendResponse(req, res) {
     res.sendFile('index.html', {
-      root: DesignerPath + '/designer'
+      root: evfDesignerPath + '/evf-designer'
     });
   });
 
@@ -172,14 +173,14 @@ function setDesignerPath(DesignerPath, server) {
     var adapter = remotes.handler('rest').adapter;
     var routes = adapter.allRoutes();
     var classes = remotes.classes();
-    routes = routes.map(function routesMapFn(route) {
+    routes = routes.map(function (route) {
       if (!route.documented) {
         return;
       }
 
-      // Get the class definition matching this route.
+            // Get the class definition matching this route.
       var className = route.method.split('.')[0];
-      var classDef = classes.filter(function clasesFilter(item) {
+      var classDef = classes.filter(function (item) {
         return item.name === className;
       })[0];
 
@@ -189,27 +190,26 @@ function setDesignerPath(DesignerPath, server) {
       }
       var accepts = route.accepts || [];
       var split = route.method.split('.');
-      /* HACK */
       if (classDef && classDef.sharedCtor &&
-        classDef.sharedCtor.accepts && split.length > 2) {
+              classDef.sharedCtor.accepts && split.length > 2 /* HACK */) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
       }
 
-      // Filter out parameters that are generated from the incoming request,
-      // or generated by functions that use those resources.
-      accepts = accepts.filter(function acceptsFilter(arg) {
+            // Filter out parameters that are generated from the incoming request,
+            // or generated by functions that use those resources.
+      accepts = accepts.filter(function (arg) {
         if (!arg.http) {
           return true;
         }
-        // Don't show derived arguments.
+                // Don't show derived arguments.
         if (typeof arg.http === 'function') {
           return false;
         }
-        // Don't show arguments set to the incoming http request.
-        // Please note that body needs to be shown, such as User.create().
+                // Don't show arguments set to the incoming http request.
+                // Please note that body needs to be shown, such as User.create().
         if (arg.http.source === 'req' ||
-          arg.http.source === 'res' ||
-          arg.http.source === 'context') {
+                  arg.http.source === 'res' ||
+                  arg.http.source === 'context') {
           return false;
         }
         return true;
@@ -223,7 +223,7 @@ function setDesignerPath(DesignerPath, server) {
         accepts: route.accepts
       };
     });
-    var modelEndPoints = _.groupBy(routes, function modelEndPoints(d) {
+    var modelEndPoints = _.groupBy(routes, function (d) {
       return d.path.split('/')[1];
     });
     var result = model ? modelEndPoints[model] : modelEndPoints;
@@ -245,8 +245,42 @@ function setDesignerPath(DesignerPath, server) {
     res.json(module.stylesData);
   });
 
+  server.get(appconfig.designer.mountPath + '/data/:model', function (req, res) {
+    var model = req.params.model;
+    var responseData = [];
+
+    var initialStartupData = [];
+    appconfig.designer.initialStartupDataPath.forEach(function (sPath) {
+      if (fs.existsSync(sPath)) {
+        var dataFiles = fs.readdirSync(sPath);
+        dataFiles.forEach(function (fileName) {
+          var dataRecord = {
+            file: fileName,
+            path: sPath,
+            content: JSON.parse(fs.readFileSync(sPath + '/' + fileName, {
+              encoding: 'utf-8'
+            }))
+          };
+          initialStartupData.push(dataRecord);
+        });
+      }
+    });
+
+    var file = initialStartupData.find(function (obj) {
+      return obj.file === model + '.json';
+    });
+    if (file) {
+      responseData.push(file);
+    } else {
+      responseData.push({
+        'path': appconfig.designer.initialStartupDataPath[0]
+      });
+    }
+    res.json(responseData);
+  });
+
   server.post(appconfig.designer.mountPath + '/save-theme', function saveTheme(req, res) {
-    fs.writeFile('client/styles/app-theme.html', req.body.data, function writeFileCbFn(err) {
+    fs.writeFile('client/styles/app-theme.html', req.body.data, function (err) {
       if (err) {
         res.status(500).send(err);
       } else {
@@ -261,7 +295,7 @@ function setDesignerPath(DesignerPath, server) {
     var content = fs.readFileSync(req.body.file, {
       encoding: 'utf-8'
     });
-    fs.writeFile('client/styles/app-theme.html', content, function writeFileCbFn(err) {
+    fs.writeFile('client/styles/app-theme.html', content, function (err) {
       if (err) {
         res.status(500).send(err);
       } else {
@@ -273,7 +307,7 @@ function setDesignerPath(DesignerPath, server) {
   });
 
   server.post(appconfig.designer.mountPath + '/save-file', function saveFile(req, res) {
-    fs.writeFile(req.body.file, req.body.data, function writeFileCbFn(err) {
+    fs.writeFile(req.body.file, req.body.data, function (err) {
       if (err) {
         res.status(500).send(err);
       } else {
@@ -304,9 +338,9 @@ function setDesignerPath(DesignerPath, server) {
     res.json(module.prospectElements);
   });
 
-  ifDirectoryExist(DesignerPath + '/designer', function checkIfDirectoryExist(dirname, status) {
+  ifDirectoryExist(evfDesignerPath + '/evf-designer', function checkIfDirectoryExist(dirname, status) {
     if (status) {
-      server.once('started', function DesignerServerStarted() {
+      server.once('started', function evfDesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
         console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
       });
@@ -336,22 +370,23 @@ function ifDirectoryExist(dirname, cb) {
   });
 }
 
-module.exports = function Designer(server) {
+module.exports = function EvfDesigner(server) {
   if (appconfig.enableDesigner) {
     var defaultConfig = {
       installationPath: 'client/bower_components',
       mountPath: '/designer',
       templatePath: [],
-      stylePath: []
+      stylePath: [],
+      initialStartupDataPath: []
     };
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
 
-    ifDirectoryExist(appconfig.designer.installationPath + '/designer', function directorySearch(dirname, status) {
+    ifDirectoryExist(appconfig.designer.installationPath + '/evf-designer', function directorySearch(dirname, status) {
       if (status) {
-        setDesignerPath(appconfig.designer.installationPath, server);
+        setEvfDesignerPath(appconfig.designer.installationPath, server);
       } else {
-        console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/designer]');
+        console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/evf-designer]');
       }
     });
 
@@ -391,9 +426,9 @@ module.exports = function Designer(server) {
     var uiMetadataModel = loopback.findModel('UIMetadata');
 
     if (uiMetadataModel) {
-      uiMetadataModel.create(designerUIMetadata, util.bootContext(), function results(err, result) {
+      uiMetadataModel.create(designerUIMetadata, evf.bootContext(), function results(err, result) {
         if (err) {
-          log.debug(util.bootContext(), 'Unable to create UIMetadata record for BaseUser. Record may have already exist.', err);
+          log.debug(evf.bootContext(), 'Unable to create UIMetadata record for BaseUser. Record may have already exist.', err);
           return;
         }
       });

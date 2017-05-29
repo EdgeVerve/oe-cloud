@@ -197,7 +197,7 @@ module.exports = function BaseUser(BaseUser) {
                   if (err) {
                     log.error(options, '> error updating failedTries to 0', err);
                   } else {
-                    log.info(options, '> failedTries updated to 0');
+                    log.debug(options, '> failedTries updated to 0');
                   }
                 });
               }
@@ -363,12 +363,19 @@ module.exports = function BaseUser(BaseUser) {
     updatedData.failedTries = user.failedTries + 1;
     if (user.failedTries === maxFailedLoginTries - 1) {
       updatedData.status = 'disabled';
+	    setTimeout(BaseUser.unlock, BaseUser.app.get('UNLOCK_USER_ACCOUNT_TIME'), user.email || user.username, options, function (err, msg) {
+		    if (err) {
+			    log.error(options, err);
+		    } else {
+			    log.info(options, msg);
+		    }
+	    });
     }
     user.updateAttributes(updatedData, options, function userUpdateFailedTries(err) {
       if (err) {
         log.error(options, '> error updating failed retries', err);
       } else {
-        log.info(options, '> number of failes retries updated');
+        log.debug(options, '> number of failes retries updated');
       }
     });
   });
@@ -441,7 +448,7 @@ module.exports = function BaseUser(BaseUser) {
       if (err) {
         return log.error(log.defaultContext(), '> error sending password reset email', err);
       }
-      log.info(log.defaultContext(), '> sending password reset email to:', info.email);
+      log.debug(log.defaultContext(), '> sending password reset email to:', info.email);
     });
   });
 

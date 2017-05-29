@@ -41,6 +41,7 @@
     "lodash": "3.10.1",
     "loopback": "2.25.0",
     "loopback-boot": "^2.7.0",
+    "oe-logger" : "0.8.0",
     "loopback-component-passport": "git+https://github.com/EdgeVerve/loopback-component-passport.git",
     "loopback-component-storage": "git+https://github.com/EdgeVerve/loopback-component-storage.git",
     "loopback-component-explorer": "2.2.0",

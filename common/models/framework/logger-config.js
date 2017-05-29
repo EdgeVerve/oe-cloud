@@ -14,20 +14,20 @@ var uuid = require('node-uuid');
 msgService.subscribe('LoggerConfig', dataUpdater);
 
 var levelMap = {
-  'debug': 10,
-  'info': 20,
-  'warn': 30,
-  'error': 40,
-  'none': 50,
+  'trace': 10,
+  'debug': 20,
+  'info': 30,
+  'warn': 40,
+  'error': 50,
   'fatal': 60
 };
 
 var reverseMap = {
-  '10': 'debug',
-  '20': 'info',
-  '30': 'warn',
-  '40': 'error',
-  '50': 'none',
+  '10': 'trace',
+  '20': 'debug',
+  '30': 'info',
+  '40': 'warn',
+  '50': 'error',
   '60': 'fatal'
 };
 

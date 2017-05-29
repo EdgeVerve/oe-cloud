@@ -101,12 +101,11 @@ module.exports = function AuditFieldsMixin(Model) {
  */
 function injectAuditFields(ctx, next) {
   if (!ctx.Model.definition.settings.mixins.AuditFieldsMixin) {
-    log.info(ctx.options, 'AuditFieldsMixin disabled for model - ', ctx.Model.modelName);
+    log.debug(ctx.options, 'AuditFieldsMixin disabled for model - ', ctx.Model.modelName);
     return next();
   }
   log.debug(ctx.options, 'Before save called. Model Name - ', ctx.Model.modelName);
 
-  log.info(ctx.options, 'Saving entity - ', ctx.Model.modelName);
   var context = ctx.options;
   var cctx = context.ctx || {};
 

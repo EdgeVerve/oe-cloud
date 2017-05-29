@@ -1,9 +1,9 @@
-/**
- *
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
- * Bangalore, India. All Rights Reserved.
- *
- */
+/*
+©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
+The EdgeVerve proprietary software program ("Program"), is protected by copyrights laws, international treaties and other pending or existing intellectual property rights in India, the United States and other countries.
+The Program may contain/reference third party or open source components, the rights to which continue to remain with the applicable third party licensors or the open source community as the case may be and nothing here transfers the rights to the third party and open source components, except as expressly permitted.
+Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
+*/
 /**
  *
  * @classdesc This Model is used by Meta Polymer
@@ -13,14 +13,15 @@
  * @author Praveen Kumar Gulati
  */
 var async = require('async');
-var logger = require('../../../lib/logger');
+var logger = require('evf-logger');
 var log = logger('UIComponent');
 var loopback = require('loopback');
 var fs = require('fs');
 var path = require('path');
 var glob = require('glob');
+var appconfig = require('../../../server/config');
 
-module.exports = function uiComponent(UIComponent) {
+module.exports = function (UIComponent) {
   function loadTemplate(template, app, options, callback) {
     app.models.AppConfig.findOne({}, options, function AppConfigFindOneCb(err, data) {
       var templatesDir;
@@ -33,20 +34,26 @@ module.exports = function uiComponent(UIComponent) {
       var templatePath = path.join(app.locals.apphome, templatesDir, template);
       fs.readFile(templatePath, function read(err, data) {
         if (err) {
-          templatesDir = '../client/bower_components/designer/templates';
+          templatesDir = '../client/bower_components/evf-designer/templates';
           templatePath = path.join(app.locals.apphome, templatesDir, template);
           fs.readFile(templatePath, function read(err1, data1) {
             if (err1) {
-              glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
+              glob(app.locals.apphome + '/../**/' + template, function (err2, files) {
                 if (!err2 && files && files.length > 0) {
                   templatePath = files[0];
                   fs.readFile(templatePath, function read(err3, data2) {
-                    if (err3) {
-                      callback(err3, '');
-                    } else {
-                      callback(err3, data2.toString());
-                    }
-                  });
+                      if (err3) {
+                        callback(err3, '');
+                      } else {
+                        callback(err3, data2.toString());
+                      }
+                    });
+                } else {
+                  var error = new Error();
+                  error.message = 'Template ' + template + ' not found';
+                  error.code = 'TEMPLATE_TYPE_MISSING';
+                  error.statusCode = 422;
+                  callback(error, '');
                 }
               });
             } else {
@@ -61,6 +68,13 @@ module.exports = function uiComponent(UIComponent) {
   }
 
   function mergeAsHTML(html, response, callback) {
+    if (appconfig.removeComponentImports) {
+            /* Remove all the <link rel="import" ...> lines */
+      html = html.split('\n').filter(function (line) {
+        return !line.match(/link.*rel="import"/i);
+      }).join('\n');
+    }
+
     var out = '<script> var EV = window.EV || {}; EV.metadataCache = EV.metadataCache || {}; \n ';
     out += 'EV.metadataCache["' + response.componentName + '"] = ';
     out += JSON.stringify(response);
@@ -77,13 +91,13 @@ module.exports = function uiComponent(UIComponent) {
       }
     };
     var elements = {};
-    UIElement.find(elementsWhere, options, function uiElementFindCb(err, dbelements) {
-      dbelements.forEach(function dbElementsForEach(e) {
+    UIElement.find(elementsWhere, options, function (err, dbelements) {
+      dbelements.forEach(function (e) {
         var elementData = {
           label: e.label,
           textContent: e.textContent
         };
-        e.attributes && e.attributes.forEach(function attributesFetch(att) {
+        e.attributes && e.attributes.forEach(function (att) {
           elementData[att.name] = att.value;
         });
         elements[e.field] = elementData;
@@ -104,14 +118,14 @@ module.exports = function uiComponent(UIComponent) {
       rec.autoInjectFields = false;
       rec.gridConfig = {};
       rec.gridConfig.modelGrid = [];
-      Object.keys(model.definition.rawProperties).forEach(function configFetch(key) {
+      Object.keys(model.definition.rawProperties).forEach(function (key) {
         if (key.required) {
           rec.gridConfig.modelGrid.push(key);
         }
       });
 
       if (rec.gridConfig.modelGrid.length < 4) {
-        Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
+        Object.keys(model.definition.rawProperties).forEach(function (key) {
           if (key.startsWith('_') || key === 'scope' || key === 'id') {
             return;
           }
@@ -124,7 +138,7 @@ module.exports = function uiComponent(UIComponent) {
     return rec;
   }
 
-  UIComponent.prototype.generateComponent = function generateComponent(fetchAsHtml, options, callback) {
+  UIComponent.prototype.generateComponent = function (fetchAsHtml, options, callback) {
     var component = this;
     var componentName = component.name;
     var tasks = [];
@@ -136,8 +150,8 @@ module.exports = function uiComponent(UIComponent) {
 
     var html = '';
 
-    tasks.push(function pushCb(done) {
-      _getElements(componentName, response, options, function getElementsCb(err, elements) {
+    tasks.push(function (done) {
+      _getElements(componentName, response, options, function (err, elements) {
         response.elements = elements;
         done(err);
       });
@@ -157,11 +171,11 @@ module.exports = function uiComponent(UIComponent) {
     response.options = component.options;
     response.polymerConfig = component.polymerConfig;
     response.gridConfig = component.gridConfig;
-    response.oeValidations = component.oeValidations;
+    response.evValidations = component.evValidations;
 
     if (fetchAsHtml) {
       if (component.filePath) {
-        tasks.push(function pushCb(done) {
+        tasks.push(function (done) {
           var fp = path.join(UIComponent.app.locals.apphome, component.filePath);
           fs.readFile(fp, function read(err, data) {
             if (!err) {
@@ -171,16 +185,16 @@ module.exports = function uiComponent(UIComponent) {
           });
         });
       } else if (component.templateName && component.modelName) {
-        tasks.push(function pushCb(done) {
+        tasks.push(function (done) {
           var modelAlias = component.modelAlias || (component.modelName ? component.modelName.toLowerCase() : 'vm');
-          loadTemplate(component.templateName, UIComponent.app, options, function loadTemplateCb(err, template) {
+          loadTemplate(component.templateName, UIComponent.app, options, function (err, template) {
             html = replacePlaceHolders(UIComponent.app, componentName, modelAlias, template);
             done(err);
           });
         });
       } else if (component.templateName) {
-        tasks.push(function pushCb(done) {
-          loadTemplate(component.templateName, UIComponent.app, options, function loadTemplateCb(err, template) {
+        tasks.push(function (done) {
+          loadTemplate(component.templateName, UIComponent.app, options, function (err, template) {
             html = template.replace(/:componentName/g, componentName);
             done(err);
           });
@@ -192,23 +206,19 @@ module.exports = function uiComponent(UIComponent) {
     }
 
     if (component.modelName) {
-      tasks.push(function pushCb(done) {
+      tasks.push(function (done) {
         var metaconfig = {};
-        UIComponent._modelmeta(component.modelName, metaconfig, options, function modelsMetaCbFn(err, meta) {
-          if (err) {
-            done(err);
-          }
+        UIComponent._modelmeta(component.modelName, metaconfig, options, function (err, meta) {
           response.metadata = meta.metadata;
           done();
         });
       });
     }
 
-    async.parallel(tasks, function finalMergeTask(err, results) {
+    async.parallel(tasks, function (err, results) {
       if (err) {
-        callback(err);
-      }
-      if (fetchAsHtml) {
+        callback(err, undefined);
+      } else if (fetchAsHtml) {
         mergeAsHTML(html, response, callback);
       } else {
         callback(null, response);
@@ -216,9 +226,9 @@ module.exports = function uiComponent(UIComponent) {
     });
   };
 
-  // name can have .html component name without
-  // componentName without .
-  UIComponent._createResponse = function createResponse(fetchAsHtml, name, options, callback) {
+    // name can have .html component name without
+    // componentName without .
+  UIComponent._createResponse = function (fetchAsHtml, name, options, callback) {
     var dotIndex = name.lastIndexOf('.') || name.length;
     var componentName = dotIndex === -1 ? name : name.substring(0, dotIndex);
     var where = {
@@ -228,27 +238,31 @@ module.exports = function uiComponent(UIComponent) {
     };
 
 
-    UIComponent.findOne(where, options, function findOneCb(err, component) {
+        // prefer find and results[0] over findOne
+        // to make sure data personalization is applied correctly.
+    UIComponent.find(where, options, function (err, results) {
       if (err) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
 
+      var component;
+      if (results) {
+        component = results[0];
+      }
       if (!component) {
         if (fetchAsHtml) {
-          // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
-          var modelAndType = componentName.split('-');
+          var modelAndType = componentName.split('-'); // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
           var templateType = modelAndType[1];
-          var types = ['form', 'list'];
-          if (modelName && templateType && types.indexOf(templateType) !== -1) {
+          if (modelName && templateType) {
             var model = UIComponent.app.models[modelName];
             component = defaultComponent(model, templateType);
-            // add autoInjectFields = true to render the form if templateType is form.
+                        // add autoInjectFields = true to render the form if templateType is form.
             if (templateType === 'form' && component && !component.autoInjectFields) {
               component.autoInjectFields = true;
             }
-            component = new UIComponent(component);
+            component = UIComponent(component);
           } else {
             var error = new Error();
             if (!modelName) {
@@ -273,10 +287,7 @@ module.exports = function uiComponent(UIComponent) {
             elements: {},
             fields: {}
           };
-          _getElements(componentName, response, options, function getElementsCb(err, elements) {
-            if (err) {
-              callback(err);
-            }
+          _getElements(componentName, response, options, function (err, elements) {
             response.elements = elements;
             callback(null, response);
           });
@@ -288,13 +299,13 @@ module.exports = function uiComponent(UIComponent) {
     });
   };
 
-  // name can be in model name in lower case also
+    // name can be in model name in lower case also
   UIComponent._modelmeta = function meta(name, metaoptions, options, callback) {
-    if (typeof callback === 'undefined' && typeof options === 'undefined' && typeof metaoptions === 'function') {
+    if (callback === undefined && options === undefined && typeof metaoptions === 'function') {
       callback = metaoptions;
       options = {};
       metaoptions = {};
-    } else if (typeof callback === 'undefined' && typeof options === 'function') {
+    } else if (callback === undefined && typeof options === 'function') {
       callback = options;
       options = {};
     }
@@ -305,14 +316,11 @@ module.exports = function uiComponent(UIComponent) {
     var response = {};
     response.modelName = modelName;
     response.metadata = {};
-    options.flatten = typeof metaoptions.flatten === 'undefined' ? false : metaoptions.flatten;
-    options.dependencies = typeof metaoptions.dependencies === 'undefined' ? true : options.dependencies;
+    options.flatten = metaoptions.flatten === undefined ? false : metaoptions.flatten;
+    options.dependencies = metaoptions.dependencies === undefined ? true : options.dependencies;
     options.skipSystemFields = true;
     var model;
-    app.models.ModelDefinition.extractMeta(modelName, options, function extractMetaCb(err, allmodels) {
-      if (err) {
-        callback(err);
-      }
+    app.models.ModelDefinition.extractMeta(modelName, options, function (err, allmodels) {
       response.metadata = {};
       response.metadata.models = {};
       var metadata = response.metadata;
@@ -325,23 +333,23 @@ module.exports = function uiComponent(UIComponent) {
         props = allmodels.properties || {};
         model = allmodels;
       } else {
-        Object.keys(allmodels).forEach(function extractRefModels(key) {
+        Object.keys(allmodels).forEach(function (key) {
           metadata.models[key] = {};
           var refmodel = metadata.models[key];
           refmodel.resturl = allmodels[key].resturl;
           refmodel.properties = allmodels[key].properties;
-          // TODO we can copy more properties here
+                    // TODO we can copy more properties here
         });
         model = allmodels[modelName] || {};
         props = model.properties || {};
         metadata.resturl = model.resturl;
-        // allmodels will not be sent by uicomponent/component
+                // allmodels will not be sent by uicomponent/component
         response.allmodels = allmodels;
       }
 
       var subtasks = [];
 
-      Object.keys(props).forEach(function extractPropData(fieldId) {
+      Object.keys(props).forEach(function (fieldId) {
         var field = props[fieldId];
         field.type = field.type || 'string';
         if (field.enumtype || field.refcodetype) {
@@ -362,9 +370,9 @@ module.exports = function uiComponent(UIComponent) {
           }
         }
         if (field.refcodetype) {
-          subtasks.push(function subTaskPushCb(fetched) {
+          subtasks.push(function (fetched) {
             var refCodeModel = UIComponent.app.models[field.refcodetype];
-            refCodeModel.find({}, options, function findCb(err, resp) {
+            refCodeModel.find({}, options, function (err, resp) {
               if (!err) {
                 field.listdata = resp;
                 field.displayproperty = 'description';
@@ -377,27 +385,26 @@ module.exports = function uiComponent(UIComponent) {
       });
 
       var relations = model.relations || {};
-      Object.keys(relations).forEach(function extractRelatedModelMeta(relationName) {
+      Object.keys(relations).forEach(function (relationName) {
         var relation = relations[relationName];
         var modelTo = allmodels[relation.modelTo.modelName] || {};
         var fieldId = relation.keyFrom;
         var fmeta;
-        // by default hasMany will not be grid
-        // however we will support sending meta data
-        // if it is one of the fields in gridConfig
+                // by default hasMany will not be grid
+                // however we will support sending meta data
+                // if it is one of the fields in gridConfig
         if (relation.type === 'belongsTo') {
           props[fieldId] = props[fieldId] || {};
           fmeta = props[fieldId];
-          // unable to get additional properties added in model for relation
-          // so, add specific model logic instead.
+                    // unable to get additional properties added in model for relation
+                    // so, add specific model logic instead.
           if (modelTo.id === 'DocumentData') {
             fmeta.type = 'documentdata';
             fmeta.relationName = relation.name;
           } else {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
-            // assume 'name' ??
-            fmeta.displayproperty = 'name';
+            fmeta.displayproperty = 'name'; // assume 'name' ??
             fmeta.resturl = modelTo.resturl;
             fmeta.searchurl = fmeta.resturl + '?filter[where][name][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
             fmeta.dataurl = fmeta.resturl + '/VALUE_STRING';
@@ -413,10 +420,7 @@ module.exports = function uiComponent(UIComponent) {
 
       response.metadata.properties = props;
 
-      async.parallel(subtasks, function subTaskFinalCb(err, results) {
-        if (err) {
-          callback(err);
-        }
+      async.parallel(subtasks, function (err, results) {
         callback(null, response);
       });
     });
@@ -434,24 +438,24 @@ module.exports = function uiComponent(UIComponent) {
     return template;
   }
 
-  UIComponent.component = function fetchComponent(name, options, callback) {
+  UIComponent.component = function (name, options, callback) {
     var fetchAsHtml = true;
     UIComponent._createResponse(fetchAsHtml, name, options, callback);
   };
 
-  UIComponent.modelmeta = function fetchModelMeta(name, options, callback) {
+  UIComponent.modelmeta = function (name, options, callback) {
     var fetchAsHtml = false;
     UIComponent._createResponse(fetchAsHtml, name, options, callback);
   };
 
-  UIComponent.simulate = function simulateComponent(data, options, callback) {
+  UIComponent.simulate = function (data, options, callback) {
     var component = new UIComponent(data);
     var fetchAsHtml = true;
     component.generateComponent(fetchAsHtml, options, callback);
   };
 
-  UIComponent.configure = function configure(modelList, options, callback) {
-    if (typeof callback === 'undefined' && typeof options === 'function') {
+  UIComponent.configure = function (modelList, options, callback) {
+    if (callback === undefined && typeof options === 'function') {
       callback = options;
       options = {};
     }
@@ -463,15 +467,15 @@ module.exports = function uiComponent(UIComponent) {
     var temp = {};
     if (modelList.length > 0 && modelList[0] === '*') {
       modelList = [];
-      Object.keys(UIComponent.app.models).forEach(function modelsKeysForEach(modelName) {
+      Object.keys(UIComponent.app.models).forEach(function (modelName) {
         temp[modelName.toLowerCase()] = modelName;
       });
-      Object.keys(temp).forEach(function createModelList(modelName) {
+      Object.keys(temp).forEach(function (modelName) {
         modelList.push(modelName);
       });
     }
 
-    var createComponent = function createComponent(model, templateType, options, callback) {
+    var createComponent = function (model, templateType, options, callback) {
       var templateName = 'default-' + templateType + '.html';
       var name = model.modelName.toLowerCase() + '-' + templateType;
       var rec = {
@@ -483,14 +487,14 @@ module.exports = function uiComponent(UIComponent) {
         rec.autoInjectFields = false;
         rec.gridConfig = {};
         rec.gridConfig.modelGrid = [];
-        Object.keys(model.definition.rawProperties).forEach(function extractGridMeta(key) {
+        Object.keys(model.definition.rawProperties).forEach(function (key) {
           if (key.required) {
             rec.gridConfig.modelGrid.push(key);
           }
         });
 
         if (rec.gridConfig.modelGrid.length < 4) {
-          Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
+          Object.keys(model.definition.rawProperties).forEach(function (key) {
             if (key.startsWith('_') || key === 'scope' || key === 'id') {
               return;
             }
@@ -500,32 +504,31 @@ module.exports = function uiComponent(UIComponent) {
           });
         }
       }
-      UIComponent.create(rec, options, function createCb(err, component) {
+      UIComponent.create(rec, options, function (err, component) {
         if (err) log.error(options, 'error creating ui component ', name, JSON.stringify(err));
         callback(err, component);
       });
     };
 
     var tasks = [];
-    modelList.forEach(function defaultUICreator(modelName) {
+    modelList.forEach(function (modelName) {
       modelName = UIComponent.app.locals.modelNames[modelName] || modelName;
       var model = UIComponent.app.models[modelName];
       if (model && model.shared) {
         var templates = ['form', 'list'];
-        templates.forEach(function templateBasedComponentCreator(templateType) {
-          tasks.push(function pushCb(done) {
+        templates.forEach(function (templateType) {
+          tasks.push(function (done) {
             var componentName = modelName.toLowerCase() + '-' + templateType;
             var filter = {
               where: {
                 name: componentName
               }
             };
-            UIComponent.findOne(filter, options, function findComponentCb(err, component) {
-              if (err) {
-                done(err);
-              }
-              if (component) {
-                done(null, component);
+                        // prefer find and results[0] over findOne
+                        // to make sure data personalization is applied correctly.
+            UIComponent.find(filter, options, function (err, results) {
+              if (results && results[0]) {
+                done(null, results[0]);
               } else {
                 createComponent(model, templateType, options, done);
               }
@@ -535,10 +538,7 @@ module.exports = function uiComponent(UIComponent) {
       }
     });
 
-    async.series(tasks, function seriesCb(err, results) {
-      if (err) {
-        callback(err);
-      }
+    async.series(tasks, function (err, results) {
       callback(null, results);
     });
   };
@@ -652,26 +652,26 @@ module.exports = function uiComponent(UIComponent) {
   });
 
 
-  UIComponent.afterRemote('ui', function uiComponentUi(context, remoteMethodOutput, next) {
+  UIComponent.afterRemote('ui', function (context, remoteMethodOutput, next) {
     context.res.setHeader('Content-Type', 'text/plain');
     context.res.end(context.result);
   });
 
-  UIComponent.afterRemote('component', function uiComponentComponent(context, remoteMethodOutput, next) {
+  UIComponent.afterRemote('component', function (context, remoteMethodOutput, next) {
     context.res.setHeader('Content-Type', 'text/html');
     context.res.end(context.result);
   });
 
-  UIComponent.afterRemote('simulate', function uiComponentSimulate(context, remoteMethodOutput, next) {
+  UIComponent.afterRemote('simulate', function (context, remoteMethodOutput, next) {
     context.res.setHeader('Content-Type', 'text/html');
     context.res.end(context.result);
   });
 
-  // TODO handle route path and nav link add update / delete
-  // UIComponent.observe('after save', function(ctx, next){
-  //	if (ctx.instance) {
-  // var NavigationLink = loopback.getModelByType('NavigationLink');
-  //	}
-  //	next();
-  // });
+    // TODO handle route path and nav link add update / delete
+    // UIComponent.observe('after save', function(ctx, next){
+    //	if (ctx.instance) {
+    // var NavigationLink = loopback.getModelByType('NavigationLink');
+    //	}
+    //	next();
+    // });
 };
