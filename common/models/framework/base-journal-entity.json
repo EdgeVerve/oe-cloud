@@ -1,7 +1,7 @@
-{
+﻿{
   "name": "BaseJournalEntity",
   "base": "BaseEntity",
-  "idInjection": false,
+  "idInjection": true,
   "description": "Enable to perform several activities togather in a way that all will succeed or fail",
   "properties": {
     "fromPending": {
@@ -26,11 +26,6 @@
       "property": "nonAtomicActivitiesList"
 
     }
-  },
-   "options": {
-    "instanceCacheSize": 200000,
-    "instanceCacheExpiration": 0,
-    "disableManualPersonalization": true
   },
   "acls": [],
   "methods": {}

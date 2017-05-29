@@ -15,7 +15,7 @@
     "instanceCacheSize": 200000,
     "instanceCacheExpiration": 0,
     "proxyEnabled": true,
-    "proxyMethods": [{"name":"validateAndReserveAtomicAction"},{"name":"validateNonAtomicAction"},{"name":"drainMailBox"}]
+    "proxyMethods": [{"name":"validateAndReserveAtomicAction"},{"name":"validateNonAtomicAction"},{"name":"journalSaved"}]
   },
   "acls": [],
   "methods": {},
