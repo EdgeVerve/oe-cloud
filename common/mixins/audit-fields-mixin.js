@@ -48,7 +48,7 @@
  * @author Sivankar Jain
  */
 
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('audit-fields-mixin');
 
 module.exports = function AuditFieldsMixin(Model) {

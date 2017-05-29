@@ -17,7 +17,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var models = bootstrap.models;
 
-//var loggerModule = require('../lib/logger');
+//var loggerModule = require('oe-logger');
 var api = bootstrap.api;
 var app = bootstrap.app;
 

@@ -8,7 +8,7 @@ var util = require('../../lib/common/util');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 var config = require('../config');
 var DEFAULT_TTL_OTP = 180000;
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('otp-middleware');
 var crypto = require('crypto');
 

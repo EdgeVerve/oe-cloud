@@ -6,7 +6,7 @@
  */
 
 var loopback = require('loopback');
-var log = require('../../lib/logger')('redirect-for-uiroutes');
+var log = require('oe-logger')('redirect-for-uiroutes');
 
 /**
  * This boot script registers express handler for each UIRoute

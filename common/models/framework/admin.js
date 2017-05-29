@@ -9,7 +9,7 @@ var async = require('async');
 var path = require('path');
 var fs = require('fs');
 var Admzip = require('adm-zip');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('admin');
 
 module.exports = function AppUser(admin) {

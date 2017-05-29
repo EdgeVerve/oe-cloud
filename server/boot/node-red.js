@@ -50,7 +50,7 @@ module.exports = function startNodeRed(server, callback) {
     flowFilePretty: true,
     functionGlobalContext: {
       loopback: require('loopback'),
-      logger: require('../../lib/logger')('node-red-flow')
+      logger: require('oe-logger')('node-red-flow')
     }
     // enables global context
   };

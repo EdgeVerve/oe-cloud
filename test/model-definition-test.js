@@ -17,7 +17,7 @@ var expect = bootstrap.chai.expect;
 var loopback = require('loopback');
 var models = bootstrap.models;
 var modelDefitnionUrl = bootstrap.basePath + '/ModelDefinitions';
-var log = require('../lib/logger')('model-definition-test');
+var log = require('oe-logger')('model-definition-test');
 
 
 var chai = require('chai');

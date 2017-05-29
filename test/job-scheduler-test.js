@@ -11,7 +11,7 @@
  */
 var bootstrap = require('./bootstrap');
 var models = bootstrap.models;
-var logger = require('../lib/logger');
+var logger = require('oe-logger');
 var log = logger('job-scheduler-test');
 var Uuid = require('node-uuid');
 

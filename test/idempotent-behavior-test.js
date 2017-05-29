@@ -16,7 +16,7 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 var api = bootstrap.api;
 var models = bootstrap.models;
-var logger = require('../lib/logger');
+var logger = require('oe-logger');
 var log = logger('data-personalization-test');
 var loopback = require('loopback');
 

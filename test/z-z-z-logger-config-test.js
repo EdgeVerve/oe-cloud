@@ -9,7 +9,7 @@ var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
 var loggerConfigUrl = bootstrap.basePath + '/LoggerConfigs/';
-var loggerModule = require('../lib/logger');
+var loggerModule = require('oe-logger');
 var api = bootstrap.api;
 
 var debug = require('debug')('logger-config-test');

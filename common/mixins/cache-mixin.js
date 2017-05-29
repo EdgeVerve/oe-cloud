@@ -18,7 +18,7 @@
  * @author Ajith Vasudevan
  */
 
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('cache-mixin');
 var messaging = require('../../lib/common/global-messaging');
 var uuid = require('node-uuid');

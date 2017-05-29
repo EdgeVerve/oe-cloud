@@ -10,7 +10,7 @@
 // var _ = require('lodash');
 // var modelPersonalizer = require('../../lib/model-personalizer');
 var util = require('../../lib/common/util');
-var log = require('../../lib/logger')('model-discovery-filter');
+var log = require('oe-logger')('model-discovery-filter');
 
 /**
  * Model Discovery Filter

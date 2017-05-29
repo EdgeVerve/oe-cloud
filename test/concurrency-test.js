@@ -7,7 +7,7 @@
 
 var bootstrap = require('./bootstrap');
 var chalk = require('chalk');
-var log = require('../lib/logger')('concurrency-test');
+var log = require('oe-logger')('concurrency-test');
 var chai = require('chai');
 var expect = chai.expect;
 chai.use(require('chai-things'));

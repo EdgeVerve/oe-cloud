@@ -29,7 +29,7 @@
 var loopback = require('loopback');
 // var _ = require('lodash');
 
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('history-mixin');
 
 module.exports = function HistoryMixin(Model) {

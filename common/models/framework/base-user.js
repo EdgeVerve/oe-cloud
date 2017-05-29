@@ -12,7 +12,7 @@
  */
 
 var loopback = require('loopback');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('BaseUser');
 var async = require('async');
 var debug = require('debug')('base-user');

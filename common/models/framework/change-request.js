@@ -19,7 +19,7 @@
  */
 // function has too many parameters.'
 var loopback = require('loopback');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('change-request');
 var uuid = require('node-uuid');
 

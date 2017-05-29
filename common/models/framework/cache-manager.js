@@ -19,7 +19,7 @@
  * @class CacheManager
  * @author Ajith Vasudevan
  */
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('cache-manager');
 
 module.exports = function CacheManagerFn(CacheManager) {

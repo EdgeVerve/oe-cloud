@@ -1,5 +1,5 @@
 var loopback = require('loopback');
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('pening-journal');
 
 module.exports = function (PendingJournal) {

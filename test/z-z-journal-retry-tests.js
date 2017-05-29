@@ -18,7 +18,7 @@ var app = bootstrap.app;
 var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('rest-api-actors-mixin-test');
 var eventHistoryManager = require('../ev-modules/ev-event-history-manager');
 

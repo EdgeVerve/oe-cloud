@@ -18,7 +18,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var expect = chai.expect;
-var logger = require('../lib/logger');
+var logger = require('oe-logger');
 
 var models = bootstrap.models;
 

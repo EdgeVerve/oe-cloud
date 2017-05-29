@@ -41,7 +41,7 @@ var encryption = require('../../../lib/encryption');
 var autofields = require('../../../lib/auto-fields');
 var async = require('async');
 var loopback = require('loopback');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('baseentity');
 // The actual config object
 var config = require('../../../server/config.js');

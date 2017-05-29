@@ -50,7 +50,7 @@
  * @author RSR
  */
 
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('enum-base');
 
 module.exports = function EnumBaseFn(EnumBase) {

@@ -26,7 +26,7 @@ var loopback = require('loopback');
 var CronJob = require('cron').CronJob;
 var _ = require('lodash');
 
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('job-scheduler');
 module.exports = function JobScheduler(jobScheduler) {
   /**

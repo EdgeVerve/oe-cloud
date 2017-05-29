@@ -12,7 +12,7 @@
     */
 
 var loopback = require('loopback');
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('switch-datasource-mixin');
 var appinstance = require('../../server/server.js').app;
 

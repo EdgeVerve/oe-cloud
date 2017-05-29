@@ -21,7 +21,7 @@ var async = require('async');
 var chai = require('chai');
 var chaiThings = require('chai-things');
 var chalk = require('chalk');
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 

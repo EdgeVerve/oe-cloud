@@ -12,7 +12,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 var loopback = require('loopback');
 var fs = require('fs');
 var path = require('path');
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('evf-designer');
 var _ = require('lodash');
 var evf = require('../../lib/evf');

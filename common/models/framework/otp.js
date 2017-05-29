@@ -13,7 +13,7 @@
  */
 
 var loopback = require('loopback');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('otp');
 
 module.exports = function OTP(otpModel) {

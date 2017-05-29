@@ -14,7 +14,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 // TODO: without clean db test cases are not passing, need to clean up test cases.
 
 var loopback = require('loopback');
-var log = require('evf-logger')('service-personalization');
+var log = require('oe-logger')('service-personalization');
 
 var messaging = require('../../lib/common/ev-global-messaging');
 var servicePersonalizer = require('../../lib/ev-service-personalizer');

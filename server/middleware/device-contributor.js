@@ -4,7 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('device-contributor');
 
 /**

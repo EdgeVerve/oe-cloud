@@ -20,7 +20,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 // modelName should not be unique you can have multiple rules based on the scope?
 var async = require('async');
 var loopback = require('loopback');
-var log = require('evf-logger')('model-rule');
+var log = require('oe-logger')('model-rule');
 
 var messaging = require('../../lib/common/ev-global-messaging');
 

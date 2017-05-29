@@ -6,7 +6,7 @@
  */
 var util = require('../../../lib/common/util');
 var debug = require('debug')('db-models');
-var log = require('../../../lib/logger')('model-definition');
+var log = require('oe-logger')('model-definition');
 var inflection = require('inflection');
 var loopback = require('loopback');
 var uuid = require('node-uuid');

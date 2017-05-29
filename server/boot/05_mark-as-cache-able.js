@@ -5,7 +5,7 @@ The Program may contain/reference third party or open source components, the rig
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
 var config = require('../../server/config');
-var log = require('evf-logger')('markascacheable');
+var log = require('oe-logger')('markascacheable');
 var messaging = require('../../lib/common/ev-global-messaging');
 var loopback = require('loopback');
 

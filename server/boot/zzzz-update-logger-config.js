@@ -5,7 +5,7 @@
  *
  */
 var loopback = require('loopback');
-var loggingModule = require('./../../lib/logger');
+var loggingModule = require('oe-logger');
 var log = loggingModule('update-logger-config');
 var config = require('./../log-config');
 

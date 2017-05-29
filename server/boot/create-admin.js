@@ -6,7 +6,7 @@
  */
 var loopback = require('loopback');
 var async = require('async');
-var log = require('../../lib/logger')('create-admin');
+var log = require('oe-logger')('create-admin');
 var app = require('../server').app;
 
 var userDetails = app.get('defaultUser');

@@ -4,7 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-var log = require('../../lib/logger')('context-populator-filter');
+var log = require('oe-logger')('context-populator-filter');
 var camelCase = require('camelcase');
 
 

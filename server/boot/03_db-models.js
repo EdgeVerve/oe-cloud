@@ -5,7 +5,7 @@
  *
  */
 var util = require('../../lib/common/util');
-var log = require('../../lib/logger')('boot-db-models');
+var log = require('oe-logger')('boot-db-models');
 var events = require('events');
 var DataSource = require('loopback-datasource-juggler').DataSource;
 var async = require('async');

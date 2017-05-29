@@ -16,7 +16,7 @@ var app = bootstrap.app;
 var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
-var logger = require('../lib/logger');
+var logger = require('oe-logger');
 var log = logger('business-validations-test');
 
 var api = bootstrap.api;

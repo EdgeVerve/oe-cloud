@@ -44,7 +44,7 @@
 
 const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 const _ = require('lodash');
-const log = require('../../lib/logger')('data-personalization-mixin');
+const log = require('oe-logger')('data-personalization-mixin');
 
 module.exports = Model => {
   // Defining a new _score, scope, _autoScope property

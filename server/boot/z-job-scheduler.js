@@ -12,7 +12,7 @@
  * @name Z Job Scheduler
  */
 var schedulerConfigs = require('../job-scheduler-config.json').configs;
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('z-job-scheduler');
 var util = require('../../lib/common/util');
 

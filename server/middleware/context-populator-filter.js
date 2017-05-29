@@ -5,7 +5,7 @@
  *
  */
 var loopback = require('loopback');
-var log = require('../../lib/logger')('context-populator-filter');
+var log = require('oe-logger')('context-populator-filter');
 /**
  * Context Populator Filter
  * This middleware sets the current Context from req to loopback current context

@@ -15,7 +15,7 @@ var bootstrap = require('./bootstrap');
 var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
-var logger = require('../lib/logger');
+var logger = require('oe-logger');
 var log = logger('idempotent-mixin-test');
 
 var api = bootstrap.api;

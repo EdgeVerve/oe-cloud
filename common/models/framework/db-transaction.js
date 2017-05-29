@@ -5,7 +5,7 @@
  *
  */
 var loopback = require('loopback');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('DbTransaction');
 // var debug = require('debug')('DbTransaction');
 var async = require('async');

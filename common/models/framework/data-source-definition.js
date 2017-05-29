@@ -6,7 +6,7 @@
  */
 var util = require('../../../lib/common/util');
 var loopbackDatasource = require('loopback-datasource-juggler').DataSource;
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('data-source-definition');
 
 /**

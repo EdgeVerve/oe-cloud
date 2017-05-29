@@ -7,7 +7,7 @@
 // var loopback = require ('loopback');
 // var uuid = require ('node-uuid');
 // var debug = require('debug')('res-logging-filter');
-var log = require('../../lib/logger')('res-logging-filter');
+var log = require('oe-logger')('res-logging-filter');
 
 /**
  * Response Logging Filter

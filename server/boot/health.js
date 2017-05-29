@@ -4,7 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('health');
 var DataSource = require('loopback-datasource-juggler').DataSource;
 var dataSources = require('./../datasources.json');

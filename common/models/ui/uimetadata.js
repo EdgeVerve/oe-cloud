@@ -6,7 +6,7 @@
  */
 var async = require('async');
 var inflection = require('inflection');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('uimetadata');
 
 /**

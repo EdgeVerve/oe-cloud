@@ -13,7 +13,7 @@
  */
 
 var exprLang = require('../../../lib/expression-language/expression-language.js');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('model-validations');
 
 module.exports = function businessRule(BusinessRule) {

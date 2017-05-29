@@ -11,7 +11,7 @@
 var bootstrap = require('./bootstrap');
 var chalk = require('chalk');
 var async = require('async');
-var log = require('../lib/logger')('switch-data-source-test');
+var log = require('oe-logger')('switch-data-source-test');
 var chai = require('chai');
 var expect = chai.expect;
 chai.use(require('chai-things'));

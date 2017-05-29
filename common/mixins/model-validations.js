@@ -13,7 +13,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @author Sambit Kumar Patra
  */
 
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('model-validations');
 var async = require('async');
 var q = require('q');

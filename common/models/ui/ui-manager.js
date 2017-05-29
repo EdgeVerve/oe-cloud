@@ -6,7 +6,7 @@
  */
 var modelPersonalizer = require('../../../lib/model-personalizer');
 var async = require('async');
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('ui-manager');
 var inflection = require('inflection');
 

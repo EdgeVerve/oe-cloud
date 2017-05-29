@@ -14,7 +14,7 @@
 var q = require('q');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 var loopback = require('loopback');
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('model-validations');
 
 module.exports = function BusinessRuleMixin(BusinessRuleModel) {

@@ -1,5 +1,5 @@
 var async = require('async');
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
 var ignoreScopeOptions = {

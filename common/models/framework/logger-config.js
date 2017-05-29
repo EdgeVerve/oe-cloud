@@ -6,7 +6,7 @@
  */
 
 var loopback = require('loopback');
-var loggingModule = require('./../../../lib/logger');
+var loggingModule = require('oe-logger');
 var log = loggingModule('logger-config');
 var msgService = require('../../../lib/common/global-messaging');
 var uuid = require('node-uuid');

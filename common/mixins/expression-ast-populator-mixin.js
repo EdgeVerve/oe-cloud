@@ -12,7 +12,7 @@
  * @author Sambit Kumar Patra
  */
 
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('expression-ast-populator-mixin');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 

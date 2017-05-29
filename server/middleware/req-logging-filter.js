@@ -8,7 +8,7 @@
 // var uuid = require ('node-uuid');
 // var logger = require ('../../lib/logger');
 // var debug = require('debug')('req-logging-filter');
-var log = require('../../lib/logger')('req-logging-filter');
+var log = require('oe-logger')('req-logging-filter');
 
 /**
  * Request Logging Filter

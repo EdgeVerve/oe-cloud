@@ -5,7 +5,7 @@
  *
  */
 // var loopback = require('loopback');
-var log = require('../../lib/logger')('boot-datasources');
+var log = require('oe-logger')('boot-datasources');
 var util = require('../../lib/common/util');
 
 /**

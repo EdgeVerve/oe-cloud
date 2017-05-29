@@ -6,7 +6,7 @@
  */
 const loopback = require('loopback');
 const Passport = require('passport');
-const logger = require('../../lib/logger');
+const logger = require('oe-logger');
 const log = logger('JWT-Assertion');
 const path = require('path');
 const app = require('../server').app;

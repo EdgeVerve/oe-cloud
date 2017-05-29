@@ -8,7 +8,7 @@
 /* This mixin is for expression evaluations mentioned in properties and attaching the evaluated values to the properties*/
 /* @mixin Property expression mixin*/
 /* @author Rahul_Verma17*/
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('property-expression-mixin');
 var propertyUtils = require('../../lib/common/property-expression-utils.js');
 var exprLang = require('../../lib/expression-language/expression-language.js');

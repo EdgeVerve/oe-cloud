@@ -12,7 +12,7 @@
 * @name Load DataSource Mapping
  */
 
-var log = require('../../lib/logger')('boot-datasources');
+var log = require('oe-logger')('boot-datasources');
 
 module.exports = function LoadDataSourceMappings(app, cb) {
   var model = app.models.DataSourceMapping;

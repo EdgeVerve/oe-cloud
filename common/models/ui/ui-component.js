@@ -13,7 +13,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @author Praveen Kumar Gulati
  */
 var async = require('async');
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('UIComponent');
 var loopback = require('loopback');
 var fs = require('fs');

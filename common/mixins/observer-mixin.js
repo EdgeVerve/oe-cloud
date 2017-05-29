@@ -26,7 +26,7 @@
  * @author Sivankar Jain
  */
 
-var logger = require('../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('observer-mixin');
 
 module.exports = function ObserverMixin(Model) {

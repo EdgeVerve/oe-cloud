@@ -24,7 +24,7 @@
  * @author Praveen Kumar Gulati
  */
 
-var logger = require('../../../lib/logger');
+var logger = require('oe-logger');
 var log = logger('data-acl');
 var loopback = require('loopback');
 var applyFilter = require('loopback-filters');
