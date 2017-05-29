@@ -31,7 +31,7 @@
     "cron": "^1.1.0",
     "debug": "2.2.0",
     "errorhandler": "^1.4.3",
-    "js-feel": "^1.0.0",
+    "js-feel": "~1.0.0",
     "express-flash": "0.0.2",
     "express-session": "1.12.1",
     "gelf-stream": "^1.1.1",
