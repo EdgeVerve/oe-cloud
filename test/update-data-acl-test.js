@@ -63,7 +63,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
             principalType: 'ROLE',
             principalId: 'ROLE232',
             accessType: 'WRITE',
-            property: 'updateById',
+            property: 'update',
             group: 'category',
             filter: { 'category': 'book' },
             errorCode: 'data-acl-err-003'
@@ -202,7 +202,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
         var lc = logger('LOGGER-CONFIG');
         var dlog = logger('data-acl');
         lc.changeLogger(dlog, logger.DEBUG_LEVEL);
- 
+
         async.series([function (cb) {
             cleanup(cb);
             cb();
@@ -264,7 +264,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
         var postData = {
             'username': user1.username,
             'password': user1.password,
-            'tenantId' : 'test-tenant'
+            'tenantId': 'test-tenant'
         };
 
         var postUrl = baseUrl + '/BaseUsers/login';
@@ -311,6 +311,8 @@ describe(chalk.blue('data-acl-update-test'), function () {
                     .put(url)
                     .send(rec)
                     .end(function (err, res) {
+                        console.log(res.status);
+                        console.log(res.body.error);
                         expect(res.status).to.be.equal(200);
                         expect(res.body._version).not.to.be.equal(rec._version);
                         var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;

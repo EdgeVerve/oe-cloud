@@ -357,7 +357,7 @@ describe(chalk.blue('actor-state-test'), function() {
                 //expect(err.message).to.be.equal('Cannot delete journal entry');
                 return done();
             } else {
-                log.info('deleted alltest transfers');
+                log.debug('deleted alltest transfers');
                 return done(new Error('Should not be allowed to delete journal entries!'));
             }
         });

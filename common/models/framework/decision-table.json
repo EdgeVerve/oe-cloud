@@ -26,6 +26,7 @@
       "foreignKey": ""
     }
   },
+  "cacheable": true,
   "acls": [],
   "methods": {}
 }

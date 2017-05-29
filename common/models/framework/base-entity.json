@@ -1,7 +1,7 @@
 {
     "name": "BaseEntity",
     "base": "PersistedModel",
-  "idInjection": false,
+  "idInjection": true,
   "strict" :  true,
     "autoscope": [
         "tenantId"
@@ -12,18 +12,17 @@
     },
     "mixins": {
         "ObserverMixin": true,
-        "HistoryMixin": true,
         "CacheMixin": true,
         "ModelValidations": true,
         "PropertyExpressionMixin": true,
         "ExpressionAstPopulatorMixin": true,
         "AuditFieldsMixin": true,
         "DataPersonalizationMixin": true,
-        "ServicePersonalizationMixin": true,
         "SwitchDatasourceMixin": true,
-        "VersionMixin": true,
         "BusinessRuleMixin": true,
         "SoftDeleteMixin": true,
+        "VersionMixin": true,
+        "HistoryMixin": true,
         "IdempotentMixin": true,
         "FailsafeObserverMixin": true,
         "DataHierarchyMixin": false

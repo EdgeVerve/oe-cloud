@@ -1,8 +1,8 @@
 {
     "name": "ChangeRequest",
     "plural": "changeRequests",
-  "base": "BaseEntity",
-  "description" :  "Can be used for approval workflow",
+    "base": "BaseEntity",
+    "description": "used for approval workflow",
     "idInjection": true,
     "options": {
         "validateUpsert": true,
@@ -20,7 +20,7 @@
         "originalEntityType": {
             "type": "string",
             "required": true,
-            "max":30
+            "max": 30
         },
         "changedEntity": {
             "type": "object",

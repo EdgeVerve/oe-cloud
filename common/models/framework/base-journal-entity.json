@@ -1,12 +1,18 @@
 {
   "name": "BaseJournalEntity",
   "base": "BaseEntity",
-  "idInjection": true,
+  "idInjection": false,
+  "description": "Enable to perform several activities togather in a way that all will succeed or fail",
   "properties": {
-    "nonAtomicWait": {
+    "fromPending": {
       "type": "boolean"
+    },
+    "startup": {
+      "type": "string",
+      "index": true
     }
   },
+  "hidden": [ "startup" ],
   "validations": [],
   "relations": {
     "atomicActivities": {
@@ -20,6 +26,11 @@
       "property": "nonAtomicActivitiesList"
 
     }
+  },
+   "options": {
+    "instanceCacheSize": 200000,
+    "instanceCacheExpiration": 0,
+    "disableManualPersonalization": true
   },
   "acls": [],
   "methods": {}

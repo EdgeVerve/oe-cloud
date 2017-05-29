@@ -1,14 +1,33 @@
 {
     "name": "State",
-    "base": "PersistedModel",
-    "properties": 
-    {
+    "base": "BaseEntity",
+    "description": "holds transactional data on the actor itself",
+    "properties": {
         "stateObj": {
             "type": "object",
             "required": true
         },
         "lastUpdated": {
             "type": "Date"
+        },
+        "seqNum": {
+            "type": "Number",
+            "default": 0
         }
+    },
+    "mixins": {
+        "ModelValidations": false,
+        "DataPersonalizationMixin": false,
+        "HistoryMixin": false,
+        "IdempotentMixin": false,
+        "VersionMixin": false,
+        "FailsafeObserverMixin": false,
+        "BusinessRuleMixin": false,
+        "SoftDeleteMixin": false
+    },
+    "options": {
+        "instanceCacheSize": 200000,
+        "instanceCacheExpiration": 0,
+        "disableManualPersonalization": true
     }
 }

@@ -30,7 +30,9 @@
   "mixins": {
     "DataPersonalizationMixin": true
   },
-  "autoscope": [ "tenantId" ],
+  "autoscope": [
+    "tenantId"
+  ],
   "isFrameworkModel": true,
   "relations": {},
   "acls": [],

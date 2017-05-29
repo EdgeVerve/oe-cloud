@@ -64,7 +64,8 @@
             "enabled": true,
             "paths": ["${restApiRoot}"]
         },
-        "./middleware/recaptcha-validate": {}
+        "./middleware/recaptcha-validate": {},
+        "./middleware/db-lock-contributor": {}
     },
     "routes": {
     },

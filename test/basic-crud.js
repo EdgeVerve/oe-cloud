@@ -1,6 +1,6 @@
 /**
  * 
- * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * ï¿½2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
  * 
  */
@@ -192,26 +192,26 @@ describe('basic-crud', function () {
             done();
         });
     });
-    
+
     it('find after delete', function (done) {
         var query = {
-            where : {
+            where: {
                 id: data.id
             },
-            fetchDeleted : true
+            fetchDeleted: true
         }
         Note.find(query, bootstrap.defaultContext, function (err, rec) {
             expect(err).to.be.defined;
             done();
         });
     });
-    
+
     it('upsert after delete', function (done) {
         var updateData = {
             title: 'my note 2',
             content: 'Hello word',
             id: data.id,
-            _version : 'sdasd'
+            _version: 'sdasd'
         };
         Note.upsert(updateData, bootstrap.defaultContext, function (err, res) {
             if (err) {

@@ -4,6 +4,7 @@
   "plural": "PersonalizationRules",
   "description": "Service Personalization metadata",
   "idInjection": false,
+  "strict": true,
   "options": {
     "validateUpsert": true,
     "isFrameworkModel": true
@@ -12,27 +13,24 @@
     "ruleName": {
       "type": "string"
     },
-    "disableRule": {
+    "disabled": {
       "type": "boolean",
       "default": false
     },
     "modelName": {
       "type": "string",
       "required": true,
-      "max": 30
+      "unique": true,
+      "notin": [
+        "PersonalizationRule"
+      ]
     },
     "personalizationRule": {
       "type": "object",
       "required": true
-    },
-    "scope": {
-      "type": "object",
-      "required": true
     }
   },
-  "mixins": {
-    "ServicePersonalizationMixin": false
-  },
+  "cacheable": true,
   "validations": [],
   "relations": {},
   "acls": [],

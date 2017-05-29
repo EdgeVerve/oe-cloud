@@ -58,7 +58,9 @@
       "type": "string"
     },
     "listdata": {
-      "type": [ "string" ]
+      "type": [
+        "string"
+      ]
     },
     "listid": {
       "type": "string",
@@ -75,7 +77,6 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [
-  ],
+  "acls": [],
   "methods": {}
 }

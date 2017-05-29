@@ -180,6 +180,38 @@ describe('audit-fields-mixin tests	Programmatically', function () {
         });
     });
 
+    xit('Should update data and see if audit fields are updated (modifiedOn, modefiedBy should change)', function (done) {
+        var postData = {
+            'name': 'TestCaseTwo'
+        };
+
+        models[modelName].create(postData, defaultContext, function (err, res) {
+            if (err) {
+                done(err);
+            } else {
+                res.name = 'updatedName';
+                res.save(updateContext, function (err, updateRes) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(updateRes.name).to.be.equal(res.name);
+
+                        audit_fields.forEach(function (field) {
+                            expect(updateRes[field]).not.to.be.null;
+                            expect(updateRes[field]).not.to.be.undefined;
+                        });
+
+                        expect(updateRes['_modifiedBy']).to.be.equal(updateContext.ctx.remoteUser);
+                        expect(updateRes['_createdBy']).to.be.equal(defaultContext.ctx.remoteUser);
+                        expect(updateRes['_modifiedOn']).not.to.be.equalTime(updateRes['_createdOn']);
+                        expect(updateRes['_modifiedOn']).not.to.be.equalTime(res['_modifiedOn']);
+                        expect(updateRes['_createdOn']).to.be.equalTime(res['_createdOn']);
+                        done();
+                    }
+                });
+            }
+        });
+    });
 
     it('Should update data with _type, _createdOn, _createdBy set, and see if audit fields are updated' +
         '  without changing _createdOn, _createdBy and _type ',

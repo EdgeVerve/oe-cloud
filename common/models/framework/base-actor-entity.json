@@ -3,16 +3,19 @@
   "base": "BaseEntity",
   "idInjection": true,
   "validations": [],
-  "relations": {
-    "state": {
-        "type": "hasOne",
-        "model": "State",
-        "foreignKey": "actorId"
-    }
+  "relations": {},
+  "properties": 
+  {
+    "stateId": {
+          "type": "String"          
+      }
   },
   "options": {
+    "disableManualPersonalization": true,
+    "instanceCacheSize": 200000,
+    "instanceCacheExpiration": 0,
     "proxyEnabled": true,
-    "proxyMethods": [{"name":"initActor"},{"name":"validateAndReserveAtomicAction"},{"name":"nonAtomicAction"}]
+    "proxyMethods": [{"name":"validateAndReserveAtomicAction"},{"name":"validateNonAtomicAction"},{"name":"drainMailBox"}]
   },
   "acls": [],
   "methods": {},

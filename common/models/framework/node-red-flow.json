@@ -13,7 +13,9 @@
       "required": true
     },
     "flow": {
-      "type": [ "object" ]
+      "type": [
+        "object"
+      ]
     }
   },
   "validations": [],

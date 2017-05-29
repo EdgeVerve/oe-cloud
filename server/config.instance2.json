@@ -1,0 +1,60 @@
+{
+  "restApiRoot": "/api",
+  "host": "0.0.0.0",
+  "port": 3100,
+  "cookieSecret": "246bace2-9876-4321-1234-0ae8160b07c8",
+  "remoting": {
+    "context": {
+      "enableHttpContext": true
+    },
+    "rest": {
+      "normalizeHttpPath": false,
+      "xml": false
+    },
+    "json": {
+      "strict": false,
+      "limit": "2048kb"
+    },
+    "urlencoded": {
+      "extended": true,
+      "limit": "2048kb"
+    },
+    "cors": false,
+    "errorHandler": {
+      "disableStackTrace": false
+    }
+  },
+  "legacyExplorer": false,
+  "log": {
+    "type": "rotating-file",
+    "path": "./fw-log.log",
+    "period": "1d",
+    "count": 3
+  },
+  "frameworkdsname": "db",
+  "systemId" : "temporaryId",
+  "disablecaching": false,
+  "modelstocache": ["ACL", "ModelDefinition", "AppConfig"],
+  "frameworkMetadataModels"  : ["ModelDefinition", "BaseUser", "BaseACL", "DataACL", "DataSourceDefinition", "DataSourceMapping", "EnumBase", "ErrorDetail", "JobScheduler", "PersonalizationRule", "Error", "Literal", "Field", "GridColumnDefinition", "GridMetaData", "UIResource", "UIRoute", "UIMetadata", "NavigationLink"],
+  "tenantsource": "HEADER",
+  "tenantkey": "tenant_id",
+  "disableNodered": true,
+  "nodeRedUserDir": "nodered/",
+  "app": "ev-foundation",
+  "realm": "evf",
+  "enableQuickBootTest":true,
+  "defaultAutoScope": "default",
+  "encryptionAlgorithm": "crypto.aes256",
+  "encryptionPassword": "SomePassword",
+  "mqttOptions" : "mqtt://mqttguest:mqttguest@10.73.44.51",
+  "otpConfig":{
+	  "FundsTransfer" : "transferFund"
+  },
+  "enableDevEnvironment" : true,
+  "enableDesigner":true,
+  "designer":{
+      "installationPath":"client/bower_components",
+      "mountPath":"/designer",
+      "templatePath":[]
+  }
+}

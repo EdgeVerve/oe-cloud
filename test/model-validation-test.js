@@ -15,6 +15,7 @@ var api = bootstrap.api;
 var url = bootstrap.basePath;
 
 var modelName = 'StarWars';
+var starTrekModelName = 'StarTrek';
 
 describe(chalk.blue('model-validation PropertyLevel Validation test'), function () {
     this.timeout(20000);
@@ -24,65 +25,81 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
             done();
         });
 
-        models.ModelDefinition.create({
-            'name': 'StarWars',
-            'base': 'BaseEntity',
-            'strict': false,
-            'idInjection': true,
-            'options': {
-                'validateUpsert': true
-            },
-            'properties': {
-                'name': {
-                    'type': 'string',
-                    'unique': true,
-                    'min': 4,
-                    'max': 7
+        models.ModelDefinition.create([
+            {
+                'name': starTrekModelName,
+                'base': 'BaseEntity',
+                'strict': false,
+                'idInjection': true,
+                'options': {
+                    'validateUpsert': true
                 },
-                'numericField1': {
-                    'type': 'number',
-                    'numericality': 'integer'
-                },
-                'numericField2': {
-                    'type': 'number',
-                    'absence': true
-                },
-                'numericField3': {
-                    'type': 'number',
-                    'numericality': 'number',
-                    'pattern': '^\\d+(\\.\\d{1,2})?$'
-                },
-                'clan': {
-                    'type': 'string',
-                    'required': true,
-                    'unique': false,
-                    'absencechar': true
-                },
-                'country': {
-                    'type': 'string',
-                    'notin': ['England'],
-                    'is': 8
-                },
-                'gender': {
-                    'type': 'string',
-                    'in': ['Male', 'Female'],
-                    'required': false
-                },
-                'shipName': {
-                    'type': 'string',
-                    'pattern': '^[A-Za-z0-9-]+$'
+                'properties': {
+                    'name': {
+                        'type': 'string',
+                        'unique': 'ignoreCase'
+                    }
                 }
             },
-            'validations': [],
-            'relations': {},
-            'acls': [],
-            'methods': {}
-        }, bootstrap.defaultContext, function (err, model) {
-            if (err) {
-                console.log(err);
-            }
-            expect(err).to.be.not.ok;
-        });
+            {
+                'name': 'StarWars',
+                'base': 'BaseEntity',
+                'strict': false,
+                'idInjection': true,
+                'options': {
+                    'validateUpsert': true
+                },
+                'properties': {
+                    'name': {
+                        'type': 'string',
+                        'unique': true,
+                        'min': 4,
+                        'max': 7
+                    },
+                    'numericField1': {
+                        'type': 'number',
+                        'numericality': 'integer'
+                    },
+                    'numericField2': {
+                        'type': 'number',
+                        'absence': true
+                    },
+                    'numericField3': {
+                        'type': 'number',
+                        'numericality': 'number',
+                        'pattern': '^\\d+(\\.\\d{1,2})?$'
+                    },
+                    'clan': {
+                        'type': 'string',
+                        'required': true,
+                        'unique': false,
+                        'absencechar': true
+                    },
+                    'country': {
+                        'type': 'string',
+                        'notin': ['England'],
+                        'is': 8
+                    },
+                    'gender': {
+                        'type': 'string',
+                        'in': ['Male', 'Female'],
+                        'required': false
+                    },
+                    'shipName': {
+                        'type': 'string',
+                        'pattern': '^[A-Za-z0-9-]+$'
+                    }
+                },
+                'validations': [],
+                'relations': {},
+                'acls': [],
+                'methods': {}
+            }], bootstrap.defaultContext, function (err, model) {
+                if (err) {
+                    console.log(err);
+                }
+                expect(err).to.be.not.ok;
+            });
     });
 
 
@@ -94,10 +111,22 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
                 console.log('Error - not able to delete modelDefinition entry for mysettings');
                 return done();
             }
-            var model = loopback.getModel(modelName);
-            model.destroyAll({}, bootstrap.defaultContext, function () {
-                done();
+            models.ModelDefinition.destroyAll({
+                name: starTrekModelName
+            }, bootstrap.defaultContext, function (err, d) {
+                if (err) {
+                    console.log('Error - not able to delete modelDefinition entry for mysettings');
+                    return done();
+                }
+                var model = loopback.getModel(modelName);
+                var starTrekModel = loopback.getModel(starTrekModelName);
+                model.destroyAll({}, bootstrap.defaultContext, function () {
+                    starTrekModel.destroyAll({}, bootstrap.defaultContext, function () {
+                        done();
+                    });
+                });
             });
+
         });
     });
 
@@ -383,7 +412,7 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
         });
     });
 
-    it('Validation Test - Should sucessfully insert data', function (done) {
+    it('Validation Test - Should Fail to insert data by POST', function (done) {
         var URL = url + "/StarWars";
 
         var postData = {
@@ -403,6 +432,44 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
                 }
             });
 
+    });
+
+    it('Validation Test Unique Case insensitive- Should insert data successfully', function (done) {
+
+        var myModel = loopback.getModel(starTrekModelName);
+
+        var data = {
+            'name': 'Spock'
+        };
+        myModel.create(data, bootstrap.defaultContext, function (err, results) {
+            expect(err).to.be.null;
+            done();
+        });
+    });
+
+    it('Validation Test Unique Case insensitive- Should fail with duplicate case insensitive data ', function (done) {
+
+        var myModel = loopback.getModel(starTrekModelName);
+
+        var data1 = {
+            'name': 'spock'
+        };
+        var data2 = {
+            'name': 'SPOCK'
+        };
+        var data3 = {
+            'name': 'spOck'
+        };
+        myModel.create(data1, bootstrap.defaultContext, function (err, results) {
+            expect(err).not.to.be.null;
+            myModel.create(data2, bootstrap.defaultContext, function (err, results) {
+                expect(err).not.to.be.null;
+                myModel.create(data3, bootstrap.defaultContext, function (err, results) {
+                    expect(err).not.to.be.null;
+                    done();
+                });
+            });
+        });
     });
 
 });

@@ -1,0 +1,25 @@
+﻿{
+  "name": "Author",
+  "base": "BaseEntity",
+  "idInjection": true,
+  "properties": {
+    "firstName": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {
+    "pictures": {
+      "type": "hasMany",
+      "model": "Picture",
+      "primaryKey": "firstName",
+      "polymorphic": {
+        "as": "picRltn",
+        "foreignKey": "picRltnId",
+        "discriminator": "picRltnType"
+      }
+    }
+  },
+  "acls": [],
+  "methods": {}
+}

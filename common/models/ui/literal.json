@@ -14,12 +14,16 @@
       "max": 250
     },
     "placeholders": {
-      "type": [ "string" ]
+      "type": [
+        "string"
+      ]
     }
   },
   "validations": [],
   "relations": {},
   "acls": [],
   "methods": [],
-  "unique": [ "key" ]
+  "unique": [
+    "key"
+  ]
 }
