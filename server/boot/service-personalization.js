@@ -16,8 +16,8 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 var loopback = require('loopback');
 var log = require('oe-logger')('service-personalization');
 
-var messaging = require('../../lib/common/ev-global-messaging');
-var servicePersonalizer = require('../../lib/ev-service-personalizer');
+var messaging = require('../../lib/common/global-messaging');
+var servicePersonalizer = require('../../lib/service-personalizer');
 
 var personalizationRuleModel;
 

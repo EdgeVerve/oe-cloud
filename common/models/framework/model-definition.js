@@ -13,7 +13,7 @@ var uuid = require('node-uuid');
 var _ = require('lodash');
 var modelPersonalizer = require('../../../lib/model-personalizer');
 var config = require('../../../server/config');
-var messaging = require('../../../ev-modules/common/ev-global-messaging');
+var messaging = require('../../../lib/common/global-messaging');
 
 module.exports = function ModelDefintionFn(modelDefinition) {
   // Prevent creation of ModelDefinitions with filebased: true using the REST API
@@ -193,7 +193,6 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
             // Find all child models and re-create them so that the new base properties
             // are reflected in them
-            modelDefinition.find({
             modelDefinition.find({
                 where: {
                     base: modeldefinition.name

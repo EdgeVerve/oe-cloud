@@ -20,7 +20,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
 var log = logger('rest-api-actors-mixin-test');
-var eventHistoryManager = require('../ev-modules/ev-event-history-manager');
+var eventHistoryManager = require('../lib/event-history-manager');
 
 var api = bootstrap.api;
 

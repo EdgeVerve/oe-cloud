@@ -77,6 +77,7 @@ module.exports = function decisionTableFn(decisionTable) {
             data.decisionRules = JSON.stringify(decisionRules);
             next();
           } catch (err) {
+	    console.log(err);
             return next(err);
           }
         }

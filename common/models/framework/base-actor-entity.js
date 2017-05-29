@@ -7,7 +7,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 var async = require('async');
 var loopback = require('loopback');
 var log = require('oe-logger')('BaseActorEntity');
-var actorPool = require('../../../ev-modules/ev-actor-pool');
+var actorPool = require('../../../lib/actor-pool');
 var config = require('../../../server/config');
 var DB_LOCK_MODE = config.dbLockMode;
 var StateModel;

@@ -9,7 +9,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @mixin Change rest api calls to first check in memory pool and if it is not find - find in DB.
  * @author Karin Angel
  */
-var memoryPool = require('../../lib/ev-actor-pool');
+var memoryPool = require('../../lib/actor-pool');
 var _ = require('lodash');
 
 module.exports = function RestApiActorsMixin(Model) {

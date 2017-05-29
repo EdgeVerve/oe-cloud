@@ -7,7 +7,26 @@
 var loopback = require('loopback');
 var loggingModule = require('oe-logger');
 var log = loggingModule('update-logger-config');
-var config = require('./../log-config');
+var config;
+var configStr = process.env.LOGGER_CONFIG;
+if (configStr) {
+  try {
+    config = JSON.parse(process.env.LOGGER_CONFIG);
+  } catch (ex) {
+    console.error('Error parsing LOGGER_CONFIG environment variable.', ex.message);
+  }
+}
+if (!config) {
+  config = {
+    logStreams: [{
+      type: 'pretty'
+    }],
+    levels: {
+      default: 'info'
+    },
+    enableContextLogging: 0
+  };
+}
 
 function getModelFromConfig(callback) {
   var levelMap = {

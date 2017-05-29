@@ -14,8 +14,8 @@ var fs = require('fs');
 var path = require('path');
 var logger = require('oe-logger');
 var log = logger('evf-designer');
+var util = require('../../lib/common/util');
 var _ = require('lodash');
-var evf = require('../../lib/evf');
 var appconfig = require('../config');
 var glob = require('glob');
 
@@ -426,9 +426,9 @@ module.exports = function EvfDesigner(server) {
     var uiMetadataModel = loopback.findModel('UIMetadata');
 
     if (uiMetadataModel) {
-      uiMetadataModel.create(designerUIMetadata, evf.bootContext(), function results(err, result) {
+      uiMetadataModel.create(designerUIMetadata, util.bootContext(), function results(err, result) {
         if (err) {
-          log.debug(evf.bootContext(), 'Unable to create UIMetadata record for BaseUser. Record may have already exist.', err);
+          log.debug(util.bootContext(), 'Unable to create UIMetadata record for BaseUser. Record may have already exist.', err);
           return;
         }
       });
