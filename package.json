@@ -48,7 +48,6 @@
     "loopback-connector-mongodb": "git+https://github.com/EdgeVerve/loopback-connector-mongodb.git",
     "loopback-connector-nodes-for-Node-RED": "git+https://github.com/EdgeVerve/loopback-connector-nodes-for-Node-RED.git",
     "loopback-datasource-juggler": "git+https://github.com/EdgeVerve/loopback-datasource-juggler.git",
-    "loopback-explorer": "1.8.0",
     "loopback-filters": "0.1.2",
     "lru-cache": "^4.0.1",
     "mail": "^0.2.3",
