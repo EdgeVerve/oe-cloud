@@ -282,7 +282,7 @@ module.exports = function ModelValidations(Model) {
       if (properties[property].type instanceof Array &&
                 properties[property].type[0] &&
                 properties[property].type[0].sharedClass &&
-                instanceData[property]) {
+                instanceData[property]){
         relationNames.forEach(function getRelationFn(relationName) {
           var rel = relations[relationName];
           if (rel.modelTo.modelName === properties[property].type[0].modelName && rel.type === 'embedsMany' && rel.options && rel.options.validate === false) {
@@ -299,10 +299,9 @@ module.exports = function ModelValidations(Model) {
             modelfns.push(async.apply(model.prototype.isValid, null, options, data, path, instance));
           }
         }
-      }
-            // if property is of type Model then add its isValid method to the function array
-      else if (properties[property].type instanceof Function &&
+      } else if (properties[property].type instanceof Function &&
                 properties[property].type.sharedClass) {
+        // if property is of type Model then add its isValid method to the function array
         model = properties[property].type;
         path = instancePath + '->' + property;
         data = instanceData[property];

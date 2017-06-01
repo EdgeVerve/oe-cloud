@@ -252,7 +252,8 @@ module.exports = function (UIComponent) {
       }
       if (!component) {
         if (fetchAsHtml) {
-          var modelAndType = componentName.split('-'); // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
+          // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
+          var modelAndType = componentName.split('-');
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
           var templateType = modelAndType[1];
           if (modelName && templateType) {
@@ -262,7 +263,7 @@ module.exports = function (UIComponent) {
             if (templateType === 'form' && component && !component.autoInjectFields) {
               component.autoInjectFields = true;
             }
-            component = UIComponent(component);
+            component = new UIComponent(component);
           } else {
             var error = new Error();
             if (!modelName) {
@@ -404,7 +405,8 @@ module.exports = function (UIComponent) {
           } else {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
-            fmeta.displayproperty = 'name'; // assume 'name' ??
+            // assume 'name' ??
+            fmeta.displayproperty = 'name';
             fmeta.resturl = modelTo.resturl;
             fmeta.searchurl = fmeta.resturl + '?filter[where][name][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
             fmeta.dataurl = fmeta.resturl + '/VALUE_STRING';
