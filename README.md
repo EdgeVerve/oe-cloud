@@ -49,6 +49,15 @@ Browse all oeCloud.io models in browser
 http://localhost:3000/explorer
 ```
 
+## Migration from evf-foundation
+* change package.json to point to oe-cloud instead of ev-foundation
+* change require('evf-foundation) statements to require('oe-cloud');
+* change server/app-list.json to use use oe-cloud instead of ev-foundation, otherwiuse you may get error like
+Cannot find module node_modules/ev-foundation/server/providers.json
+* change connector property in datasources.json and datasources.js, and datasources.docker.js etc. from evmongodb to mongodb
+* npm install node-uuid --no-optional
+* change evf-logger to oe-logger
+
 ## More information
 
 Please visit [oeCloud.io](https://www.oecloud.io)
