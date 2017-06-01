@@ -22,9 +22,8 @@ module.exports = function UIResourceFn(UIResource) {
     * Extracts the `content` from the given record and returns.
     * `type` property on record decides the 'Content-Type' http header.
     *
-    * @param {string} name - name of UIResource
-    * @param {object} options - callContext Options
-    * @param {function} cb - callback
+    * @memberof UIResource
+    * @name content
     */
   UIResource.content = function uiResourceContentFn(name, options, cb) {
         // var self = this;

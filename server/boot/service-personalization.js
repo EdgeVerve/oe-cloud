@@ -45,15 +45,14 @@ module.exports = function ServicePersonalization(app, cb) {
       log.error(log.defaultContext(), 'personalizationRuleModel.find error. Error', err);
       cb(err);
     } else if (results && results.length > 0) {
-      // The below code for the if clause will not executed for test cases with clean/empty DB.
-      // In order to execute the below code and get code coverage for it we should have
-      // some rules defined for some models in the database before running tests for coverage.
+            // The below code for the if clause will not executed for test cases with clean/empty DB.
+            // In order to execute the below code and get code coverage for it we should have
+            // some rules defined for some models in the database before running tests for coverage.
       log.debug(log.defaultContext(), 'Some modelRules are present, on loading of this ModelRule model');
       for (var i = 0; i < results.length; i++) {
-        // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
-        // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
-        // Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
-        attachRemoteHooksToModel(results[i].modelName);
+                // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
+                // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
+        attachRemoteHooksToModel(results[i].modelName);// Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
       }
       cb();
     } else {
@@ -82,8 +81,7 @@ function personalizationRuleBeforeSave(ctx, next) {
   if (loopback.findModel(modelName)) {
     next();
   } else {
-    // Not sure it is the right way to construct error object to sent in the response.
-    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.');
+    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.'); // Not sure it is the right way to construct error object to sent in the response.
     next(err);
   }
 }
