@@ -30,6 +30,10 @@
         "dataSource": "db",
         "public": true
     },
+    "dev": {
+        "dataSource": "db",
+        "public": true
+    },
     "ModelDefinition": {
         "dataSource": "db",
         "public": true

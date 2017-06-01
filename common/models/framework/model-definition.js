@@ -185,51 +185,51 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     });
   };
 
-    function registerModel(modeldefinition, app, next) {
-        var options = {
-            fetchAllScopes: true
-        };
-        util.createModel(app, modeldefinition, options, function() {
-            modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
+  function registerModel(modeldefinition, app, next) {
+    var options = {
+      fetchAllScopes: true
+    };
+    util.createModel(app, modeldefinition, options, function () {
+      modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
             // Find all child models and re-create them so that the new base properties
             // are reflected in them
-            modelDefinition.find({
-                where: {
-                    base: modeldefinition.name
-                }
-            }, options, function(err, modeldefinitions) {
-                if (err) {
-                    log.error(options, err);
-                    return next(err);
-                }
-                if (modeldefinitions && modeldefinitions.length) {
-                    modeldefinitions.forEach(function(md) {
-                        util.createModel(app, md, options, function() {
-                            log.debug(options, 'emitting event model available ', md.name);
-                            modelDefinition.events.emit('model-' + md.name + '-available');
-                        });
-                    });
-                }
-                next();
+      modelDefinition.find({
+        where: {
+          base: modeldefinition.name
+        }
+      }, options, function (err, modeldefinitions) {
+        if (err) {
+          log.error(options, err);
+          return next(err);
+        }
+        if (modeldefinitions && modeldefinitions.length) {
+          modeldefinitions.forEach(function (md) {
+            util.createModel(app, md, options, function () {
+              log.debug(options, 'emitting event model available ', md.name);
+              modelDefinition.events.emit('model-' + md.name + '-available');
             });
-        });
-    }
-
-    messaging.subscribe('RegisterModel', function(modelId) {
-        var options = {
-            fetchAllScopes: true,
-            ignoreAutoScope: true
-        };
-        log.debug(options, 'RegisterModel ', modelId);
-        modelDefinition.findById(modelId, options, function(err, modelInstance) {
-            if (err) {
-                log.error(options, 'Error RegisterModel ', modelId, err);
-            }
-            registerModel(modelInstance, modelDefinition.app, function() {
-                log.debug(options, 'RegisterModel done ', modelId);
-            });
-        });
+          });
+        }
+        next();
+      });
     });
+  }
+
+  messaging.subscribe('RegisterModel', function (modelId) {
+    var options = {
+      fetchAllScopes: true,
+      ignoreAutoScope: true
+    };
+    log.debug(options, 'RegisterModel ', modelId);
+    modelDefinition.findById(modelId, options, function (err, modelInstance) {
+      if (err) {
+        log.error(options, 'Error RegisterModel ', modelId, err);
+      }
+      registerModel(modelInstance, modelDefinition.app, function () {
+        log.debug(options, 'RegisterModel done ', modelId);
+      });
+    });
+  });
 
   /**
    * This After Save Hook for ModelDefinition is responsible for creating a model
@@ -341,7 +341,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             });
           }
         });
-	messaging.publish('RegisterModel', modeldefinition.id);
+        messaging.publish('RegisterModel', modeldefinition.id);
       });
     }
     next();
