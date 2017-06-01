@@ -190,9 +190,8 @@ function setEvfDesignerPath(evfDesignerPath, server) {
       }
       var accepts = route.accepts || [];
       var split = route.method.split('.');
-      /* HACK split.length > 2 */
       if (classDef && classDef.sharedCtor &&
-          classDef.sharedCtor.accepts && split.length > 2 ) {
+              classDef.sharedCtor.accepts && split.length > 2 /* HACK */) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
       }
 
