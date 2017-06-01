@@ -42,12 +42,12 @@ module.exports = function (UIComponent) {
                 if (!err2 && files && files.length > 0) {
                   templatePath = files[0];
                   fs.readFile(templatePath, function read(err3, data2) {
-                      if (err3) {
-                        callback(err3, '');
-                      } else {
-                        callback(err3, data2.toString());
-                      }
-                    });
+                    if (err3) {
+                      callback(err3, '');
+                    } else {
+                      callback(err3, data2.toString());
+                    }
+                  });
                 } else {
                   var error = new Error();
                   error.message = 'Template ' + template + ' not found';
