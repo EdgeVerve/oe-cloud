@@ -71,7 +71,7 @@ module.exports = function failsafeObserverMixin(Model) {
   };
 
   function converteObservers(type) {
-    if (Model._observers[type] !== undefined) {
+    if (!Model._observers[type]) {
       Model._observers[type].forEach(function (observer) {
         var failSafeObserver = new FailSafeObserver(observer);
         Model.failSafeObserve(type, failSafeObserver);
@@ -103,10 +103,10 @@ module.exports = function failsafeObserverMixin(Model) {
 
 function failsafeObserverBeforeDelete(ctx, next) {
   var version;
-  if (ctx.instance !== undefined) {
+  if (!ctx.instance) {
     version = ctx.instance._version;
     ctx.instance._fsCtx = JSON.stringify(ctx.options);
-  } else if (ctx.data !== undefined) {
+  } else if (!ctx.data) {
     version = ctx.data._version;
   }
   if (!version) {
@@ -118,10 +118,10 @@ function failsafeObserverBeforeDelete(ctx, next) {
 
 function failsafeObserverBeforeSave(ctx, next) {
   var version;
-  if (ctx.instance !== undefined) {
+  if (!ctx.instance) {
     version = ctx.instance._version;
     ctx.instance._fsCtx = JSON.stringify(ctx.options);
-  } else if (ctx.data !== undefined) {
+  } else if (!ctx.data) {
     version = ctx.data._version;
   }
   if (!version) {
