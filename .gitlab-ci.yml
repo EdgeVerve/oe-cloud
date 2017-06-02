@@ -25,14 +25,12 @@ buildjob:
   stage: build
   script:
     - echo "Performing code style check..."
-    - status_jshint=0
+    - status_eslint=0
     - status_jscs=0
     - exit_status=0
-    - if jshint .; then status_jshint=0; else status_jshint=1; fi
-    - if jscs .; then status_jscs=0; else status_jscs=1; fi
-    - if [ $status_jshint == 1 ]; then exit_status=1 && echo "JSHint errors exist"; fi
-    - if [ $status_jscs == 1 ]; then exit_status=1 && echo "JSCS errors exist"; fi
-    - if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - if eslint .; then status_eslint=0; else status_jshint=1; fi
+    - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
+    #- if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - echo "Building oe-cloud image..."
     - time npm install --no-optional
