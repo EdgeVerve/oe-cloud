@@ -4,6 +4,7 @@
   "idInjection": true,
   "validations": [],
   "relations": {},
+  "strict": false,
   "properties": 
   {
     "stateId": {
