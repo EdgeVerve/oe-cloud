@@ -88,7 +88,6 @@ describe(chalk.blue('logger-config-test'), function () {
     });
 
     it('should change the logger configuration of all the loggers', function (done) {
-        debugger;
         var testLogger = loggerModule('test-logger');
         testLogger.debug('');
         var postData = {
