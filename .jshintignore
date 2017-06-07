@@ -1,8 +1,0 @@
-/client/
-/node_modules/
-server/dropdb.js
-/ev-modules/expression-language
-/test/
-/server/demo/
-/tools/demo/
-/demo/
