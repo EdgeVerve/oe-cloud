@@ -202,8 +202,7 @@ describe(chalk.blue('UIElement'), function() {
                 remoteUser: 'admin'
             }
         };
-
-        this.timeout(2000);
+        this.timeout(15000);
         var UIComponent = bootstrap.models['UIComponent'];
         UIComponent.configure([testModelName], context, function(err, data) {
             UIComponent.component('modelperson-form.html', context, function(err, data) {
