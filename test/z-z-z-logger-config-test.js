@@ -107,7 +107,7 @@ describe(chalk.blue('logger-config-test'), function () {
                     setTimeout(function () {
                         var checkerArray = (loggerModule('LOGGER-CONFIG')).getLoggers(); //get array of loggers to check them
                         Object.keys(checkerArray).forEach(function (key) {
-                            if (checkerArray[key].level !== levelMap.info) {
+                            if (checkerArray[key].level !== levelMap.warn) {
                                 return done(new Error('Logger levels unchanged in all test'));
                             }
                         });
