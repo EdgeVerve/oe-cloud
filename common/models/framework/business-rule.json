@@ -2,7 +2,6 @@
   "name": "BusinessRule",
   "base": "BaseEntity",
   "description": "This Model processes all the business rules(grammar expressions), create their ASTs and attach it to BusinessRule model",
-  "options": {
     "options": {
       "validateUpsert": true,
       "isFrameworkModel": true
@@ -41,5 +40,4 @@
     "relations": {},
     "acls": [],
     "methods": {}
-  }
 }

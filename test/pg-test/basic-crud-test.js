@@ -54,7 +54,7 @@ describe(chalk.blue('Basic Crud for Postgresql connector'), function () {
         var model = loopback.findModel(modelName);
         app.dataSource('db2', dataSourceConfig);
         model.attachTo(app.dataSources['db2']);
-        
+        model.app = app;
         done();
     });
     
