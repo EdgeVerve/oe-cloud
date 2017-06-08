@@ -26,9 +26,8 @@ buildjob:
   script:
     - echo "Performing code style check..."
     - status_eslint=0
-    - status_jscs=0
     - exit_status=0
-    - if eslint .; then status_eslint=0; else status_jshint=1; fi
+    - if eslint .; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     #- if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
@@ -54,11 +53,12 @@ mongotest:
   stage: test
   script:
     - export COMPOSE_HTTP_TIMEOUT=180
+    - export NODE_ENV=docker
     - export DB=mongo
     - export PROJECT_NAME=test-$DB-$APP_IMAGE_NAME
     - export NETWORK_NAME=${PROJECT_NAME//[^[:alnum:]]/}
     - export WEB_CONTAINER_NAME=$NETWORK_NAME"_web_1"
-    - export FILE_NAME=docker-compose.test.$DB.yml
+    - export FILE_NAME=docker-compose.test.env.yml
     - export exit_status=0
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
     - if docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME; then docker --tls -H $SWARM_HOST network rm $(docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME | awk -F" " '{ print $1 }'); else echo "Network doesn't exist"; fi
@@ -85,10 +85,11 @@ postgrestest:
   stage: test
   script:
     - export COMPOSE_HTTP_TIMEOUT=180
+    - export NODE_ENV=postgres
     - export DB=postgres
     - export PROJECT_NAME=test-$DB-$APP_IMAGE_NAME
     - export NETWORK_NAME=${PROJECT_NAME//[^[:alnum:]]/}
-    - export FILE_NAME=docker-compose.test.$DB.yml
+    - export FILE_NAME=docker-compose.test.env.yml
     - export exit_status=0
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
     - if docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME; then docker --tls -H $SWARM_HOST network rm $(docker --tls -H $SWARM_HOST network ls | grep $NETWORK_NAME | awk -F" " '{ print $1 }'); else echo "Network doesn't exist"; fi

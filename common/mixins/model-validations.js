@@ -121,10 +121,16 @@ module.exports = function ModelValidations(Model) {
       }
             // execute all the validation functions of the model parallely
       async.parallel(fnArr, function modelValidationsAsyncParallelCb(err, results) {
+        if (err) {
+          // Handle the error if any...
+        }
         results = [].concat.apply([], results);
                 // execute all the isValid functions of the properties which are of Model type
         if (recursionFns && recursionFns.length > 0) {
           async.parallel(recursionFns, function modelValidationRecursionAsyncParallelCb(err, recurResults) {
+            if (err) {
+              // Handle the error if any...
+            }
             results = results.concat([].concat.apply([], recurResults));
             var errArr = results.filter(function modelValidationAsyncParalllelErrCb(d) {
               return d !== null && typeof d !== 'undefined';
@@ -142,7 +148,7 @@ module.exports = function ModelValidations(Model) {
                 getError(self, errArr);
                                 // done(valid);
               }
-                            // running custom validations of model(written in model js file) if any
+              // running custom validations of model(written in model js file) if any
               if (Model.customValidations || inst.__data.customValidations) {
                 log.trace(options, 'executing custom validations for model');
                 var customValArr = [];
@@ -153,12 +159,15 @@ module.exports = function ModelValidations(Model) {
                   customValArr.push(async.apply(customValidation, inst.__data, options));
                 });
                 async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
-                                    // Add error to the response object
+                  if (err) {
+                    // Handle the error if any...
+                  }
+                  // Add error to the response object
                   customResults = [].concat.apply([], customResults);
                   var custErrArr = customResults.filter(function modelValidationAsyncParalllelCustomErrCb(d) {
                     return d !== null && typeof d !== 'undefined';
                   });
-                                    // inst.errors will have custom errors if any
+                  // inst.errors will have custom errors if any
                   if ((custErrArr && custErrArr.length > 0) || inst.errors) {
                     valid = false;
                     getError(self, custErrArr);
@@ -200,12 +209,15 @@ module.exports = function ModelValidations(Model) {
                 customValArr.push(async.apply(customValidation, inst.__data, options));
               });
               async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
-                                // Add error to the response object
+                if (err) {
+                  // Handle the error if any...
+                }
+                // Add error to the response object
                 customResults = [].concat.apply([], customResults);
                 var custErrArr = customResults.filter(function modelValidationAsyncParalllelCustomErrCb(d) {
                   return d !== null && typeof d !== 'undefined';
                 });
-                                // inst.errors will have custom errors if any
+                // inst.errors will have custom errors if any
                 if ((custErrArr && custErrArr.length > 0) || inst.errors) {
                   valid = false;
                   getError(self, custErrArr);
@@ -237,13 +249,22 @@ module.exports = function ModelValidations(Model) {
       }
     };
     modelRule.find(filter, options, function modelRule(err, res) {
+      if (err) {
+        return callback(err);
+      }
       if (res && res[0] && res[0].validationRules && res[0].validationRules.length > 0) {
         var rules = res[0].validationRules;
         async.concat(rules, function (rule, cb) {
           desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
+            if (err) {
+              return cb(err);
+            }
             cb(null, dataAfterValidationRule);
           });
         }, function (err, results) {
+          if (err) {
+            return callback(err);
+          }
           callback(null, results);
         });
       } else {
@@ -299,10 +320,9 @@ module.exports = function ModelValidations(Model) {
             modelfns.push(async.apply(model.prototype.isValid, null, options, data, path, instance));
           }
         }
-      }
-            // if property is of type Model then add its isValid method to the function array
-      else if (properties[property].type instanceof Function &&
+      } else if (properties[property].type instanceof Function &&
                 properties[property].type.sharedClass) {
+        // if property is of type Model then add its isValid method to the function array
         model = properties[property].type;
         path = instancePath + '->' + property;
         data = instanceData[property];

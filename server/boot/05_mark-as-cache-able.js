@@ -26,22 +26,24 @@ messaging.subscribe('evictCache', function (modelName) {
  */
 
 module.exports = function MarkAsCacheable(app, cb) {
-    // Fetch the models to cache array from framework config
+  // Fetch the models to cache array from framework config
   var modelstocache = config && config.modelstocache;
 
-  if (config && modelstocache && !(config && config.disablecaching)) { // if framework model caching is not disabled via config
+  if (config && modelstocache && !(config && config.disablecaching)) {
+     // if framework model caching is not disabled via config
     modelstocache.forEach(function modelstocacheForEachCb(modelname) {
       var Model = app.models[modelname];
-      if (Model) { // if the model actually exists
+      if (Model) {
+        // if the model actually exists
         log.debug(log.defaultContext(), 'EV_CACHE', 'markascacheable boot script:', 'Marking   Framework Model as cacheable:', modelname);
 
-                // create the global evcacheables object if not present
+        // create the global evcacheables object if not present
         if (!global.evcacheables) {
           global.evcacheables = {};
         }
 
-                // Mark the model as cacheable by adding a property with this model's name
-                // to the "evcacheables" object and setting its value to 'true'.
+        // Mark the model as cacheable by adding a property with this model's name
+        // to the "evcacheables" object and setting its value to 'true'.
         global.evcacheables[modelname] = true;
 
                 // Add an 'After Save' observer for this Model to evict the cache

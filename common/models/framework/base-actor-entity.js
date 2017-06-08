@@ -207,8 +207,8 @@ module.exports = function (BaseActorEntity) {
       });
     });
   };
-
-  BaseActorEntity.prototype.reserveAmount = function (context) { // should be async
+   // should be async
+  BaseActorEntity.prototype.reserveAmount = function (context) {
     var journalEntity = context.journalEntity;
     var journalEntityType = journalEntity._type;
     var journalEntityVersion = journalEntity._version;
