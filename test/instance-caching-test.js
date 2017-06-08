@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /**
  * This test is for unit-testing the Instance result caching feature in datasource juggler.
@@ -94,7 +94,7 @@ describe('Instance Caching Test', function () {
 
     describe('CRUD tests', function () {
 
-        it('Should cache the Test instance after create', function (done) {
+        it('Should NOT cache the Test instance after create', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -114,14 +114,9 @@ describe('Instance Caching Test', function () {
                             if (err) {
                                 return done(err);
                             } else if(data2.length === 0) {
-                                return done('instance not cached')
+                                return done();
                             }
-                            result2 = Object.assign({},data2[0].toObject());
-                            expect(result1).not.to.be.null;
-                            expect(result2).not.to.be.null;
-                            expect(result1).to.deep.equal(result2);
-                            expect(result1.__data === result2.__data).to.be.true;
-                            return done();
+                            return done(new Error('should not cache instance'));
                         })
                     });
                 }
