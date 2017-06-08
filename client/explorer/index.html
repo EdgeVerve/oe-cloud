@@ -5,7 +5,6 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>oeCloud.io API Explorer</title>
   <link rel="icon" href="favicon.ico">
-  <link href='css/oeCloud.css' media='screen' rel='stylesheet' type='text/css'/>
   <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
   <script src="swagger-ui-bundle.js" charset="utf-8"></script>
   <script src="swagger-ui-oecloud-preset.js"> </script>
@@ -51,9 +50,6 @@
   <script src="./swagger-ui-oecloud-preset.js" charset="utf-8"></script>
   <script>
   window.onload = function() {
-  window["SwaggerUIBundle"] = window["swagger-ui-bundle"]
-  // window["SwaggerUIStandalonePreset"] = window["swagger-ui-standalone-preset"]
-  window["SwaggerUIOeCloudPreset"] = window["swagger-ui-oecloud-preset"]
   // Build a system
   const ui = SwaggerUIBundle({
     url: "http://localhost:3000/explorer/swagger.json",
