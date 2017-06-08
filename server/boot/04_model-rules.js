@@ -49,14 +49,15 @@ module.exports = function ModelRule(app, cb) {
       log.error(log.defaultContext(), 'modelRuleModel.find error. Error', err);
       cb(err);
     } else if (results && results.length > 0) {
-            // The below code for the if clause will not executed for test cases with clean/empty DB.
-            // In order to execute the below code and get code coverage for it we should have
-            // some rules defined for some models in the database before running tests for coverage.
+      // The below code for the if clause will not executed for test cases with clean/empty DB.
+      // In order to execute the below code and get code coverage for it we should have
+      // some rules defined for some models in the database before running tests for coverage.
       log.debug(log.defaultContext(), 'Some modelRules are present, on loading of this ModelRule model');
       for (var i = 0; i < results.length; i++) {
-                // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
-                // Attaching all models(ModelRule.modelName) before save hooks when ModelRule loads.
-        attachBeforeSaveHookToModel(results[i].modelName);// Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
+        // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
+        // Attaching all models(ModelRule.modelName) before save hooks when ModelRule loads.
+        // Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
+        attachBeforeSaveHookToModel(results[i].modelName);
       }
       cb();
     } else {
@@ -101,7 +102,8 @@ function modelRuleBeforeSave(ctx, next) {
   if (loopback.findModel(modelName)) {
     next();
   } else {
-    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.'); // Not sure it is the right way to construct error object to sent in the response.
+    // Not sure it is the right way to construct error object to sent in the response.
+    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.');
     next(err);
   }
 }
@@ -135,20 +137,21 @@ function attachBeforeSaveHookToModel(modelName) {
  * This function is to check the before save hook for a particular model with name is already attached or not.
  *
  * @param {object} model - Model Object
+ * @returns {string} - model name is attached or not.
  */
 function checkHookisAlreadyAttached(model) {
   var returnRes = false;
-    // Checking of existence of model._observers is not required since these are populated by default by loopback.
-    // Fetching all the before save hooks for the model.
+  // Checking of existence of model._observers is not required since these are populated by default by loopback.
+  // Fetching all the before save hooks for the model.
   var beforeSaveObserversArray = model._observers['before save'];
   if (beforeSaveObserversArray && beforeSaveObserversArray.length > 0) {
-        // Using javascript array.find function.
+    // Using javascript array.find function.
     returnRes = beforeSaveObserversArray.find(function (observer) {
       return observer.name ===  '_decsionTableBeforeSaveHook';
     });
     return returnRes;
   }
-        // Getting into this else case is very tricky models without any base or base as Model, PersistedModel comes here.
+  // Getting into this else case is very tricky models without any base or base as Model, PersistedModel comes here.
   return returnRes;
 }
 
@@ -156,16 +159,17 @@ function checkHookisAlreadyAttached(model) {
  * This function is to execute decision table rules.
  *
  * @param {object} modelCtx - Model Context
- * @param {object} data - Model data
+ * @param {object} model - Model data
  * @param {Function} next - Callback Function
  */
 function executeDecisionTableRules(modelCtx, model, next) {
-  var desicionTableModel = loopback.findModel('DecisionTable'); // Not checking the model existence since it is a loopback feature.
+  // Not checking the model existence since it is a loopback feature.
+  var desicionTableModel = loopback.findModel('DecisionTable');
   var modelData = modelCtx.data || modelCtx.instance;
   var payload = modelData.__data;
-    // Building filter query to find the modelRule
-    // Is model.modelName is the right way to get model name or we have to use modelCtx, who is populating modelName to model constructor
-    // does models with base PersistedModel also works.
+  // Building filter query to find the modelRule
+  // Is model.modelName is the right way to get model name or we have to use modelCtx, who is populating modelName to model constructor
+  // does models with base PersistedModel also works.
   var filter = {
     where: {
       modelName: model.modelName,

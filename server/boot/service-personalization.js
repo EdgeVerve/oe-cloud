@@ -50,9 +50,10 @@ module.exports = function ServicePersonalization(app, cb) {
             // some rules defined for some models in the database before running tests for coverage.
       log.debug(log.defaultContext(), 'Some modelRules are present, on loading of this ModelRule model');
       for (var i = 0; i < results.length; i++) {
-                // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
-                // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
-        attachRemoteHooksToModel(results[i].modelName);// Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
+        // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
+        // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
+        // Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
+        attachRemoteHooksToModel(results[i].modelName);
       }
       cb();
     } else {
@@ -76,12 +77,13 @@ messaging.subscribe('personalizationRuleAttachHook', function (modelName) {
  */
 function personalizationRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
-    // It is good to have if we have a declarative way of validating model existence.
+  // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
   if (loopback.findModel(modelName)) {
     next();
   } else {
-    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.'); // Not sure it is the right way to construct error object to sent in the response.
+     // Not sure it is the right way to construct error object to sent in the response.
+    var err = new Error('Model \'' + modelName + '\' doesn\'t exists.');
     next(err);
   }
 }
