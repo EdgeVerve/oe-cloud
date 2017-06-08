@@ -21,7 +21,9 @@ module.exports = function UIResourceFn(UIResource) {
     /**
     * Extracts the `content` from the given record and returns.
     * `type` property on record decides the 'Content-Type' http header.
-    *
+    * @param {string} name name.
+    * @param {function} options options.
+    * @param {function} cb callback.
     * @memberof UIResource
     * @name content
     */
@@ -40,6 +42,9 @@ module.exports = function UIResourceFn(UIResource) {
     }
 
     UIResource.find(filter, options, function uiResourceContentFindCb(err, results) {
+      if (err) {
+        cb(err);
+      }
       if (results && results[0]) {
         cb(null, results[0]);
       } else {

@@ -16,7 +16,7 @@ module.exports = function RestApiActorsMixin(Model) {
     // Before remote hook to parse ctx.args.filter string to object
   Model.beforeRemote('find', function parseFilter(ctx, modelInstance, next) {
     if (ctx.args.filter) {
-      ctx.args.filter = (typeof ctx.args.filter !== 'object') ? JSON.parse(ctx.args.filter) : ctx.args.filter; // jshint ignore:line
+      ctx.args.filter = (typeof ctx.args.filter !== 'object') ? JSON.parse(ctx.args.filter) : ctx.args.filter;
     }
     next();
   });
@@ -49,7 +49,8 @@ module.exports = function RestApiActorsMixin(Model) {
       if (!actor) {
         return next();
       }
-      var options = ctx.req.callContext;// loopback.getCurrentContext().active.callContext;
+      // loopback.getCurrentContext().active.callContext;
+      var options = ctx.req.callContext;
       var context = {
         actorEntity: actor
       };
