@@ -147,7 +147,7 @@ module.exports = function (BaseActorEntity) {
     message.version = journalEntityVersion;
     message.journalEntityType = journalEntityType;
     message.seqNum = activity.seqNum;
-    message.journalStatus = undefined;
+    message.journalStatus = null;
     return message;
   };
 
@@ -253,7 +253,7 @@ module.exports = function (BaseActorEntity) {
     var messages = prepareMessagesForProcessing(envelope);
     var self = this;
 
-    if (messages.length === 0 && (envelope.dirty === undefined || envelope.dirty === false)) {
+    if (messages.length === 0 && (typeof envelope.dirty === 'undefined' || envelope.dirty === false)) {
       return actorCb();
     }
 
@@ -502,7 +502,7 @@ module.exports = function (BaseActorEntity) {
       });
     };
     var envelope = actorPool.getEnvelope(modelName, id);
-    if (envelope === null || envelope === undefined) {
+    if (envelope === null || typeof envelope === 'undefined') {
       return cb();
     }
     setMessageStatus(envelope);
