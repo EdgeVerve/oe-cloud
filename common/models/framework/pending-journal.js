@@ -45,6 +45,9 @@ module.exports = function (PendingJournal) {
         if (err.retriable === false) {
           next();
           updatePending(ctx, instance, 'failed', function (err, res) {
+            if (err) {
+              return next(err);
+            }
             return;
           });
         } else {
@@ -53,6 +56,9 @@ module.exports = function (PendingJournal) {
       } else {
         next();
         updatePending(ctx, instance, 'success', function (err, res) {
+          if (err) {
+            return next(err);
+          }
           return;
         });
       }
