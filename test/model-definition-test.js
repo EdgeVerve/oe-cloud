@@ -231,6 +231,34 @@ describe(chalk.blue('model-definition-test'), function () {
                 });
         });
 
+        it('should not allow overriding filebased model', function (done) {
+            var modelName = 'ModelDefinition'; // ModelDefinition itself is file based model.
+            var postData = {
+                name: modelName,
+                base: 'BaseEntity',
+                properties: {}
+            };
+
+            api
+                .post(modelDefitnionUrl)
+                .set('tenant_id', 'test-tenant')
+                .set('remote_user', 'unitTest')
+                .send(postData)
+                .expect(500).end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        expect(res.body).not.to.be.null;
+                        expect(res.body).not.to.be.undefined;
+                        var responseBody = JSON.parse(JSON.stringify(res.body));
+                        expect(responseBody.error).not.to.be.null;
+                        expect(responseBody.error).not.to.be.undefined;
+                        debug('response body : ' + JSON.stringify(res.body, null, 4));
+                        done();
+                    }
+                });
+        });
+
         it('should create a new model with properties and make it available in app', function (done) {
 
             var modelName = 'TestMyCart';
@@ -384,6 +412,24 @@ describe(chalk.blue('model-definition-test'), function () {
 
             models.ModelDefinition.create(postData, bootstrap.defaultContext, function (err, res) {
                 debug('response body : ' + JSON.stringify(err, null, 4));
+                if (err) {
+                    done(); //if err test case pass.
+                } else {
+                    done(new Error('Model created with same Plural. Test Case failed. '));
+                }
+            });
+        });
+
+        it('should not allow overriding filebased model', function (done) {
+            var modelName = 'ModelDefinition';// ModelDefinition itself is file based model.
+            var postData = {
+                name: modelName,
+                base: 'BaseEntity',
+                properties: {}
+            };
+
+            models.ModelDefinition.create(postData, bootstrap.defaultContext, function (err, res) {
+                debug('err body : ' + JSON.stringify(err, null, 4));
                 if (err) {
                     done(); //if err test case pass.
                 } else {

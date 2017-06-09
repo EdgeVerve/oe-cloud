@@ -95,7 +95,7 @@ module.exports = function DBModels(app, cb) {
           'cause': err,
           'details': ''
         });
-        return cb();
+        return attachBeforeSaveHook(app, cb);
       }
       if (results && results.length > 0) {
         // For each Model defined in the DB ...
@@ -106,7 +106,45 @@ module.exports = function DBModels(app, cb) {
           });
         });
       }
-      cb();
+      attachBeforeSaveHook(cb);
     });
   });
 };
+
+// Attaching before save hook for restricting overriding of file based models
+function attachBeforeSaveHook(app, cb) {
+  var modelDefinition = app.models.ModelDefinition;
+  modelDefinition.observe('before save', function beforeSaveHookForModelDefinitionFn(ctx, next) {
+    var data = ctx.instance || ctx.data;
+    // No need to check for data.filebased for true, it is already taken care in beforeRemote("**")
+    // in model-definition.js
+    if (typeof data !== 'undefined' && typeof data.name !== 'undefined') {
+      var whereClause = {
+        where: {
+          filebased: true
+        }
+      };
+      modelDefinition.find(whereClause, ctx.options, (err, results) => {
+        if (err) {
+          next(err);
+        } else if (typeof results !== 'undefined' && Array.isArray(results) && results.length > 0) {
+          const modelFound = results.find((model) => {
+            return model.name === data.name;
+          });
+          if (typeof modelFound !== 'undefined') {
+            var modelFoundErr = new Error('Model ' + data.name + ' is a filebased model. ModelDefinition doesn\'t allow overriding of it.');
+            next(modelFoundErr);
+          } else {
+            next();
+          }
+        } else {
+          next();
+        }
+      });
+    } else {
+      var err = new Error('ModelDefinition data should not be empty to save.');
+      next(err);
+    }
+  });
+  cb();
+}
