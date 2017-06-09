@@ -77,7 +77,7 @@ module.exports = function decisionTableFn(decisionTable) {
             data.decisionRules = JSON.stringify(decisionRules);
             next();
           } catch (err) {
-	    console.log(err);
+            // console.log(err);
             return next(err);
           }
         }
@@ -178,20 +178,20 @@ module.exports = function decisionTableFn(decisionTable) {
               }
             });
           } else {
-		  var rules = JSON.parse(decisionTableData[0].decisionRules);
-		  jsFeel.execute_decision_table(docId, rules, data, function (err, results) {
-			  if (rules.hitPolicy === 'V') {
-				  if (err) {
-					  results.push(err);
-				  }
-				  return callback(null, results);
-			  }
-			  if (err) {
-				  return callback(err, null);
-			  }
-			  data = processPayload(results, data);
-			  callback(null, data);
-		  });
+            var rules = JSON.parse(decisionTableData[0].decisionRules);
+            jsFeel.execute_decision_table(docId, rules, data, function (err, results) {
+              if (rules.hitPolicy === 'V') {
+                if (err) {
+                  results.push(err);
+                }
+                return callback(null, results);
+              }
+              if (err) {
+                return callback(err, null);
+              }
+              data = processPayload(results, data);
+              callback(null, data);
+            });
           }
         });
       } else {

@@ -182,32 +182,31 @@ function executeDecisionTableRules(modelCtx, model, next) {
             // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
       log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
       next(err);
-    } else {
-            // Validating results is array and it contains the first element and defaultRules
-      if (results && results instanceof Array && results[0] && results[0].defaultRules) {
-                // Getting the defaultRules from the DB/cache results.
-        var defaultRules = results[0].defaultRules;
-                // Validating defaultRules is of type array and have some rules present in it.
-        if (defaultRules instanceof Array && defaultRules.length > 0) {
-                    // Default rules need to be executed in sequence and enrich the payload data.
-          async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
-            log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
-            desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {
-              payload = enrichedData;
-              ruleCb(err);
-            });
-          }, function (err) {
-            modelCtx.data = modelCtx.instance = payload;
-            next(err);
+    }
+    // Validating results is array and it contains the first element and defaultRules
+    if (results && results instanceof Array && results[0] && results[0].defaultRules) {
+              // Getting the defaultRules from the DB/cache results.
+      var defaultRules = results[0].defaultRules;
+              // Validating defaultRules is of type array and have some rules present in it.
+      if (defaultRules instanceof Array && defaultRules.length > 0) {
+                  // Default rules need to be executed in sequence and enrich the payload data.
+        async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
+          log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
+          desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {
+            payload = enrichedData;
+            ruleCb(err);
           });
-        }  else {
-          log.debug(log.defaultContext(), 'No default rules to execute.');
-          next();
-        }
-      } else {
-        log.debug(log.defaultContext(), 'no model rule found for model ', model.modelName);
+        }, function (err) {
+          modelCtx.data = modelCtx.instance = payload;
+          next(err);
+        });
+      }  else {
+        log.debug(log.defaultContext(), 'No default rules to execute.');
         next();
       }
+    } else {
+      log.debug(log.defaultContext(), 'no model rule found for model ', model.modelName);
+      next();
     }
   });
 }
