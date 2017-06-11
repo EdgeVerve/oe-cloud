@@ -15,7 +15,7 @@ var bootstrap = require('./bootstrap');
 var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
-var logger = require('evf-logger');
+var logger = require('oe-logger');
 var log = logger('actor-pattern-db-lock-tests');
 var api = bootstrap.api;
 var async = require('async');
@@ -1256,10 +1256,9 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                         return cb(err);
                     } else {
                         if (res[0].stateObj.quantity === value) {
-                            console.log('quantity and value equal to: ', value);
                             return cb();
                         } else {
-                            console.log('quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
+                            log.error(log.defaultContext(), 'quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
                             return cb(new Error('error in assertion against db'));
                         }
                     }
