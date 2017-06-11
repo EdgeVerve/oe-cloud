@@ -50,6 +50,13 @@ module.exports = function ObserverMixin(Model) {
     }
   };
 
+  Model.evRemoveObserver = function evRemoveObserver(operation, listener) {
+    var locationModel = Model.observerAppliedWhere(operation, listener);
+    if (locationModel !== null) {
+      locationModel.removeObserver(operation, listener);
+    }
+  };
+
 
   /**
    * isObserverApplied is an recursive function, and it checks if any of the
@@ -107,5 +114,50 @@ module.exports = function ObserverMixin(Model) {
       return isApplied;
     }
     return baseModel.isObserverApplied(operation, listener);
+  };
+
+
+  Model.observerAppliedWhere = function observerAppliedWhere(operation, listener) {
+    var isApplied = false;
+    var observerList = Model._observers[operation];
+    var fsObserverList;
+
+    var isSameName =  function (e, index, array) {
+      return e.name === listener.name;
+    };
+
+    if (Model._fsObservers) {
+      fsObserverList = Model._fsObservers[operation];
+    }
+    if (observerList) {
+      isApplied = observerList.indexOf(listener) !== -1 ? true : false;
+      if (!isApplied) {
+        isApplied = observerList.some(isSameName);
+      }
+    } else {
+      isApplied = false;
+    }
+
+    if (!isApplied) {
+      if (fsObserverList) {
+        for (var x = 0; x < fsObserverList.observers.length; x++) {
+          var observer = fsObserverList.observers[x];
+          isApplied = (observer.getName() === listener.name) ? true : false;
+          log.debug(log.defaultContext(), 'fs observer  ', observer.getName());
+          if (isApplied) {
+            break;
+          }
+        }
+      }
+    }
+
+    if (isApplied) {
+      return Model;
+    }
+    var baseModel = Model.base;
+    if (!baseModel.observerAppliedWhere) {
+      return null;
+    }
+    return baseModel.observerAppliedWhere(operation, listener);
   };
 };

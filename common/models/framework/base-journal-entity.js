@@ -2,6 +2,9 @@ var async = require('async');
 var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
+var profiler = require('v8-profiler');
+var fs = require('fs');
+var number = 0;
 var ignoreScopeOptions = {
   ignoreAutoScope: true,
   fetchAllScopes: true
@@ -188,6 +191,7 @@ module.exports = function (BaseJournalEntity) {
   };
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
+    profiler.startProfiling('' + number)
     if (ctx.isNewInstance === false || !(ctx.instance)) {
       var err = new Error('Cannot update existing journal entry');
       err.retriable = false;
@@ -217,6 +221,11 @@ module.exports = function (BaseJournalEntity) {
             }
             return writePending(ctx, next);
           } else {
+             var prof = profiler.stopProfiling('' + number);
+             number ++;
+            prof.export(function(error, result) {
+                fs.writeFileSync('profile' + number + '.json', result);
+            });
             return next();
           }
         });
