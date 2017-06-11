@@ -81,10 +81,15 @@ module.exports = Model => {
     Model.definition.settings.mixins = {};
   }
 
-  // Ev observer hooks for before save access and after save.
-  Model.evObserve('before save', dataPersonalizationBeforeSave);
-  Model.evObserve('access', dataPersonalizationAccess);
-  Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.settings.mixins.DataPersonalizationMixin) {
+    Model.evRemoveObserver('before save', dataPersonalizationBeforeSave);
+    Model.evRemoveObserver('access', dataPersonalizationAccess);
+    Model.evRemoveObserver('after accesss', dataPersonalizationAfterAccess);
+  } else {
+    Model.evObserve('before save', dataPersonalizationBeforeSave);
+    Model.evObserve('access', dataPersonalizationAccess);
+    Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+  }
 };
 
 /**
