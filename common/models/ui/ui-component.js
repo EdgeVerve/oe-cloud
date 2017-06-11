@@ -69,7 +69,7 @@ module.exports = function (UIComponent) {
 
   function mergeAsHTML(html, response, callback) {
     if (appconfig.removeComponentImports) {
-            /* Remove all the <link rel="import" ...> lines */
+      /* Remove all the <link rel="import" ...> lines */
       html = html.split('\n').filter(function (line) {
         return !line.match(/link.*rel="import"/i);
       }).join('\n');
@@ -220,7 +220,7 @@ module.exports = function (UIComponent) {
 
     async.parallel(tasks, function (err, results) {
       if (err) {
-        callback(err, undefined);
+        callback(err, null);
       } else if (fetchAsHtml) {
         mergeAsHTML(html, response, callback);
       } else {
@@ -229,8 +229,8 @@ module.exports = function (UIComponent) {
     });
   };
 
-    // name can have .html component name without
-    // componentName without .
+  // name can have .html component name without
+  // componentName without .
   UIComponent._createResponse = function (fetchAsHtml, name, options, callback) {
     var dotIndex = name.lastIndexOf('.') || name.length;
     var componentName = dotIndex === -1 ? name : name.substring(0, dotIndex);
@@ -241,8 +241,8 @@ module.exports = function (UIComponent) {
     };
 
 
-        // prefer find and results[0] over findOne
-        // to make sure data personalization is applied correctly.
+    // prefer find and results[0] over findOne
+    // to make sure data personalization is applied correctly.
     UIComponent.find(where, options, function (err, results) {
       if (err) {
         log.error(options, 'Error ', err);
@@ -262,11 +262,11 @@ module.exports = function (UIComponent) {
           if (modelName && templateType) {
             var model = UIComponent.app.models[modelName];
             component = defaultComponent(model, templateType);
-                        // add autoInjectFields = true to render the form if templateType is form.
+            // add autoInjectFields = true to render the form if templateType is form.
             if (templateType === 'form' && component && !component.autoInjectFields) {
               component.autoInjectFields = true;
             }
-            component = UIComponent(component);
+            component = new UIComponent(component);
           } else {
             var error = new Error();
             if (!modelName) {
@@ -292,6 +292,9 @@ module.exports = function (UIComponent) {
             fields: {}
           };
           _getElements(componentName, response, options, function (err, elements) {
+            if (err) {
+              callback(err);
+            }
             response.elements = elements;
             callback(null, response);
           });
@@ -303,13 +306,13 @@ module.exports = function (UIComponent) {
     });
   };
 
-    // name can be in model name in lower case also
+  // name can be in model name in lower case also
   UIComponent._modelmeta = function meta(name, metaoptions, options, callback) {
-    if (callback === undefined && options === undefined && typeof metaoptions === 'function') {
+    if (typeof callback === 'undefined' && typeof options === 'undefined' && typeof metaoptions === 'function') {
       callback = metaoptions;
       options = {};
       metaoptions = {};
-    } else if (callback === undefined && typeof options === 'function') {
+    } else if (typeof callback === 'undefined' && typeof options === 'function') {
       callback = options;
       options = {};
     }
@@ -320,11 +323,14 @@ module.exports = function (UIComponent) {
     var response = {};
     response.modelName = modelName;
     response.metadata = {};
-    options.flatten = metaoptions.flatten === undefined ? false : metaoptions.flatten;
-    options.dependencies = metaoptions.dependencies === undefined ? true : options.dependencies;
+    options.flatten = typeof metaoptions.flatten === 'undefined' ? false : metaoptions.flatten;
+    options.dependencies = typeof metaoptions.dependencies === 'undefined' ? true : options.dependencies;
     options.skipSystemFields = true;
     var model;
     app.models.ModelDefinition.extractMeta(modelName, options, function (err, allmodels) {
+      if (err) {
+        // handle err
+      }
       response.metadata = {};
       response.metadata.models = {};
       var metadata = response.metadata;
@@ -342,12 +348,12 @@ module.exports = function (UIComponent) {
           var refmodel = metadata.models[key];
           refmodel.resturl = allmodels[key].resturl;
           refmodel.properties = allmodels[key].properties;
-                    // TODO we can copy more properties here
+          // TODO we can copy more properties here
         });
         model = allmodels[modelName] || {};
         props = model.properties || {};
         metadata.resturl = model.resturl;
-                // allmodels will not be sent by uicomponent/component
+        // allmodels will not be sent by uicomponent/component
         response.allmodels = allmodels;
       }
 
@@ -394,14 +400,14 @@ module.exports = function (UIComponent) {
         var modelTo = allmodels[relation.modelTo.modelName] || {};
         var fieldId = relation.keyFrom;
         var fmeta;
-                // by default hasMany will not be grid
-                // however we will support sending meta data
-                // if it is one of the fields in gridConfig
+        // by default hasMany will not be grid
+        // however we will support sending meta data
+        // if it is one of the fields in gridConfig
         if (relation.type === 'belongsTo') {
           props[fieldId] = props[fieldId] || {};
           fmeta = props[fieldId];
-                    // unable to get additional properties added in model for relation
-                    // so, add specific model logic instead.
+          // unable to get additional properties added in model for relation
+          // so, add specific model logic instead.
           if (modelTo.id === 'DocumentData') {
             fmeta.type = 'documentdata';
             fmeta.relationName = relation.name;
@@ -426,6 +432,9 @@ module.exports = function (UIComponent) {
       response.metadata.properties = props;
 
       async.parallel(subtasks, function (err, results) {
+        if (err) {
+          callback(err);
+        }
         callback(null, response);
       });
     });
@@ -460,7 +469,7 @@ module.exports = function (UIComponent) {
   };
 
   UIComponent.configure = function (modelList, options, callback) {
-    if (callback === undefined && typeof options === 'function') {
+    if (typeof callback === 'undefined' && typeof options === 'function') {
       callback = options;
       options = {};
     }
@@ -529,9 +538,12 @@ module.exports = function (UIComponent) {
                 name: componentName
               }
             };
-                        // prefer find and results[0] over findOne
-                        // to make sure data personalization is applied correctly.
+            // prefer find and results[0] over findOne
+            // to make sure data personalization is applied correctly.
             UIComponent.find(filter, options, function (err, results) {
+              if (err) {
+                done(err);
+              }
               if (results && results[0]) {
                 done(null, results[0]);
               } else {
@@ -544,6 +556,9 @@ module.exports = function (UIComponent) {
     });
 
     async.series(tasks, function (err, results) {
+      if (err) {
+        callback(err);
+      }
       callback(null, results);
     });
   };
@@ -672,11 +687,11 @@ module.exports = function (UIComponent) {
     context.res.end(context.result);
   });
 
-    // TODO handle route path and nav link add update / delete
-    // UIComponent.observe('after save', function(ctx, next){
-    //	if (ctx.instance) {
-    // var NavigationLink = loopback.getModelByType('NavigationLink');
-    //	}
-    //	next();
-    // });
+  // TODO handle route path and nav link add update / delete
+  // UIComponent.observe('after save', function(ctx, next){
+  //	if (ctx.instance) {
+  // var NavigationLink = loopback.getModelByType('NavigationLink');
+  //	}
+  //	next();
+  // });
 };

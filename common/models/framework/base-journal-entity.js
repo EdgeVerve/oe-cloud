@@ -73,8 +73,8 @@ module.exports = function (BaseJournalEntity) {
   BaseJournalEntity.prototype.performOperations = function (ctx, next) {
     var instance = ctx.instance;
     var options = ctx.options;
-    var atomicActivityList = instance.__data.atomicActivitiesList;
-    var nonAtomicActivityList = instance.__data.nonAtomicActivitiesList;
+    var atomicActivityList = instance.atomicActivitiesList;
+    var nonAtomicActivityList = instance.nonAtomicActivitiesList;
 
     var createOperationContext = function (activity, callback) {
       var Model = getActorModel(activity.modelName);
@@ -199,7 +199,6 @@ module.exports = function (BaseJournalEntity) {
     }
 
     ctx.options.journalProcessStartTime = new Date();
-    ctx.instance.__data._modifiedOn = new Date();
     var instance = ctx.instance;
     instance.performBusinessValidations(function (err) {
       if (err) {
@@ -241,7 +240,7 @@ module.exports = function (BaseJournalEntity) {
   });
 
   var actualDrainActorMailBox = function (activityList, options, callback) {
-    async.eachSeries(activityList, function (activity, cb) {
+    async.each(activityList, function (activity, cb) {
       var actor = options.actorInstancesMap[activity.entityId];
       if (actor) {
         actor.journalSaved(activity, options, function (err) {

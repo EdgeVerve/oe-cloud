@@ -1,4 +1,4 @@
-/**
+﻿/**
  *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
@@ -22,7 +22,7 @@ module.exports = {
     'database': 'db',
     'password': 'postgres',
     'name': 'db',
-    'connector': 'loopback-connector-evpostgresql',
+    'connector': 'loopback-connector-postgresql',
     'user': 'postgres',
     'connectionTimeout': 50000
   },

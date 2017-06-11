@@ -20,7 +20,7 @@ var AccessContext = loopbackAccessContext.AccessContext;
 
 module.exports = function DevModelFn(devmodel) {
   devmodel.getinfo = function GetInfoFn(ctx, options, cb) {
-    var data = {callContext: {}, accessToken: {}};
+    var data = { callContext: {}, accessToken: {} };
     if (!cb && typeof options === 'function') {
       cb = options;
       options = {};
@@ -69,8 +69,11 @@ module.exports = function DevModelFn(devmodel) {
       remotingContext: ctx
     });
 
-    var filter = {where: {model: modelName, property: propertyQuery}};
+    var filter = { where: { model: modelName, property: propertyQuery } };
     BaseACL.find(filter, options, function (err, acls) {
+      if (err) {
+        cb(err);
+      }
       data.dbACLs = acls;
 
       var inRoleTasks = [];
@@ -88,18 +91,18 @@ module.exports = function DevModelFn(devmodel) {
           }
         }
 
-                // Check role matches
+        // Check role matches
         if (acl.principalType === 'ROLE') {
           inRoleTasks.push(function (done) {
             roleModel.isInRole(acl.principalId, context,
-                          function (err, inRole) {
-                            if (!err && inRole) {
-                              data.matchedACLs.push(acl);
-                            } else {
-                              data.unmatchedACLs.push(acl);
-                            }
-                            done(err, acl);
-                          });
+              function (err, inRole) {
+                if (!err && inRole) {
+                  data.matchedACLs.push(acl);
+                } else {
+                  data.unmatchedACLs.push(acl);
+                }
+                done(err, acl);
+              });
           });
         }
       });
@@ -117,8 +120,8 @@ module.exports = function DevModelFn(devmodel) {
     }
     var ModelDefinition = loopback.getModel('ModelDefinition');
 
-    ModelDefinition.findOne({where: {name: modelName}}, options, function (err, modeldef) {
-            // console.log('model find ', err, modelName, modeldef);
+    ModelDefinition.findOne({ where: { name: modelName } }, options, function (err, modeldef) {
+      // console.log('model find ', err, modelName, modeldef);
       if (err || !modeldef) {
         return callback(err, 'Model Definition not found');
       }
@@ -128,7 +131,7 @@ module.exports = function DevModelFn(devmodel) {
         'variantOf': modeldef.name,
         'base': modeldef.name
       };
-            // console.log(variantData);
+      // console.log(variantData);
       ModelDefinition.create(variantData, options, function (err, cb) {
         callback(err, cb);
       });

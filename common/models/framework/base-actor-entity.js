@@ -56,22 +56,22 @@ module.exports = function (BaseActorEntity) {
           }
         });
     BaseActor.remoteMethod(
-        'journalSaved', {
-          http: {
-            path: '/drainMailBox',
-            verb: 'post'
-          },
-          isStatic: false,
-          accepts: {
-            arg: 'activity',
-            type: 'object'
-          },
-          returns: {
-            arg: 'response',
-            type: 'object',
-            root: true
-          }
-        });
+      'journalSaved', {
+        http: {
+          path: '/drainMailBox',
+          verb: 'post'
+        },
+        isStatic: false,
+        accepts: {
+          arg: 'activity',
+          type: 'object'
+        },
+        returns: {
+          arg: 'response',
+          type: 'object',
+          root: true
+        }
+      });
   };
 
   BaseActorEntity.disableRemoteMethod('__get__state', false);
@@ -98,22 +98,22 @@ module.exports = function (BaseActorEntity) {
         });
 
   BaseActorEntity.remoteMethod(
-        'validateNonAtomicAction', {
-          http: {
-            path: '/validateNonAtomicAction',
-            verb: 'post'
-          },
-          isStatic: false,
-          accepts: {
-            arg: 'filter',
-            type: 'object'
-          },
-          returns: {
-            arg: 'response',
-            type: 'object',
-            root: true
-          }
-        });
+    'validateNonAtomicAction', {
+      http: {
+        path: '/validateNonAtomicAction',
+        verb: 'post'
+      },
+      isStatic: false,
+      accepts: {
+        arg: 'filter',
+        type: 'object'
+      },
+      returns: {
+        arg: 'response',
+        type: 'object',
+        root: true
+      }
+    });
 
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
@@ -137,7 +137,7 @@ module.exports = function (BaseActorEntity) {
     return resultObj;
   }
 
-  BaseActorEntity.prototype.createMessage = function (activity, journalEntityType, journalEntityVersion, journalEntityTime) {
+  BaseActorEntity.prototype.createMessage = function (activity, journalEntityType, journalEntityVersion) {
     var message = {};
     message.isProcessed = false;
     message.retryCount = 0;
@@ -145,10 +145,9 @@ module.exports = function (BaseActorEntity) {
     message.payload = activity.payload;
     message.activity = activity;
     message.version = journalEntityVersion;
-    message.time = journalEntityTime;
     message.journalEntityType = journalEntityType;
     message.seqNum = activity.seqNum;
-    message.journalStatus = undefined;
+    message.journalStatus = null;
     return message;
   };
 
@@ -213,9 +212,8 @@ module.exports = function (BaseActorEntity) {
     var journalEntity = context.journalEntity;
     var journalEntityType = journalEntity._type;
     var journalEntityVersion = journalEntity._version;
-    var journalEntityTime = journalEntity._createdOn || journalEntity._modifiedOn;
 
-    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion, journalEntityTime);
+    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
   };
 
@@ -223,9 +221,8 @@ module.exports = function (BaseActorEntity) {
     var journalEntity = context.journalEntity;
     var journalEntityType = journalEntity._type;
     var journalEntityVersion = journalEntity._version;
-    var journalEntityTime = journalEntity._createdOn || journalEntity._modifiedOn;
 
-    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion, journalEntityTime);
+    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
     return cb();
   };
@@ -256,7 +253,7 @@ module.exports = function (BaseActorEntity) {
     var messages = prepareMessagesForProcessing(envelope);
     var self = this;
 
-    if (messages.length === 0 && (envelope.dirty === undefined || envelope.dirty === false)) {
+    if (messages.length === 0 && (typeof envelope.dirty === 'undefined' || envelope.dirty === false)) {
       return actorCb();
     }
 
@@ -329,8 +326,6 @@ module.exports = function (BaseActorEntity) {
       return cb();
     }
 
-    var loopbackModelsCollection = getAssociatedModels(this._type);
-
     var self = this;
 
     var actualProcess = function (cb) {
@@ -347,33 +342,26 @@ module.exports = function (BaseActorEntity) {
     if (message.journalStatus === 'saved') {
       return actualProcess(cb);
     }
-
-    async.eachSeries(loopbackModelsCollection, function (model, asyncCB) {
-      var query = {
-        where: {_version: message.version}
-      };
-      model.findOne(query, options, function (err, result) {
-        if (err) {
-          return asyncCB(err);
-        } else if (!result) {
-          return asyncCB();
-        } else if (result) {
-          actualProcess(asyncCB);
+    var model = loopback.getModel(message.journalEntityType);
+    var query = {
+      where: {_version: message.version}
+    };
+    model.findOne(query, options, function (err, result) {
+      if (err) {
+        log.error(options, 'error in processMessage: ', err);
+        return cb(err);
+      } else if (!result) {
+        if (!message.isProcessed) {
+          message.retryCount += 1;
+          if (message.retryCount > self.MAX_RETRY_COUNT) {
+            log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
+            message.isProcessed = true;
+          }
+          return cb();
         }
-      });
-    }, function (error) {
-      if (error) {
-        log.error(options, 'error in processMessage: ', error);
-        return cb(error);
+      } else if (result) {
+        actualProcess(cb);
       }
-      if (!message.isProcessed) {
-        message.retryCount += 1;
-        if (message.retryCount > self.MAX_RETRY_COUNT) {
-          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
-          message.isProcessed = true;
-        }
-      }
-      return cb();
     });
   };
 
@@ -514,7 +502,7 @@ module.exports = function (BaseActorEntity) {
       });
     };
     var envelope = actorPool.getEnvelope(modelName, id);
-    if (envelope === null || envelope === undefined) {
+    if (envelope === null || typeof envelope === 'undefined') {
       return cb();
     }
     setMessageStatus(envelope);
