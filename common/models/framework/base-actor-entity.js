@@ -234,23 +234,8 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  function prepareMessagesForProcessing(envelope) {
-    var messages = envelope.msg_queue.slice(0);
-    messages.sort(function (a, b) {
-      var key1 = a.seqNum;
-      var key2 = b.seqNum;
-      if (key1 < key2) {
-        return -1;
-      } else if (key1 === key2) {
-        return 0;
-      }
-      return 1;
-    });
-    return messages;
-  }
-
   BaseActorEntity.prototype.processMessagesBackground = function (envelope, options, actorCb) {
-    var messages = prepareMessagesForProcessing(envelope);
+    var messages = envelope.msg_queue.slice(0);
     var self = this;
 
     if (messages.length === 0 && (typeof envelope.dirty === 'undefined' || envelope.dirty === false)) {
@@ -412,7 +397,7 @@ module.exports = function (BaseActorEntity) {
   }
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
-    var loopbackModelsCollection = getAssociatedModels(this._type);
+    var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
     var self = this;

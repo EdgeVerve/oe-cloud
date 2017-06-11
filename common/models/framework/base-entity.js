@@ -46,10 +46,24 @@ var log = logger('baseentity');
 // The actual config object
 var config = require('../../../server/config.js');
 
+var propsToEncrypt = [];
+
 module.exports = function BaseEntityFn(BaseEntity) {
   BaseEntity.setup = function setupBaseEntity() {
     BaseEntity.base.setup.call(this, arguments);
     var Model = this;
+
+    var props = BaseEntity.definition.properties;
+    for (var key in props) {
+      if (props.hasOwnProperty(key)) {
+        var propprops = BaseEntity.definition.properties[key];
+        if (propprops.encrypt && propprops.type.name.toLowerCase() === 'string') {
+          propsToEncrypt.push(propprops);
+        }
+      }
+    }
+
+
     Model.beforeRemote('**', function modelBeforeRemote(ctx, model, next) {
       var method = ctx.method;
       var Model = method.ctor;
@@ -94,17 +108,17 @@ module.exports = function BaseEntityFn(BaseEntity) {
    * Ajith
    */
   BaseEntity.observe('before save', function baseEntityObserveBeforeSaveCb(ctx, next) {
+    if (propsToEncrypt.length === 0) {
+      return next();
+    }
     var data = ctx.instance || ctx.currentInstance || ctx.data;
-    var props = ctx.Model.definition.properties;
     log.debug(ctx.options, 'BaseEntity before save called: ModelName =', ctx.Model.modelName);
-    for (var key in props) {
+    var props = ctx.Model.definition.properties;
+    for (var key in propsToEncrypt) {
       if (props.hasOwnProperty(key)) {
-        var propprops = ctx.Model.definition.properties[key];
-        if (propprops.encrypt && (typeof data[key]) === 'string') {
-          log.debug(ctx.options, 'To be encrypted:', key, data[key]);
-          data[key] = encrypt(data[key]);
-          log.debug(ctx.options, 'After encryption:', key, data[key]);
-        }
+        log.debug(ctx.options, 'To be encrypted:', key, data[key]);
+        data[key] = encrypt(data[key]);
+        log.debug(ctx.options, 'After encryption:', key, data[key]);
       }
     }
     next();
@@ -121,6 +135,9 @@ module.exports = function BaseEntityFn(BaseEntity) {
    */
 
   BaseEntity.observe('after accesss', function baseEntityObserveAfterAccessCb(ctx, next) {
+    if (propsToEncrypt.length === 0) {
+      return next();
+    }
     var data = ctx.instance || ctx.currentInstance || ctx.data || ctx.accdata;
     var props = ctx.Model.definition.properties;
     var decryptFn = function decryptFn(item) {
@@ -128,12 +145,9 @@ module.exports = function BaseEntityFn(BaseEntity) {
       item[key] = decrypt(item[key]);
       log.debug(ctx.options, 'After decryption:', key, item[key]);
     };
-    for (var key in props) {
+    for (var key in propsToEncrypt) {
       if (props.hasOwnProperty(key)) {
-        var propprops = ctx.Model.definition.properties[key];
-        if (propprops.encrypt && propprops.type.name.toLowerCase() === 'string') {
-          data.forEach(decryptFn);
-        }
+        data.forEach(decryptFn);
       }
     }
     next();

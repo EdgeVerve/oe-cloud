@@ -24,7 +24,7 @@ module.exports = function DataHierarchyMixin(Model) {
   } else {
     Model.definition.settings.hidden = ['_hierarchyScope'];
   }
-  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataHierarchyMixin) || (!Model.mixins.DataHierarchyMixin)) {
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataHierarchyMixin) || (!Model.settings.mixins.DataHierarchyMixin)) {
     Model.evRemoveObserver('before save', hierarchyBeforeSave);
     Model.evRemoveObserver('access', hierarchyAccess);
     Model.evRemoveObserver('after accesss', hierarchyAfterAccess);

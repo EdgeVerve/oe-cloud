@@ -83,7 +83,7 @@ module.exports = function AuditFieldsMixin(Model) {
     required: true
   });
 
-  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.EvAuditFieldsMixin) || !Model.settings.mixins.EvAuditFieldsMixin) {
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.AuditFieldsMixin) || !Model.settings.mixins.AuditFieldsMixin) {
     Model.evRemoveObserver('before save', injectAuditFields);
   } else {
     Model.evObserve('before save', injectAuditFields);
