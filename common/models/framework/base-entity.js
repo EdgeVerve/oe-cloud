@@ -46,19 +46,20 @@ var log = logger('baseentity');
 // The actual config object
 var config = require('../../../server/config.js');
 
-var propsToEncrypt = [];
+
 
 module.exports = function BaseEntityFn(BaseEntity) {
   BaseEntity.setup = function setupBaseEntity() {
     BaseEntity.base.setup.call(this, arguments);
     var Model = this;
+    Model.settings.propsToEncrypt = [];
 
-    var props = BaseEntity.definition.properties;
+    var props = Model.definition.properties;
     for (var key in props) {
       if (props.hasOwnProperty(key)) {
-        var propprops = BaseEntity.definition.properties[key];
+        var propprops = Model.definition.properties[key];
         if (propprops.encrypt && propprops.type.name.toLowerCase() === 'string') {
-          propsToEncrypt.push(propprops);
+          Model.settings.propsToEncrypt.push(key);
         }
       }
     }
@@ -108,19 +109,19 @@ module.exports = function BaseEntityFn(BaseEntity) {
    * Ajith
    */
   BaseEntity.observe('before save', function baseEntityObserveBeforeSaveCb(ctx, next) {
-    if (propsToEncrypt.length === 0) {
+    if (ctx.Model.settings.propsToEncrypt.length === 0) {
       return next();
     }
     var data = ctx.instance || ctx.currentInstance || ctx.data;
     log.debug(ctx.options, 'BaseEntity before save called: ModelName =', ctx.Model.modelName);
     var props = ctx.Model.definition.properties;
-    for (var key in propsToEncrypt) {
+    ctx.Model.settings.propsToEncrypt.forEach(function(key) {
       if (props.hasOwnProperty(key)) {
         log.debug(ctx.options, 'To be encrypted:', key, data[key]);
         data[key] = encrypt(data[key]);
         log.debug(ctx.options, 'After encryption:', key, data[key]);
       }
-    }
+    });
     next();
   });
 
@@ -135,21 +136,20 @@ module.exports = function BaseEntityFn(BaseEntity) {
    */
 
   BaseEntity.observe('after accesss', function baseEntityObserveAfterAccessCb(ctx, next) {
-    if (propsToEncrypt.length === 0) {
+    if (ctx.Model.settings.propsToEncrypt.length === 0) {
       return next();
     }
     var data = ctx.instance || ctx.currentInstance || ctx.data || ctx.accdata;
     var props = ctx.Model.definition.properties;
-    var decryptFn = function decryptFn(item) {
-      log.debug(ctx.options, 'To be decrypted:', key, item[key]);
-      item[key] = decrypt(item[key]);
-      log.debug(ctx.options, 'After decryption:', key, item[key]);
-    };
-    for (var key in propsToEncrypt) {
-      if (props.hasOwnProperty(key)) {
-        data.forEach(decryptFn);
-      }
-    }
+    data.forEach(function(item){
+      ctx.Model.settings.propsToEncrypt.forEach(function(key) {
+        if (props.hasOwnProperty(key)) {
+          log.debug(ctx.options, 'To be decrypted:', key, item[key]);
+          item[key] = decrypt(item[key]);
+          log.debug(ctx.options, 'After decryption:', key, item[key]);
+        }
+      });
+    });
     next();
   });
 
