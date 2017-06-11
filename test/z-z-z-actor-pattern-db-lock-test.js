@@ -1256,10 +1256,9 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                         return cb(err);
                     } else {
                         if (res[0].stateObj.quantity === value) {
-                            console.log('quantity and value equal to: ', value);
                             return cb();
                         } else {
-                            console.log('quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
+                            log.error(log.defaultContext(), 'quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
                             return cb(new Error('error in assertion against db'));
                         }
                     }
