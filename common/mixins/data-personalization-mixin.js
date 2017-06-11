@@ -47,6 +47,13 @@ const _ = require('lodash');
 const log = require('oe-logger')('data-personalization-mixin');
 
 module.exports = Model => {
+    if (Model.modelName === 'BaseEntity') {
+    // No need to apply the model property expression change at
+    // BaseEntity level
+    // Let the actual model decide if it wants to enable property
+    // expression mixin
+    return;
+  }
   // Defining a new _score, scope, _autoScope property
   Model.defineProperty('_scope', {
     type: ['string'],
@@ -81,7 +88,7 @@ module.exports = Model => {
     Model.definition.settings.mixins = {};
   }
 
-  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.settings.mixins.DataPersonalizationMixin) {
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.definition.settings.mixins.DataPersonalizationMixin) {
     Model.evRemoveObserver('before save', dataPersonalizationBeforeSave);
     Model.evRemoveObserver('access', dataPersonalizationAccess);
     Model.evRemoveObserver('after accesss', dataPersonalizationAfterAccess);

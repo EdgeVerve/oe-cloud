@@ -12,6 +12,13 @@ const uuid = require('node-uuid');
 const async = require('async');
 const ROOT_PATH = ',root,';
 module.exports = function DataHierarchyMixin(Model) {
+    if (Model.modelName === 'BaseEntity') {
+    // No need to apply the model property expression change at
+    // BaseEntity level
+    // Let the actual model decide if it wants to enable property
+    // expression mixin
+    return;
+  }
   Model.defineProperty('_hierarchyScope', {
     type: 'object',
     index: true,
