@@ -6,7 +6,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 */
 
 var parser = require('ua-parser-js');
-var log = require('evf-logger')('db-lock-contributor');
+var log = require('oe-logger')('db-lock-contributor');
 var config = require('../config.js');
 var DB_LOCK_MODE = config.dbLockMode;
 
