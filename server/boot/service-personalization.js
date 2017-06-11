@@ -24,30 +24,30 @@ var personalizationRuleModel;
 module.exports = function ServicePersonalization(app, cb) {
   log.debug(log.defaultContext(), 'In service-personalization.js boot script.');
   personalizationRuleModel = app.models.PersonalizationRule;
-    // Creating 'before save' and 'after save' observer hooks for PersonlizationRule model
+  // Creating 'before save' and 'after save' observer hooks for PersonlizationRule model
   personalizationRuleModel.observe('before save', personalizationRuleBeforeSave);
   personalizationRuleModel.observe('after save', personalizationRuleAfterSave);
-    // Creating filter finding only records where disabled is false.
+  // Creating filter finding only records where disabled is false.
   var filter = {
     where: {
       disabled: false
     }
   };
-    // Creating options to fetch all records irrespective of scope.
+  // Creating options to fetch all records irrespective of scope.
   var options = {
     ignoreAutoScope: true,
     fetchAllScopes: true
   };
-    // Using fetchAllScopes and ignoreAutoScope to retrieve all the records from DB. i.e. from all tenants.
+  // Using fetchAllScopes and ignoreAutoScope to retrieve all the records from DB. i.e. from all tenants.
   personalizationRuleModel.find(filter, options, function (err, results) {
     log.debug(log.defaultContext(), 'personalizationRuleModel.find executed.');
     if (err) {
       log.error(log.defaultContext(), 'personalizationRuleModel.find error. Error', err);
       cb(err);
     } else if (results && results.length > 0) {
-            // The below code for the if clause will not executed for test cases with clean/empty DB.
-            // In order to execute the below code and get code coverage for it we should have
-            // some rules defined for some models in the database before running tests for coverage.
+      // The below code for the if clause will not executed for test cases with clean/empty DB.
+      // In order to execute the below code and get code coverage for it we should have
+      // some rules defined for some models in the database before running tests for coverage.
       log.debug(log.defaultContext(), 'Some modelRules are present, on loading of this ModelRule model');
       for (var i = 0; i < results.length; i++) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
@@ -64,7 +64,7 @@ module.exports = function ServicePersonalization(app, cb) {
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
 messaging.subscribe('personalizationRuleAttachHook', function (modelName) {
-    // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
+  // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to ');
   attachRemoteHooksToModel(modelName);
 });
@@ -82,7 +82,7 @@ function personalizationRuleBeforeSave(ctx, next) {
   if (loopback.findModel(modelName)) {
     next();
   } else {
-     // Not sure it is the right way to construct error object to sent in the response.
+    // Not sure it is the right way to construct error object to sent in the response.
     var err = new Error('Model \'' + modelName + '\' doesn\'t exists.');
     next(err);
   }
@@ -97,7 +97,7 @@ function personalizationRuleBeforeSave(ctx, next) {
 function personalizationRuleAfterSave(ctx, next) {
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave method.');
   var data = ctx.data || ctx.instance;
-    // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
+  // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('personalizationRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
   attachRemoteHooksToModel(data.modelName);
@@ -110,13 +110,13 @@ function personalizationRuleAfterSave(ctx, next) {
  * @param {string} modelName - Model name
  */
 function attachRemoteHooksToModel(modelName) {
-    // Can we avoid this step and get the ModelConstructor from context.
+  // Can we avoid this step and get the ModelConstructor from context.
   var model = loopback.findModel(modelName);
-    // Setting the flag that Personalization Rule exists, need to check where it will be used.
+  // Setting the flag that Personalization Rule exists, need to check where it will be used.
   if (!model.settings._personalizationRuleExists) {
     model.settings._personalizationRuleExists = true;
-        // We can put hook methods in an array an have single function to attach them.
-        // After Remote hooks
+    // We can put hook methods in an array an have single function to attach them.
+    // After Remote hooks
 
     afterRemoteFindHook(model);
     afterRemoteFindByIdHook(model);
@@ -125,7 +125,7 @@ function attachRemoteHooksToModel(modelName) {
     afterRemoteUpsertHook(model);
     afterRemoteUpdateAttributesHook(model);
 
-        // Before Remote Hooks
+    // Before Remote Hooks
     beforeRemoteCreateHook(model);
     beforeRemoteUpsertHook(model);
     beforeRemoteUpdateAttributesHook(model);
@@ -251,7 +251,7 @@ function beforeRemoteFindHook(model) {
   model.beforeRemote('find', function (ctx, modelInstance, next) {
     log.debug(ctx.req.callContext, 'beforeRemoteFindHook ', model.modelName, 'called');
     servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationAccessHookGetRuleCb(rule) {
-      if (rule !== null && rule !== undefined) {
+      if (rule !== null && typeof rule !== 'undefined') {
         log.debug(ctx.req.callContext, 'beforeRemoteFindHook personalization rule found , rule: ', rule);
         servicePersonalizer.applyPersonalizationRule(ctx, rule.personalizationRule, function servicePersonalizationAccessHookApplyRuleCb() {
           log.debug(ctx.req.callContext, 'filter', ctx.args.filter);
@@ -275,13 +275,13 @@ function beforeRemoteFindHook(model) {
 function afterRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec for ', model.modelName, ' called.');
   servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
-    if (rule !== null && rule !== undefined) {
+    if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
       servicePersonalizer.applyPersonalizationRule(ctx, rule.personalizationRule, function servicePersonalizationMixinApplyRule() {
         var callContext = ctx.req.callContext;
-        var postProcessingFns = callContext.postProcessingFns ? callContext.postProcessingFns[callContext.modelName] : undefined;
-        if (postProcessingFns !== undefined) {
+        var postProcessingFns = callContext.postProcessingFns ? callContext.postProcessingFns[callContext.modelName] : null;
+        if (postProcessingFns && typeof postProcessingFns !== 'undefined') {
           log.debug(ctx.req.callContext, 'PostProcessingFunctions = ', JSON.stringify(postProcessingFns));
           log.debug(ctx.req.callContext, 'looping through and executing PostProcessingFunctions');
           for (var i in postProcessingFns) {
@@ -314,13 +314,13 @@ function afterRemotePersonalizationExec(model, ctx, next) {
 function beforeRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec for ', model.modelName, ' called.');
   servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
-    if (rule !== null && rule !== undefined) {
+    if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
       servicePersonalizer.applyReversePersonalizationRule(ctx, rule.personalizationRule, function servicePersonalizationMixinBeforeCreateApplyReverse(rule) {
         var callContext = ctx.req.callContext;
-        var preProcessingFns = callContext.preProcessingFns ? callContext.preProcessingFns[callContext.modelName] : undefined;
-        if (preProcessingFns !== undefined) {
+        var preProcessingFns = callContext.preProcessingFns ? callContext.preProcessingFns[callContext.modelName] : null;
+        if (preProcessingFns && typeof preProcessingFns !== 'undefined') {
           log.debug(ctx.req.callContext, 'PreProcessingFunctions = ', JSON.stringify(preProcessingFns));
           log.debug(ctx.req.callContext, 'looping through and executing PreProcessingFunctions');
           for (var i in preProcessingFns) {

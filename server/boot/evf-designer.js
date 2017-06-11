@@ -178,21 +178,22 @@ function setEvfDesignerPath(evfDesignerPath, server) {
         return;
       }
 
-            // Get the class definition matching this route.
+      // Get the class definition matching this route.
       var className = route.method.split('.')[0];
       var classDef = classes.filter(function (item) {
         return item.name === className;
       })[0];
 
       if (!classDef) {
-        console.error('Route exists with no class: %j', route);
+        // console.error('Route exists with no class: %j', route);
+        log.error(log.defaultContext(), 'Route exists with no class: %j', route);
         return;
       }
       var accepts = route.accepts || [];
       var split = route.method.split('.');
       /* 2 is HACK */
       if (classDef && classDef.sharedCtor &&
-              classDef.sharedCtor.accepts && split.length > 2) {
+        classDef.sharedCtor.accepts && split.length > 2) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
       }
 
@@ -202,15 +203,15 @@ function setEvfDesignerPath(evfDesignerPath, server) {
         if (!arg.http) {
           return true;
         }
-                // Don't show derived arguments.
+        // Don't show derived arguments.
         if (typeof arg.http === 'function') {
           return false;
         }
-                // Don't show arguments set to the incoming http request.
-                // Please note that body needs to be shown, such as User.create().
+        // Don't show arguments set to the incoming http request.
+        // Please note that body needs to be shown, such as User.create().
         if (arg.http.source === 'req' ||
-                  arg.http.source === 'res' ||
-                  arg.http.source === 'context') {
+          arg.http.source === 'res' ||
+          arg.http.source === 'context') {
           return false;
         }
         return true;
@@ -343,7 +344,8 @@ function setEvfDesignerPath(evfDesignerPath, server) {
     if (status) {
       server.once('started', function evfDesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
-        console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
+        // console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
+        log.info(log.defaultContext(), 'Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
       });
     }
   });
@@ -387,7 +389,8 @@ module.exports = function EvfDesigner(server) {
       if (status) {
         setEvfDesignerPath(appconfig.designer.installationPath, server);
       } else {
-        console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/evf-designer]');
+        // console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/evf-designer]');
+        log.warn(log.defaultContext(), 'Designer not installed at [' + appconfig.designer.installationPath + '/evf-designer]');
       }
     });
 

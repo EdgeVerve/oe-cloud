@@ -148,7 +148,7 @@ module.exports = function (BaseActorEntity) {
     message.version = journalEntityVersion;
     message.journalEntityType = journalEntityType;
     message.seqNum = activity.seqNum;
-    message.journalStatus = undefined;
+    message.journalStatus = null;
     return message;
   };
 
@@ -293,7 +293,7 @@ module.exports = function (BaseActorEntity) {
             return actorCb();
           });
         }
-        return actorCb()
+        return actorCb();
       });
     });
   };
@@ -509,7 +509,7 @@ module.exports = function (BaseActorEntity) {
       });
     };
     var envelope = actorPool.getEnvelope(modelName, id);
-    if (envelope === null || envelope === undefined) {
+    if (envelope === null || typeof envelope === 'undefined') {
       return cb();
     }
     setMessageStatus(envelope);

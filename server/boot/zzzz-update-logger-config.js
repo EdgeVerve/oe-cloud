@@ -13,7 +13,8 @@ if (configStr) {
   try {
     config = JSON.parse(process.env.LOGGER_CONFIG);
   } catch (ex) {
-    console.error('Error parsing LOGGER_CONFIG environment variable.', ex.message);
+    // console.error('Error parsing LOGGER_CONFIG environment variable.', ex.message);
+    log.error(log.defaultContext(), 'Error parsing LOGGER_CONFIG environment variable.', ex.message);
   }
 }
 if (!config) {

@@ -30,8 +30,8 @@ module.exports = function RestApiActorsMixin(Model) {
 
     var id = query.id;
 
-    if (id === undefined) {
-      if (query.filter !== undefined && query.filter.where !== undefined) {
+    if (typeof id === 'undefined') {
+      if (typeof query.filter !== 'undefined' && typeof query.filter.where !== 'undefined') {
         var idInWhere = findIdInWhere(Model, query.filter.where);
         if (idInWhere) {
           id = idInWhere.value;

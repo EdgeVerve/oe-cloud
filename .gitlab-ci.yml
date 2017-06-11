@@ -29,7 +29,7 @@ buildjob:
     - exit_status=0
     - if eslint .; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-    #- if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - echo "Building oe-cloud image..."
     - time npm install --no-optional
@@ -100,4 +100,3 @@ postgrestest:
     - exit $exit_status
   tags:
     - EVF-PAAS
-
