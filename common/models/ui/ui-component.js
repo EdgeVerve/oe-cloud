@@ -61,8 +61,8 @@ module.exports = function uiComponent(UIComponent) {
   }
 
   function mergeAsHTML(html, response, callback) {
-    var out = '<script> var baseUtils = window.baseUtils || {}; baseUtils.metadataCache = baseUtils.metadataCache || {}; \n ';
-    out += 'baseUtils.metadataCache["' + response.componentName + '"] = ';
+    var out = '<script> var OEUtils = window.OEUtils || {}; OEUtils.metadataCache = OEUtils.metadataCache || {}; \n ';
+    out += 'OEUtils.metadataCache["' + response.componentName + '"] = ';
     out += JSON.stringify(response);
     out += '; </script>\n';
     out += html;
