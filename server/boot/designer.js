@@ -149,7 +149,7 @@ function setDesignerPath(DesignerPath, server) {
   });
   module.prospectElements = prospectElements;
 
-  var evEnsureLoggedIn = function evEnsureLoggedIn(req, res, next) {
+  var ensureLoggedIn = function ensureLoggedIn(req, res, next) {
     if (req.accessToken) {
       next();
     } else {
@@ -159,7 +159,7 @@ function setDesignerPath(DesignerPath, server) {
   };
 
   server.use(loopback.static(DesignerPath));
-  server.get(appconfig.designer.mountPath, evEnsureLoggedIn, function sendResponse(req, res) {
+  server.get(appconfig.designer.mountPath, ensureLoggedIn, function sendResponse(req, res) {
     res.sendFile('index.html', {
       root: DesignerPath + '/designer'
     });
