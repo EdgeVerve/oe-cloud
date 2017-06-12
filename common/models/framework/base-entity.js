@@ -46,8 +46,6 @@ var log = logger('baseentity');
 // The actual config object
 var config = require('../../../server/config.js');
 
-
-
 module.exports = function BaseEntityFn(BaseEntity) {
   BaseEntity.setup = function setupBaseEntity() {
     BaseEntity.base.setup.call(this, arguments);
@@ -115,7 +113,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
     var data = ctx.instance || ctx.currentInstance || ctx.data;
     log.debug(ctx.options, 'BaseEntity before save called: ModelName =', ctx.Model.modelName);
     var props = ctx.Model.definition.properties;
-    ctx.Model.settings.propsToEncrypt.forEach(function(key) {
+    ctx.Model.settings.propsToEncrypt.forEach(function (key) {
       if (props.hasOwnProperty(key)) {
         log.debug(ctx.options, 'To be encrypted:', key, data[key]);
         data[key] = encrypt(data[key]);
@@ -141,8 +139,8 @@ module.exports = function BaseEntityFn(BaseEntity) {
     }
     var data = ctx.instance || ctx.currentInstance || ctx.data || ctx.accdata;
     var props = ctx.Model.definition.properties;
-    data.forEach(function(item){
-      ctx.Model.settings.propsToEncrypt.forEach(function(key) {
+    data.forEach(function (item) {
+      ctx.Model.settings.propsToEncrypt.forEach( function (key) {
         if (props.hasOwnProperty(key)) {
           log.debug(ctx.options, 'To be decrypted:', key, item[key]);
           item[key] = decrypt(item[key]);

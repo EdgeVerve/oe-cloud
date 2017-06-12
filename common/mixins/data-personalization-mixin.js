@@ -47,11 +47,7 @@ const _ = require('lodash');
 const log = require('oe-logger')('data-personalization-mixin');
 
 module.exports = Model => {
-    if (Model.modelName === 'BaseEntity') {
-    // No need to apply the model property expression change at
-    // BaseEntity level
-    // Let the actual model decide if it wants to enable property
-    // expression mixin
+  if (Model.modelName === 'BaseEntity') {
     return;
   }
   // Defining a new _score, scope, _autoScope property
