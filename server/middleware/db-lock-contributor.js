@@ -17,6 +17,7 @@ var DB_LOCK_MODE = config.dbLockMode;
  * @author Karin angel
  * @memberof Middleware
  */
+
 module.exports = function dbLockContributor(options) {
   return function dbLockContributorFn(req, res, next) {
     if (!(parser(req.headers['x-evproxy-db-lock']).ua) || parser(req.headers['x-evproxy-db-lock']).ua === '0') {
@@ -33,4 +34,3 @@ module.exports = function dbLockContributor(options) {
     }
   };
 };
-
