@@ -10,7 +10,7 @@ var log = require('oe-logger')('db-lock-contributor');
 var config = require('../config.js');
 var DB_LOCK_MODE = config.dbLockMode;
 
-/**
+/*
  * This middleware is used to decide which DB Lock method will be used - the connector dbLock or an empty lock.
  *
  * @name DB Lock Contributor
