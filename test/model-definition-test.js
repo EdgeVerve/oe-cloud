@@ -244,7 +244,7 @@ describe(chalk.blue('model-definition-test'), function () {
                 .set('tenant_id', 'test-tenant')
                 .set('remote_user', 'unitTest')
                 .send(postData)
-                .expect(500).end(function (err, res) {
+                .expect(422).end(function (err, res) {
                     if (err) {
                         done(err);
                     } else {

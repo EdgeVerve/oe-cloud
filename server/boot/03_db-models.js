@@ -4,11 +4,13 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-var util = require('../../lib/common/util');
-var log = require('oe-logger')('boot-db-models');
-var events = require('events');
-var DataSource = require('loopback-datasource-juggler').DataSource;
 var async = require('async');
+var events = require('events');
+var loopback = require('loopback');
+var DataSource = require('loopback-datasource-juggler').DataSource;
+var log = require('oe-logger')('boot-db-models');
+
+var util = require('../../lib/common/util');
 
 var eventEmitter = new events.EventEmitter();
 
@@ -24,7 +26,7 @@ var eventEmitter = new events.EventEmitter();
  * load models from database.
  *
  * @memberof Boot Scripts
- * @author Ajith Vasudevan
+ * @author Ajith Vasudevan, Pradeep Kumar Tippa
  * @name DB Models
  */
 
@@ -106,7 +108,7 @@ module.exports = function DBModels(app, cb) {
           });
         });
       }
-      attachBeforeSaveHook(cb);
+      attachBeforeSaveHook(app, cb);
     });
   });
 };
@@ -119,31 +121,20 @@ function attachBeforeSaveHook(app, cb) {
     // No need to check for data.filebased for true, it is already taken care in beforeRemote("**")
     // in model-definition.js
     if (typeof data !== 'undefined' && typeof data.name !== 'undefined') {
-      var whereClause = {
-        where: {
-          filebased: true
-        }
-      };
-      modelDefinition.find(whereClause, ctx.options, (err, results) => {
-        if (err) {
-          next(err);
-        } else if (typeof results !== 'undefined' && Array.isArray(results) && results.length > 0) {
-          const modelFound = results.find((model) => {
-            return model.name === data.name;
-          });
-          if (typeof modelFound !== 'undefined') {
-            var modelFoundErr = new Error('Model ' + data.name + ' is a filebased model. ModelDefinition doesn\'t allow overriding of it.');
-            next(modelFoundErr);
-          } else {
-            next();
-          }
-        } else {
-          next();
-        }
-      });
+      var model = loopback.findModel(data.name);
+      // Checking the model availability and is it a dynamic model.
+      if (model && typeof model._dynamicModel === 'undefined') {
+        var modelFoundErr = new Error();
+        modelFoundErr.name = 'Data Error';
+        modelFoundErr.message = 'Model \'' + data.name + '\' is a system or filebased model. ModelDefinition doesn\'t allow overriding of it.';
+        modelFoundErr.retriable = false;
+        modelFoundErr.status = 422;
+        next(modelFoundErr);
+      } else {
+        next();
+      }
     } else {
-      var err = new Error('ModelDefinition data should not be empty to save.');
-      next(err);
+      next();
     }
   });
   cb();
