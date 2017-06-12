@@ -254,37 +254,34 @@ module.exports = function (BaseActorEntity) {
         log.error(options, err);
         return actorCb(err);
       }
-      async.reduce(messages, false, function (stateUpdated, message, cb) {
-        self.processMessage(stateUpdated, envelope, message, stateObj, options, cb);
-      }, function (err, stateUpdated) {
+      async.eachSeries(messages, function (message, cb) {
+        self.processMessage(envelope, message, stateObj, options, cb);
+      }, function (err) {
         if (err) {
           log.error(options, err);
           return actorCb(err);
-        } else if (stateUpdated) {
-          stateObj.__data.seqNum = envelope.processedSeqNum;
-          self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-            stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
-              if (error) {
-                log.error(options, 'error while persisting actor ', error);
-                return releaseLockCb(error);
-              }
-              envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
-              return releaseLockCb();
-            });
-          }, function (err, ret) {
-            if (err) {
-              return actorCb(err);
-            }
-            return actorCb();
-          });
         }
-        return actorCb();
+        stateObj.__data.seqNum = envelope.processedSeqNum;
+        self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+          stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
+            if (error) {
+              log.error(options, 'error while persisting actor ', error);
+              return releaseLockCb(error);
+            }
+            envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
+            return releaseLockCb();
+          });
+        }, function (err, ret) {
+          if (err) {
+            return actorCb(err);
+          }
+          return actorCb();
+        });
       });
     });
   };
 
   BaseActorEntity.prototype.MAX_RETRY_COUNT = 3;
-  BaseActorEntity.prototype.MAX_SKIP_COUNT = 5;
 
   BaseActorEntity.prototype.processPendingMessage = function (message, atomicAmount) {
     return atomicAmount;
@@ -309,7 +306,7 @@ module.exports = function (BaseActorEntity) {
     });
   };
 
-  BaseActorEntity.prototype.processMessage = function (stateUpdated, envelope, message, state, options, cb) {
+  BaseActorEntity.prototype.processMessage = function (envelope, message, state, options, cb) {
     if (message.isProcessed === true) {
       return cb();
     }
@@ -324,21 +321,17 @@ module.exports = function (BaseActorEntity) {
       }
       envelope.processedSeqNum = Math.max(message.seqNum, envelope.processedSeqNum);
       message.isProcessed = true;
-      return cb(null, true);
+      return cb();
     };
 
     if (message.journalStatus === 'saved') {
       return actualProcess(cb);
-    } else if (message.skipCount < self.MAX_SKIP_COUNT) {
-      message.skipCount++;
-      return cb(null, stateUpdated);
     }
     var model = loopback.getModel(message.journalEntityType);
     var query = {
       where: {_version: message.version}
     };
     model.findOne(query, options, function (err, result) {
-      console.log('>>>>>>>>>>>>> query by version');
       if (err) {
         log.error(options, 'error in processMessage: ', err);
         return cb(err);
@@ -349,7 +342,7 @@ module.exports = function (BaseActorEntity) {
             log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
             message.isProcessed = true;
           }
-          return cb(null, stateUpdated);
+          return cb();
         }
       } else if (result) {
         actualProcess(cb);
