@@ -1245,7 +1245,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
     after('check state is updated against DB', function(done) {
         var stateModel = loopback.getModel('State');
-        async.retry({times: 5, interval: 30000}, function(retrycb) {
+        async.retry({times: 5}, function(retrycb) {
             async.eachOf(afterTest, function(value, stateId, cb) {
                 var query = {
                     where: {id: stateId}
@@ -1265,7 +1265,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 });
             }, function(err) {
                 if (err) {
-                    return retrycb(err);
+                    return setTimeout(retrycb, 3000, err);
                 } else {
                     return retrycb(null, true);
                 }
