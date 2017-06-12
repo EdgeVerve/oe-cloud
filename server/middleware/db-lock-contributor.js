@@ -18,18 +18,18 @@ var DB_LOCK_MODE = config.dbLockMode;
  * @memberof Middleware
  */
 module.exports = function dbLockContributor(options) {
-    return function dbLockContributorFn(req, res, next) {
-        if (!(parser(req.headers['x-evproxy-db-lock']).ua) || parser(req.headers['x-evproxy-db-lock']).ua === '0') {
-            log.debug(req.callContext, 'x-evproxy-db-lock header is undefined');
-            next();
-        } else if (parser(req.headers['x-evproxy-db-lock']).ua === '1') {
-            log.debug(req.callContext, 'x-evproxy-db-lockk header has value of 1');
-            req.callContext.lockMode = DB_LOCK_MODE;
-            next();
-        } else {
-            var err = new Error('invalid value in x-evproxy-db-lockk header');
-            log.error(req.callContext, err);
-            throw err;
-        }
-    };
+  return function dbLockContributorFn(req, res, next) {
+    if (!(parser(req.headers['x-evproxy-db-lock']).ua) || parser(req.headers['x-evproxy-db-lock']).ua === '0') {
+      log.debug(req.callContext, 'x-evproxy-db-lock header is undefined');
+      next();
+    } else if (parser(req.headers['x-evproxy-db-lock']).ua === '1') {
+      log.debug(req.callContext, 'x-evproxy-db-lockk header has value of 1');
+      req.callContext.lockMode = DB_LOCK_MODE;
+      next();
+    } else {
+      var err = new Error('invalid value in x-evproxy-db-lockk header');
+      log.error(req.callContext, err);
+      throw err;
+    }
+  };
 };
