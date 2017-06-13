@@ -21,6 +21,8 @@ services:
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       SERVICE_PORTS: "3000"
       BROADCASTER_HOST : "broadcaster"
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
       - $NETWORK_NAME
       - router_network
@@ -47,6 +49,8 @@ services:
       NETWORK_INTERFACE_NAME: "eth2"
       APP_URL: "https:/${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
       - $NETWORK_NAME
       - router_network

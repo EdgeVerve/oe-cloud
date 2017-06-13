@@ -23,6 +23,7 @@ swarm:
     - "npm install --verbose --no-optional"
     - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
     - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
+    - "export HAPROXY=10.73.96.215"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - "mv -f qqq2.yml qqq.yml"
     - docker stack rm $APP_IMAGE_NAME
