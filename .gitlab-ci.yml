@@ -1,6 +1,6 @@
 stages:
   - build
-  - test
+  - test1
 
 before_script:
   - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
@@ -48,6 +48,21 @@ buildjob:
     - echo "Image ($REGISTRY/$APP_IMAGE_NAME:latest) built and pushed to registry"
   tags:
     - EVF-PAAS
+
+swarm:
+  script: 
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
+    - "mv -f qqq2.yml qqq.yml"
+    - docker stack rm $APP_IMAGE_NAME
+    - until [ -z "$(docker network ls --filter name=$APP_IMAGE_NAME_$NETWORK_NAME -q)" ]; do sleep 5; done
+    - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
+    - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - while [ $isStarted -ne 200 ]; do echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 10; done
+    - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+  stage: test1
+  tags: 
+    - EVF-PAAS13
 
 mongotest:
   stage: test
