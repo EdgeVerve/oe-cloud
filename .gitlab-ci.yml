@@ -1,53 +1,5 @@
 stages:
   - build
-  - test1
-
-before_script:
-
-buildjob:
-  stage: build
-  script:
-    - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
-    - export project=${nameGroupProject##*/}
-    - export group=${nameGroupProject%/*}
-    - export branch=${CI_BUILD_REF_NAME}
-    - export project=${project//[^[:alnum:]]/}
-    - export group=${group//[^[:alnum:]]/}
-    - export branch=${branch//[^[:alnum:]]/}
-    - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
-    - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-    - npm config set registry $NPM_REGISTRY
-    - npm config set fetch-retries 0
-    - npm config set loglevel warn
-    - evf-paas login -u admin -p Anything_f9 evfapp.dev -d && source $HOME/evf-paas/evfapp.dev/install_env.sh
-    - echo "Enviroment where app will be deployed in swarm - "$SWARM_HOST
-    - echo "Domain name - "$DOMAIN_NAME
-    - echo "App will be pushed to registry - "$REGISTRY
-    - echo "The image name in registry - "$APP_IMAGE_NAME
-    - echo "Performing code style check..."
-    - status_eslint=0
-    - exit_status=0
-    - if eslint .; then status_eslint=0; else status_eslint=1; fi
-    - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-    - if [ $exit_status == 1 ]; then exit $exit_status; fi
-    - echo "Code style check done successfully"
-    - echo "Building oe-cloud image..."
-    - time npm install --no-optional
-    - time evf-paas build & buildpid=$!
-    - mkdir -p /data/db
-    - mongod --dbpath /data/db &
-    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-    - export APP_URL=http://localhost:8080/api
-    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-    - mocha test/consistenthash/server.js &
-    - sleep 60
-    - mocha test/consistenthash/server.js 3100 &
-    - sleep 60
-    - mocha test/consistenthash/client.js 3200
-    - wait ${buildpid}
-    - echo "Image ($REGISTRY/$APP_IMAGE_NAME:latest) built and pushed to registry"
-  tags:
-    - EVF-PAAS
 
 swarm:
   script: 
@@ -67,6 +19,7 @@ swarm:
     - "npm set registry $NPM_REGISTRY"
     - "echo \"App will be pushed to registry - \"${REGISTRY}"
     - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
+    - "time npm install --no-optional"
     - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
     - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
@@ -78,6 +31,6 @@ swarm:
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - while [ $isStarted -ne 200 ]; do echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 10; done
     - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
-  stage: test1
+  stage: build
   tags: 
     - EVF-PAAS13
