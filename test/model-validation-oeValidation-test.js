@@ -223,7 +223,7 @@ describe(chalk.blue('EV Validation test'), function () {
         };
 
         childModel.create(data, bootstrap.defaultContext, function (err, results) {
-            expect(err.details.messages.errs[0].message).to.equal(err.details.messages.errs[0].code);
+            expect(err.details.messages.fuelCheck[0]).to.equal(err.details.codes.fuelCheck[0]);
             done();
         });
     });
@@ -245,7 +245,7 @@ describe(chalk.blue('EV Validation test'), function () {
             expect(err).to.be.null;
             childModel.create(data, bootstrap.defaultContext, function (err, results) {
                 expect(err).to.not.be.null;
-                expect(err.details.messages.errs[0].message).to.not.equal(err.details.messages.errs[0].code);
+                expect(err.details.messages.fuelCheck[0]).to.not.equal(err.details.codes.fuelCheck[0]);
                 done();
             });
         });
