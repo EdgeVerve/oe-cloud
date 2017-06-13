@@ -107,7 +107,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
    * Ajith
    */
   BaseEntity.observe('before save', function baseEntityObserveBeforeSaveCb(ctx, next) {
-    if (ctx.Model.settings.propsToEncrypt.length === 0) {
+    if (ctx.Model.settings.propsToEncrypt && ctx.Model.settings.propsToEncrypt.length === 0) {
       return next();
     }
     var data = ctx.instance || ctx.currentInstance || ctx.data;
@@ -134,7 +134,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
    */
 
   BaseEntity.observe('after accesss', function baseEntityObserveAfterAccessCb(ctx, next) {
-    if (ctx.Model.settings.propsToEncrypt.length === 0) {
+    if (ctx.Model.settings.propsToEncrypt && ctx.Model.settings.propsToEncrypt.length === 0) {
       return next();
     }
     var data = ctx.instance || ctx.currentInstance || ctx.data || ctx.accdata;
