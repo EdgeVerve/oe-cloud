@@ -27,7 +27,7 @@ services:
 
        
   web:
-    image: $REGISTRY/${APP_IMAGE_NAME}:latest
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
       - broadcaster
