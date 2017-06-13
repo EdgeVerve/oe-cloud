@@ -122,14 +122,14 @@ module.exports = function ModelValidations(Model) {
             // execute all the validation functions of the model parallely
       async.parallel(fnArr, function modelValidationsAsyncParallelCb(err, results) {
         if (err) {
-          // Handle the error if any...
+          results.push(err);
         }
         results = [].concat.apply([], results);
                 // execute all the isValid functions of the properties which are of Model type
         if (recursionFns && recursionFns.length > 0) {
           async.parallel(recursionFns, function modelValidationRecursionAsyncParallelCb(err, recurResults) {
             if (err) {
-              // Handle the error if any...
+              recurResults.push(err);
             }
             results = results.concat([].concat.apply([], recurResults));
             var errArr = results.filter(function modelValidationAsyncParalllelErrCb(d) {
@@ -160,7 +160,7 @@ module.exports = function ModelValidations(Model) {
                 });
                 async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                   if (err) {
-                    // Handle the error if any...
+                    customResults.push(err);
                   }
                   // Add error to the response object
                   customResults = [].concat.apply([], customResults);
@@ -210,7 +210,7 @@ module.exports = function ModelValidations(Model) {
               });
               async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                 if (err) {
-                  // Handle the error if any...
+                  customResults.push(err);
                 }
                 // Add error to the response object
                 customResults = [].concat.apply([], customResults);
@@ -263,7 +263,7 @@ module.exports = function ModelValidations(Model) {
           });
         }, function (err, results) {
           if (err) {
-            return callback(err);
+            results.push(err);
           }
           callback(null, results);
         });

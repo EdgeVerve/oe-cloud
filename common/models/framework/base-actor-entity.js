@@ -141,6 +141,7 @@ module.exports = function (BaseActorEntity) {
     var message = {};
     message.isProcessed = false;
     message.retryCount = 0;
+    message.skipCount = 0;
     message.instructionType = activity.instructionType;
     message.payload = activity.payload;
     message.activity = activity;
@@ -253,7 +254,7 @@ module.exports = function (BaseActorEntity) {
     var messages = prepareMessagesForProcessing(envelope);
     var self = this;
 
-    if (messages.length === 0 && (typeof envelope.dirty === 'undefined' || envelope.dirty === false)) {
+    if (messages.length === 0) {
       return actorCb();
     }
 
@@ -282,7 +283,6 @@ module.exports = function (BaseActorEntity) {
               log.error(options, 'error while persisting actor ', error);
               return releaseLockCb(error);
             }
-            envelope.dirty = false;
             envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
             return releaseLockCb();
           });
