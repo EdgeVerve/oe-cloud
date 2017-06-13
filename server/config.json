@@ -75,7 +75,7 @@
   "globalMessagingMode": "multicast",
   "useDefaultNodeRedStorage": false,
   "memoryInterval": 1000,
-  "memoryPoolChunk": 50,
+  "memoryPoolChunk": 3,
   "eventReliabilityReplayThreshold": 300000,
   "eventReliabilityReplayInterval": 2000,
   "eventReliabilityDbPersistenceInterval": 2000,
