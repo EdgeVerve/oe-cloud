@@ -67,6 +67,8 @@ swarm:
     - "npm set registry $NPM_REGISTRY"
     - "echo \"App will be pushed to registry - \"${REGISTRY}"
     - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
+    - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
+    - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - "mv -f qqq2.yml qqq.yml"
     - docker stack rm $APP_IMAGE_NAME
