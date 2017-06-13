@@ -965,7 +965,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
                     }).catch(function (err) {
                       expect(err).to.be.ok;
                       expect(JSON.parse(err.message).status).to.be.equal(422);
-                      expect(JSON.parse(err.message).errors[0].code).to.be.equal('DATA_ERROR_071');
+                      expect(JSON.parse(err.message).code).to.be.equal('DATA_ERROR_071');
                     });
       });
 

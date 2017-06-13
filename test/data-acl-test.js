@@ -372,7 +372,7 @@ describe(chalk.blue('data-acl-test'), function() {
             .get(url)
             .expect(404).end(function(err, res) {
                 var response = res.body;
-                expect(response.error.errors[0].code === 'MODEL_NOT_FOUND').to.be.true;
+                expect(response.error.code === 'MODEL_NOT_FOUND').to.be.true;
                 done();
             });
     });

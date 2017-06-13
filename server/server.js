@@ -223,7 +223,7 @@ function finalBoot(appinstance, options, cb) {
 
         appinstance.get('remoting').errorHandler = {
           handler: function remotingErrorHandler(err, req, res, defaultHandler) {
-            res.status(err.statusCode || err.status);
+            /* res.status(err.statusCode || err.status);
             var finalError = {};
             finalError.message = err.message || err.toString();
             var errors = [];
@@ -231,12 +231,13 @@ function finalBoot(appinstance, options, cb) {
             finalError.txnId = req.callContext ? req.callContext.txnId : '';
             finalError.requestId = req.callContext ? req.callContext.requestId : '';
             finalError.errors = errors;
-            log.error(options, 'error :', JSON.stringify(finalError));
-            defaultHandler(finalError);
+            log.error(options, 'error :', JSON.stringify(finalError));*/
+            log.error(options, 'error :', JSON.stringify(err));
+            defaultHandler(err);
           }
         };
 
-        appinstance.buildError = function appinstanceBuildError(err, context) {
+        /* appinstance.buildError = function appinstanceBuildError(err, context) {
           var errors = [];
           if (err instanceof Array) {
             // concat all errors to form a single error array
@@ -261,7 +262,7 @@ function finalBoot(appinstance, options, cb) {
             errors.push(errObj);
           }
           return errors;
-        };
+        };*/
       });
     };
     return cb();
