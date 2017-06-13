@@ -50,7 +50,7 @@ buildjob:
     - EVF-PAAS
 
 swarm:
-  script2: 
+  script: 
     - "export DOMAIN_NAME=evfapp.dev"
     - "REGISTRY=registry.${DOMAIN_NAME}"
     - "name=${CI_PROJECT_DIR##*builds/}"
