@@ -259,7 +259,11 @@ module.exports = function ModelValidations(Model) {
             if (err) {
               return cb(err);
             }
-            cb(null, dataAfterValidationRule);
+            var errorArr = dataAfterValidationRule.map(function (obj) {
+              obj.fieldName = 'DecisionTable';
+              return obj;
+            });
+            cb(null, errorArr);
           });
         }, function (err, results) {
           if (err) {
