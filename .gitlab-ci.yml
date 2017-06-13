@@ -3,27 +3,27 @@ stages:
   - test1
 
 before_script:
-  - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
-  - export project=${nameGroupProject##*/}
-  - export group=${nameGroupProject%/*}
-  - export branch=${CI_BUILD_REF_NAME}
-  - export project=${project//[^[:alnum:]]/}
-  - export group=${group//[^[:alnum:]]/}
-  - export branch=${branch//[^[:alnum:]]/}
-  - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
-  - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - npm config set registry $NPM_REGISTRY
-  - npm config set fetch-retries 0
-  - npm config set loglevel warn
-  - evf-paas login -u admin -p Anything_f9 evfapp.dev -d && source $HOME/evf-paas/evfapp.dev/install_env.sh
-  - echo "Enviroment where app will be deployed in swarm - "$SWARM_HOST
-  - echo "Domain name - "$DOMAIN_NAME
-  - echo "App will be pushed to registry - "$REGISTRY
-  - echo "The image name in registry - "$APP_IMAGE_NAME
 
 buildjob:
   stage: build
   script:
+    - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
+    - export project=${nameGroupProject##*/}
+    - export group=${nameGroupProject%/*}
+    - export branch=${CI_BUILD_REF_NAME}
+    - export project=${project//[^[:alnum:]]/}
+    - export group=${group//[^[:alnum:]]/}
+    - export branch=${branch//[^[:alnum:]]/}
+    - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
+    - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+    - npm config set registry $NPM_REGISTRY
+    - npm config set fetch-retries 0
+    - npm config set loglevel warn
+    - evf-paas login -u admin -p Anything_f9 evfapp.dev -d && source $HOME/evf-paas/evfapp.dev/install_env.sh
+    - echo "Enviroment where app will be deployed in swarm - "$SWARM_HOST
+    - echo "Domain name - "$DOMAIN_NAME
+    - echo "App will be pushed to registry - "$REGISTRY
+    - echo "The image name in registry - "$APP_IMAGE_NAME
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
@@ -49,28 +49,24 @@ buildjob:
   tags:
     - EVF-PAAS
 
-  before_script2: 
-  - "export DOMAIN_NAME=evfapp.dev"
-  - "REGISTRY=registry.${DOMAIN_NAME}"
-  - "name=${CI_PROJECT_DIR##*builds/}"
-  - "appName=${name##*/}"
-  - "appUserName=${name%/*}"
-  - "branchName=${CI_BUILD_REF_NAME}"
-  - "email=$(git log --reverse -n 1 $CI_BUILD_REF --pretty=format:\"%ae\")"
-  - "appName=${appName//[^[:alnum:]]/}"
-  - "appUserName=${appUserName//[^[:alnum:]]/}"
-  - "branchName=${branchName//[^[:alnum:]]/}"
-  - "if [ $branchName == \"master\" ]; then export APP_IMAGE_NAME=$appUserName\"-\"$appName; else export APP_IMAGE_NAME=$appUserName\"-\"$branchName\"-\"$appName; fi"
-  - "APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
-  - "NETWORK_NAME=${APP_IMAGE_NAME}"
-  - "npm set registry $NPM_REGISTRY"
-  - "echo \"App will be pushed to registry - \"${REGISTRY}"
-  - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
-
-
-
 swarm:
   script2: 
+    - "export DOMAIN_NAME=evfapp.dev"
+    - "REGISTRY=registry.${DOMAIN_NAME}"
+    - "name=${CI_PROJECT_DIR##*builds/}"
+    - "appName=${name##*/}"
+    - "appUserName=${name%/*}"
+    - "branchName=${CI_BUILD_REF_NAME}"
+    - "email=$(git log --reverse -n 1 $CI_BUILD_REF --pretty=format:\"%ae\")"
+    - "appName=${appName//[^[:alnum:]]/}"
+    - "appUserName=${appUserName//[^[:alnum:]]/}"
+    - "branchName=${branchName//[^[:alnum:]]/}"
+    - "if [ $branchName == \"master\" ]; then export APP_IMAGE_NAME=$appUserName\"-\"$appName; else export APP_IMAGE_NAME=$appUserName\"-\"$branchName\"-\"$appName; fi"
+    - "APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
+    - "NETWORK_NAME=${APP_IMAGE_NAME}"
+    - "npm set registry $NPM_REGISTRY"
+    - "echo \"App will be pushed to registry - \"${REGISTRY}"
+    - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - "mv -f qqq2.yml qqq.yml"
     - docker stack rm $APP_IMAGE_NAME
