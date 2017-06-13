@@ -24,7 +24,7 @@
         "FailsafeObserverMixin": false,
         "BusinessRuleMixin": false,
         "SoftDeleteMixin": false,
-        "EvAuditFieldsMixin": false,
+        "AuditFieldsMixin": true,
         "ExpressionAstPopulatorMixin": false,
         "PropertyExpressionMixin": false
     },
