@@ -20,7 +20,7 @@ swarm:
     - "echo \"Npm Registry - \"${NPM_REGISTRY}"
     - "echo \"App will be pushed to registry - \"${REGISTRY}"
     - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
-    - "npm install --verbose --no-optional"
+    - "npm install --no-optional"
     - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
     - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
     - "export HAPROXY=10.73.96.215"
