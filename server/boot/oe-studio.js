@@ -23,10 +23,10 @@ var designerName = 'oe-studio';
 
 function setDesignerPath(DesignerPath, server) {
   if (!appconfig.designer.templatePath || appconfig.designer.templatePath.length === 0) {
-    appconfig.designer.templatePath = [DesignerPath + '/'+designerName+'/templates'];
+    appconfig.designer.templatePath = [DesignerPath + '/' + designerName + '/templates'];
   }
   if (!appconfig.designer.stylePath || appconfig.designer.stylePath.length === 0) {
-    appconfig.designer.stylePath = [DesignerPath + '/'+designerName+'/styles'];
+    appconfig.designer.stylePath = [DesignerPath + '/' + designerName + '/styles'];
   }
   if (!appconfig.designer.assetPath || appconfig.designer.assetPath.length === 0) {
     appconfig.designer.assetPath = ['client/images'];
@@ -158,10 +158,10 @@ function setDesignerPath(DesignerPath, server) {
     }
   };
 
-  //server.use(loopback.static(DesignerPath));
+  // server.use(loopback.static(DesignerPath));
   server.get(appconfig.designer.mountPath, evEnsureLoggedIn, function sendResponse(req, res) {
     res.sendFile('index.html', {
-      root: DesignerPath + '/'+designerName
+      root: DesignerPath + '/' + designerName
     });
   });
 
@@ -304,7 +304,7 @@ function setDesignerPath(DesignerPath, server) {
     res.json(module.prospectElements);
   });
 
-  ifDirectoryExist(DesignerPath + '/'+designerName, function checkIfDirectoryExist(dirname, status) {
+  ifDirectoryExist(DesignerPath + '/' + designerName, function checkIfDirectoryExist(dirname, status) {
     if (status) {
       server.once('started', function DesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
@@ -347,11 +347,11 @@ module.exports = function Designer(server) {
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
 
-    ifDirectoryExist(appconfig.designer.installationPath + '/'+designerName, function directorySearch(dirname, status) {
+    ifDirectoryExist(appconfig.designer.installationPath + '/' + designerName, function directorySearch(dirname, status) {
       if (status) {
         setDesignerPath(appconfig.designer.installationPath, server);
       } else {
-        console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/'+oe-studio+']');
+        console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/' + designerName + ']');
       }
     });
 
