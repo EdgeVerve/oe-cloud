@@ -230,8 +230,12 @@ module.exports = function (BaseJournalEntity) {
     next(err);
   });
 
-  var actualDrainActorMailBox = function (activityList, options, callback) {
-    async.each(activityList, function (activity, cb) {
+  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+    var atomicActivitiesList = ctx.instance.atomicActivitiesList;
+    var nonAtomicActivitiesList = ctx.instance.nonAtomicActivitiesList;
+    var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
+    async.each(activities, function (activity, cb) {
+      var options = ctx.options;
       var actor = options.actorInstancesMap[activity.entityId];
       if (actor) {
         actor.journalSaved(activity, options, function (err) {
@@ -247,25 +251,9 @@ module.exports = function (BaseJournalEntity) {
       }
     }, function (err) {
       if (err) {
-        return callback(err);
-      }
-      return callback();
-    });
-  };
-
-  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
-    var atomicActivitiesList = ctx.instance.atomicActivitiesList;
-    var nonAtomicActivitiesList = ctx.instance.nonAtomicActivitiesList;
-    actualDrainActorMailBox(atomicActivitiesList, ctx.options, function (err) {
-      if (err) {
         return next(err);
       }
-      actualDrainActorMailBox(nonAtomicActivitiesList, ctx.options, function (err) {
-        if (err) {
-          return next(err);
-        }
-        return next();
-      });
+      return next();
     });
   });
 
