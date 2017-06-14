@@ -34,5 +34,5 @@ swarm:
     - while [ $isStarted -ne 200 ]; do echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 10; done
     - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
   stage: build
-   tags:
+  tags:
     - EVF_Paas_Runner_Docker_13_181
