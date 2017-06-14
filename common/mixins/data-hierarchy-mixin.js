@@ -12,6 +12,9 @@ const uuid = require('node-uuid');
 const async = require('async');
 const ROOT_PATH = ',root,';
 module.exports = function DataHierarchyMixin(Model) {
+  if (Model.modelName === 'BaseEntity') {
+    return;
+  }
   Model.defineProperty('_hierarchyScope', {
     type: 'object',
     index: true,
@@ -24,10 +27,15 @@ module.exports = function DataHierarchyMixin(Model) {
   } else {
     Model.definition.settings.hidden = ['_hierarchyScope'];
   }
-  // Ev observer hooks for before save access and after access.
-  Model.evObserve('before save', hierarchyBeforeSave);
-  Model.evObserve('access', hierarchyAccess);
-  Model.evObserve('after accesss', hierarchyAfterAccess);
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataHierarchyMixin) || (!Model.settings.mixins.DataHierarchyMixin)) {
+    Model.evRemoveObserver('before save', hierarchyBeforeSave);
+    Model.evRemoveObserver('access', hierarchyAccess);
+    Model.evRemoveObserver('after accesss', hierarchyAfterAccess);
+  } else {
+    Model.evObserve('before save', hierarchyBeforeSave);
+    Model.evObserve('access', hierarchyAccess);
+    Model.evObserve('after accesss', hierarchyAfterAccess);
+  }
 };
 
 

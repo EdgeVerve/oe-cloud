@@ -15,15 +15,18 @@
             "default": 0
         }
     },
-    "mixins": {
+     "overridingMixins": {
         "ModelValidations": false,
         "DataPersonalizationMixin": false,
         "HistoryMixin": false,
         "IdempotentMixin": false,
-        "VersionMixin": false,
+        "EvVersionMixin": false,
         "FailsafeObserverMixin": false,
         "BusinessRuleMixin": false,
-        "SoftDeleteMixin": false
+        "SoftDeleteMixin": false,
+        "AuditFieldsMixin": true,
+        "ExpressionAstPopulatorMixin": false,
+        "PropertyExpressionMixin": false
     },
     "options": {
         "instanceCacheSize": 200000,
