@@ -4,11 +4,13 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-var util = require('../../lib/common/util');
-var log = require('oe-logger')('boot-db-models');
-var events = require('events');
-var DataSource = require('loopback-datasource-juggler').DataSource;
 var async = require('async');
+var events = require('events');
+var loopback = require('loopback');
+var DataSource = require('loopback-datasource-juggler').DataSource;
+var log = require('oe-logger')('boot-db-models');
+
+var util = require('../../lib/common/util');
 
 var eventEmitter = new events.EventEmitter();
 
@@ -24,7 +26,7 @@ var eventEmitter = new events.EventEmitter();
  * load models from database.
  *
  * @memberof Boot Scripts
- * @author Ajith Vasudevan
+ * @author Ajith Vasudevan, Pradeep Kumar Tippa
  * @name DB Models
  */
 
@@ -95,7 +97,7 @@ module.exports = function DBModels(app, cb) {
           'cause': err,
           'details': ''
         });
-        return cb();
+        return attachBeforeSaveHook(app, cb);
       }
       if (results && results.length > 0) {
         // For each Model defined in the DB ...
@@ -106,7 +108,37 @@ module.exports = function DBModels(app, cb) {
           });
         });
       }
-      cb();
+      attachBeforeSaveHook(app, cb);
     });
   });
 };
+
+// Attaching before save hook for restricting overriding of file based models
+function attachBeforeSaveHook(app, cb) {
+  var modelDefinition = app.models.ModelDefinition;
+  modelDefinition.observe('before save', function beforeSaveHookForModelDefinitionFn(ctx, next) {
+    var data = ctx.instance || ctx.data;
+    // No need to check for data.filebased for true, it is already taken care in beforeRemote("**")
+    // in model-definition.js
+    if (typeof data !== 'undefined' && typeof data.name !== 'undefined') {
+      var model = loopback.findModel(data.name);
+      // Checking the model availability and is it a dynamic model.
+      // When a model(A) is created with relation of another model(B), and lets say the related model(B)
+      // doesn't exists, loopback will created a model with settings as {'unresolved': true}
+      // So added additional check for unresolved model setting.
+      if (model && model.settings && typeof model.settings.unresolved === 'undefined' && typeof model.settings._dynamicModel === 'undefined') {
+        var modelFoundErr = new Error();
+        modelFoundErr.name = 'Data Error';
+        modelFoundErr.message = 'Model \'' + data.name + '\' is a system or filebased model. ModelDefinition doesn\'t allow overriding of it.';
+        modelFoundErr.retriable = false;
+        modelFoundErr.status = 422;
+        next(modelFoundErr);
+      } else {
+        next();
+      }
+    } else {
+      next();
+    }
+  });
+  cb();
+}
