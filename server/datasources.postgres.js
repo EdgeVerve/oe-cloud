@@ -24,6 +24,7 @@ module.exports = {
     'name': 'db',
     'connector': 'loopback-connector-postgresql',
     'user': 'postgres',
+    'max': 50,
     'connectionTimeout': 50000
   },
   'emailDs': {

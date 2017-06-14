@@ -31,8 +31,11 @@ module.exports = function SoftDeleteMixin(Model) {
     type: 'boolean',
     default: false
   });
-
-  Model.evObserve('access', addSoftDeleteFilter);
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.SoftDeleteMixin) || !Model.settings.mixins.SoftDeleteMixin) {
+    Model.evRemoveObserver('access', addSoftDeleteFilter);
+  } else {
+    Model.evObserve('access', addSoftDeleteFilter);
+  }
 };
 
 /**
