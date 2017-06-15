@@ -47,7 +47,7 @@
     "loopback-component-storage": "git+http://evgit/oecloud.io/loopback-component-storage.git#v0.8",
     "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#v0.8",
     "loopback-connector-nodes-for-Node-RED": "git+http://evgit/oecloud.io/loopback-connector-nodes-for-Node-RED.git#v0.8",
-    "loopback-datasource-juggler": "git+http://evgit/oecloud.io/loopback-datasource-juggler.git",
+    "loopback-datasource-juggler": "git+http://evgit/lior.schindler/loopback-datasource-juggler.git#idempotent-perf",
     "loopback-explorer": "1.8.0",
     "loopback-filters": "0.1.2",
     "lru-cache": "^4.0.1",

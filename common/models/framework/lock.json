@@ -1,6 +1,6 @@
 ﻿{
   "name": "Lock",
-  "base": "BaseEntity",
+  "base": "PersistedModel",
   "description": "used in lock implementation for no-sql databases",
   "properties": {
     "modelName": {
