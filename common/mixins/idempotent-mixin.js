@@ -77,7 +77,7 @@ module.exports = function IdempotencyMixin(Model) {
             return cb(null, ctx.currentInstant);
           }
           var hinst = result[0];
-          Model.findById(hinst.id, ctx.options, function modelFindByIdcb(err, latestInst) {
+          Model.findById(hinst._modelId, ctx.options, function modelFindByIdcb(err, latestInst) {
             return cb(err, latestInst);
           });
         } else {
