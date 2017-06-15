@@ -25,10 +25,6 @@ module.exports = function VersionMixin(Model) {
     return;
   }
 
-  if (Model.modelName === 'BaseReplayableEntity') {
-    return;
-  }
-
   Model.defineProperty('_oldVersion', {
     type: String
   });
@@ -63,7 +59,6 @@ module.exports = function VersionMixin(Model) {
     //     return next();
     // }
     var data = ctx.data || ctx.instance;
-    // console.log('before save version mixin ', ctx.Model.modelName, data._version);
     var error;
     if (ctx.isNewInstance) {
       data._version = data._newVersion || data._version || Uuid.v4();
@@ -71,7 +66,6 @@ module.exports = function VersionMixin(Model) {
       delete data._newVersion;
     } else if (ctx.currentInstance) {
       if (ctx.currentInstance.__remoteInvoked) {
-        // console.log('post data', data);
         if (!data._version) {
           error = new Error();
           error.name = 'Data Error';
