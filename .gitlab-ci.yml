@@ -7,6 +7,7 @@ before_script:
   - export project=${nameGroupProject##*/}
   - export group=${nameGroupProject%/*}
   - export branch=${CI_BUILD_REF_NAME}
+  - export USER_BROADCASTER=false
   - export project=${project//[^[:alnum:]]/}
   - export group=${group//[^[:alnum:]]/}
   - export branch=${branch//[^[:alnum:]]/}
