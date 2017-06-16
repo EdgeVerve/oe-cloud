@@ -367,17 +367,23 @@ function dataPersonalizationAccess(ctx, next) {
   const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
   if (autoscope.length) {
-    autoscope.forEach((key) => {
+    var err;
+    var len = autoscope.length;
+    for (var i = 0; i < len; i++) {
+      var key = autoscope[i];
       if (!context[key] && !callContext.ignoreAutoScope) {
-        const err = new Error();
+        err = new Error();
         err.name = 'Data Personalization error';
         err.message = `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`;
         err.code = 'DATA_PERSONALIZATION_ERROR_029';
         err.type = 'AutoScopeValuesNotFound';
         err.retriable = false;
-        return next(err);
+        break;
       }
-    });
+    }
+    if (err) {
+      return next(err);
+    }
   }
 
   // pushing the query parameters into ignorelist.so tht manually passed query will not conflict with context inferred

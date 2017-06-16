@@ -205,7 +205,6 @@ describe(chalk.blue('data-acl-update-test'), function () {
 
         async.series([function (cb) {
             cleanup(cb);
-            cb();
         },
         function (cb) {
             var model = bootstrap.models[modelName1];
