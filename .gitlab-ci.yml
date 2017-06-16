@@ -65,16 +65,16 @@ mongotest:
     - docker --tls -H $SWARM_HOST pull $REGISTRY/$APP_IMAGE_NAME
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME up -d
     - if docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME exec web grunt test-with-coverage; then echo "Test cases passed successfully"; else echo "Test cases are failing" && export exit_status=1; fi
-    - if echo $CI_BUILD_REPO | grep "10.73.53.167/oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
+    - if echo $CI_BUILD_REPO | grep "oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
     - if [ $MAIN_BRANCH -eq 0 ]; then echo "Not the main project, hence not sending coverage report to evgit..."; docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down; exit $exit_status; fi
     - docker --tls -H $SWARM_HOST cp $WEB_CONTAINER_NAME:/home/src/coverage/ .
     - echo "Sending coverage reports to evgit..."
     - tar -cf oe-cloud.tar -C ./coverage/lcov-report/ .
-    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud'
-    - scp oe-cloud.tar root@evgit:/data/share/coverage/
-    - ssh root@evgit 'mkdir -p /data/share/coverage/oe-cloud'
-    - ssh root@evgit 'tar -xf /data/share/coverage/oe-cloud.tar -C /data/share/coverage/oe-cloud'
-    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud.tar'
+    - ssh root@evgit 'rm -rf /data/documentation-portal/coverage/oe-cloud'
+    - scp oe-cloud.tar root@evgit:/data/documentation-portal/coverage/
+    - ssh root@evgit 'mkdir -p /data/documentation-portal/coverage/oe-cloud'
+    - ssh root@evgit 'tar -xf /data/documentation-portal/coverage/oe-cloud.tar -C /data/documentation-portal/coverage/oe-cloud'
+    - ssh root@evgit 'rm -rf /data/documentation-portal/coverage/oe-cloud.tar'
     - echo "Coverage report updated"
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
     - exit $exit_status
