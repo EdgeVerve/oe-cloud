@@ -121,7 +121,12 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         var data = {
           'name': modelNameNoInjection,
           'base': 'BaseEntity',
-          'idInjection': false
+          'idInjection': false,
+          'properties': {
+            'color': {
+              'type': 'string'
+            }
+          }
         };
         modelDefinition.create(data, bootstrap.defaultContext, done);
       }
@@ -339,7 +344,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       });
     });
 
-    xit('2 parallel creates, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
+    it('2 parallel creates, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection);
       var version = uuid.v4();
       var createData1 = { '_version': version, 'color': 'blue' };
@@ -358,19 +363,19 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         var result2 = results[1];
 
         expect(result1.id).to.not.equal(undefined);
-        expect(result1.id).to.be.equal(result2.id);
-        expect(result1._oldVersion).to.be.equal(result1._version);
-        expect(result2._oldVersion).to.be.equal(result2._version);
-        expect(result1._oldVersion).to.be.equal(version);
+        expect(result1.id.toString()).to.be.equal(result2.id.toString());
+        expect(result1._version).to.be.equal(version);
         expect(result1._version).to.be.equal(result2._version);
         expect(result1.color).to.be.equal(result2.color);
         expect(result1.color).to.be.equal('blue');
-        expect(result1._newVersion).to.be.equal(undefined);
-        expect(result2._newVersion).to.be.equal(undefined);
+        expect(result1._oldVersion).to.not.be.ok;
+        expect(result2._oldVersion).to.not.be.ok;
+        expect(result1._newVersion).to.not.be.ok;
+        expect(result2._newVersion).to.not.be.ok;
       });
     });
 
-    xit('2 parallel Rest Posts, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
+    it('2 parallel Rest Posts, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
       var version = uuid.v4();
       var createData1 = { '_version': version, 'color': 'blue' };
       var createData2 = { '_version': version, 'color': 'blue' };
@@ -392,15 +397,10 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         expect(result1._version).to.be.equal(version);
         expect(result1.color).to.be.equal(result2.color);
         expect(result1.color).to.be.equal('blue');
-        expect(result1._oldVersion).to.be.equal(undefined);
-        expect(result2._oldVersion).to.be.equal(undefined);
-        expect(result1._newVersion).to.be.equal(undefined);
-        expect(result2._newVersion).to.be.equal(undefined);
-        var vehicleModel = loopback.getModel(modelNameNoInjection);
-        return vehicleModel.find({ where: { id: result1.id } }, bootstrap.defaultContext).then(function (res) {
-          expect(res[0]._oldVersion).to.be.equal(version);
-          expect(res._newVersion).to.be.equal(undefined);
-        });
+        expect(result1._oldVersion).to.not.be.ok;
+        expect(result2._oldVersion).to.not.be.ok;
+        expect(result1._newVersion).to.not.be.ok;
+        expect(result2._newVersion).to.not.be.ok;
       });
     });
   });

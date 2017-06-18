@@ -31,7 +31,9 @@ module.exports = function VersionMixin(Model) {
 
   Model.defineProperty('_version', {
     type: String,
-    index: true,
+    index: {
+      unique: true
+    },
     required: true
   });
 
