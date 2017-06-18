@@ -12,7 +12,7 @@ before_script:
   - export branch=${branch//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - npm config set registry http://10.64.100.109
+  - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
   - npm config set loglevel warn
   - evf-paas login -u admin -p Anything_f9 evfapp.dev -d && source $HOME/evf-paas/evfapp.dev/install_env.sh
