@@ -217,6 +217,7 @@ function createHistoryData(ctx, next) {
   }
   if (ctx.currentInstance) {
     ctx.hookState.historyData = [ctx.currentInstance.toObject()];
+    return next();
   } else if (ctx.where) {
     // Earlier history mixin was doing findOne
     // which is wrong as updateAll is being done...
@@ -233,9 +234,11 @@ function createHistoryData(ctx, next) {
       recs.forEach(function recsForEach(e) {
         ctx.hookState.historyData.push(e.toObject());
       });
+      return next();
     });
+  } else {
+    return next();
   }
-  return next();
 }
 
 /**
