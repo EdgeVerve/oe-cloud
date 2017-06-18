@@ -139,5 +139,5 @@ swarm:
     - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
     - "mocha test/actorIntegrationTest.js"
     - "node test/cleanupIntegrationTest.js"
-    tags:
+  tags:
     - EVF-PAAS13
