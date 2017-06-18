@@ -121,7 +121,12 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         var data = {
           'name': modelNameNoInjection,
           'base': 'BaseEntity',
-          'idInjection': false
+          'idInjection': false,
+          'properties': {
+            'color': {
+              'type': 'string'
+            }
+          }
         };
         modelDefinition.create(data, bootstrap.defaultContext, done);
       }
@@ -363,10 +368,10 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         expect(result1._version).to.be.equal(result2._version);
         expect(result1.color).to.be.equal(result2.color);
         expect(result1.color).to.be.equal('blue');
-        expect(result1._oldVersion).to.be.equal(undefined);
-        expect(result2._oldVersion).to.be.equal(undefined);
-        expect(result1._newVersion).to.be.equal(undefined);
-        expect(result2._newVersion).to.be.equal(undefined);
+        expect(result1._oldVersion).to.not.be.ok;
+        expect(result2._oldVersion).to.not.be.ok;
+        expect(result1._newVersion).to.not.be.ok;
+        expect(result2._newVersion).to.not.be.ok;
       });
     });
 
@@ -392,10 +397,10 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
         expect(result1._version).to.be.equal(version);
         expect(result1.color).to.be.equal(result2.color);
         expect(result1.color).to.be.equal('blue');
-        expect(result1._oldVersion).to.be.equal(undefined);
-        expect(result2._oldVersion).to.be.equal(undefined);
-        expect(result1._newVersion).to.be.equal(undefined);
-        expect(result2._newVersion).to.be.equal(undefined);
+        expect(result1._oldVersion).to.not.be.ok;
+        expect(result2._oldVersion).to.not.be.ok;
+        expect(result1._newVersion).to.not.be.ok;
+        expect(result2._newVersion).to.not.be.ok;
       });
     });
   });
