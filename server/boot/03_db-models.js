@@ -49,13 +49,13 @@ module.exports = function DBModels(app, cb) {
       return callback();
     }
     var ds = model.getDataSource(util.bootContext());
-    ds.autoupdate(model.modelName, function(err,result) {
+    ds.autoupdate(model.modelName, function (err, result) {
       if (err) {
         callback(err);
       }
       return findOrCreateModelDefinition();
     });
-    function findOrCreateModelDefinition(){
+    function findOrCreateModelDefinition() {
       var modelDefinitionObject = JSON.parse(JSON.stringify(model.definition.settings));
       // add the 'name' member
       modelDefinitionObject.name = key;
@@ -109,7 +109,6 @@ module.exports = function DBModels(app, cb) {
       if (results && results.length > 0) {
         // For each Model defined in the DB ...
         results.forEach(function dbModelsModelDefinitionFindResultsForEachFn(r) {
-          console.log('creating for model ',r.modelName)
           util.createModel(app, r, util.bootContext(), function dbModelsModelDefinitionFindCreateModelCb() {
             log.debug(options, 'emitting event model available ', r.name);
             modelDefinition.events.emit('model-' + r.name + '-available');
