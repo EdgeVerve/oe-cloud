@@ -13,6 +13,8 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var uuid = require('node-uuid');
+var logger = require('oe-logger');
+var log = logger('basic-crud');
 
 
 describe('basic-crud', function () {
