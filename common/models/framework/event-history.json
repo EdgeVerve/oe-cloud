@@ -13,6 +13,9 @@
         },
         "timestamp": {
             "type": "Date"
+        },
+        "doStartUpOperation": {
+            "type": "boolean"
         }
     }
 }

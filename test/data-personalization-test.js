@@ -102,7 +102,8 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     plural: myScopeModel,
     mixins: {
       'HistoryMixin': true,
-      'SoftDeleteMixin': false
+      'SoftDeleteMixin': false,
+      'FailsafeObserverMixin': false
     }
   };
 
