@@ -155,7 +155,7 @@ module.exports = function GruntConfig(grunt) {
       coverage: {
         src: 'test',
         options: {
-          excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
+          excludes: ['test/cleanupIntegrationTest.js', 'lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
           timeout: 60000,
           check: {
             lines: 70,
@@ -167,11 +167,11 @@ module.exports = function GruntConfig(grunt) {
     }
   });
 
-    // Load the plugin that provides the "jshint" task.
+  // Load the plugin that provides the "jshint" task.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
 
-    // Add the grunt-mocha-test tasks.
+  // Add the grunt-mocha-test tasks.
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-contrib-clean');
