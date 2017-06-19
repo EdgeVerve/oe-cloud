@@ -1,7 +1,7 @@
 stages:
+  - integrate
   - build
   - test
-  - integrate
 
 before_script:
   - export nameGroupProject=${CI_PROJECT_DIR##*builds/}
