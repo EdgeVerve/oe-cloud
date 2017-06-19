@@ -117,7 +117,7 @@ module.exports = function GruntConfig(grunt) {
     mochaTest: {
       test: {
         options: {
-          excludes: ['test/prepareIntegrationTest.js','test/actorIntegrationTest.js','test/cleanupIntegrationTest.js'],
+          excludes: ['test/prepareIntegrationTest.js', 'test/actorIntegrationTest.js', 'test/cleanupIntegrationTest.js'],
           quiet: false,
           clearRequireCache: true,
           timeout: 60000
