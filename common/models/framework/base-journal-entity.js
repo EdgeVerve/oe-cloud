@@ -205,7 +205,8 @@ module.exports = function (BaseJournalEntity) {
           if (instance.fromPending === true) {
             return next(err);
           }
-          return writePending(ctx, next);
+          // return writePending(ctx, next);
+          return next(err);
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
@@ -215,7 +216,8 @@ module.exports = function (BaseJournalEntity) {
             if (instance.fromPending === true) {
               return next(err);
             }
-            return writePending(ctx, next);
+            // return writePending(ctx, next);
+            return next(err);
           } else {
             return next();
           }
