@@ -5,7 +5,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var chalk = require('chalk');
 
-var baseurl = "https://zharnest-oecloud.evfapp.dev/api/";
+var baseurl = "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api/";
 
 var actorPlural = 'Inventories';
 
@@ -35,7 +35,7 @@ var tempIds = [];
 var funcArray = [];
 
 describe(chalk.blue('integrationTest'), function() {
-    this.timeout(60000);
+    this.timeout(120000);
 
   function checkBalance(num, next) {
     if (!token) {
