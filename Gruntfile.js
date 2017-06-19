@@ -166,11 +166,11 @@ module.exports = function GruntConfig(grunt) {
     }
   });
 
-  // Load the plugin that provides the "jshint" task.
+    // Load the plugin that provides the "jshint" task.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
 
-  // Add the grunt-mocha-test tasks.
+    // Add the grunt-mocha-test tasks.
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-contrib-clean');
