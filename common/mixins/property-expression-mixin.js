@@ -26,7 +26,11 @@ module.exports = function PropertyExpressionMixin(Model) {
   // get property expressions from property-expression-util
   Model.propertyUtils = propertyUtils.propertyExpressions(Model);
   if (typeof Model.propertyUtils !== 'undefined' && Model.propertyUtils.length > 0) {
-    Model.evObserve('before save', injectPropertyExprVal);
+    if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.settings.mixins.PropertyExpressionMixin) {
+      Model.evRemoveObserver('before save', injectPropertyExprVal);
+    } else if (Model.settings.mixins.PropertyExpressionMixin) {
+      Model.evObserve('before save', injectPropertyExprVal);
+    }
   }
 };
 

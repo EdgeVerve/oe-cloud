@@ -205,7 +205,6 @@ describe(chalk.blue('data-acl-update-test'), function () {
 
         async.series([function (cb) {
             cleanup(cb);
-            cb();
         },
         function (cb) {
             var model = bootstrap.models[modelName1];
@@ -351,7 +350,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
                         // earlier it was coming in main body as 403
                         // expect(res.status).to.be.equal(403);
                         expect(res.error.status).to.be.equal(403);
-                        expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
                         var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
                         var confirmation = {
                             "remarks": "confirmation for music",
@@ -388,7 +387,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
                     .end(function (err, res) {
                         var response = res.body;
                         expect(res.error.status).to.be.equal(403);
-                        expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
                         done();
                     });
             });

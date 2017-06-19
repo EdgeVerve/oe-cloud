@@ -11,10 +11,6 @@ module.exports = function failsafeObserverMixin(Model) {
     return;
   }
 
-  if (Model.modelName === 'BaseReplayableEntity') {
-    return;
-  }
-
   var FailSafeObserver = function (fn) {
     var _fn = fn;
     var _id = UUID.v4();
@@ -45,14 +41,19 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
+  Model.defineProperty('_processed', {
+    type: 'boolean',
+    default: false
+  });
+
   Model.defineProperty('_fsCtx', {
     type: 'string'
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', '_processed']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx'];
+    Model.definition.settings.hidden = ['_fsCtx', '_processed'];
   }
 
   Model.failSafeObserve = function (eventName, observer) {
@@ -71,7 +72,7 @@ module.exports = function failsafeObserverMixin(Model) {
   };
 
   function converteObservers(type) {
-    if (Model._observers[type] !== undefined) {
+    if (typeof Model._observers[type] !== 'undefined') {
       Model._observers[type].forEach(function (observer) {
         var failSafeObserver = new FailSafeObserver(observer);
         Model.failSafeObserve(type, failSafeObserver);
@@ -103,10 +104,10 @@ module.exports = function failsafeObserverMixin(Model) {
 
 function failsafeObserverBeforeDelete(ctx, next) {
   var version;
-  if (ctx.instance !== undefined) {
+  if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
     ctx.instance._fsCtx = JSON.stringify(ctx.options);
-  } else if (ctx.data !== undefined) {
+  } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
   }
   if (!version) {
@@ -118,10 +119,10 @@ function failsafeObserverBeforeDelete(ctx, next) {
 
 function failsafeObserverBeforeSave(ctx, next) {
   var version;
-  if (ctx.instance !== undefined) {
+  if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
     ctx.instance._fsCtx = JSON.stringify(ctx.options);
-  } else if (ctx.data !== undefined) {
+  } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
   }
   if (!version) {

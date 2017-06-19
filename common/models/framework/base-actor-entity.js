@@ -141,13 +141,14 @@ module.exports = function (BaseActorEntity) {
     var message = {};
     message.isProcessed = false;
     message.retryCount = 0;
+    message.skipCount = 0;
     message.instructionType = activity.instructionType;
     message.payload = activity.payload;
     message.activity = activity;
     message.version = journalEntityVersion;
     message.journalEntityType = journalEntityType;
     message.seqNum = activity.seqNum;
-    message.journalStatus = undefined;
+    message.journalStatus = null;
     return message;
   };
 
@@ -234,26 +235,11 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  function prepareMessagesForProcessing(envelope) {
-    var messages = envelope.msg_queue.slice(0);
-    messages.sort(function (a, b) {
-      var key1 = a.seqNum;
-      var key2 = b.seqNum;
-      if (key1 < key2) {
-        return -1;
-      } else if (key1 === key2) {
-        return 0;
-      }
-      return 1;
-    });
-    return messages;
-  }
-
   BaseActorEntity.prototype.processMessagesBackground = function (envelope, options, actorCb) {
-    var messages = prepareMessagesForProcessing(envelope);
+    var messages = envelope.msg_queue.slice(0);
     var self = this;
 
-    if (messages.length === 0 && (envelope.dirty === undefined || envelope.dirty === false)) {
+    if (messages.length === 0) {
       return actorCb();
     }
 
@@ -282,7 +268,6 @@ module.exports = function (BaseActorEntity) {
               log.error(options, 'error while persisting actor ', error);
               return releaseLockCb(error);
             }
-            envelope.dirty = false;
             envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
             return releaseLockCb();
           });
@@ -412,7 +397,7 @@ module.exports = function (BaseActorEntity) {
   }
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
-    var loopbackModelsCollection = getAssociatedModels(this._type);
+    var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
     var self = this;
@@ -502,7 +487,7 @@ module.exports = function (BaseActorEntity) {
       });
     };
     var envelope = actorPool.getEnvelope(modelName, id);
-    if (envelope === null || envelope === undefined) {
+    if (envelope === null || typeof envelope === 'undefined') {
       return cb();
     }
     setMessageStatus(envelope);

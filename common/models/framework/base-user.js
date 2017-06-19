@@ -363,13 +363,13 @@ module.exports = function BaseUser(BaseUser) {
     updatedData.failedTries = user.failedTries + 1;
     if (user.failedTries === maxFailedLoginTries - 1) {
       updatedData.status = 'disabled';
-	    setTimeout(BaseUser.unlock, BaseUser.app.get('UNLOCK_USER_ACCOUNT_TIME'), user.email || user.username, options, function (err, msg) {
-		    if (err) {
-			    log.error(options, err);
-		    } else {
-			    log.info(options, msg);
-		    }
-	    });
+      setTimeout(BaseUser.unlock, BaseUser.app.get('UNLOCK_USER_ACCOUNT_TIME'), user.email || user.username, options, function (err, msg) {
+        if (err) {
+          log.error(options, err);
+        } else {
+          log.info(options, msg);
+        }
+      });
     }
     user.updateAttributes(updatedData, options, function userUpdateFailedTries(err) {
       if (err) {

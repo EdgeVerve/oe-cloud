@@ -191,10 +191,17 @@ function createHistoryModel(model) {
  * @memberof History Mixin
  */
 function addObservers(Model) {
-  Model.evObserve('before save', createHistoryData);
-  Model.evObserve('before delete', createHistoryDataForDelete);
-  Model.evObserve('after save', insertIntoHistory);
-  Model.evObserve('after delete', insertIntoHistoryForDelete);
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.HistoryMixin) || !Model.settings.mixins.HistoryMixin) {
+    Model.evRemoveObserver('before save', createHistoryData);
+    Model.evRemoveObserver('before delete', createHistoryDataForDelete);
+    Model.evRemoveObserver('after save', insertIntoHistory);
+    Model.evRemoveObserver('after delete', insertIntoHistoryForDelete);
+  } else {
+    Model.evObserve('before save', createHistoryData);
+    Model.evObserve('before delete', createHistoryDataForDelete);
+    Model.evObserve('after save', insertIntoHistory);
+    Model.evObserve('after delete', insertIntoHistoryForDelete);
+  }
 }
 
 function createHistoryData(ctx, next) {
@@ -210,6 +217,7 @@ function createHistoryData(ctx, next) {
   }
   if (ctx.currentInstance) {
     ctx.hookState.historyData = [ctx.currentInstance.toObject()];
+    return next();
   } else if (ctx.where) {
     // Earlier history mixin was doing findOne
     // which is wrong as updateAll is being done...
@@ -226,9 +234,11 @@ function createHistoryData(ctx, next) {
       recs.forEach(function recsForEach(e) {
         ctx.hookState.historyData.push(e.toObject());
       });
+      return next();
     });
+  } else {
+    return next();
   }
-  return next();
 }
 
 /**

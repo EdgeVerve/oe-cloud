@@ -47,6 +47,9 @@ const _ = require('lodash');
 const log = require('oe-logger')('data-personalization-mixin');
 
 module.exports = Model => {
+  if (Model.modelName === 'BaseEntity') {
+    return;
+  }
   // Defining a new _score, scope, _autoScope property
   Model.defineProperty('_scope', {
     type: ['string'],
@@ -81,10 +84,15 @@ module.exports = Model => {
     Model.definition.settings.mixins = {};
   }
 
-  // Ev observer hooks for before save access and after save.
-  Model.evObserve('before save', dataPersonalizationBeforeSave);
-  Model.evObserve('access', dataPersonalizationAccess);
-  Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.definition.settings.mixins.DataPersonalizationMixin) {
+    Model.evRemoveObserver('before save', dataPersonalizationBeforeSave);
+    Model.evRemoveObserver('access', dataPersonalizationAccess);
+    Model.evRemoveObserver('after accesss', dataPersonalizationAfterAccess);
+  } else {
+    Model.evObserve('before save', dataPersonalizationBeforeSave);
+    Model.evObserve('access', dataPersonalizationAccess);
+    Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+  }
 };
 
 /**
@@ -359,17 +367,23 @@ function dataPersonalizationAccess(ctx, next) {
   const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
   if (autoscope.length) {
-    autoscope.forEach((key) => {
+    var err;
+    var len = autoscope.length;
+    for (var i = 0; i < len; i++) {
+      var key = autoscope[i];
       if (!context[key] && !callContext.ignoreAutoScope) {
-        const err = new Error();
+        err = new Error();
         err.name = 'Data Personalization error';
         err.message = `insufficient data! Autoscoped values not found for the model${ctx.Model.modelName} key ${key}`;
         err.code = 'DATA_PERSONALIZATION_ERROR_029';
         err.type = 'AutoScopeValuesNotFound';
         err.retriable = false;
-        return next(err);
+        break;
       }
-    });
+    }
+    if (err) {
+      return next(err);
+    }
   }
 
   // pushing the query parameters into ignorelist.so tht manually passed query will not conflict with context inferred

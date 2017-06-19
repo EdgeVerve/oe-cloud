@@ -32,7 +32,7 @@ function apiRequest(url, postData, callback, done) {
         .send(postData)
         .end(function(err, res) {
             if (err || res.body.error) {
-                log.error(err || (new Error(JSON.stringify(res.body.error))));
+                log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
                 return done(err || (new Error(JSON.stringify(res.body.error))));
             } else {
                 return callback(res);
@@ -41,7 +41,8 @@ function apiRequest(url, postData, callback, done) {
 }
 
 describe(chalk.blue('actor-pattern-db-lock-test'), function() {
-    this.timeout(30000);
+    this.timeout(40000);
+    var afterTest = {};
 
     before('login using admin', function fnLogin(done) {
         var sendData = {
@@ -55,7 +56,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
             .send(sendData)
             .expect(200).end(function(err, res) {
                 if (err) {
-                    log.error(err);
+                    log.error(log.defaultContext(), err);
                     return done(err);
                 } else {
                     accessToken = res.body.id;
@@ -133,7 +134,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
     it('should create an account and deposit 20 into the account', function(done) {
 
-        apiRequest('/TestAccounts/', {'qqq': 0, 'stateObj': {'quantity': 0}}, postTransaction, done);
+        apiRequest('/TestAccounts/', {'stateObj': {'quantity': 0}}, postTransaction, done);
 
         function postTransaction(result) {
             var postData =
@@ -159,11 +160,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(20);
                         expect(res.body[0].id).to.be.equal(result.body.nonAtomicActivitiesList[0].entityId);
+                        afterTest[res.body[0].stateId] = 20;
                         return done();
                     }
                 });
@@ -179,7 +181,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         function createActor(actor, cb) {
             apiRequest(
                 '/TestAccounts/',
-                {'qqq': 0, 'stateObj': {'quantity': 0}},
+                {'stateObj': {'quantity': 0}},
                 function(result) {
                     actor.result = result;
                     return cb();
@@ -236,11 +238,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(20);
                         expect(res.body[0].id).to.be.equal(actor.result.body.id);
+                        afterTest[res.body[0].stateId] = 20;
                         return cb();
                     }
                 });
@@ -256,7 +259,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     });
 
     it('should fail to debit from a new account', function(done) {
-        apiRequest('/TestAccounts/', {'qqq': 0, 'stateObj': {'quantity': 0}}, postTransaction, done);
+        apiRequest('/TestAccounts/', {'stateObj': {'quantity': 0}}, postTransaction, done);
 
         function postTransaction(result) {
             var postData =
@@ -278,9 +281,9 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send(postData)
                 .expect(500).end(function(err, res) {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                     } else {
-                        log.debug(log.defaultContext(), 'the debit succeeded, altough it should not!');
+                        log.debug(log.defaultContext(), log.defaultContext(), 'the debit succeeded, altough it should not!');
                     }
                     return done();
                 });
@@ -289,7 +292,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     });
 
     it('should credit an account 20 and then debit the same account 10', function(done) {
-        apiRequest('/TestAccounts/', {'qqq': 0, 'stateObj': {'quantity': 0}}, postTransaction, done);
+        apiRequest('/TestAccounts/', {'stateObj': {'quantity': 0}}, postTransaction, done);
 
         function postTransaction(result) {
             var postData =
@@ -315,7 +318,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(20);
@@ -349,11 +352,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(10);
                         expect(res.body[0].id).to.be.equal(result.body.atomicActivitiesList[0].entityId);
+                        afterTest[res.body[0].stateId] = 10;
                         return done();
                     }
                 });
@@ -361,7 +365,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     });
 
     it('should credit an account 20 and then debit the same account 10 and then debit it 20 and fail', function(done) {
-        apiRequest('/TestAccounts/', {'qqq': 0, 'stateObj': {'quantity': 0}}, postTransaction, done);
+        apiRequest('/TestAccounts/', {'stateObj': {'quantity': 0}}, postTransaction, done);
         function postTransaction(result) {
             var postData =
                 {
@@ -386,7 +390,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(20);
@@ -420,7 +424,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(10);
@@ -450,7 +454,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send(postData)
                 .expect(500).end(function(err, res) {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                     } else {
                         log.debug(log.defaultContext(), 'the debit succeeded, altough it should not!');
                     }
@@ -498,10 +502,11 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(3);
+                        afterTest[res.body[0].stateId] = 3;
                         done();
                     }
                 });
@@ -562,10 +567,11 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(7);
+                        afterTest[res.body[0].stateId] = 7;
                         done();
                     }
                 });
@@ -626,7 +632,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(0);
@@ -734,10 +740,11 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         done(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(1);
+                        afterTest[res.body[0].stateId] = 1;
                         done();
                     }
                 });
@@ -752,7 +759,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         function createActor(actor, cb) {
             apiRequest(
                 '/TestAccounts/',
-                {'qqq': 0, 'stateObj': {'quantity': 0}},
+                {'stateObj': {'quantity': 0}},
                 function(result) {
                     actor.result = result;
                     return cb();
@@ -807,11 +814,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(10);
                         expect(res.body[0].id).to.be.equal(actor.result.body.id);
+                        afterTest[res.body[0].stateId] = 10;
                         return cb();
                     }
                 });
@@ -820,7 +828,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
         function continueLogicSecond(err) {
             if (err) {
-                log.error(err);
+                log.error(log.defaultContext(), err);
                 return done(err);
             } else {
                 return done();
@@ -836,7 +844,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         function createActor(actor, cb) {
             apiRequest(
                 '/TestAccounts/',
-                {'qqq': 0, 'stateObj': {'quantity': 0}},
+                {'stateObj': {'quantity': 0}},
                 function(result) {
                     actor.result = result;
                     return cb();
@@ -885,7 +893,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(10);
@@ -897,7 +905,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
         function continueLogicSecond(err) {
             if (err) {
-                log.error(err);
+                log.error(log.defaultContext(), err);
                 return done(err);
             } else {
                 debitAccount();
@@ -945,11 +953,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(5);
                         expect(res.body[0].id).to.be.equal(actor.result.body.id);
+                        afterTest[res.body[0].stateId] = 5;
                         return cb();
                     }
                 });
@@ -957,7 +966,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
         function continueLogicThird(err) {
             if (err) {
-                log.error(err);
+                log.error(log.defaultContext(), err);
                 return done(err);
             } else {
                 return done();
@@ -967,7 +976,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
     it('should not be able to modify a transaction', function(done) {
 
-        apiRequest('/TestAccounts/', {'qqq': 0, 'stateObj': {'quantity': 0}}, postTransaction, done);
+        apiRequest('/TestAccounts/', {'stateObj': {'quantity': 0}}, postTransaction, done);
 
         function postTransaction(result) {
             var postData =
@@ -1005,7 +1014,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send(postData)
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body.error.message).to.be.equal('Cannot update existing journal entry');
@@ -1018,7 +1027,6 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     it('should delete an account ', function(done) {
         var postData = {
             id: 'TestAccount116',
-            'qqq': 0,
             'stateObj': {
                 'quantity': 0
             }
@@ -1076,7 +1084,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return done(err);
                     } else {
                         expect(res.body.length).to.be.equal(0);
@@ -1086,7 +1094,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         }
     });
 
-    it('should create 10 accounts in parallel. Then credit them with 1000 in parallel. Then debit 3*10 from all of them in parallel', function(done) {
+    it('should create 9 accounts in parallel. Then credit them with 1000 in parallel. Then debit 3*10 from all of them in parallel', function(done) {
 
         var ids = [];
         ids.push('a1');
@@ -1098,7 +1106,6 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         ids.push('g1');
         ids.push('h1');
         ids.push('i1');
-        //ids.push('j1');
 
         var createData = {
             stateObj: {quantity: 0}
@@ -1151,7 +1158,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(1000);
@@ -1163,7 +1170,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
         function continueMidLogic(err) {
             if (err) {
-                log.error(err);
+                log.error(log.defaultContext(), err);
                 return done(err);
             } else {
                 atomicTransactions();
@@ -1215,11 +1222,12 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 .send()
                 .end((err, res) => {
                     if (err) {
-                        log.error(err);
+                        log.error(log.defaultContext(), err);
                         return cb(err);
                     } else {
                         expect(res.body[0].state.stateObj.quantity).to.be.equal(970);
                         expect(res.body[0].id).to.be.equal(id);
+                        afterTest[res.body[0].stateId] = 970;
                         return cb();
                     }
                 });
@@ -1227,7 +1235,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
         function continueFinalLogic(err) {
             if (err) {
-                log.error(err);
+                log.error(log.defaultContext(), err);
                 return done(err);
             } else {
                 return done();
@@ -1235,57 +1243,44 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         }
     });
 
-    var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
-
-    after('delete all the test accounts', function(done) {
-        var testAccount = loopback.getModel('TestAccount');
-        testAccount.destroyAll({}, deleteContext, function(err) {
+    after('check state is updated against DB', function(done) {
+        var stateModel = loopback.getModel('State');
+        async.retry({times: 5}, function(retrycb) {
+            async.eachOf(afterTest, function(value, stateId, cb) {
+                var query = {
+                    where: {id: stateId}
+                };
+                stateModel.find(query, bootstrap.defaultContext, function(err, res) {
+                    if (err) {
+                        log.error(log.defaultContext(), err);
+                        return cb(err);
+                    } else {
+                        if (res[0].stateObj.quantity === value) {
+                            return cb();
+                        } else {
+                            log.error(log.defaultContext(), 'quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
+                            return cb(new Error('error in assertion against db'));
+                        }
+                    }
+                });
+            }, function(err) {
+                if (err) {
+                    return setTimeout(retrycb, 3000, err);
+                } else {
+                    return retrycb(null, true);
+                }
+            });
+        }, function(err, result) {
             if (err) {
-                log.error(err);
-                console.log('unable to delete all the TestAccount models');
                 return done(err);
             } else {
-                log.debug('deleted alltest accounts');
                 return done();
             }
         });
     });
 
-    after('delete all the test transfers', function(done) {
-        var testTransfer = loopback.getModel('TestTransfer');
-        testTransfer.destroyAll({}, deleteContext, function(err) {
-            if (err) {
-                expect(err.message).to.be.equal('Cannot delete journal entry');
-                return done();
-            } else {
-                log.debug('deleted alltest transfers');
-                return done(new Error('Should not be allowed to delete journal entries!'));
-            }
-        });
-    });
-
-    after('delete all the test states', function(done) {
-        var state = loopback.getModel('State');
-        state.destroyAll({}, deleteContext, function(err) {
-            if (err) {
-                log.error(err);
-                console.log('unable to delete all the TestState models');
-                return done(err);
-            } else {
-                log.debug('deleted alltest states');
-                return done();
-            }
-        });
-    });
-
-    after('delete all modelDefinition models', function(done) {
-        //        models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function(err, res) {
-        //                    if (err) {
-        //                        done(err);
-        //                    } else {
-        //                        done();
-        //                    }
-        //           });
-        done();
+    after('unset the dbLock header', function(done) {
+        api.set('x-evproxy-db-lock', '0');
+        return done();
     });
 });

@@ -176,7 +176,7 @@ describe(chalk.blue('model-rule-test'), function () {
             };
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
             models[testModelName].create(data, bootstrap.defaultContext, function(err, res){
-                expect(err.details.messages.errs[0].code).to.be.equal('err-husband-name-presence');
+                expect(err.details.codes.DecisionTable[0]).to.be.equal('err-husband-name-presence');
                 done();
             });
         });
@@ -189,10 +189,10 @@ describe(chalk.blue('model-rule-test'), function () {
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
             // and age is out of range ModelDefinition
             models[testModelName].create(data, bootstrap.defaultContext, function(err, res){
-                var errors = JSON.parse(JSON.stringify(err.details.messages.errs));
+                var errors = JSON.parse(JSON.stringify(err.details.codes));
                 var errCodes = [];
-                errors.forEach(function(error){
-                    errCodes.push(error.code);
+                Object.keys(errors).forEach(function (v, k) {
+                    errCodes = errCodes.concat(errors[v]);
                 });
                 expect(errCodes.indexOf('validation-err-002')).not.to.be.equal(-1);
                 expect(errCodes.indexOf('err-husband-name-presence')).not.to.be.equal(-1);
@@ -291,9 +291,11 @@ describe(chalk.blue('model-rule-test'), function () {
                 expect(response.body).not.to.be.undefined;
                 expect(response.body.error).not.to.be.undefined;
                 expect(response.body.error).not.to.be.null;
-                expect(response.body.error.errors).not.to.be.undefined;
-                expect(response.body.error.errors).not.to.be.null;
-                expect(response.body.error.errors[0].code).to.be.equal('err-husband-name-presence');
+                expect(response.body.error.details).not.to.be.undefined;
+                expect(response.body.error.details).not.to.be.null;
+                expect(response.body.error.details.codes).not.to.be.undefined;
+                expect(response.body.error.details.codes).not.to.be.null;
+                expect(response.body.error.details.codes.DecisionTable[0]).to.be.equal('err-husband-name-presence');
                 done();
             });
         });
@@ -323,11 +325,14 @@ describe(chalk.blue('model-rule-test'), function () {
                 expect(response.body).not.to.be.undefined;
                 expect(response.body.error).not.to.be.undefined;
                 expect(response.body.error).not.to.be.null;
-                expect(response.body.error.errors).not.to.be.undefined;
-                expect(response.body.error.errors).not.to.be.null;
+                expect(response.body.error.details).not.to.be.undefined;
+                expect(response.body.error.details).not.to.be.null;
+                expect(response.body.error.details.codes).not.to.be.undefined;
+                expect(response.body.error.details.codes).not.to.be.null;
+                var errors = response.body.error.details.codes;
                 var errCodes = [];
-                response.body.error.errors.forEach(function(error){
-                    errCodes.push(error.code);
+                Object.keys(response.body.error.details.codes).forEach(function (v, k){
+                    errCodes = errCodes.concat(errors[v]);
                 });
                 expect(errCodes.indexOf('validation-err-002')).not.to.be.equal(-1);
                 expect(errCodes.indexOf('err-husband-name-presence')).not.to.be.equal(-1);
@@ -398,10 +403,9 @@ describe(chalk.blue('model-rule-test'), function () {
                         expect(response.body).not.to.be.undefined;
                         expect(response.body.error).not.to.be.undefined;
                         expect(response.body.error).not.to.be.null;
-                        expect(response.body.error.errors).not.to.be.undefined;
-                        expect(response.body.error.errors).not.to.be.null;
-                        expect(response.body.error.errors.length).to.be.equal(1);
-                        expect(response.body.error.errors[0].code).to.be.equal('validation-err-002');
+                        expect(response.body.error.details).not.to.be.undefined;
+                        expect(response.body.error.details).not.to.be.null;
+                        expect(response.body.error.details.codes.status[0]).to.be.equal('validation-err-002');
                         done();
                     });
                 }

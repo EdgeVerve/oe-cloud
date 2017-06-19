@@ -102,7 +102,8 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     plural: myScopeModel,
     mixins: {
       'HistoryMixin': true,
-      'SoftDeleteMixin': false
+      'SoftDeleteMixin': false,
+      'FailsafeObserverMixin': false
     }
   };
 
@@ -2664,7 +2665,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         expect(result.name).to.be.equal('upsertTestRecord');
 
         postData.id = result.id;
-        postData._version = result._version;
+        //postData._version = result._version;
         postData.name = 'upsertTestRecordChanged';
         postData.scope.unit = 'finacle';
 
