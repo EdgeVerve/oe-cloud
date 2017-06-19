@@ -37,32 +37,22 @@ module.exports = function (BaseJournalEntity) {
     });
   };
 
-  var performNonAtomicOperation = function (journalEntity, operationContexts, next) {
-    if (operationContexts.length === 0) {
-      return next();
-    }
+  var performNonAtomicOperation = function (journalEntity, operationContext, next) {
     var startup = '';
-    async.each(operationContexts, function (operationContext, cb) {
-      var actor = operationContext.actorEntity;
-      delete operationContext.actorEntity;
-      var options = operationContext.options;
-      delete operationContext.options;
-      actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
-        if (err) {
-          return cb(err);
-        } else if (!validationObj.validation) {
-          var error = new Error('Validation on non atomic activity failed');
-          error.retriable = false;
-          return cb(error);
-        }
-        operationContext.activity.seqNum = validationObj.seqNum;
-        startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
-        return cb();
-      });
-    }, function (err) {
+    var actor = operationContext.actorEntity;
+    delete operationContext.actorEntity;
+    var options = operationContext.options;
+    delete operationContext.options;
+    return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
+      } else if (!validationObj.validation) {
+        var error = new Error('Validation on non atomic activity failed');
+        error.retriable = false;
+        return next(error);
       }
+      operationContext.activity.seqNum = validationObj.seqNum;
+      startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
   };
@@ -113,12 +103,12 @@ module.exports = function (BaseJournalEntity) {
       });
     };
 
-    var mapAndPreformNonAtomic = function (nonAtomicActivityList, cb) {
-      async.map(nonAtomicActivityList, createOperationContext, function (err, operationContexts) {
+    var createAndPerformeNonAtomic = function (activity, cb) {
+      createOperationContext(activity, function (err, operationContext) {
         if (err) {
           return cb(err);
         }
-        performNonAtomicOperation(instance, operationContexts, function (err, res) {
+        performNonAtomicOperation(instance, operationContext, function (err, res) {
           if (err) {
             return cb(err);
           }
@@ -127,7 +117,16 @@ module.exports = function (BaseJournalEntity) {
       });
     };
 
-    if (atomicActivityList && nonAtomicActivityList && atomicActivityList.length && nonAtomicActivityList.length) {
+    var mapAndPreformNonAtomic = function (nonAtomicActivityList, cb) {
+      async.map(nonAtomicActivityList, createAndPerformeNonAtomic, function (err, results) {
+        if (err) {
+          return cb(err);
+        }
+        return cb(null, results.join('$'));
+      });
+    };
+
+    if (atomicActivityList && atomicActivityList.length || nonAtomicActivityList && nonAtomicActivityList.length) {
       mapAndPreformAtomic(atomicActivityList, function (err, resAtomic) {
         if (err) {
           return next(err);
@@ -139,22 +138,6 @@ module.exports = function (BaseJournalEntity) {
           instance.startup = (resAtomic + resNonAtomic).slice(0, -1);
           return next();
         });
-      });
-    } else if (atomicActivityList && atomicActivityList.length) {
-      mapAndPreformAtomic(atomicActivityList, function (err, res) {
-        if (err) {
-          return next(err);
-        }
-        instance.startup = ('' + res).slice(0, -1);
-        return next();
-      });
-    } else if (nonAtomicActivityList && nonAtomicActivityList.length) {
-      mapAndPreformNonAtomic(nonAtomicActivityList, function (err, res) {
-        if (err) {
-          return next(err);
-        }
-        instance.startup = ('' + res).slice(0, -1);
-        return next();
       });
     } else {
       return next();
