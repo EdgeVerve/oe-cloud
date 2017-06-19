@@ -43,42 +43,51 @@ module.exports = function DBModels(app, cb) {
   var keys = Object.keys(app.models);
   async.eachSeries(keys, function asyncForEachKey(key, callback) {
     // first disable ChangeStream for file based models
-    app.models[key].disableRemoteMethod('createChangeStream', true);
-    app.locals.modelNames[key.toLowerCase()] = app.models[key].modelName;
-    app.locals.modelNames[key] = app.models[key].modelName;
-    if (key !== app.models[key].modelName) {
+    var model = app.models[key];
+    model.disableRemoteMethod('createChangeStream', true);
+    app.locals.modelNames[key.toLowerCase()] = model.modelName;
+    app.locals.modelNames[key] = model.modelName;
+    if (key !== model.modelName) {
       return callback();
     }
-
-    var modelDefinitionObject = JSON.parse(JSON.stringify(app.models[key].definition.settings));
-    // add the 'name' member
-    modelDefinitionObject.name = key;
-    modelDefinitionObject.filebased = true;
-    // store actual default datasource name and not getDataSource or using datasource switch
-    // at this stage model.dataSource should be as per model-config.json file
-
-    // modelDefinitionObject.dataSourceName = app.models[key].dataSource.settings.name;
-    var ownDefinition = app.models[key]._ownDefinition || {};
-    // _ownDefinition is set in juggler
-    modelDefinitionObject.properties = ownDefinition.properties || {};
-
-    // to avoid crash due to max event listener check
-    DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
-    modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
+    var ds = model.getDataSource(util.bootContext());
+    ds.autoupdate(model.modelName, function (err, result) {
       if (err) {
         callback(err);
       }
-      if (!res) {
-        modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
-          if (err) {
-            callback(err);
-          }
-          callback();
-        });
-      } else {
-        callback();
-      }
+      return findOrCreateModelDefinition();
     });
+    function findOrCreateModelDefinition() {
+      var modelDefinitionObject = JSON.parse(JSON.stringify(model.definition.settings));
+      // add the 'name' member
+      modelDefinitionObject.name = key;
+      modelDefinitionObject.filebased = true;
+      // store actual default datasource name and not getDataSource or using datasource switch
+      // at this stage model.dataSource should be as per model-config.json file
+
+      // modelDefinitionObject.dataSourceName = app.models[key].dataSource.settings.name;
+      var ownDefinition = model._ownDefinition || {};
+      // _ownDefinition is set in juggler
+      modelDefinitionObject.properties = ownDefinition.properties || {};
+
+      // to avoid crash due to max event listener check
+      DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
+      modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
+        if (err) {
+          callback(err);
+        }
+        if (!res) {
+          modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
+            if (err) {
+              callback(err);
+            }
+            callback();
+          });
+        } else {
+          callback();
+        }
+      });
+    }
   }, function dbModels() {
     var options = {};
     options.ignoreAutoScope = true;

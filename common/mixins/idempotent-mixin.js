@@ -35,35 +35,21 @@ module.exports = function IdempotencyMixin(Model) {
 
     if (data._newVersion && ctx.isNewInstance) {
       // create case
-      var whereClause = {
-        '_version': data._newVersion
-      };
-      Model.find({
-        where: whereClause
-      }, ctx.options, function modelFindcb(err, result) {
-        if (err) {
-          return cb(err);
-        }
-        if (result && result.length) {
-          return cb(err, result[0]);
-        }
-        return findInHistory();
-      });
+      return findInHistory();
     } else if (data._newVersion) {
       // update case by id
       if (ctx.currentInstance && ctx.currentInstance._version === data._newVersion) {
         return cb(null, ctx.currentInstance);
       }
       return findInHistory();
-    } else {
-      return cb();
     }
+    return cb();
 
     function findInHistory() {
       if (!Model._historyModel) {
         return cb();
       }
-      whereClause = {
+      var whereClause = {
         '_version': data._newVersion
       };
       Model._historyModel.find({
@@ -77,7 +63,7 @@ module.exports = function IdempotencyMixin(Model) {
             return cb(null, ctx.currentInstant);
           }
           var hinst = result[0];
-          Model.findById(hinst.id, ctx.options, function modelFindByIdcb(err, latestInst) {
+          Model.findById(hinst._modelId, ctx.options, function modelFindByIdcb(err, latestInst) {
             return cb(err, latestInst);
           });
         } else {
@@ -86,7 +72,26 @@ module.exports = function IdempotencyMixin(Model) {
       });
     }
   };
-
+  Model.checkIdempotencyAfter = function modelCheckIdempotencyAfter(err, ctx, cb) {
+    var data = ctx.data || ctx.instance;
+    if (ctx.isNewInstance && err) {
+      var whereClause = {
+        '_version': data._version
+      };
+      Model.find({
+        where: whereClause
+      }, ctx.options, function modelFindcb(error, result) {
+        if (error) {
+          return cb(err);
+        } else if (result && result.length) {
+          return cb(null, result[0]);
+        }
+        return cb(err);
+      });
+    } else {
+      return cb(err);
+    }
+  };
   Model.checkIdempotencyForDelete = function modelCheckIdempotencyForDeletecb(context, cb) {
     var filter;
     if (context.id) {
