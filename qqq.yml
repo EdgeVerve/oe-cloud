@@ -54,11 +54,6 @@ services:
     networks:
       - $NETWORK_NAME
       - router_network
-    healthcheck:
-      test: "curl http://0.0.0.0:3000/login"
-      interval: 1m30s
-      timeout: 3s
-      retries: 5
 
 networks:
   $NETWORK_NAME:
