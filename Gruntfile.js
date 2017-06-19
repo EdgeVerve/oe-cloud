@@ -117,7 +117,6 @@ module.exports = function GruntConfig(grunt) {
     mochaTest: {
       test: {
         options: {
-          excludes: ['test/prepareIntegrationTest.js', 'test/actorIntegrationTest.js', 'test/cleanupIntegrationTest.js'],
           quiet: false,
           clearRequireCache: true,
           timeout: 60000
@@ -155,7 +154,7 @@ module.exports = function GruntConfig(grunt) {
       coverage: {
         src: 'test',
         options: {
-          excludes: ['test/cleanupIntegrationTest.js', 'lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
+          excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
           timeout: 60000,
           check: {
             lines: 70,
