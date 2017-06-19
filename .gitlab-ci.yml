@@ -125,7 +125,7 @@ swarm:
     - "echo \"App will be pushed to registry - \"${REGISTRY}"
     - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
     - "npm install --no-optional"
-    - "node actor-tests/prepareIntegrationTest.js"
+    - "node test/actor-tests/prepareIntegrationTest.js"
     - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
     - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
     - "export HAPROXY=10.73.96.215"
@@ -138,7 +138,7 @@ swarm:
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - while [ $isStarted -ne 200 ]; do echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 10; done
     - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
-    - "mocha actor-tests/actorIntegrationTest.js"
-    - "node actor-tests/cleanupIntegrationTest.js"
+    - "mocha test/actor-tests/actorIntegrationTest.js"
+    - "node test/actor-tests/cleanupIntegrationTest.js"
   tags:
     - EVF-PAAS13
