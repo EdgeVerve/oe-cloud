@@ -5,7 +5,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var chalk = require('chalk');
 
-var baseurl = "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api/";
+var baseurl = "https://$EVFURL/api/";
 
 var actorPlural = 'Inventories';
 

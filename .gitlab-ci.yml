@@ -120,6 +120,7 @@ swarm:
     - "if [ $branchName == \"master\" ]; then export APP_IMAGE_NAME=$appUserName\"-\"$appName; else export APP_IMAGE_NAME=$appUserName\"-\"$branchName\"-\"$appName; fi"
     - "APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
     - "NETWORK_NAME=${APP_IMAGE_NAME}"
+    - docker stack rm $APP_IMAGE_NAME
     - "npm set registry $NPM_REGISTRY"
     - "echo \"Npm Registry - \"${NPM_REGISTRY}"
     - "echo \"App will be pushed to registry - \"${REGISTRY}"
@@ -131,7 +132,8 @@ swarm:
     - "export HAPROXY=10.73.96.215"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - "mv -f qqq2.yml qqq.yml"
-    - docker stack rm $APP_IMAGE_NAME
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
+    - "mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js"
     - until [ -z "$(docker network ls --filter name=$APP_IMAGE_NAME_$NETWORK_NAME -q)" ]; do sleep 5; done
     - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
     - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
