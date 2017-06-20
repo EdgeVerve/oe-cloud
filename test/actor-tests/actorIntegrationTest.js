@@ -100,6 +100,7 @@ describe(chalk.blue('integrationTest'), function() {
 
 
 it('should log in', function(done) {
+console.log('Base Url is ', baseurl);
 request.post(
               baseurl + "BaseUsers", {
                 json: createLoginData
@@ -123,7 +124,9 @@ request.post(
 			            console.log("error:", error);
                   done(error);
                 } else {
-                  //console.log('login()', body);
+                  if (body.status != 200) {
+                    console.log("error: ", body);
+                  }
                   token = body.id;
                   setup(body.id);
 		            }
@@ -145,10 +148,12 @@ request.post(
               },
               function(error, response, body) {
                 if (error) {
-			            console.log("error:", error);
+			            console.log("error: ", error);
                   done(error);
                 } else {
-                  //console.log("created ", response);
+                  if (body.status != 200) {
+                    console.log("error: ", body);
+                  }
                   expect(response.statusCode).to.be.equal(200);
                   expect(body.id).not.to.be.equal(undefined);
                   done(null, body.id);
