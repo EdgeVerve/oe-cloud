@@ -1,16 +1,35 @@
+<!-- HTML for dev server -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>oeCloud.io API Explorer</title>
-  <link rel="icon" href="favicon.ico">
-  <link rel="stylesheet" type="text/css" href="./swagger-ui.css" >
-  <script src="swagger-ui-bundle.js" charset="utf-8"></script>
-  <script src="swagger-ui-oecloud-preset.js"> </script>
+  <title>Swagger UI</title>
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
+  <!-- <link rel="stylesheet" type="text/css" href="./swagger-ui.css" > -->
+  <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+  <style>
+    html
+    {
+        box-sizing: border-box;
+        overflow: -moz-scrollbars-vertical;
+        overflow-y: scroll;
+    }
+    *,
+    *:before,
+    *:after
+    {
+        box-sizing: inherit;
+    }
+
+    body {
+      margin:0;
+      background: #fafafa;
+    }
+  </style>
 </head>
 
-<body class="swagger-section standalone">
+<body>
   <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0">
     <defs>
       <symbol viewBox="0 0 20 20" id="unlocked">
@@ -44,12 +63,16 @@
 
     </defs>
   </svg>
-  <div id="swagger-ui"></div>
+<div id="swagger-ui"></div>
 
-  <script src="./swagger-ui-bundle.js"> </script>
-  <script src="./swagger-ui-oecloud-preset.js" charset="utf-8"></script>
-  <script>
-  window.onload = function() {
+<script src="./swagger-ui-bundle.js"> </script>
+<!-- <script src="./swagger-ui-standalone-preset.js"> </script> -->
+<script src="./swagger-ui-oecloud-preset.js" charset="utf-8"></script>
+<script>
+window.onload = function() {
+  window["SwaggerUIBundle"] = window["swagger-ui-bundle"]
+  // window["SwaggerUIStandalonePreset"] = window["swagger-ui-standalone-preset"]
+  window["SwaggerUIOeCloudPreset"] = window["swagger-ui-oecloud-preset"]
   // Build a system
   const ui = SwaggerUIBundle({
     url: "http://localhost:3000/explorer/swagger.json",
@@ -62,20 +85,16 @@
       SwaggerUIBundle.plugins.DownloadUrl
     ],
     layout: "OeLayout",
-    docExpansion: false
+    docExpansion: false,
+    layoutConfigs: {
+      logo: "logo_small.png"
+    }
   })
 
   window.ui = ui
-
-  ui.initOAuth({
-    clientId: "your-client-id",
-    clientSecret: "your-client-secret-if-required",
-    realm: "your-realms",
-    appName: "your-app-name",
-    scopeSeparator: " ",
-    additionalQueryStringParams: {}
-  })
-  }
-  </script>
+  
+}
+</script>
 </body>
+
 </html>
