@@ -1,5 +1,4 @@
 stages:
-  - integrate
   - build
   - test
 
@@ -105,7 +104,7 @@ postgrestest:
 
 
 swarm:
-  stage: integrate
+  stage: test
   script: 
     - "export DOMAIN_NAME=evfapp.dev"
     - "REGISTRY=registry.${DOMAIN_NAME}"

@@ -35,7 +35,7 @@ var tempIds = [];
 var funcArray = [];
 
 describe(chalk.blue('integrationTest'), function() {
-    this.timeout(120000);
+    this.timeout(180000);
 
   function checkBalance(num, next) {
     if (!token) {
