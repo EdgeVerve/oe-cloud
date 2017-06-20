@@ -2,10 +2,6 @@ var async = require('async');
 var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
-var ignoreScopeOptions = {
-  ignoreAutoScope: true,
-  fetchAllScopes: true
-};
 var actorModelsMap = {};
 
 module.exports = function (BaseJournalEntity) {
@@ -148,8 +144,12 @@ module.exports = function (BaseJournalEntity) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
-
+  /*
   var writePending = function (ctx, next) {
+    var ignoreScopeOptions = {
+      ignoreAutoScope: true,
+      fetchAllScopes: true
+    };
     var pendingModel = loopback.findModel('PendingJournal');
     var pending = {};
     pending.savedCtx = JSON.stringify(ctx.options);
@@ -169,6 +169,7 @@ module.exports = function (BaseJournalEntity) {
       }
     });
   };
+  */
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance === false || !(ctx.instance)) {
@@ -188,7 +189,8 @@ module.exports = function (BaseJournalEntity) {
           if (instance.fromPending === true) {
             return next(err);
           }
-          return writePending(ctx, next);
+          // return writePending(ctx, next);
+          return next(err);
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
@@ -198,7 +200,8 @@ module.exports = function (BaseJournalEntity) {
             if (instance.fromPending === true) {
               return next(err);
             }
-            return writePending(ctx, next);
+            // return writePending(ctx, next);
+            return next(err);
           } else {
             return next();
           }
