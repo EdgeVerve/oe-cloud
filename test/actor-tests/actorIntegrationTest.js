@@ -75,6 +75,9 @@ describe(chalk.blue('integrationTest'), function() {
                 if (error || body.error) {
                     console.log("error:", error || body.error);
                 } else {
+                    if (body.state === undefined) {
+                      console.log(body);
+                    }
                     console.log("account: ", body.id, 'balance: ', body.state.stateObj.quantity);
                 }
                 expect(body.state.stateObj.quantity).to.be.equal(num);
@@ -124,7 +127,7 @@ request.post(
 			            console.log("error:", error);
                   done(error);
                 } else {
-                  if (body.status != 200) {
+                  if (body.error !== undefined) {
                     console.log("error: ", body);
                   }
                   token = body.id;
@@ -151,7 +154,7 @@ request.post(
 			            console.log("error: ", error);
                   done(error);
                 } else {
-                  if (body.status != 200) {
+                  if (body.status !== undefined) {
                     console.log("error: ", body);
                   }
                   expect(response.statusCode).to.be.equal(200);
