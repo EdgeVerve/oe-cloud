@@ -154,7 +154,7 @@ request.post(
 			            console.log("error: ", error);
                   done(error);
                 } else {
-                  if (body.status !== undefined) {
+                  if (body.error !== undefined || body.id === undefined) {
                     console.log("error: ", body);
                   }
                   expect(response.statusCode).to.be.equal(200);
@@ -256,6 +256,9 @@ function deleteAmount() {
                 if (error) {
 			            console.log("error:", error);
                 } else {
+                  if (body.error !== undefined || body.id === undefined) {
+                    console.log("error: ", body);
+                  }
                   console.log("created ", body.id);
 		            }
                 done(error, body.id);
