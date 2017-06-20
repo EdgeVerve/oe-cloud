@@ -165,7 +165,7 @@ module.exports = function (BaseJournalEntity) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
-
+  /*
   var writePending = function (ctx, next) {
     var pendingModel = loopback.findModel('PendingJournal');
     var pending = {};
@@ -186,6 +186,7 @@ module.exports = function (BaseJournalEntity) {
       }
     });
   };
+  */
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance === false || !(ctx.instance)) {
