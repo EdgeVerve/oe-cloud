@@ -2,10 +2,6 @@ var async = require('async');
 var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
-var ignoreScopeOptions = {
-  ignoreAutoScope: true,
-  fetchAllScopes: true
-};
 var actorModelsMap = {};
 
 module.exports = function (BaseJournalEntity) {
@@ -167,6 +163,10 @@ module.exports = function (BaseJournalEntity) {
   };
   /*
   var writePending = function (ctx, next) {
+    var ignoreScopeOptions = {
+      ignoreAutoScope: true,
+      fetchAllScopes: true
+    };
     var pendingModel = loopback.findModel('PendingJournal');
     var pending = {};
     pending.savedCtx = JSON.stringify(ctx.options);
