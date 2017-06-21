@@ -4,14 +4,9 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// var loopback = require('loopback');
-// var debug = require('debug')('model-discovery-filter');
-// var lwspace = require('loopback-workspace');
-// var _ = require('lodash');
-// var modelPersonalizer = require('../../lib/model-personalizer');
-var util = require('../../lib/common/util');
+var loopback = require('loopback');
 var log = require('oe-logger')('model-discovery-filter');
-
+var util = require('../../lib/common/util');
 /**
  * Model Discovery Filter
  *
@@ -22,34 +17,25 @@ var log = require('oe-logger')('model-discovery-filter');
 module.exports = function ModelDiscoveryFilter(options) {
   return function modelDiscoveryFilterReturnCb(req, resp, next) {
     var app = req.app;
-    var url = req.url;
+    var url = req.originalUrl;
 
     log.debug(req.callContext, 'url = ', req.url);
 
     var restApiRoot = app.get('restApiRoot');
-    if (req.url.indexOf(restApiRoot) !== 0) {
+    if (req.originalUrl.indexOf(restApiRoot) !== 0) {
       log.debug(req.callContext, 'url = ', req.url, ' ---- skipping model discovery');
       return next();
     }
 
     var invokedPlural = url.split('/')[2].split('?')[0];
     var savedName = invokedPlural;
-
-    // var ModelDefinition = lwspace.models['ModelDefinition'];
-    var ModelDefinition = app.models.ModelDefinition;
-
-    var baseModel = util.checkModelWithPlural(req.app, invokedPlural);
-    ModelDefinition.findOne({
-      where: {
-        variantOf: baseModel
-      }
-    }, req.callContext, function modelDiscoveryFilterModelDefinitionFindOneCb(err, instance) {
-      if (err || !instance) {
-        return next();
-      }
-      req.url = req.url.replace(savedName, instance.plural);
-
+    var baseModel = util.checkModelWithPlural(app, invokedPlural);
+    var model = loopback.findModel(baseModel, req.callContext.ctx);
+    if (model) {
+      req.url = req.url.replace(savedName, model.pluralModelName);
+      req.originalUrl = req.originalUrl.replace(savedName, model.pluralModelName);
       return next();
-    });
+    }
+    return next();
   };
 };

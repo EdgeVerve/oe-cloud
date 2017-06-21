@@ -2,14 +2,14 @@
 	"name": "ModelDefinition",
 	"base": "BaseEntity",
 	"strict": true,
-  "plural": "ModelDefinitions",
-  "description" :  "This model stores application models metadata",
-  "options": {
-    "validateUpsert": true,
-    "isFrameworkModel": true
-  },
+	"plural": "ModelDefinitions",
+	"description": "This model stores application models metadata",
+	"options": {
+		"validateUpsert": true,
+		"isFrameworkModel": true
+	},
 	"properties": {
-		"properties":{
+		"properties": {
 			"type": "object"
 		},
 		"readonly": {
@@ -19,116 +19,139 @@
 		"name": {
 			"type": "string",
 			"required": true,
-			"unique" : "ignoreCase",
-			"max":100,
-			"notin": ["Model", "PersistedModel","User", "AccessToken", "ACL", "RoleMapping", "Role"],
+			"unique": "ignoreCase",
+			"max": 100,
+			"notin": [
+				"Model",
+				"PersistedModel",
+				"User",
+				"AccessToken",
+				"ACL",
+				"RoleMapping",
+				"Role"
+			],
 			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
 		},
 		"description": {
 			"type": "string",
-			"max":500
+			"max": 500
 		},
 		"plural": {
 			"type": "string",
 			"unique": "ignoreCase",
-			"max":105,
-			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"	
+			"max": 105,
+			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
 		},
 		"base": {
-			"type":"string",
-			"max":100
+			"type": "string",
+			"max": 100
 		},
 		"strict": {
 			"type": "boolean",
-			"default": false 
+			"default": false
 		},
 		"public": {
 			"type": "boolean",
-			"default": true 
+			"default": true
 		},
 		"idInjection": {
 			"type": "boolean",
-			"default": false 
+			"default": false
 		},
 		"validateUpsert": {
 			"type": "boolean",
-			"default": false 
+			"default": false
 		},
 		"validations": {
-		    "type": ["object"]
+			"type": [
+				"object"
+			]
 		},
 		"relations": {
-		    "type": "object"
+			"type": "object"
 		},
 		"acls": {
-		    "type": ["object"]
+			"type": [
+				"object"
+			]
 		},
 		"methods": {
-		    "type": "object"
+			"type": "object"
 		},
-    "filebased": {
-      "type": "boolean",
-      "default": false
-    },
-    "compositeModels": {
-      "type": "object"
-    },
-    "CompositeTransaction": {
-      "type": "boolean",
-      "default": false
-    },
-        "dataSourceName" : {
-            "type" : "string",
-            "default" : "db",
-            "max":30
-        },
-    "autoscope": {
-      "type": [ "string" ]
-    },
-    "hierarchyScope": {
-      "type": [ "string" ]
-    },
-    "mixins": {
-      "type": "object"
-    },
-    "mongodb": {
-      "type" :  "object"
-    },
-    "variantOf": {
-      "type": "string"
-    },
-    "upward": {
-      "type": "boolean",
-      "default": false
-    },
-    "options": {
-      "type": "object"
-    },
-    "oeValidations": {
-      "type" :  "object"
-    },
-    "enableDefaultUI" : {
-     "type": "boolean",
-      "default": false,
-      "description" : "This flag is for application use to enable ui component/routes etc. for this model"    
-    },
-    "enableRemoteProxy" : {
-      "type": "boolean",
-      "default": true   
-    },
-    "clientModelName" : {
-         "type": "string"
-    }
+		"filebased": {
+			"type": "boolean",
+			"default": false
+		},
+		"compositeModels": {
+			"type": "object"
+		},
+		"CompositeTransaction": {
+			"type": "boolean",
+			"default": false
+		},
+		"dataSourceName": {
+			"type": "string",
+			"default": "db",
+			"max": 30
+		},
+		"autoscope": {
+			"type": [
+				"string"
+			]
+		},
+		"hierarchyScope": {
+			"type": [
+				"string"
+			]
+		},
+		"mixins": {
+			"type": "object"
+		},
+		"mongodb": {
+			"type": "object"
+		},
+		"variantOf": {
+			"type": "string"
+		},
+		"upward": {
+			"type": "boolean",
+			"default": false
+		},
+		"options": {
+			"type": "object"
+		},
+		"oeValidations": {
+			"type": "object"
+		},
+		"enableDefaultUI": {
+			"type": "boolean",
+			"default": false,
+			"description": "This flag is for application use to enable ui component/routes etc. for this model"
+		},
+		"enableRemoteProxy": {
+			"type": "boolean",
+			"default": true
+		},
+		"clientModelName": {
+			"type": "string"
+		},
+		"clientPlural": {
+			"type": "string"
+		},
+		"modelId": {
+			"type": "string"
+		}
 	},
 	"hidden": [
-	             "filebased"
-	           ],
+		"filebased"
+	],
 	"validations": [],
 	"relations": {},
 	"acls": [],
-  "methods": { },
-  "enumList": {
-    "type" : ["object"]
-  }
-	
+	"methods": {},
+	"enumList": {
+		"type": [
+			"object"
+		]
+	}
 }

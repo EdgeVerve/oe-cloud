@@ -172,26 +172,15 @@ module.exports = function SwitchDatasourceMixin(model) {
   * @return {void} it returns none. however upon finding overriden model- callback is called along with overriden model
   * @function
   */
-  model.getOverridenModel = function getOverridenModelFn(options, cb) {
-    if (typeof cb === 'undefined') {
-      if (typeof options === 'function') {
-        cb = options;
-        options = {};
-      }
+  model.getOverridenModel = function getOverridenModelFn(options) {
+    if (!options) {
+      options = {};
     }
-    var modelDefinition = loopback.findModel('ModelDefinition');
-    var savethis = this;
-    modelDefinition.findOne({
-      where: {
-        variantOf: this.modelName
-      }
-    }, options, function modelDiscoveryFilterModelDefinitionFindOneCb(err, instance) {
-      if (err || !instance) {
-        return cb(null, savethis);
-      }
-      var overridenModel = loopback.findModel(instance.name);
-      return cb(null, overridenModel);
-    });
+    var model = loopback.findModel(this.modelName, options.ctx);
+    if (model) {
+      return model;
+    }
+    return this;
   };
 
   var originalDataSource = {};

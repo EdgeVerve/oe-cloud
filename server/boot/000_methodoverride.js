@@ -1,0 +1,91 @@
+const loopback = require('loopback');
+const util = require('../../lib/common/util');
+
+module.exports = (app, cb) => {
+  const actualFindModel = loopback.findModel;
+  const actualGetModel = loopback.getModel;
+  const actualGetModelByType = loopback.getModelByType;
+  app.personalizedModels = {};
+  const getContextBasedModel = (modelName, ctx, actualMethod) => {
+    if (!ctx) {
+      return actualMethod.call(app, modelName);
+    }
+
+    const personalizedModel = getPersonalizedModel(modelName, ctx);
+    modelName = personalizedModel && personalizedModel.modelId ? personalizedModel.modelId : modelName;
+    var model = actualMethod.call(app, modelName);
+    if (model) {
+      model.modelName = modelName;
+      return model;
+    }
+    return null;
+  };
+
+  const getPersonalizedModel = (modelName, ctx) => {
+    const modelDefinition = loopback.getModel('ModelDefinition');
+    const autoscopeFields = modelDefinition.definition.settings.autoscope;
+    const ctxStr = util.createContextString(autoscopeFields, ctx);
+    const model = app.personalizedModels[modelName] && app.personalizedModels[modelName][ctxStr] ? app.personalizedModels[modelName][ctxStr] : null;
+    if (model) {
+      return model;
+    }
+    return getDefaultPersonalizedModels(modelName, autoscopeFields, ctx);
+  };
+
+  const getDefaultPersonalizedModels = (modelName, autoscope, ctx) => {
+    let length = autoscope.length;
+    for (let i = 0; i < Math.pow(2, length); i++) {
+      let elem = [];
+      var binary = decimalToBinary(i, length);
+      for (let j = 0; j < length; j++) {
+        if (binary[j] === '1') {
+          elem.push('default');
+        } else {
+          elem.push(ctx[autoscope[j]]);
+        }
+      }
+      var element = elem.join('::');
+      if (app.personalizedModels[modelName] && app.personalizedModels[modelName][element]) {
+        return app.personalizedModels[modelName][element];
+      }
+    }
+    return null;
+  };
+  const decimalToBinary = (decimal, length) => {
+    var out = '';
+    while (length--)      {out += (decimal >> length) & 1;}
+    return out;
+  };
+
+  loopback.findModel = (modelName, ctx) => {
+    return getContextBasedModel(modelName, ctx, actualFindModel);
+  };
+
+  loopback.getModel = (modelName, ctx) => {
+    let model = getContextBasedModel(modelName, ctx, actualGetModel);
+    if (model) {
+      return model;
+    }
+    let err = new Error();
+    err.name = 'Model Not Found';
+    err.message = 'Could not find the model $modelName';
+    err.code = 'MODEL_NOT_FOUND';
+    err.retriable = false;
+    return err;
+  };
+
+  loopback.getModelByType = (modelName, ctx) => {
+    let model = getContextBasedModel(modelName, ctx, actualGetModelByType);
+    if (model) {
+      return model;
+    }
+    let err = new Error();
+    err.name = 'Model Not Found';
+    err.message = 'Could not find the model $modelName';
+    err.code = 'MODEL_NOT_FOUND';
+    err.retriable = false;
+    return err;
+  };
+
+  cb();
+};
