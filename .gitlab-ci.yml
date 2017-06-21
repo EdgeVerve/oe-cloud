@@ -128,7 +128,6 @@ swarm:
     - "node test/actor-tests/prepareIntegrationTest.js"
     - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
     - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
-    - "export HAPROXY=10.73.96.215"
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - "mv -f qqq2.yml qqq.yml"
     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
@@ -136,7 +135,9 @@ swarm:
     - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
     - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - while [ $isStarted -ne 200 ]; do echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 10; done
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
     - "mocha test/actor-tests/actorIntegrationTest.js"
     - "node test/actor-tests/cleanupIntegrationTest.js"
