@@ -11,7 +11,7 @@ The Program may contain/reference third party or open source components, the rig
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
 module.exports = function GruntConfig(grunt) {
-    // Project configuration.
+  // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
 
@@ -86,7 +86,7 @@ module.exports = function GruntConfig(grunt) {
     copy: {
       main: {
         files: [
-                    // includes files within path and its sub-directories
+          // includes files within path and its sub-directories
           {
             expand: true,
             src: ['**', '!node_modules/**', '!coverage/**'],
@@ -166,11 +166,11 @@ module.exports = function GruntConfig(grunt) {
     }
   });
 
-    // Load the plugin that provides the "jshint" task.
+  // Load the plugin that provides the "jshint" task.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-jscs');
 
-    // Add the grunt-mocha-test tasks.
+  // Add the grunt-mocha-test tasks.
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-contrib-clean');

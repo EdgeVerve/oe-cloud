@@ -29,10 +29,10 @@ var modelRuleModel;
 module.exports = function ModelRule(app, cb) {
   log.debug(log.defaultContext(), 'In 04_model_rules.js script.');
   modelRuleModel = app.models.ModelRule;
-    // Creating 'before save' and 'after save' observer hooks for ModelRule
+  // Creating 'before save' and 'after save' observer hooks for ModelRule
   modelRuleModel.observe('before save', modelRuleBeforeSave);
   modelRuleModel.observe('after save', modelRuleAfterSave);
-    // Creating filter finding only records where disabled is false.
+  // Creating filter finding only records where disabled is false.
   var filter = {
     where: {
       disabled: false
@@ -68,7 +68,7 @@ module.exports = function ModelRule(app, cb) {
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
 messaging.subscribe('modelRuleAttachHook', function (modelName) {
-    // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
+  // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to attach before save hook for model ', modelName);
   attachBeforeSaveHookToModel(modelName);
 });
@@ -82,7 +82,7 @@ messaging.subscribe('modelRuleAttachHook', function (modelName) {
 function modelRuleAfterSave(ctx, next) {
   log.debug(log.defaultContext(), 'modelRuleAfterSave method.');
   var data = ctx.data || ctx.instance;
-    // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
+  // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('modelRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
   attachBeforeSaveHookToModel(data.modelName);
@@ -97,7 +97,7 @@ function modelRuleAfterSave(ctx, next) {
  */
 function modelRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
-    // It is good to have if we have a declarative way of validating model existence.
+  // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
   if (loopback.findModel(modelName)) {
     next();
@@ -114,15 +114,15 @@ function modelRuleBeforeSave(ctx, next) {
  * @param {string} modelName - Model name
  */
 function attachBeforeSaveHookToModel(modelName) {
-    // Can we avoid this step and get the ModelConstructor from context.
+  // Can we avoid this step and get the ModelConstructor from context.
   var model = loopback.findModel(modelName);
-    // Setting the flag that Model Rule exists which will be used for validation rules
+  // Setting the flag that Model Rule exists which will be used for validation rules
   model.settings._isModelRuleExists = true;
-    // Checking whether before save observer hook is already attached or not.
-    // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
+  // Checking whether before save observer hook is already attached or not.
+  // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
   if (!checkHookisAlreadyAttached(model)) {
     log.debug(log.defaultContext(), 'before save hook is for model :', modelName, ' is not present. Attaching now.');
-        // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
+    // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
     model.observe('before save', function _decsionTableBeforeSaveHook(modelCtx, next) {
       log.debug(log.defaultContext(), 'inside before save hook for model : ', modelName);
       log.debug(log.defaultContext(), 'Invoking executeDecisionTableRule');
@@ -179,17 +179,17 @@ function executeDecisionTableRules(modelCtx, model, next) {
     // Querying the ModelRule model with model context options since it is from 'before save' hook.
   modelRuleModel.find(filter, modelCtx.options, function (err, results) {
     if (err) {
-            // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
+      // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
       log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
       next(err);
     }
     // Validating results is array and it contains the first element and defaultRules
     if (results && results instanceof Array && results[0] && results[0].defaultRules) {
-              // Getting the defaultRules from the DB/cache results.
+      // Getting the defaultRules from the DB/cache results.
       var defaultRules = results[0].defaultRules;
-              // Validating defaultRules is of type array and have some rules present in it.
+      // Validating defaultRules is of type array and have some rules present in it.
       if (defaultRules instanceof Array && defaultRules.length > 0) {
-                  // Default rules need to be executed in sequence and enrich the payload data.
+        // Default rules need to be executed in sequence and enrich the payload data.
         async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
           log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
           desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {

@@ -15,7 +15,8 @@
     "grunt-test": "./node_modules/.bin/grunt mochaTest:test",
     "jscstest": "./node_modules/.bin/jscs .",
     "lint": "jshint .",
-    "validate": "npm ls"
+    "validate": "npm ls",
+    "eslint": "eslint ."
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
@@ -71,10 +72,12 @@
   },
   "devDependencies": {
     "app-root-path": "^1.0.0",
+    "babel-eslint": "^7.2.3",
     "chai": "^3.4.1",
     "chai-datetime": "^1.4.0",
     "chai-things": "^0.2.0",
     "chalk": "^1.1.1",
+    "eslint": "^4.0.0",
     "grunt": "^0.4.5",
     "grunt-banner": "^0.6.0",
     "grunt-cli": "^0.1.13",
@@ -89,12 +92,12 @@
     "istanbul": "0.4.1",
     "jscs": "^3.0.3",
     "jshint": "2.9.1-rc1",
+    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git",
     "mocha": "2.3.4",
     "nock": "^7.2.2",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^1.1.0",
-    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git"
+    "supertest": "^1.1.0"
   },
   "repository": {
     "type": "git",

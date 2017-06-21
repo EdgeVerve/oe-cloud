@@ -74,14 +74,14 @@ module.exports.boot = function serverBoot(appinstance, options, cb) {
       async.apply(loadClientComponents, options, env),
       async.apply(loadClientProviders, options, env)
     ],
-      function serverBootAsyncParallelCb(err, results) {
-        if (err) {
-          cb(err);
-        }
-        finalBoot(appinstance, options, function finalBoot() {
-          cb();
-        });
+    function serverBootAsyncParallelCb(err, results) {
+      if (err) {
+        cb(err);
+      }
+      finalBoot(appinstance, options, function finalBoot() {
+        cb();
       });
+    });
   }
 };
 
@@ -96,7 +96,7 @@ function finalBoot(appinstance, options, cb) {
   var env = options.env || process.env.NODE_ENV || 'development';
   preboot.setSharedCtor(appinstance);
 
-    // strong error handler to disable stack trace
+  // strong error handler to disable stack trace
   appinstance.use(errorHandler({
     debug: env === 'development' || appinstance.get('env') === 'development',
     log: true
@@ -267,10 +267,10 @@ function finalBoot(appinstance, options, cb) {
     };
 
     if (process.argv.indexOf('--swagger-dump') > -1 || process.argv.indexOf('-s') > -1) {
-      appinstance.on('started', function(){
+      appinstance.on('started', function () {
         var createSwaggerObject = require('oe-explorer').createSwaggerObject;
         var swaggerObject = createSwaggerObject(appinstance, options);
-        console.log('swagger:' + JSON.stringify(swaggerObject))
+        console.log('swagger:' + JSON.stringify(swaggerObject));
         process.exit(0);
       });
     }
@@ -288,8 +288,8 @@ if (require.main === module) {
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
 
-    // Checking for app-list.json in app home directory and setting providerJson using
-    // value provided by loadAppProviders function in merge-util
+  // Checking for app-list.json in app home directory and setting providerJson using
+  // value provided by loadAppProviders function in merge-util
   var appListPath = path.resolve(path.join(lbapp.locals.apphome, 'app-list.json'));
   var appListExists = fs.existsSync(appListPath) ? true : false;
   if (appListExists) {
@@ -390,10 +390,10 @@ function loadClientModels(options, env, callback) {
  * @function loadClientProviders
  */
 function loadClientProviders(options, env, callback) {
-    // Read the EVFoundation's all provider files.
+  // Read the EVFoundation's all provider files.
   var providers = mergeUtil.loadFiles(__dirname, env, 'providers');
   if (providers && providers.length) {
-        // Filter the list based on env.
+    // Filter the list based on env.
     providers = _.findLast(providers, function serverLoadClientProviderFn(d) {
       return (d._filename === path.resolve(__dirname, 'providers.' + env + '.js') || d._filename === path.resolve(__dirname, 'providers.' + env + '.json') || d._filename === path.resolve(__dirname, 'providers.local.js') || d._filename === path.resolve(__dirname, 'providers.local.json') || d._filename === path.resolve(__dirname, 'providers.json'));
     });
