@@ -265,6 +265,16 @@ function finalBoot(appinstance, options, cb) {
         };*/
       });
     };
+
+    if (process.argv.indexOf('--swagger-dump') > -1 || process.argv.indexOf('-s') > -1) {
+      appinstance.on('started', function(){
+        var createSwaggerObject = require('oe-explorer').createSwaggerObject;
+        var swaggerObject = createSwaggerObject(appinstance, options);
+        console.log('swagger:' + JSON.stringify(swaggerObject))
+        process.exit(0);
+      });
+    }
+
     return cb();
   });
 }
