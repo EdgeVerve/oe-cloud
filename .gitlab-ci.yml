@@ -132,7 +132,6 @@ swarm:
     - "mv -f qqq2.yml qqq.yml"
     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
     - "mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js"
-    - until [ -z "$(docker network ls --filter name=$APP_IMAGE_NAME_$NETWORK_NAME -q)" ]; do sleep 5; done
     - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
     - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
