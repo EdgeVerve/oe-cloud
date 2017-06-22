@@ -270,7 +270,9 @@ function finalBoot(appinstance, options, cb) {
       appinstance.on('started', function () {
         var createSwaggerObject = require('oe-explorer').createSwaggerObject;
         var swaggerObject = createSwaggerObject(appinstance, options);
-        console.log('swagger:' + JSON.stringify(swaggerObject));
+        // console.log('swagger:' + JSON.stringify(swaggerObject));
+        var result = JSON.stringify(swaggerObject);
+        require('fs').writeFileSync('swagger.json', result, { encoding: 'utf8'});
         process.exit(0);
       });
     }
