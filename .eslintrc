@@ -3,7 +3,7 @@
   "parserOptions" : {
     "ecmaFeatures": {
       "jsx": true
-    },
+    }
   },
   "env": {                           // http://eslint.org/docs/user-guide/configuring.html#specifying-environments
     "browser": true,                 // browser global variables
