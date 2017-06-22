@@ -365,7 +365,7 @@ module.exports = function startNodeRed(server, callback) {
         var f = null;
         var index = null;
         var len = dbFlows.length;
-      // find out flows which exist in database but not part of POST request - mark for deletion from database
+        // find out flows which exist in database but not part of POST request - mark for deletion from database
         for (var i = 0; i < len; ++i) {
           f = dbFlows[i];
           index = _.findIndex(reqFlows, function findIndexFn(o) {
@@ -375,8 +375,8 @@ module.exports = function startNodeRed(server, callback) {
             nodesToRemove.push(f);
           }
         }
-      // find out flows which exist node-red and also part of POST request, take from what being posted.
-      // if credentials are being posted (it may be partially posted), union it with stored credential and save back.
+        // find out flows which exist node-red and also part of POST request, take from what being posted.
+        // if credentials are being posted (it may be partially posted), union it with stored credential and save back.
         len = reqFlows.length;
         for (i = 0; i < len; ++i) {
           f = reqFlows[i];
