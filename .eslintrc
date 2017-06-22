@@ -1,8 +1,10 @@
 /* Based on https://github.com/FreeCodeCamp/freecodecamp/blob/staging/.eslintrc */
 {
-  "ecmaFeatures": {
-    "jsx": true
+  "parserOptions" : {
+    "ecmaFeatures": {
+      "jsx": true
     },
+  },
   "env": {                           // http://eslint.org/docs/user-guide/configuring.html#specifying-environments
     "browser": true,                 // browser global variables
     "node": true ,                   // Node.js global variables and Node.js-specific rules
