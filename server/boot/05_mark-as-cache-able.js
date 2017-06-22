@@ -30,7 +30,7 @@ module.exports = function MarkAsCacheable(app, cb) {
   var modelstocache = config && config.modelstocache;
 
   if (config && modelstocache && !(config && config.disablecaching)) {
-     // if framework model caching is not disabled via config
+    // if framework model caching is not disabled via config
     modelstocache.forEach(function modelstocacheForEachCb(modelname) {
       var Model = app.models[modelname];
       if (Model) {
@@ -46,12 +46,12 @@ module.exports = function MarkAsCacheable(app, cb) {
         // to the "evcacheables" object and setting its value to 'true'.
         global.evcacheables[modelname] = true;
 
-                // Add an 'After Save' observer for this Model to evict the cache
-                // corresponding to this Model's data whenever this Model's data
-                // is updated.
-                // Add an 'After Delete' observer for this Model to evict the cache
-                // corresponding to this Model's data whenever this Model's data
-                // is deleted.
+        // Add an 'After Save' observer for this Model to evict the cache
+        // corresponding to this Model's data whenever this Model's data
+        // is updated.
+        // Add an 'After Delete' observer for this Model to evict the cache
+        // corresponding to this Model's data whenever this Model's data
+        // is deleted.
       } else {
         log.debug(log.defaultContext(), 'EV_CACHE', 'markascacheable boot script:', 'Framework Model to cache specified in config does not exist:', modelname);
       }
@@ -60,6 +60,6 @@ module.exports = function MarkAsCacheable(app, cb) {
     log.debug(log.defaultContext(), 'EV_CACHE', 'markascacheable boot script:', 'Framework Model Caching is disabled via config (ev-foundation/server/config.json [\'disablecaching\': true])');
   }
 
-    // Callback to make the 'marking as cacheable' synchronous
+  // Callback to make the 'marking as cacheable' synchronous
   cb();
 };

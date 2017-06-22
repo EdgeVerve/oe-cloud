@@ -13,7 +13,7 @@ var memoryPool = require('../../lib/actor-pool');
 var _ = require('lodash');
 
 module.exports = function RestApiActorsMixin(Model) {
-    // Before remote hook to parse ctx.args.filter string to object
+  // Before remote hook to parse ctx.args.filter string to object
   Model.beforeRemote('find', function parseFilter(ctx, modelInstance, next) {
     if (ctx.args.filter) {
       ctx.args.filter = (typeof ctx.args.filter !== 'object') ? JSON.parse(ctx.args.filter) : ctx.args.filter;

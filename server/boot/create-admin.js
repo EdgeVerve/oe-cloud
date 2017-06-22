@@ -73,44 +73,44 @@ var createAdminUser = function createAdminUser(done) {
       }
     });
   },
-    function roleOp(cb) {
-      var Role = loopback.getModelByType('BaseRole');
-      Role.create({
-        id: 'admin',
-        name: 'admin',
-        description: 'Admin'
-      }, adminUserContext, function roleCreate(err, res) {
-        if (err) {
-          if (err.code === 11000) {
-            return cb();
-          }
-          cb(err);
-        } else {
-          cb();
+  function roleOp(cb) {
+    var Role = loopback.getModelByType('BaseRole');
+    Role.create({
+      id: 'admin',
+      name: 'admin',
+      description: 'Admin'
+    }, adminUserContext, function roleCreate(err, res) {
+      if (err) {
+        if (err.code === 11000) {
+          return cb();
         }
-      });
-    },
-    function roleMappingOp(cb) {
-      var RoleMapping = loopback.getModelByType('BaseRoleMapping');
-      RoleMapping.create({
-        id: 'admin',
-        principalType: 'USER',
-        principalId: 'admin',
-        roleId: 'admin'
-      }, adminUserContext, function roleMapppingCreate(err, res) {
-        if (err) {
-          if (err.code === 11000) {
-            return cb();
-          }
-          cb(err);
-        } else {
-          cb();
+        cb(err);
+      } else {
+        cb();
+      }
+    });
+  },
+  function roleMappingOp(cb) {
+    var RoleMapping = loopback.getModelByType('BaseRoleMapping');
+    RoleMapping.create({
+      id: 'admin',
+      principalType: 'USER',
+      principalId: 'admin',
+      roleId: 'admin'
+    }, adminUserContext, function roleMapppingCreate(err, res) {
+      if (err) {
+        if (err.code === 11000) {
+          return cb();
         }
-      });
-    }],
-    function finalCallback() {
-      done();
-    }
+        cb(err);
+      } else {
+        cb();
+      }
+    });
+  }],
+  function finalCallback() {
+    done();
+  }
   );
 };
 
