@@ -130,7 +130,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           } else {
             modeldefinition.base = 'BaseEntity';
           }
-          let baseModel = loopback.findModel(modeldefinition.base, ctx.options.ctx);
+          let baseModel = loopback.findModel(modeldefinition.base, ctx.options);
           if (!baseModel) {
             //   console.log('invalid model ', modeldefinition.base);
             log.error(ctx.options, 'Could not find variant model ', modeldefinition.variantOf);
@@ -140,7 +140,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           }
         }
       } else {
-        let baseModel = loopback.findModel(modeldefinition.base, ctx.options.ctx);
+        let baseModel = loopback.findModel(modeldefinition.base, ctx.options);
         if (!baseModel) {
           //   console.log('invalid model ', modeldefinition.base);
           var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');

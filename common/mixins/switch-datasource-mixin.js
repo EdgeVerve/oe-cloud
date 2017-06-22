@@ -176,7 +176,7 @@ module.exports = function SwitchDatasourceMixin(model) {
     if (!options) {
       options = {};
     }
-    var model = loopback.findModel(this.modelName, options.ctx);
+    var model = loopback.findModel(this.modelName, options);
     if (model) {
       return model;
     }

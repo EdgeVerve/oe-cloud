@@ -6,12 +6,12 @@ module.exports = (app, cb) => {
   const actualGetModel = loopback.getModel;
   const actualGetModelByType = loopback.getModelByType;
   app.personalizedModels = {};
-  const getContextBasedModel = (modelName, ctx, actualMethod) => {
-    if (!ctx) {
+  const getContextBasedModel = (modelName, options, actualMethod) => {
+    if (!(options && options.ctx)) {
       return actualMethod.call(app, modelName);
     }
 
-    const personalizedModel = getPersonalizedModel(modelName, ctx);
+    const personalizedModel = getPersonalizedModel(modelName, options.ctx);
     modelName = personalizedModel && personalizedModel.modelId ? personalizedModel.modelId : modelName;
     var model = actualMethod.call(app, modelName);
     if (model) {
@@ -53,16 +53,16 @@ module.exports = (app, cb) => {
   };
   const decimalToBinary = (decimal, length) => {
     var out = '';
-    while (length--)      {out += (decimal >> length) & 1;}
+    while (length--) { out += (decimal >> length) & 1; }
     return out;
   };
 
-  loopback.findModel = (modelName, ctx) => {
-    return getContextBasedModel(modelName, ctx, actualFindModel);
+  loopback.findModel = (modelName, options) => {
+    return getContextBasedModel(modelName, options, actualFindModel);
   };
 
-  loopback.getModel = (modelName, ctx) => {
-    let model = getContextBasedModel(modelName, ctx, actualGetModel);
+  loopback.getModel = (modelName, options) => {
+    let model = getContextBasedModel(modelName, options, actualGetModel);
     if (model) {
       return model;
     }
@@ -74,8 +74,8 @@ module.exports = (app, cb) => {
     return err;
   };
 
-  loopback.getModelByType = (modelName, ctx) => {
-    let model = getContextBasedModel(modelName, ctx, actualGetModelByType);
+  loopback.getModelByType = (modelName, options) => {
+    let model = getContextBasedModel(modelName, options, actualGetModelByType);
     if (model) {
       return model;
     }
