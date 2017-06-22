@@ -2,8 +2,6 @@ version: "3"
 services:
   mongo:
     image: registry.evfapp.dev/alpine-mongo:latest
-    ports:
-        - "8119:27017"
     networks:
       - $NETWORK_NAME
       
