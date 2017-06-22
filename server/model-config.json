@@ -7,7 +7,6 @@
             "../common/models",
             "../common/models/ui",
             "../common/models/framework",
-            "../common/models/test",
             "./models",
             "loopback-component-passport/lib/models"
         ],
@@ -284,18 +283,6 @@
         "dataSource": "db"
     },
     "PendingJournal": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "Note": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "Inventory": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "InventoryTransaction": {
         "public": true,
         "dataSource": "db"
     }
