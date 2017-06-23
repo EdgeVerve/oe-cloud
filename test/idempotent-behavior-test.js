@@ -22,6 +22,7 @@ var loopback = require('loopback');
 
 describe(chalk.blue('Idempotent behaviour --REST'), function () {
   this.timeout(300000);
+  var state;
   var modelName = 'TestState';
   var modelDetails = {
     name: modelName,
@@ -422,7 +423,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
     ];
 
 
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var url = bootstrap.basePath + '/' + modelName;
     model.find({
       'where': {
@@ -498,6 +499,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
 
 describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   this.timeout(30000);
+  var city;
   var modelName = 'City';
   var modelDetails = {
     name: modelName,
@@ -543,7 +545,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       '_newVersion': '10'
     };
     var testData2 = JSON.parse(JSON.stringify(testData));
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
 
     model.create(testData, bootstrap.defaultContext, function (err, res) {
       if (err) {
@@ -594,7 +596,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       '_newVersion': '20'
     };
     var testData2 = Object.assign({}, testData);
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     model.upsert(testData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
@@ -638,7 +640,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   });
 
   it('- Test for Idempotent behaviour - update attribute ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
 
     model.find({
       where: {
@@ -695,7 +697,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   });
 
   it('- Test for Idempotent behaviour - update attributes ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
 
     model.find({
       where: {
@@ -754,7 +756,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   });
 
   it('- Test for Idempotent behaviour - updateById ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var testData = {
       'name': 'Madras',
       '_newVersion': 'M1'
@@ -822,7 +824,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   // the way of doing upsert with current version is not clear in updateall.
   // This will be taken up later - As of now, we do not support updateAll
   xit('- Test for Idempotent behaviour - updateAll ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var testData = {
       'name': 'Mysore',
       '_newVersion': 'C1'
@@ -854,7 +856,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
   });
 
   it('- Test for Idempotent behaviour - findOrCreate', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var testData = {
       'name': 'Delhi',
       '_newVersion': 'D1'
@@ -904,7 +906,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
 
   //For deleteById, destroyById, removeById
   it('- Test for Idempotent behaviour - destroyById ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var testData = {
       'name': 'Mumbai',
       '_newVersion': 'did10'
@@ -959,7 +961,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
 
   //For deleteAll, destroyAll, remove
   it('- Test for Idempotent behaviour - destroyAll ', function (done) {
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     var options = bootstrap.defaultContext;
     options.requestId = '1001';
     model.destroyAll({}, options, function (err, res1) {
@@ -1014,7 +1016,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       }
     ];
     var testData2 = JSON.parse(JSON.stringify(testData));
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     model.create(testData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
@@ -1061,7 +1063,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       }
     ];
 
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     model.find({
       where: {
         name: 'Poona'
@@ -1123,7 +1125,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       'name': 'Ooty',
       '_newVersion': 'o1'
     };
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     model.create(testData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
@@ -1177,7 +1179,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
       '_newVersion': 'co1'
     };
 
-    var model = loopback.getModel(modelName);
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
     model.create(testData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);

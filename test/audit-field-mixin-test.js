@@ -48,6 +48,7 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var debug = require('debug')('audit-field-mixin-test');
 var clonedeep = require('lodash').cloneDeep;
+var loopback = require('loopback');
 
 chai.use(require('chai-datetime'));
 
@@ -96,7 +97,8 @@ describe('audit-fields-mixin tests	Programmatically', function () {
 
     after('delete model clear in memory', function (done) {
         // clearing data from TestModel
-        models[modelName].destroyAll({ name: modelName }, defaultContext, function (err, info) {
+        var model = loopback.getModel(modelName, defaultContext);
+        model.destroyAll({ name: modelName }, defaultContext, function (err, info) {
             if (err) {
                 done(err);
             } else {
@@ -113,11 +115,12 @@ describe('audit-fields-mixin tests	Programmatically', function () {
     });
 
     it('Should -- make TestModel availabe in the app with AuditFieldMixins SET', function (done) {
-        expect(models[modelName]).not.to.be.null;
-        expect(models[modelName].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(Object.keys(TestModelSchema.properties));
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(audit_fields);
-        expect(Object.keys(models[modelName].settings.mixins)).to.include.members(Object.keys(TestModelSchema.mixins));
+        var model = loopback.getModel(modelName, defaultContext);
+        expect(model).not.to.be.null;
+        expect(model.definition.properties).not.to.be.undefined;
+        expect(Object.keys(model.definition.properties)).to.include.members(Object.keys(TestModelSchema.properties));
+        expect(Object.keys(model.definition.properties)).to.include.members(audit_fields);
+        expect(Object.keys(model.settings.mixins)).to.include.members(Object.keys(TestModelSchema.mixins));
         done();
     });
 
@@ -126,8 +129,8 @@ describe('audit-fields-mixin tests	Programmatically', function () {
             'name': 'TestCaseOne',
             '_type': 'hello'
         };
-
-        models[modelName].create(postData, defaultContext, function (err, res) {
+        var model = loopback.getModel(modelName, defaultContext);
+        model.create(postData, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
@@ -149,15 +152,15 @@ describe('audit-fields-mixin tests	Programmatically', function () {
         var postData = {
             'name': 'TestCaseTwo'
         };
-
-        models[modelName].create(postData, defaultContext, function (err, res) {
+        var model = loopback.getModel(modelName, defaultContext);
+        model.create(postData, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 postData.id = res.id;
                 postData.name = 'updatedName';
                 postData._version = res._version;
-                models[modelName].upsert(postData, updateContext, function (err, updateRes) {
+                model.upsert(postData, updateContext, function (err, updateRes) {
                     if (err) {
                         done(err);
                     } else {
@@ -184,8 +187,8 @@ describe('audit-fields-mixin tests	Programmatically', function () {
         var postData = {
             'name': 'TestCaseTwo'
         };
-
-        models[modelName].create(postData, defaultContext, function (err, res) {
+        var model = loopback.getModel(modelName, defaultContext);
+        model.create(postData, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
@@ -221,8 +224,8 @@ describe('audit-fields-mixin tests	Programmatically', function () {
                 'name': 'TestCaseTwo'
             };
             // var resData;
-
-            models[modelName].create(postData, defaultContext, function (err, res) {
+            var model = loopback.getModel(modelName, defaultContext);
+            model.create(postData, defaultContext, function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -236,7 +239,7 @@ describe('audit-fields-mixin tests	Programmatically', function () {
                     postData._version = res._version;
                     var postdata1 = clonedeep(postData);
 
-                    models[modelName].upsert(postData, updateContext, function (err, updateRes) {
+                    model.upsert(postData, updateContext, function (err, updateRes) {
                         if (err) {
                             done(err);
                         } else {

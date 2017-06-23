@@ -52,17 +52,17 @@ describe('Auto Fields Test', function () {
     });
 
     after('cleanup', function (done) {
-        models.ModelDefinition.destroyAll({"id": modelId}, bootstrap.defaultContext, function(err, data) {
+        models.ModelDefinition.destroyAll({ "id": modelId }, bootstrap.defaultContext, function (err, data) {
             done();
         });
     });
 
 
     it('should create a model instance with auto-populated values', function (done) {
-        model = loopback.findModel('AutoFieldTestModel');
+        model = loopback.findModel('AutoFieldTestModel', bootstrap.defaultContext);
         expect(model).not.to.be.null;
         expect(model).not.to.be.undefined;
-        model.create({}, bootstrap.defaultContext, function(err, data) {
+        model.create({}, bootstrap.defaultContext, function (err, data) {
             expect(err).to.be.null;
             expect(data).not.to.be.null;
             expect(data.user).not.to.be.null;

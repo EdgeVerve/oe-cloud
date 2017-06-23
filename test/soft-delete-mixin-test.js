@@ -50,147 +50,147 @@ var softDeleteMixin = require('../common/mixins/soft-delete-mixin.js');
 
 describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
 
-    var testDatasourceName = uuid.v4();
-    var modelName = 'TestModel';
+  var testDatasourceName = uuid.v4();
+  var modelName = 'TestModel';
 
-    var TestModelSchema = {
-        'name': {
-            'type': 'string',
-            'required': true,
-            'unique': true
-        }
+  var TestModelSchema = {
+    'name': {
+      'type': 'string',
+      'required': true,
+      'unique': true
+    }
+  };
+  var opts = {
+    base: 'BaseEntity',
+    mixins: {
+      SoftDeleteMixin: true,
+      ModelMixin: false,
+      VersionMixin: true
+    }
+  };
+
+  before('create test model', function (done) {
+
+    var dataSource = app.dataSources['db'];
+
+    var TestModel = dataSource.createModel(modelName, TestModelSchema, opts);
+    TestModel.attachTo(dataSource);
+    softDeleteMixin(TestModel);
+    app.model(TestModel, {
+      dataSource: 'db'
+    });
+    done();
+  });
+
+  after('delete model clear in memory', function (done) {
+
+    // clearing data from TestModel
+    delete models[modelName];
+    delete app.dataSource[testDatasourceName];
+    done();
+  });
+
+  it('Should create TestModel with SoftDeleteMixins SET ', function (done) {
+    expect(models[modelName]).not.to.be.null;
+    expect(models[modelName].definition.properties).not.to.be.undefined;
+    expect(Object.keys(models[modelName].definition.properties)).to.include.members(Object.keys(TestModelSchema));
+    expect(Object.keys(models[modelName].definition.properties)).to.include.members(['_isDeleted']);
+    expect(Object.keys(models[modelName].settings)).to.include.members(Object.keys(opts));
+    expect(Object.keys(models[modelName].settings.mixins)).to.include.members(Object.keys(opts.mixins));
+    done();
+  });
+
+  it('Should insert data to the TestModel and see if _isDelete is present and set to false ', function (done) {
+    var postData = {
+      'name': 'TestCaseOne',
+      '_version': uuid.v4()
     };
-    var opts = {
-        base: 'BaseEntity',
-        mixins: {
-            SoftDeleteMixin: true,
-            ModelMixin: false,
-            VersionMixin: true
-        }
+    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+      if (err) {
+        done(err);
+      } else {
+        expect(res.name).to.be.equal(postData.name);
+        expect(res['_isDeleted']).to.be.false;
+        done();
+      }
+    });
+  });
+
+  it('Should delete record from TestModel using destroyById and find the same record ,should not return the record ', function (done) {
+    var postData = {
+      'name': 'TestCaseTwo',
+      '_version': uuid.v4()
     };
-
-    before('create test model', function (done) {
-
-        var dataSource = app.dataSources['db'];
-
-        var TestModel = dataSource.createModel(modelName, TestModelSchema, opts);
-        TestModel.attachTo(dataSource);
-        softDeleteMixin(TestModel);
-        app.model(TestModel, {
-            dataSource: 'db'
-        });
-        done();
-    });
-
-    after('delete model clear in memory', function (done) {
-
-        // clearing data from TestModel
-        delete models[modelName];
-        delete app.dataSource[testDatasourceName];
-        done();
-    });
-
-    it('Should create TestModel with SoftDeleteMixins SET ', function (done) {
-        expect(models[modelName]).not.to.be.null;
-        expect(models[modelName].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(Object.keys(TestModelSchema));
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(['_isDeleted']);
-        expect(Object.keys(models[modelName].settings)).to.include.members(Object.keys(opts));
-        expect(Object.keys(models[modelName].settings.mixins)).to.include.members(Object.keys(opts.mixins));
-        done();
-    });
-
-    it('Should insert data to the TestModel and see if _isDelete is present and set to false ', function (done) {
-        var postData = {
-            'name': 'TestCaseOne',
-            '_version':  uuid.v4()
-        };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
-            if (err) {
+    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+      if (err) {
+        done(err);
+      } else {
+        models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            models[modelName].findById(res.id, bootstrap.defaultContext, function (err, record) {
+              if (err) {
                 done(err);
-            } else {
-                expect(res.name).to.be.equal(postData.name);
-                expect(res['_isDeleted']).to.be.false;
+              } else {
+                expect(record).to.be.null;
                 done();
-            }
+              }
+            });
+          }
         });
+      }
     });
+  });
 
-    it('Should delete record from TestModel using destroyById and find the same record ,should not return the record ', function (done) {
-        var postData = {
-            'name': 'TestCaseTwo',
-            '_version':  uuid.v4()
-        };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
-            if (err) {
-                done(err);
-            } else {
-                models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        models[modelName].findById(res.id, bootstrap.defaultContext, function (err, record) {
-                            if (err) {
-                                done(err);
-                            } else {
-                                expect(record).to.be.null;
-                                done();
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    });
+  xit('Should find with IncludeMixin.softDelete = true, all records should be return ', function (done) {
 
-    xit('Should find with IncludeMixin.softDelete = true, all records should be return ', function (done) {
-
-        var postData = {
-            'name': 'TestCaseThree',
-            '_version':  uuid.v4()
-        };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
-            if (err) {
+    var postData = {
+      'name': 'TestCaseThree',
+      '_version': uuid.v4()
+    };
+    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+      if (err) {
+        done(err);
+      } else {
+        models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err) {
+          if (err) {
+            done(err);
+          } else {
+            models[modelName].find({
+              includeMixin: {
+                softDelete: true
+              }
+            }, bootstrap.defaultContext, function (err, record) {
+              if (err) {
                 done(err);
-            } else {
-                models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        models[modelName].find({
-                            includeMixin: {
-                                softDelete: true
-                            }
-                        }, bootstrap.defaultContext, function (err, record) {
-                            if (err) {
-                                done(err);
-                            } else {
-                                expect(record).to.have.length(4);
-                                expect(record[0]._isDeleted).to.be.false;
-                                expect(record[1]._isDeleted).to.be.true;
-                                expect(record[2]._isDeleted).to.be.true;
-                                done();
-                            }
-                        });
-                    }
-                });
-            }
+              } else {
+                expect(record).to.have.length(4);
+                expect(record[0]._isDeleted).to.be.false;
+                expect(record[1]._isDeleted).to.be.true;
+                expect(record[2]._isDeleted).to.be.true;
+                done();
+              }
+            });
+          }
         });
+      }
     });
-    it('Should delete record from TestModel using destroyAll, on find nothing should be return ', function (done) {
-        models[modelName].destroyAll({}, bootstrap.defaultContext, function (err) {
-            if (err) {
-                done(err);
-            } else {
-                models[modelName].find({}, bootstrap.defaultContext, function (err, record) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        expect(record).to.be.empty;
-                        done();
-                    }
-                });
-            }
+  });
+  it('Should delete record from TestModel using destroyAll, on find nothing should be return ', function (done) {
+    models[modelName].destroyAll({}, bootstrap.defaultContext, function (err) {
+      if (err) {
+        done(err);
+      } else {
+        models[modelName].find({}, bootstrap.defaultContext, function (err, record) {
+          if (err) {
+            done(err);
+          } else {
+            expect(record).to.be.empty;
+            done();
+          }
         });
+      }
     });
+  });
 });
