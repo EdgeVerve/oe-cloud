@@ -83,7 +83,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       } else {
         let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
         if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
-          jsonifyModel.mongodb = {
+          modeldefinition.mongodb = {
             collection: jsonifyModel.name
           };
         } else {
