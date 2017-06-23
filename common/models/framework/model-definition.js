@@ -71,12 +71,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   function mongoSpecificHandling(modeldefinition, ctx, next) {
     if (!modeldefinition.mongodb) {
       debug('Posted modeldefinition does not have the \'mongodb\' property');
+      var autoscopeFields = modelDefinition.definition.settings.autoscope;
       if (modeldefinition.filebased) {
-        modeldefinition.mongodb = {
-          collection: modeldefinition.name
-        };
-        var autoscopeFields = modelDefinition.definition.settings.autoscope;
-        var ctxStr = util.createDefaultContextString(autoscopeFields);
+        let ctxStr = util.createDefaultContextString(autoscopeFields);
         if (!modelDefinition.app.personalizedModels[modeldefinition.name]) {
           modelDefinition.app.personalizedModels[modeldefinition.name] = {};
         }
@@ -84,15 +81,19 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           'modelId': modeldefinition.name, 'context': ctxStr
         };
       } else {
-        modeldefinition.mongodb = {
-          collection: modeldefinition.modelId
-        };
+        let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
+        if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
+          jsonifyModel.mongodb = {
+            collection: jsonifyModel.name
+          };
+        } else {
+          modeldefinition.mongodb = {
+            collection: modeldefinition.modelId
+          };
+        }
       }
       return next();
     }
-    modeldefinition.mongodb = {
-      collection: modeldefinition.modelId
-    };
     return next();
   }
 

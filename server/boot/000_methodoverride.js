@@ -15,7 +15,6 @@ module.exports = (app, cb) => {
     modelName = personalizedModel && personalizedModel.modelId ? personalizedModel.modelId : modelName;
     var model = actualMethod.call(app, modelName);
     if (model) {
-      model.modelName = modelName;
       return model;
     }
     return null;
