@@ -500,37 +500,29 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     if (options.flatten) {
       options.dependencies = true;
     }
+    var model = loopback.findModel(modelName, options);
+    var result = {};
+    if (model) {
+      var allDefinitions = {};
+      _extractMeta(model, options, allDefinitions);
 
-    modelPersonalizer(modelName, options, function getPersonalizedModelCB(personalizedModelName) {
-      personalizedModelName = personalizedModelName || modelName;
-      var model = loopback.findModel(personalizedModelName);
-      if (!model) {
-        model = loopback.findModel(modelName);
-        personalizedModelName = modelName;
+      /**
+       * If we are returning a different personalized model against the requested one,
+       * also make sure this is available under original requested name
+       */
+      if (model.modelName !== modelName) {
+        allDefinitions[modelName] = allDefinitions[model.modelName];
       }
-      var result = {};
-      if (model) {
-        var allDefinitions = {};
-        _extractMeta(model, options, allDefinitions);
-
+      result = allDefinitions;
+      if (options.flatten) {
         /**
-         * If we are returning a different personalized model against the requested one,
-         * also make sure this is available under original requested name
+         * Inter-weave the embedded Model's field as sub-fields.
          */
-        if (personalizedModelName !== modelName) {
-          allDefinitions[modelName] = allDefinitions[personalizedModelName];
-        }
-        result = allDefinitions;
-        if (options.flatten) {
-          /**
-           * Inter-weave the embedded Model's field as sub-fields.
-           */
-          result = _flattenMetadata(personalizedModelName, allDefinitions);
-        }
+        result = _flattenMetadata(personalizedModelName, allDefinitions);
       }
-      callback && callback(null, result);
-      return result;
-    });
+    }
+    callback && callback(null, result);
+    return result;
   };
 
   modelDefinition.remoteMethod('extractMeta', {

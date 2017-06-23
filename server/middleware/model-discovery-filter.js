@@ -30,7 +30,7 @@ module.exports = function ModelDiscoveryFilter(options) {
     var invokedPlural = url.split('/')[2].split('?')[0];
     var savedName = invokedPlural;
     var baseModel = util.checkModelWithPlural(app, invokedPlural);
-    var model = loopback.findModel(baseModel, req.callContext.ctx);
+    var model = loopback.findModel(baseModel, req.callContext);
     if (model) {
       req.url = req.url.replace(savedName, model.pluralModelName);
       req.originalUrl = req.originalUrl.replace(savedName, model.pluralModelName);
