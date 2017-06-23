@@ -67,7 +67,7 @@ module.exports = (app, cb) => {
     }
     let err = new Error();
     err.name = 'Model Not Found';
-    err.message = 'Could not find the model $modelName';
+    err.message = `Could not find the model $modelName`;
     err.code = 'MODEL_NOT_FOUND';
     err.retriable = false;
     return err;
@@ -80,7 +80,7 @@ module.exports = (app, cb) => {
     }
     let err = new Error();
     err.name = 'Model Not Found';
-    err.message = 'Could not find the model $modelName';
+    err.message = `Could not find the model $modelName`;
     err.code = 'MODEL_NOT_FOUND';
     err.retriable = false;
     return err;
