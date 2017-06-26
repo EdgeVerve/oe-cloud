@@ -1097,15 +1097,15 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     it('should create 9 accounts in parallel. Then credit them with 1000 in parallel. Then debit 3*10 from all of them in parallel', function(done) {
 
         var ids = [];
-        ids.push('a1');
-        ids.push('b1');
-        ids.push('c1');
-        ids.push('d1');
-        ids.push('e1');
-        ids.push('f1');
-        ids.push('g1');
-        ids.push('h1');
-        ids.push('i1');
+        ids.push('aa1');
+        ids.push('bb1');
+        ids.push('cc1');
+        ids.push('dd1');
+        ids.push('ee1');
+        ids.push('ff1');
+        ids.push('gg1');
+        ids.push('hh1');
+        ids.push('ii1');
 
         var createData = {
             stateObj: {quantity: 0}
