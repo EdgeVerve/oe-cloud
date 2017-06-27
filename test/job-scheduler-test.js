@@ -87,7 +87,7 @@ describe('job-scheduler test', function () {
       'name': 'clean JobSchedulerTest',
       'schedule': cronPattern,
       'modelQuery': {
-        'attribute': 'definition.name',
+        'attribute': 'clientModelName',
         'value': 'JobSchedulerTest',
         'operation': 'EqualsTo'
       },
@@ -107,7 +107,7 @@ describe('job-scheduler test', function () {
               log.error(bootstrap.defaultContext, err);
               done(err);
             } else if (instance.length > 0) {
-              done(new Error('clean-up job failed, model ', modelDetails.name, ', number of record in db ', instance.length));
+              done(new Error('clean-up job failed, model '+ modelDetails.name+ ', number of record in db '+ instance.length));
             } else {
               done();
             }
