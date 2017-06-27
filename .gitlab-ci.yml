@@ -28,7 +28,7 @@ buildjob:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
-    - if eslint .; then status_eslint=0; else status_eslint=1; fi
+    - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
@@ -101,3 +101,45 @@ postgrestest:
     - exit $exit_status
   tags:
     - EVF-PAAS
+
+
+swarm:
+  stage: test
+  script: 
+    - "export DOMAIN_NAME=evfapp.dev"
+    - "REGISTRY=registry.${DOMAIN_NAME}"
+    - "name=${CI_PROJECT_DIR##*builds/}"
+    - "appName=${name##*/}"
+    - "appUserName=${name%/*}"
+    - "branchName=${CI_BUILD_REF_NAME}"
+    - "email=$(git log --reverse -n 1 $CI_BUILD_REF --pretty=format:\"%ae\")"
+    - "appName=${appName//[^[:alnum:]]/}"
+    - "appUserName=${appUserName//[^[:alnum:]]/}"
+    - "branchName=${branchName//[^[:alnum:]]/}"
+    - "if [ $branchName == \"master\" ]; then export APP_IMAGE_NAME=$appUserName\"-\"$appName; else export APP_IMAGE_NAME=$appUserName\"-\"$branchName\"-\"$appName; fi"
+    - "APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
+    - "NETWORK_NAME=${APP_IMAGE_NAME}"
+    - docker stack rm $APP_IMAGE_NAME
+    - "npm set registry $NPM_REGISTRY"
+    - "echo \"Npm Registry - \"${NPM_REGISTRY}"
+    - "echo \"App will be pushed to registry - \"${REGISTRY}"
+    - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
+    - "npm install --no-optional"
+    - "node test/actor-tests/prepareIntegrationTest.js"
+    - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
+    - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
+    - "mv -f qqq2.yml qqq.yml"
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
+    - "mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js"
+    - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
+    - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+    - "mocha test/actor-tests/actorIntegrationTest.js"
+    - "node test/actor-tests/cleanupIntegrationTest.js"
+  tags:
+    - EVF-PAAS13

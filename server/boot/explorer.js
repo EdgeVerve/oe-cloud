@@ -10,25 +10,25 @@ module.exports = function Explorer(server) {
   var explorer;
   var explorerPathName = '/explorer';
   try {
-    explorer = require('loopback-component-explorer');
+    explorer = require('oe-explorer');
   } catch (err) {
     // Print the message only when the app was started via `server.listen()`.
     // Do not print any message when the project is used as a component.
     server.once('started', function explorerServerStarted(baseUrl) {
       console.log(
-        'Run `npm install loopback-component-explorer` to enable the LoopBack explorer'
+        'Run `npm install oe-explorer` to enable the oeCloud explorer'
       );
     });
     return;
   }
-
+  var swaggerUiDist = require('oe-swagger-ui').dist;
   var restApiRoot = server.get('restApiRoot');
   var explorerDir = path.join(__dirname, '..', '..', 'client', 'explorer');
-
+  var uiDirs = [explorerDir, swaggerUiDist];
 
   var explorerApp = explorer.routes(server, {
     basePath: restApiRoot,
-    uiDirs: explorerDir
+    uiDirs: uiDirs
   });
   server.use(explorerPathName, explorerApp);
   server.once('started', function explorerServerStarted() {

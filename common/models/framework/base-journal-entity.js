@@ -2,10 +2,6 @@ var async = require('async');
 var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
-var ignoreScopeOptions = {
-  ignoreAutoScope: true,
-  fetchAllScopes: true
-};
 var actorModelsMap = {};
 
 module.exports = function (BaseJournalEntity) {
@@ -37,32 +33,22 @@ module.exports = function (BaseJournalEntity) {
     });
   };
 
-  var performNonAtomicOperation = function (journalEntity, operationContexts, next) {
-    if (operationContexts.length === 0) {
-      return next();
-    }
+  var performNonAtomicOperation = function (journalEntity, operationContext, next) {
     var startup = '';
-    async.each(operationContexts, function (operationContext, cb) {
-      var actor = operationContext.actorEntity;
-      delete operationContext.actorEntity;
-      var options = operationContext.options;
-      delete operationContext.options;
-      actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
-        if (err) {
-          return cb(err);
-        } else if (!validationObj.validation) {
-          var error = new Error('Validation on non atomic activity failed');
-          error.retriable = false;
-          return cb(error);
-        }
-        operationContext.activity.seqNum = validationObj.seqNum;
-        startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
-        return cb();
-      });
-    }, function (err) {
+    var actor = operationContext.actorEntity;
+    delete operationContext.actorEntity;
+    var options = operationContext.options;
+    delete operationContext.options;
+    return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
+      } else if (!validationObj.validation) {
+        var error = new Error('Validation on non atomic activity failed');
+        error.retriable = false;
+        return next(error);
       }
+      operationContext.activity.seqNum = validationObj.seqNum;
+      startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
   };
@@ -113,12 +99,12 @@ module.exports = function (BaseJournalEntity) {
       });
     };
 
-    var mapAndPreformNonAtomic = function (nonAtomicActivityList, cb) {
-      async.map(nonAtomicActivityList, createOperationContext, function (err, operationContexts) {
+    var createAndPerformeNonAtomic = function (activity, cb) {
+      createOperationContext(activity, function (err, operationContext) {
         if (err) {
           return cb(err);
         }
-        performNonAtomicOperation(instance, operationContexts, function (err, res) {
+        performNonAtomicOperation(instance, operationContext, function (err, res) {
           if (err) {
             return cb(err);
           }
@@ -127,7 +113,16 @@ module.exports = function (BaseJournalEntity) {
       });
     };
 
-    if (atomicActivityList && nonAtomicActivityList && atomicActivityList.length && nonAtomicActivityList.length) {
+    var mapAndPreformNonAtomic = function (nonAtomicActivityList, cb) {
+      async.map(nonAtomicActivityList, createAndPerformeNonAtomic, function (err, results) {
+        if (err) {
+          return cb(err);
+        }
+        return cb(null, results.join('$'));
+      });
+    };
+
+    if (atomicActivityList && atomicActivityList.length || nonAtomicActivityList && nonAtomicActivityList.length) {
       mapAndPreformAtomic(atomicActivityList, function (err, resAtomic) {
         if (err) {
           return next(err);
@@ -140,22 +135,6 @@ module.exports = function (BaseJournalEntity) {
           return next();
         });
       });
-    } else if (atomicActivityList && atomicActivityList.length) {
-      mapAndPreformAtomic(atomicActivityList, function (err, res) {
-        if (err) {
-          return next(err);
-        }
-        instance.startup = ('' + res).slice(0, -1);
-        return next();
-      });
-    } else if (nonAtomicActivityList && nonAtomicActivityList.length) {
-      mapAndPreformNonAtomic(nonAtomicActivityList, function (err, res) {
-        if (err) {
-          return next(err);
-        }
-        instance.startup = ('' + res).slice(0, -1);
-        return next();
-      });
     } else {
       return next();
     }
@@ -165,8 +144,12 @@ module.exports = function (BaseJournalEntity) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
-
+  /*
   var writePending = function (ctx, next) {
+    var ignoreScopeOptions = {
+      ignoreAutoScope: true,
+      fetchAllScopes: true
+    };
     var pendingModel = loopback.findModel('PendingJournal');
     var pending = {};
     pending.savedCtx = JSON.stringify(ctx.options);
@@ -186,6 +169,7 @@ module.exports = function (BaseJournalEntity) {
       }
     });
   };
+  */
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance === false || !(ctx.instance)) {
@@ -205,7 +189,8 @@ module.exports = function (BaseJournalEntity) {
           if (instance.fromPending === true) {
             return next(err);
           }
-          return writePending(ctx, next);
+          // return writePending(ctx, next);
+          return next(err);
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
@@ -215,7 +200,8 @@ module.exports = function (BaseJournalEntity) {
             if (instance.fromPending === true) {
               return next(err);
             }
-            return writePending(ctx, next);
+            // return writePending(ctx, next);
+            return next(err);
           } else {
             return next();
           }

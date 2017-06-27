@@ -4,76 +4,10 @@ The EdgeVerve proprietary software program ("Program"), is protected by copyrigh
 The Program may contain/reference third party or open source components, the rights to which continue to remain with the applicable third party licensors or the open source community as the case may be and nothing here transfers the rights to the third party and open source components, except as expressly permitted.
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
-/*
-©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
-The EdgeVerve proprietary software program ("Program"), is protected by copyrights laws, international treaties and other pending or existing intellectual property rights in India, the United States and other countries.
-The Program may contain/reference third party or open source components, the rights to which continue to remain with the applicable third party licensors or the open source community as the case may be and nothing here transfers the rights to the third party and open source components, except as expressly permitted.
-Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
-*/
 module.exports = function GruntConfig(grunt) {
-    // Project configuration.
+  // Project configuration.
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
-
-    jshint: {
-      options: {
-        'jshintrc': true,
-        ignores: ['server/dropdb.js']
-      },
-      all: ['common/**/*.js',
-        'data/**/*.js',
-        'ev-modules/*.js',
-        'ev-modules/common/**/*.js',
-        'lib/**/*.js',
-        'server/*.js',
-        'server/boot/**/*.js',
-        'server/middleware/**/*.js',
-        'server/models/**/*.js',
-        'server/util/**/*.js',
-        'Gruntfile.js'
-      ]
-    },
-
-    jscs: {
-      all: {
-        options: {
-          config: '.jscs.json',
-          fix: false
-        },
-        files: {
-          src: ['common/**/*.js',
-            'data/**/*.js',
-            'ev-modules/*.js',
-            'ev-modules/common/**/*.js',
-            'lib/**/*.js',
-            'server/*.js',
-            'server/boot/**/*.js',
-            'server/middleware/**/*.js',
-            'server/models/**/*.js',
-            'server/util/**/*.js',
-            'Gruntfile.js']
-        }
-      },
-      fixall: {
-        options: {
-          config: '.jscs.json',
-          fix: true
-        },
-        files: {
-          src: ['common/**/*.js',
-            'data/**/*.js',
-            'ev-modules/*.js',
-            'ev-modules/common/**/*.js',
-            'lib/**/*.js',
-            'server/*.js',
-            'server/boot/**/*.js',
-            'server/middleware/**/*.js',
-            'server/models/**/*.js',
-            'server/util/**/*.js',
-            'Gruntfile.js']
-        }
-      }
-    },
 
     mkdir: {
       all: {
@@ -86,7 +20,7 @@ module.exports = function GruntConfig(grunt) {
     copy: {
       main: {
         files: [
-                    // includes files within path and its sub-directories
+          // includes files within path and its sub-directories
           {
             expand: true,
             src: ['**', '!node_modules/**', '!coverage/**'],
@@ -166,11 +100,7 @@ module.exports = function GruntConfig(grunt) {
     }
   });
 
-    // Load the plugin that provides the "jshint" task.
-  grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-jscs');
-
-    // Add the grunt-mocha-test tasks.
+  // Add the grunt-mocha-test tasks.
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-mocha-istanbul');
   grunt.loadNpmTasks('grunt-contrib-clean');
@@ -179,8 +109,6 @@ module.exports = function GruntConfig(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-banner');
 
-  grunt.registerTask('default', ['jshint', 'jscs']);
   grunt.registerTask('test-with-coverage', ['clean:coverage', 'mocha_istanbul']);
   grunt.registerTask('addbanner', ['clean:dist', 'mkdir', 'copy', 'usebanner']);
-  grunt.registerTask('all', ['jshint', 'jscs', 'clean:coverage', 'mocha_istanbul']);
 };

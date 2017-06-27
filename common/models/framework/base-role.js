@@ -109,7 +109,7 @@ module.exports = function BaseRoleFn(BaseRole) {
     };
 
 
-  /**
+    /**
    * Check if a given principal is in the specified role.
    *
    * @param {String} role The role name.
@@ -203,11 +203,11 @@ module.exports = function BaseRoleFn(BaseRole) {
                 principalType: principalType, principalId: principalId
               }
             },
-              options, function roleMappingModelFindOne(err, result) {
-                debug('Role mapping found: %j', result);
-                // The only arg is the result
-                done(!err && result);
-              });
+            options, function roleMappingModelFindOne(err, result) {
+              debug('Role mapping found: %j', result);
+              // The only arg is the result
+              done(!err && result);
+            });
           } else {
             process.nextTick(function findOneErr() {
               done(false);

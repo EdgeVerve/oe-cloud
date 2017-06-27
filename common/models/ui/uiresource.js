@@ -18,7 +18,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 */
 
 module.exports = function UIResourceFn(UIResource) {
-    /**
+  /**
     * Extracts the `content` from the given record and returns.
     * `type` property on record decides the 'Content-Type' http header.
     * @param {string} name name.
@@ -28,7 +28,7 @@ module.exports = function UIResourceFn(UIResource) {
     * @name content
     */
   UIResource.content = function uiResourceContentFn(name, options, cb) {
-        // var self = this;
+    // var self = this;
 
     var filter = {
       where: {
@@ -57,25 +57,25 @@ module.exports = function UIResourceFn(UIResource) {
   };
 
   UIResource.remoteMethod(
-        'content', {
-          returns: [{
-            type: 'object',
-            root: true,
-            description: 'resource content'
-          }],
-          accepts: [{
-            arg: 'name',
-            type: 'string',
-            http: {
-              source: 'path'
-            }
-          }],
-          http: {
-            path: '/content/:name',
-            verb: 'get'
-          }
+    'content', {
+      returns: [{
+        type: 'object',
+        root: true,
+        description: 'resource content'
+      }],
+      accepts: [{
+        arg: 'name',
+        type: 'string',
+        http: {
+          source: 'path'
         }
-    );
+      }],
+      http: {
+        path: '/content/:name',
+        verb: 'get'
+      }
+    }
+  );
 
   UIResource.afterRemote('content', function UIResourceContent(context, remoteMethodOutput, next) {
     context.res.setHeader('Content-Type', context.result.type);

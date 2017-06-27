@@ -191,8 +191,8 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     };
     util.createModel(app, modeldefinition, options, function () {
       modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
-            // Find all child models and re-create them so that the new base properties
-            // are reflected in them
+      // Find all child models and re-create them so that the new base properties
+      // are reflected in them
       modelDefinition.find({
         where: {
           base: modeldefinition.name
@@ -288,26 +288,26 @@ module.exports = function ModelDefintionFn(modelDefinition) {
                   base: modeldefinition.name
                 }
               }, ctx.options,
-                function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
-                  if (err) {
-                    next();
-                    log.warn(ctx.options, {
-                      'message': 'WARNING',
-                      'cause': err,
-                      'details': ''
+              function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
+                if (err) {
+                  next();
+                  log.warn(ctx.options, {
+                    'message': 'WARNING',
+                    'cause': err,
+                    'details': ''
+                  });
+                  return;
+                }
+                if (modeldefinitions && modeldefinitions.length) {
+                  modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
+                    // For each Model defined in the DB which has the current model as base ...
+                    util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
+                      log.debug(ctx.options, 'emitting event model available ', md.name);
+                      modelDefinition.events.emit('model-' + md.name + '-available');
                     });
-                    return;
-                  }
-                  if (modeldefinitions && modeldefinitions.length) {
-                    modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
-                      // For each Model defined in the DB which has the current model as base ...
-                      util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
-                        log.debug(ctx.options, 'emitting event model available ', md.name);
-                        modelDefinition.events.emit('model-' + md.name + '-available');
-                      });
-                    });
-                  }
-                });
+                  });
+                }
+              });
             });
           }
         }

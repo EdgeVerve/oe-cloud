@@ -317,36 +317,36 @@ module.exports = function BaseUser(BaseUser) {
         });
       });
     },
-      function userProfile(callback) {
-        var UserProfile = loopback.getModelByType('UserProfile');
-        UserProfile.findOne({
-          where: {
-            userId: self.id
-          }
-        }, options, function dbCallbackFn(err, userProfile) {
-          if (err) {
-            callback(err);
-          }
-          callback(null, userProfile ? userProfile : {});
-        });
-      }],
-      function finalCallBack(err, results) {
-        if ( err) {
-          cb(err);
+    function userProfile(callback) {
+      var UserProfile = loopback.getModelByType('UserProfile');
+      UserProfile.findOne({
+        where: {
+          userId: self.id
         }
-        accessToken.roles = results[0];
-        accessToken.department = results[1].department;
-        if (self._autoScope && self._autoScope.tenantId) {
-          accessToken.tenantId = self._autoScope.tenantId;
-          accessToken.userTenantId = self._autoScope.tenantId;
-        } else {
-          log.debug(options, 'base user autoscope or tenant is not present', self.username);
+      }, options, function dbCallbackFn(err, userProfile) {
+        if (err) {
+          callback(err);
         }
-        accessToken.username = self.username;
-        accessToken.ttl = userModel.app.get('accessTokenTTL') || Math.min(ttl || userModel.settings.ttl, userModel.settings.maxTTL);
-        options = options || {};
-        self.accessTokens.create(accessToken, options, cb);
+        callback(null, userProfile ? userProfile : {});
       });
+    }],
+    function finalCallBack(err, results) {
+      if ( err) {
+        cb(err);
+      }
+      accessToken.roles = results[0];
+      accessToken.department = results[1].department;
+      if (self._autoScope && self._autoScope.tenantId) {
+        accessToken.tenantId = self._autoScope.tenantId;
+        accessToken.userTenantId = self._autoScope.tenantId;
+      } else {
+        log.debug(options, 'base user autoscope or tenant is not present', self.username);
+      }
+      accessToken.username = self.username;
+      accessToken.ttl = userModel.app.get('accessTokenTTL') || Math.min(ttl || userModel.settings.ttl, userModel.settings.maxTTL);
+      options = options || {};
+      self.accessTokens.create(accessToken, options, cb);
+    });
 
     return cb.promise;
   };
