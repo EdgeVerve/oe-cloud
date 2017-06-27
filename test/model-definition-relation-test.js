@@ -73,11 +73,12 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
             };
 
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                expect(models[modelName]).not.to.be.null;
-                expect(models[modelName].definition.properties).not.to.be.undefined;
-                expect(Object.keys(models[modelName].definition.properties)).
+              expect(models[modelName]).not.to.be.null;
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model.definition.properties).not.to.be.undefined;
+                expect(Object.keys(model.definition.properties)).
                 to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                expect(Object.keys(models[modelName].definition.properties)).
+                expect(Object.keys(model.definition.properties)).
                 to.include.members(Object.keys(postData.properties));
                 //console.log(models[modelName].settings);
                 debug('model ' + modelName + ' is available now, test case passed.');
@@ -120,13 +121,14 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
                 };
 
                 models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
-                    expect(Object.keys(models[modelName].settings.relations)).
+                    expect(Object.keys(model.settings.relations)).
                     to.include.members(Object.keys(postData.relations));
                     //console.log(models[modelName].settings);
                     debug('model ' + modelName + ' is available now, test case passed.');
@@ -241,7 +243,8 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
                     return done(err);
                 }
                 var modelId = modeldefinition[0].id;
-                models[modelName].destroyAll({}, bootstrap.defaultContext, function () {
+                var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                model.destroyAll({}, bootstrap.defaultContext, function () {
                     //console.log('Clearing data from ' + modelName + ' model.');
                 });
                 //console.log('model details',modelDetails);
@@ -278,7 +281,8 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
                     return done(err);
                 }
                 var modelId = modeldefinition[0].id;
-                models[modelName].destroyAll({}, bootstrap.defaultContext, function () {
+                var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                model.destroyAll({}, bootstrap.defaultContext, function () {
                     //console.log('Clearing data from ' + modelName + ' model.');
                 });
                 //console.log('model details',modelDetails);
@@ -348,12 +352,12 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
                 if (err) {
                     done(err);
                 } else {
-
-                    expect(models[modelName1]).not.to.be.null;
-                    expect(models[modelName1].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName1].definition.properties)).
+                  var model1 = loopback.findModel(modelName1, bootstrap.defaultContext);
+                    expect(model1).not.to.be.null;
+                    expect(model1.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model1.definition.properties)).
                     to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName1].definition.properties)).
+                    expect(Object.keys(model1.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
                     done();
                 }
@@ -387,14 +391,14 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
                 if (err) {
                     done(err);
                 } else {
-
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
-                    expect(Object.keys(models[modelName].settings.relations)).
+                    expect(Object.keys(model.settings.relations)).
                     to.include.members(Object.keys(postData.relations));
                     done();
                 }
@@ -404,15 +408,15 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
         it('add data to the model', function (done) {
             var postData = {
                 Name: 'Food_Items'
-            };
-
-            models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+          };
+            var model = loopback.findModel(modelName, bootstrap.defaultContext);
+            model.create(postData, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     done(err);
                 } else {
 
                     dataID = res.id;
-                    models[modelName].findById(dataID, bootstrap.defaultContext, function (err, data) {
+                    model.findById(dataID, bootstrap.defaultContext, function (err, data) {
                         debug('response body : ' + JSON.stringify(data, null, 4));
                         //	console.log(data);
                         if (data && data.id === dataID) {
@@ -431,14 +435,14 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
                 'subName': 'subItem1',
                 'CategoryId': dataID
             };
-
-            models[modelName1].create(postData, bootstrap.defaultContext, function (err, res) {
+            var model1 = loopback.findModel(modelName1, bootstrap.defaultContext);
+            model1.create(postData, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     done(err);
                 } else {
 
                     subDataID = res.id;
-                    models[modelName1].findById(subDataID, bootstrap.defaultContext, function (err, data) {
+                    model1.findById(subDataID, bootstrap.defaultContext, function (err, data) {
                         debug('response body : ' + JSON.stringify(data, null, 4));
                         if (data && data.id === subDataID) {
                             done();
@@ -451,8 +455,9 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
         });
 
         it('Should get data for given relation ', function (done) {
-
-            models[modelName].find({
+          var model = loopback.findModel(modelName, bootstrap.defaultContext);
+          debugger;
+            model.find({
                 include: 'subCategories'
             }, bootstrap.defaultContext, function (err, data) {
                 debug('response body : ' + JSON.stringify(data, null, 4));
@@ -473,9 +478,9 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
 
 
         it('Delete test data', function (done) {
-
-            models[modelName].destroyAll({}, bootstrap.defaultContext, function () {
-                models[modelName1].destroyAll({}, bootstrap.defaultContext, function () {
+          var model = loopback.findModel(modelName, bootstrap.defaultContext);
+            model.destroyAll({}, bootstrap.defaultContext, function () {
+                model.destroyAll({}, bootstrap.defaultContext, function () {
                     models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function () {
                         //console.log('Clearing data from ModelDefinition model.');
                         done();
