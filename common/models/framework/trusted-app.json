@@ -1,0 +1,34 @@
+{
+    "name": "TrustedApp",
+    "base": "BaseEntity",
+    "strict": true,
+    "plural": "TrustedApps",
+    "description": "holds trusted application details",
+    "options": {
+        "validateUpsert": true,
+        "isFrameworkModel": true
+    },
+    "properties": {
+        "appId": {
+            "type": "string",
+            "required": true
+        },
+        "appName": {
+            "type": "string"
+        },
+        "expiry": {
+            "type": "number"
+        },
+        "username": {
+            "type": "string",
+            "required": true
+        },
+        "supportedRoles": {
+            "type": ["string"]
+        }
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}
