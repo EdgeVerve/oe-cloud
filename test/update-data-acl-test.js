@@ -229,7 +229,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
           console.log('unable to create model ', JSON.stringify(err));
           cb();
         } else {
-          var model = loopback.findModel(modelName1);
+          var model = loopback.findModel(modelName1, defaultContext);
           model.create(items, defaultContext, function (err, result) {
             cb();
           });
@@ -248,7 +248,7 @@ describe(chalk.blue('data-acl-update-test'), function () {
       bootstrap.createTestUser(user2, 'ROLE232', cb);
     },
     function (cb) {
-      var model = loopback.findModel(modelName1);
+      var model = loopback.findModel(modelName1, defaultContext);
       model.find({}, defaultContext, function (err, res) {
         dbrecords = res;
         cb();
