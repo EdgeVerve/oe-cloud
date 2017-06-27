@@ -107,7 +107,7 @@ swarm:
   stage: test
   script: 
     - "export DOMAIN_NAME=evfapp.dev"
-    - "export HAPROXY=10.73.96.144"
+    - "export HAPROXY=10.73.53.144"
     - "REGISTRY=registry.${DOMAIN_NAME}"
     - "name=${CI_PROJECT_DIR##*builds/}"
     - "appName=${name##*/}"
