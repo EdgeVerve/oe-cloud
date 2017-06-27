@@ -151,27 +151,18 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         if (!modeldefinition.base) {
           if (modeldefinition.variantOf) {
             modeldefinition.base = modeldefinition.variantOf;
-          } else {
-            modeldefinition.base = 'BaseEntity';
-          }
-          let baseModel = loopback.findModel(modeldefinition.base, ctx.options);
-          if (!baseModel) {
-            //   console.log('invalid model ', modeldefinition.base);
-            log.error(ctx.options, 'Could not find variant model ', modeldefinition.variantOf);
-            var error = new Error('Could not find variant model ' + modeldefinition.variantOf);
-            error.retriable = false;
-            return next(error);
-          }
+          } 
         }
-      } else {
+      }
+      if (!modeldefinition.base) {
+        modeldefinition.base = 'BaseEntity';
+      }
         let baseModel = loopback.findModel(modeldefinition.base, ctx.options);
         if (!baseModel) {
-          //   console.log('invalid model ', modeldefinition.base);
           var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');
           err1.retriable = false;
           return next(err1);
         }
-      }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
   };
