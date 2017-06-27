@@ -10,7 +10,6 @@ var log = require('oe-logger')('model-definition');
 var inflection = require('inflection');
 var loopback = require('loopback');
 var _ = require('lodash');
-var modelPersonalizer = require('../../../lib/model-personalizer');
 var config = require('../../../server/config');
 var messaging = require('../../../lib/common/global-messaging');
 
@@ -81,27 +80,25 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           'modelId': modeldefinition.name, 'context': ctxStr
         };
       } else if (modeldefinition.variantOf) {
-          debugger;
-          var parentVariantModel = loopback.findModel(modeldefinition.variantOf, ctx.options);
-          if (parentVariantModel) {
-            debug('Found a parent model (not a variant itself)');
-            var parentVariantMongodbParam = parentVariantModel.definition.settings.mongodb;
-            if (parentVariantMongodbParam) {
-              var parentVariantCollectionName = parentVariantMongodbParam.collection;
-              if (parentVariantCollectionName) {
-                modeldefinition.mongodb = {
-                  collection: parentVariantCollectionName
-                };
-              }
+        var parentVariantModel = loopback.findModel(modeldefinition.variantOf, ctx.options);
+        if (parentVariantModel) {
+          debug('Found a parent model (not a variant itself)');
+          var parentVariantMongodbParam = parentVariantModel.definition.settings.mongodb;
+          if (parentVariantMongodbParam) {
+            var parentVariantCollectionName = parentVariantMongodbParam.collection;
+            if (parentVariantCollectionName) {
+              modeldefinition.mongodb = {
+                collection: parentVariantCollectionName
+              };
             }
           }
-          if (!modeldefinition.mongodb) {
-            modeldefinition.mongodb = {
-              collection: modeldefinition.variantOf
-            };
-          }
         }
-      else {
+        if (!modeldefinition.mongodb) {
+          modeldefinition.mongodb = {
+            collection: modeldefinition.variantOf
+          };
+        }
+      }      else {
         let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
         if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
           modeldefinition.mongodb = {
@@ -545,7 +542,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         /**
          * Inter-weave the embedded Model's field as sub-fields.
          */
-        result = _flattenMetadata(personalizedModelName, allDefinitions);
+        result = _flattenMetadata(model.modelName, allDefinitions);
       }
     }
     callback && callback(null, result);
