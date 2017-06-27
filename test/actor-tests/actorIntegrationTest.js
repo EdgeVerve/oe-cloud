@@ -109,9 +109,9 @@ request.post(
                 json: createLoginData
               },
               function(error, response, body) {
-                if (error) {
-			            console.log("error:", error);
-                  done(error);
+                if (error || body.error) {
+			            console.log("error:", error || body.error);
+                  done(error || body.error);
                 } else {
                   login();
 		            }
@@ -123,13 +123,10 @@ request.post(
                 json: loginData
               },
               function(error, response, body) {
-                if (error) {
-			            console.log("error:", error);
-                  done(error);
+                if (error || body.error) {
+			            console.log("error:", error || body.error);
+                  done(error || body.error);
                 } else {
-                  if (body.error !== undefined) {
-                    console.log("error: ", body);
-                  }
                   token = body.id;
                   setup(body.id);
 		            }
