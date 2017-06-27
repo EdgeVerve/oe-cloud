@@ -337,7 +337,7 @@ it('find and update music', function (done) {
           // earlier it was coming in main body as 403
           // expect(res.status).to.be.equal(403);
           expect(res.error.status).to.be.equal(403);
-          expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+          expect(response.error.errCode === 'data-acl-err-003').to.be.true;
           var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
           var confirmation = {
             "remarks": "confirmation for music",
@@ -354,6 +354,7 @@ it('find and update music', function (done) {
     });
 });
 
+
 it('update book to music', function (done) {
   var api = defaults(supertest(bootstrap.app));
   var filter = { where: { category: 'book' } };
@@ -369,74 +370,16 @@ it('update book to music', function (done) {
       rec.description = 'book category can not be music';
       var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
       api.set('Accept', 'application/json')
-<<<<<<< HEAD
         .put(url)
         .send(rec)
         .end(function (err, res) {
           var response = res.body;
           expect(res.error.status).to.be.equal(403);
-          expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+          expect(response.error.errCode === 'data-acl-err-003').to.be.true;
           done();
         });
     });
 });
-=======
-            .get(url)
-            .end(function (err, res) {
-                var rec = res.body[0];
-                var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
-                rec.description += ' and description has been updated by user..';
-                api.set('Accept', 'application/json')
-                    .put(url)
-                    .send(rec)
-                    .end(function (err, res) {
-                        var response = res.body;
-                        // earlier it was coming in main body as 403
-                        // expect(res.status).to.be.equal(403);
-                        expect(res.error.status).to.be.equal(403);
-                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
-                        var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
-                        var confirmation = {
-                            "remarks": "confirmation for music",
-                            "confirmed": "yes, praveen"
-                        };
-                        api.set('Accept', 'application/json')
-                            .post(url)
-                            .send(confirmation)
-                            .end(function (err, res) {
-                                expect(res.status).to.be.equal(200);
-                                done();
-                            });
-                    });
-            });
-    });
-
-    it('update book to music', function (done) {
-        var api = defaults(supertest(bootstrap.app));
-        var filter = { where: { category: 'book' } };
-        var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
-        url += encodeURIComponent(JSON.stringify(filter));
-        url += '&access_token=' + user1token;
-        api.set('Accept', 'application/json')
-            .get(url)
-            .end(function (err, res) {
-                expect(res.body).to.have.length(1);
-                var rec = res.body[0];
-                rec.category = 'music';
-                rec.description = 'book category can not be music';
-                var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
-                api.set('Accept', 'application/json')
-                    .put(url)
-                    .send(rec)
-                    .end(function (err, res) {
-                        var response = res.body;
-                        expect(res.error.status).to.be.equal(403);
-                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
-                        done();
-                    });
-            });
-    });
->>>>>>> upstream/master
 
 after('after clean up', function (done) {
   var lc = logger('LOGGER-CONFIG');
