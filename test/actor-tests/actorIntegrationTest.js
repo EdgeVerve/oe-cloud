@@ -105,20 +105,6 @@ describe(chalk.blue('integrationTest'), function() {
 it('should log in', function(done) {
 console.log('Base Url is ', baseurl);
 request.post(
-              baseurl + "BaseUsers", {
-                json: createLoginData
-              },
-              function(error, response, body) {
-                if (error || body.error) {
-			            console.log("error:", error || body.error);
-                  done(error || body.error);
-                } else {
-                  login();
-		            }
-	});
-
-function login() {
-request.post(
               baseurl + "BaseUsers/login", {
                 json: loginData
               },
@@ -131,7 +117,6 @@ request.post(
                   setup(body.id);
 		            }
 	});
-}
 
   function setup(token) {
     console.log('start init actor', token);
