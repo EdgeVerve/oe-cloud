@@ -22,39 +22,39 @@ module.exports = function (BaseActorEntity) {
     BaseActor.disableRemoteMethod('__update__state', false);
     BaseActor.disableRemoteMethod('__destroy__state', false);
     BaseActor.remoteMethod(
-        'validateAndReserveAtomicAction', {
-          http: {
-            path: '/validateAndReserveAtomicAction',
-            verb: 'post'
-          },
-          isStatic: false,
-          accepts: {
-            arg: 'filter',
-            type: 'object'
-          },
-          returns: {
-            arg: 'response',
-            type: 'object',
-            root: true
-          }
-        });
+      'validateAndReserveAtomicAction', {
+        http: {
+          path: '/validateAndReserveAtomicAction',
+          verb: 'post'
+        },
+        isStatic: false,
+        accepts: {
+          arg: 'filter',
+          type: 'object'
+        },
+        returns: {
+          arg: 'response',
+          type: 'object',
+          root: true
+        }
+      });
     BaseActor.remoteMethod(
-        'validateNonAtomicAction', {
-          http: {
-            path: '/validateNonAtomicAction',
-            verb: 'post'
-          },
-          isStatic: false,
-          accepts: {
-            arg: 'filter',
-            type: 'object'
-          },
-          returns: {
-            arg: 'response',
-            type: 'object',
-            root: true
-          }
-        });
+      'validateNonAtomicAction', {
+        http: {
+          path: '/validateNonAtomicAction',
+          verb: 'post'
+        },
+        isStatic: false,
+        accepts: {
+          arg: 'filter',
+          type: 'object'
+        },
+        returns: {
+          arg: 'response',
+          type: 'object',
+          root: true
+        }
+      });
     BaseActor.remoteMethod(
       'journalSaved', {
         http: {
@@ -80,22 +80,22 @@ module.exports = function (BaseActorEntity) {
   BaseActorEntity.disableRemoteMethod('__destroy__state', false);
 
   BaseActorEntity.remoteMethod(
-        'validateAndReserveAtomicAction', {
-          http: {
-            path: '/validateAndReserveAtomicAction',
-            verb: 'post'
-          },
-          isStatic: false,
-          accepts: {
-            arg: 'filter',
-            type: 'object'
-          },
-          returns: {
-            arg: 'response',
-            type: 'object',
-            root: true
-          }
-        });
+    'validateAndReserveAtomicAction', {
+      http: {
+        path: '/validateAndReserveAtomicAction',
+        verb: 'post'
+      },
+      isStatic: false,
+      accepts: {
+        arg: 'filter',
+        type: 'object'
+      },
+      returns: {
+        arg: 'response',
+        type: 'object',
+        root: true
+      }
+    });
 
   BaseActorEntity.remoteMethod(
     'validateNonAtomicAction', {
@@ -141,6 +141,7 @@ module.exports = function (BaseActorEntity) {
     var message = {};
     message.isProcessed = false;
     message.retryCount = 0;
+    message.skipCount = 0;
     message.instructionType = activity.instructionType;
     message.payload = activity.payload;
     message.activity = activity;
@@ -207,7 +208,7 @@ module.exports = function (BaseActorEntity) {
       });
     });
   };
-   // should be async
+  // should be async
   BaseActorEntity.prototype.reserveAmount = function (context) {
     var journalEntity = context.journalEntity;
     var journalEntityType = journalEntity._type;
@@ -234,26 +235,11 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  function prepareMessagesForProcessing(envelope) {
-    var messages = envelope.msg_queue.slice(0);
-    messages.sort(function (a, b) {
-      var key1 = a.seqNum;
-      var key2 = b.seqNum;
-      if (key1 < key2) {
-        return -1;
-      } else if (key1 === key2) {
-        return 0;
-      }
-      return 1;
-    });
-    return messages;
-  }
-
   BaseActorEntity.prototype.processMessagesBackground = function (envelope, options, actorCb) {
-    var messages = prepareMessagesForProcessing(envelope);
+    var messages = envelope.msg_queue.slice(0);
     var self = this;
 
-    if (messages.length === 0 && (typeof envelope.dirty === 'undefined' || envelope.dirty === false)) {
+    if (messages.length === 0) {
       return actorCb();
     }
 
@@ -282,7 +268,6 @@ module.exports = function (BaseActorEntity) {
               log.error(options, 'error while persisting actor ', error);
               return releaseLockCb(error);
             }
-            envelope.dirty = false;
             envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
             return releaseLockCb();
           });
@@ -412,7 +397,7 @@ module.exports = function (BaseActorEntity) {
   }
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
-    var loopbackModelsCollection = getAssociatedModels(this._type);
+    var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
     var self = this;
@@ -430,8 +415,8 @@ module.exports = function (BaseActorEntity) {
       var query = {};
       if (self.getDataSource().name === 'evmongodb') {
         query = {where: {or: [
-                    {atomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}},
-                    {nonAtomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}}
+          {atomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}},
+          {nonAtomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}}
         ]}};
       } else {
         query = {where: {startup: {regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*'}}};

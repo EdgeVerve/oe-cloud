@@ -11,10 +11,6 @@ module.exports = function failsafeObserverMixin(Model) {
     return;
   }
 
-  if (Model.modelName === 'BaseReplayableEntity') {
-    return;
-  }
-
   var FailSafeObserver = function (fn) {
     var _fn = fn;
     var _id = UUID.v4();
@@ -45,14 +41,19 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
+  Model.defineProperty('_processed', {
+    type: 'boolean',
+    default: false
+  });
+
   Model.defineProperty('_fsCtx', {
     type: 'string'
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', '_processed']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx'];
+    Model.definition.settings.hidden = ['_fsCtx', '_processed'];
   }
 
   Model.failSafeObserve = function (eventName, observer) {

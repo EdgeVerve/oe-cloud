@@ -16,7 +16,8 @@
     "instanceCacheSize": 200000,
     "instanceCacheExpiration": 0,
     "proxyEnabled": true,
-    "proxyMethods": [{"name":"validateAndReserveAtomicAction"},{"name":"validateNonAtomicAction"},{"name":"journalSaved"}]
+    "proxyMethods": [{"name":"validateAndReserveAtomicAction"},{"name":"validateNonAtomicAction"},{"name":"journalSaved"}],
+    "dbLockRequired": true
   },
   "acls": [],
   "methods": {},

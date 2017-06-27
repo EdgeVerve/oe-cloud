@@ -20,7 +20,7 @@ var config = null;
 try {
   appconfig = require('../../../server/config.json');
 } catch (e) {
- /* ignored */
+  /* ignored */
 }
 try {
   config = require('./config.json');

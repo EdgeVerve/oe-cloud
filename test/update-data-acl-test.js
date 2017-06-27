@@ -197,210 +197,254 @@ describe(chalk.blue('data-acl-update-test'), function () {
   };
 
   var dbrecords;
-
-  before('setup model for dataacl', function (done) {
-    var lc = logger('LOGGER-CONFIG');
-    var dlog = logger('data-acl');
-    lc.changeLogger(dlog, logger.DEBUG_LEVEL);
-
-    async.series([function (cb) {
-      cleanup(cb);
+  async.series([function (cb) {
+    cleanup(cb);
+  },
+  function (cb) {
+    var model = loopback.findModel(modelName1, defaultContext);
+    if (model) {
+      model.remove({}, defaultContext, function () {
+        cb();
+      });
+    } else {
       cb();
-    },
-    function (cb) {
-      var model = loopback.findModel(modelName1, defaultContext);
-      if (model) {
-        model.remove({}, defaultContext, function () {
+    }
+  },
+  function (cb) {
+    ModelDefinition.remove({
+      'name': modelName1
+    }, defaultContext, function (err, res) {
+      cb();
+    });
+  },
+  function (cb) {
+    ModelDefinition.create(modeldefs, defaultContext, function (err, res) {
+      if (err) {
+        console.log('unable to create model ', JSON.stringify(err));
+        cb();
+      } else {
+        var model = loopback.findModel(modelName1, defaultContext);
+        model.create(items, defaultContext, function (err, result) {
           cb();
         });
-      } else {
-        cb();
       }
-    },
-    function (cb) {
-      ModelDefinition.remove({
-        'name': modelName1
-      }, defaultContext, function (err, res) {
-        cb();
-      });
-    },
-    function (cb) {
-      ModelDefinition.create(modeldefs, defaultContext, function (err, res) {
-        if (err) {
-          console.log('unable to create model ', JSON.stringify(err));
-          cb();
-        } else {
-          var model = loopback.findModel(modelName1, defaultContext);
-          model.create(items, defaultContext, function (err, result) {
-            cb();
-          });
-        }
-      });
-    },
-    function (cb) {
-      models.DataACL.create(dataacls, defaultContext, function (err, res) {
-        cb();
-      });
-    },
-    function (cb) {
-      bootstrap.createTestUser(user1, 'ROLE232', cb);
-    },
-    function (cb) {
-      bootstrap.createTestUser(user2, 'ROLE232', cb);
-    },
-    function (cb) {
-      var model = loopback.findModel(modelName1, defaultContext);
-      model.find({}, defaultContext, function (err, res) {
-        dbrecords = res;
-        cb();
-      });
-    },
-    function () {
-      done();
-    }]);
-  });
-
-  it('login1', function (done) {
-    var postData = {
-      'username': user1.username,
-      'password': user1.password,
-      'tenantId': 'test-tenant'
-    };
-
-    var postUrl = baseUrl + '/BaseUsers/login';
-
-    // without jwt token
-    var api = defaults(supertest(bootstrap.app));
-    api.set('Accept', 'application/json')
-      .set('tenant_id', 'test-tenant')
-      .post(postUrl)
-      .send(postData)
-      .expect(200).end(function (err, response) {
-        user1token = response.body.id;
-        done();
-      });
-  });
-
-  it('find', function (done) {
-    var api = defaults(supertest(bootstrap.app));
-    var url = bootstrap.basePath + '/' + modelName1 + 's?access_token=' + user1token;
-    api.set('Accept', 'application/json')
-      .get(url)
-      .end(function (err, res) {
-        expect(res.status).to.be.equal(200);
-        expect(res.body).to.be.an('array');
-        expect(res.body).to.have.length(2);
-        done();
-      });
-  });
-
-  it('find and update book', function (done) {
-    var api = defaults(supertest(bootstrap.app));
-    var filter = { where: { category: 'book' } };
-    var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
-    url += encodeURIComponent(JSON.stringify(filter));
-    url += '&access_token=' + user1token;
-    api.set('Accept', 'application/json')
-      .get(url)
-      .end(function (err, res) {
-        expect(res.body).to.have.length(1);
-        var rec = res.body[0];
-        var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
-        rec.description += 'updated';
-        api.set('Accept', 'application/json')
-          .put(url)
-          .send(rec)
-          .end(function (err, res) {
-            console.log(res.status);
-            console.log(res.body.error);
-            expect(res.status).to.be.equal(200);
-            expect(res.body._version).not.to.be.equal(rec._version);
-            var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
-            var confirmation = {
-              "remarks": "confirmation for book",
-              "confirmed": "yes, praveen"
-            };
-            api.set('Accept', 'application/json')
-              .post(url)
-              .send(confirmation)
-              .end(function (err, res) {
-                expect(res.error.code === 'DATA_ACCESS_DENIED');
-                done();
-              });
-          });
-      });
-  });
-
-  it('find and update music', function (done) {
-    var api = defaults(supertest(bootstrap.app));
-    var filter = { where: { category: 'music' } };
-    var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
-    url += encodeURIComponent(JSON.stringify(filter));
-    url += '&access_token=' + user1token;
-    api.set('Accept', 'application/json')
-      .get(url)
-      .end(function (err, res) {
-        var rec = res.body[0];
-        var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
-        rec.description += ' and description has been updated by user..';
-        api.set('Accept', 'application/json')
-          .put(url)
-          .send(rec)
-          .end(function (err, res) {
-            var response = res.body;
-            // earlier it was coming in main body as 403
-            // expect(res.status).to.be.equal(403);
-            expect(res.error.status).to.be.equal(403);
-            expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
-            var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
-            var confirmation = {
-              "remarks": "confirmation for music",
-              "confirmed": "yes, praveen"
-            };
-            api.set('Accept', 'application/json')
-              .post(url)
-              .send(confirmation)
-              .end(function (err, res) {
-                expect(res.status).to.be.equal(200);
-                done();
-              });
-          });
-      });
-  });
-
-  it('update book to music', function (done) {
-    var api = defaults(supertest(bootstrap.app));
-    var filter = { where: { category: 'book' } };
-    var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
-    url += encodeURIComponent(JSON.stringify(filter));
-    url += '&access_token=' + user1token;
-    api.set('Accept', 'application/json')
-      .get(url)
-      .end(function (err, res) {
-        expect(res.body).to.have.length(1);
-        var rec = res.body[0];
-        rec.category = 'music';
-        rec.description = 'book category can not be music';
-        var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
-        api.set('Accept', 'application/json')
-          .put(url)
-          .send(rec)
-          .end(function (err, res) {
-            var response = res.body;
-            expect(res.error.status).to.be.equal(403);
-            expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
-            done();
-          });
-      });
-  });
-
-  after('after clean up', function (done) {
-    var lc = logger('LOGGER-CONFIG');
-    var dlog = logger('data-acl');
-    lc.changeLogger(dlog, logger.ERROR_LEVEL);
+    });
+  },
+  function (cb) {
+    models.DataACL.create(dataacls, defaultContext, function (err, res) {
+      cb();
+    });
+  },
+  function (cb) {
+    bootstrap.createTestUser(user1, 'ROLE232', cb);
+  },
+  function (cb) {
+    bootstrap.createTestUser(user2, 'ROLE232', cb);
+  },
+  function (cb) {
+    var model = loopback.findModel(modelName1, defaultContext);
+    model.find({}, defaultContext, function (err, res) {
+      dbrecords = res;
+      cb();
+    });
+  },
+  function () {
     done();
-    //cleanup(done);
+  }]);
+});
+
+var postUrl = baseUrl + '/BaseUsers/login';
+
+// without jwt token
+var api = defaults(supertest(bootstrap.app));
+api.set('Accept', 'application/json')
+  .set('tenant_id', 'test-tenant')
+  .post(postUrl)
+  .send(postData)
+  .expect(200).end(function (err, response) {
+    user1token = response.body.id;
+    done();
   });
+  });
+
+it('find', function (done) {
+  var api = defaults(supertest(bootstrap.app));
+  var url = bootstrap.basePath + '/' + modelName1 + 's?access_token=' + user1token;
+  api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, res) {
+      expect(res.status).to.be.equal(200);
+      expect(res.body).to.be.an('array');
+      expect(res.body).to.have.length(2);
+      done();
+    });
+});
+
+it('find and update book', function (done) {
+  var api = defaults(supertest(bootstrap.app));
+  var filter = { where: { category: 'book' } };
+  var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
+  url += encodeURIComponent(JSON.stringify(filter));
+  url += '&access_token=' + user1token;
+  api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, res) {
+      expect(res.body).to.have.length(1);
+      var rec = res.body[0];
+      var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
+      rec.description += 'updated';
+      api.set('Accept', 'application/json')
+        .put(url)
+        .send(rec)
+        .end(function (err, res) {
+          console.log(res.status);
+          console.log(res.body.error);
+          expect(res.status).to.be.equal(200);
+          expect(res.body._version).not.to.be.equal(rec._version);
+          var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
+          var confirmation = {
+            "remarks": "confirmation for book",
+            "confirmed": "yes, praveen"
+          };
+          api.set('Accept', 'application/json')
+            .post(url)
+            .send(confirmation)
+            .end(function (err, res) {
+              expect(res.error.code === 'DATA_ACCESS_DENIED');
+              done();
+            });
+        });
+    });
+});
+
+it('find and update music', function (done) {
+  var api = defaults(supertest(bootstrap.app));
+  var filter = { where: { category: 'music' } };
+  var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
+  url += encodeURIComponent(JSON.stringify(filter));
+  url += '&access_token=' + user1token;
+  api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, res) {
+      var rec = res.body[0];
+      var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
+      rec.description += ' and description has been updated by user..';
+      api.set('Accept', 'application/json')
+        .put(url)
+        .send(rec)
+        .end(function (err, res) {
+          var response = res.body;
+          // earlier it was coming in main body as 403
+          // expect(res.status).to.be.equal(403);
+          expect(res.error.status).to.be.equal(403);
+          expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+          var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
+          var confirmation = {
+            "remarks": "confirmation for music",
+            "confirmed": "yes, praveen"
+          };
+          api.set('Accept', 'application/json')
+            .post(url)
+            .send(confirmation)
+            .end(function (err, res) {
+              expect(res.status).to.be.equal(200);
+              done();
+            });
+        });
+    });
+});
+
+it('update book to music', function (done) {
+  var api = defaults(supertest(bootstrap.app));
+  var filter = { where: { category: 'book' } };
+  var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
+  url += encodeURIComponent(JSON.stringify(filter));
+  url += '&access_token=' + user1token;
+  api.set('Accept', 'application/json')
+    .get(url)
+    .end(function (err, res) {
+      expect(res.body).to.have.length(1);
+      var rec = res.body[0];
+      rec.category = 'music';
+      rec.description = 'book category can not be music';
+      var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
+      api.set('Accept', 'application/json')
+<<<<<<< HEAD
+        .put(url)
+        .send(rec)
+        .end(function (err, res) {
+          var response = res.body;
+          expect(res.error.status).to.be.equal(403);
+          expect(response.error.errors[0].code === 'data-acl-err-003').to.be.true;
+          done();
+        });
+    });
+});
+=======
+            .get(url)
+            .end(function (err, res) {
+                var rec = res.body[0];
+                var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
+                rec.description += ' and description has been updated by user..';
+                api.set('Accept', 'application/json')
+                    .put(url)
+                    .send(rec)
+                    .end(function (err, res) {
+                        var response = res.body;
+                        // earlier it was coming in main body as 403
+                        // expect(res.status).to.be.equal(403);
+                        expect(res.error.status).to.be.equal(403);
+                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
+                        var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '/' + 'confirmations' + '?access_token=' + user1token;
+                        var confirmation = {
+                            "remarks": "confirmation for music",
+                            "confirmed": "yes, praveen"
+                        };
+                        api.set('Accept', 'application/json')
+                            .post(url)
+                            .send(confirmation)
+                            .end(function (err, res) {
+                                expect(res.status).to.be.equal(200);
+                                done();
+                            });
+                    });
+            });
+    });
+
+    it('update book to music', function (done) {
+        var api = defaults(supertest(bootstrap.app));
+        var filter = { where: { category: 'book' } };
+        var url = bootstrap.basePath + '/' + modelName1 + 's?filter=';
+        url += encodeURIComponent(JSON.stringify(filter));
+        url += '&access_token=' + user1token;
+        api.set('Accept', 'application/json')
+            .get(url)
+            .end(function (err, res) {
+                expect(res.body).to.have.length(1);
+                var rec = res.body[0];
+                rec.category = 'music';
+                rec.description = 'book category can not be music';
+                var url = bootstrap.basePath + '/' + modelName1 + 's/' + rec.id + '?access_token=' + user1token;
+                api.set('Accept', 'application/json')
+                    .put(url)
+                    .send(rec)
+                    .end(function (err, res) {
+                        var response = res.body;
+                        expect(res.error.status).to.be.equal(403);
+                        expect(response.error.errCode === 'data-acl-err-003').to.be.true;
+                        done();
+                    });
+            });
+    });
+>>>>>>> upstream/master
+
+after('after clean up', function (done) {
+  var lc = logger('LOGGER-CONFIG');
+  var dlog = logger('data-acl');
+  lc.changeLogger(dlog, logger.ERROR_LEVEL);
+  done();
+  //cleanup(done);
+});
 
 });
 

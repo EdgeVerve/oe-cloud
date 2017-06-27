@@ -24,18 +24,18 @@ var loopback = require('loopback');
 
 module.exports = function ModelValidations(Model) {
   if (Model.modelName === 'BaseEntity') {
-        // No need to apply the "isValid" change at BaseEntity level
-        // Let the actual model decide if it wants to enable modelvalidation mixin
+    // No need to apply the "isValid" change at BaseEntity level
+    // Let the actual model decide if it wants to enable modelvalidation mixin
     return;
   }
 
   var validationRules = [];
-    // aggregate all the validations defined for the model and attach it to the model
+  // aggregate all the validations defined for the model and attach it to the model
   validationRules = validationBuilder.buildValidations(Model);
 
   Model.validationRules = validationRules;
 
-    /**
+  /**
      *
      * This function overrides the isValid method of loopback, it will be called whenever `obj.isValid()` method is called
      *
@@ -55,7 +55,7 @@ module.exports = function ModelValidations(Model) {
     if (!options) {
       options = {};
     }
-        // check if validations are to be executed, if not simply return the done callback.
+    // check if validations are to be executed, if not simply return the done callback.
     if (options.skipValidations) {
       return process.nextTick(function skipValidationCb() {
         done(true);
@@ -70,20 +70,20 @@ module.exports = function ModelValidations(Model) {
       inst = this;
     }
 
-        // To Do : modelData to be used for validation hooks
+    // To Do : modelData to be used for validation hooks
     var modelData = data;
     log.debug(options, 'modelData validation : ', modelData);
 
     data = inst.toObject(true);
 
-        // path will give the exact level and property for which validation is being executed
+    // path will give the exact level and property for which validation is being executed
     if (!path) {
       path = inst.constructor.modelName;
     }
     log.debug(options, 'isValid called for : ', path);
     var self = inst;
     var ast = self.constructor._ast;
-        // construct an array of promises for validateWhen and wait for expression language to resolve all the promises
+    // construct an array of promises for validateWhen and wait for expression language to resolve all the promises
     inst.constructor.validationRules.forEach(function modelValidationsRulesForEachFn(obj) {
       if (obj.args.validateWhen) {
         validateWhenPromises.push(exprLang.traverseAST(ast[obj.args.validateWhen], data, options));
@@ -95,8 +95,8 @@ module.exports = function ModelValidations(Model) {
         })());
       }
     });
-        // when all promises are resolved check for the resolved value to know which validation rules are to be skipped
-        // based on the validateWhen clause
+    // when all promises are resolved check for the resolved value to know which validation rules are to be skipped
+    // based on the validateWhen clause
     q.allSettled(validateWhenPromises).then(function modelValidationsValidateWhenPromisesCb(results) {
       log.trace(options, 'all promises settled in isValid');
       results.map(function modelValidationsValidateWhenPromisesMapCb(d) {
@@ -104,7 +104,7 @@ module.exports = function ModelValidations(Model) {
       }).forEach(function modelValidationsValidateWhenPromisesMapForEachCb(d, i) {
         log.trace(options, 'preparing async function array for validation rules');
         if (d) {
-                    // this wrapper prepares an array of functions containg all the validations attached to the model
+          // this wrapper prepares an array of functions containg all the validations attached to the model
           var obj = inst.constructor.validationRules[i];
           obj.args.inst = inst;
           obj.args.data = data;
@@ -113,29 +113,29 @@ module.exports = function ModelValidations(Model) {
           fnArr.push(async.apply(obj.expression, obj.args));
         }
       });
-            /* prepare an array of functions which are nothing but the isValid method of the
+      /* prepare an array of functions which are nothing but the isValid method of the
                  properties which are of Model type*/
       var recursionFns = getRecursiveModelFns(options, inst, data, path);
       if (inst.constructor.settings._isModelRuleExists) {
         fnArr.push(async.apply(executeDTValidationRulesFn, inst.constructor, inst.__data || inst, options));
       }
-            // execute all the validation functions of the model parallely
+      // execute all the validation functions of the model parallely
       async.parallel(fnArr, function modelValidationsAsyncParallelCb(err, results) {
         if (err) {
-          // Handle the error if any...
+          results.push(err);
         }
         results = [].concat.apply([], results);
-                // execute all the isValid functions of the properties which are of Model type
+        // execute all the isValid functions of the properties which are of Model type
         if (recursionFns && recursionFns.length > 0) {
           async.parallel(recursionFns, function modelValidationRecursionAsyncParallelCb(err, recurResults) {
             if (err) {
-              // Handle the error if any...
+              recurResults.push(err);
             }
             results = results.concat([].concat.apply([], recurResults));
             var errArr = results.filter(function modelValidationAsyncParalllelErrCb(d) {
               return d !== null && typeof d !== 'undefined';
             });
-                        // inst.errors will have custom errors if any
+            // inst.errors will have custom errors if any
             if (errArr.length > 0 || inst.errors) {
               valid = false;
             }
@@ -144,9 +144,9 @@ module.exports = function ModelValidations(Model) {
               log.trace(options, 'all validation rules executed');
               if (errArr && errArr.length > 0) {
                 log.warn(options, 'Data posted is not valid');
-                                // Add error to the response object
+                // Add error to the response object
                 getError(self, errArr);
-                                // done(valid);
+                // done(valid);
               }
               // running custom validations of model(written in model js file) if any
               if (Model.customValidations || inst.__data.customValidations) {
@@ -160,7 +160,7 @@ module.exports = function ModelValidations(Model) {
                 });
                 async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                   if (err) {
-                    // Handle the error if any...
+                    customResults.push(err);
                   }
                   // Add error to the response object
                   customResults = [].concat.apply([], customResults);
@@ -185,7 +185,7 @@ module.exports = function ModelValidations(Model) {
           var errArr = results.filter(function modelValidationAsyncParallelElseErrFilterFn(d) {
             return d !== null && typeof d !== 'undefined';
           });
-                    // inst.errors will have custom errors if any
+          // inst.errors will have custom errors if any
           if (errArr.length > 0 || inst.errors) {
             valid = false;
           }
@@ -194,11 +194,11 @@ module.exports = function ModelValidations(Model) {
             log.trace(options, 'all validation rules executed');
             if (errArr && errArr.length > 0) {
               log.warn(options, 'Data posted is not valid');
-                            // Add error to the response object
+              // Add error to the response object
               getError(self, errArr);
-                            // done(valid);
+              // done(valid);
             }
-                        // running custom validations of model(written in model js file) if any
+            // running custom validations of model(written in model js file) if any
             if (Model.customValidations || inst.__data.customValidations) {
               log.trace(options, 'executing custom validations for model');
               var customValArr = [];
@@ -210,7 +210,7 @@ module.exports = function ModelValidations(Model) {
               });
               async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                 if (err) {
-                  // Handle the error if any...
+                  customResults.push(err);
                 }
                 // Add error to the response object
                 customResults = [].concat.apply([], customResults);
@@ -259,11 +259,15 @@ module.exports = function ModelValidations(Model) {
             if (err) {
               return cb(err);
             }
-            cb(null, dataAfterValidationRule);
+            var errorArr = dataAfterValidationRule.map(function (obj) {
+              obj.fieldName = 'DecisionTable';
+              return obj;
+            });
+            cb(null, errorArr);
           });
         }, function (err, results) {
           if (err) {
-            return callback(err);
+            results.push(err);
           }
           callback(null, results);
         });
@@ -274,7 +278,7 @@ module.exports = function ModelValidations(Model) {
   }
 
 
-    /**
+  /**
      * This function prepares an array which contains all the isValid methods,
      * incase a property is of type Model its data can be validated by calling its isValid method
      * @memberof Model Validations
@@ -297,8 +301,8 @@ module.exports = function ModelValidations(Model) {
     var relations = modelinstance.constructor.relations || {};
     var relationNames = Object.keys(relations);
     Object.keys(properties).forEach(function modelValidationsRecursiveModelKeysFn(property) {
-            // if type of the property is an array which is of Model type then collect the isValid methods for the Model
-            // for example: if proerty is of type : ['Items'] where Item is a Model
+      // if type of the property is an array which is of Model type then collect the isValid methods for the Model
+      // for example: if proerty is of type : ['Items'] where Item is a Model
       var validateEmbeddedModel = true;
       if (properties[property].type instanceof Array &&
                 properties[property].type[0] &&

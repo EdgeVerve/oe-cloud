@@ -7,6 +7,7 @@ before_script:
   - export project=${nameGroupProject##*/}
   - export group=${nameGroupProject%/*}
   - export branch=${CI_BUILD_REF_NAME}
+  - export USER_BROADCASTER=false
   - export project=${project//[^[:alnum:]]/}
   - export group=${group//[^[:alnum:]]/}
   - export branch=${branch//[^[:alnum:]]/}
@@ -27,9 +28,9 @@ buildjob:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
-    - if eslint .; then status_eslint=0; else status_eslint=1; fi
+    - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-    #- if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - echo "Building oe-cloud image..."
     - time npm install --no-optional
@@ -65,16 +66,16 @@ mongotest:
     - docker --tls -H $SWARM_HOST pull $REGISTRY/$APP_IMAGE_NAME
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME up -d
     - if docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME exec web grunt test-with-coverage; then echo "Test cases passed successfully"; else echo "Test cases are failing" && export exit_status=1; fi
-    - if echo $CI_BUILD_REPO | grep "10.73.53.167/oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
-    - if [ $MAIN_BRANCH -eq 0 ]; then echo "Not the main project, hence not sending coverage report to evgit..."; docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down; exit $exit_status; fi
+    - if echo $CI_BUILD_REPO | grep "oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
+    - if [ $MAIN_BRANCH -eq 0 ]; then echo "Not the main project, hence not sending coverage report to 10.73.53.167..."; docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down; exit $exit_status; fi
     - docker --tls -H $SWARM_HOST cp $WEB_CONTAINER_NAME:/home/src/coverage/ .
-    - echo "Sending coverage reports to evgit..."
+    - echo "Sending coverage reports to 10.73.53.167..."
     - tar -cf oe-cloud.tar -C ./coverage/lcov-report/ .
-    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud'
-    - scp oe-cloud.tar root@evgit:/data/share/coverage/
-    - ssh root@evgit 'mkdir -p /data/share/coverage/oe-cloud'
-    - ssh root@evgit 'tar -xf /data/share/coverage/oe-cloud.tar -C /data/share/coverage/oe-cloud'
-    - ssh root@evgit 'rm -rf /data/share/coverage/oe-cloud.tar'
+    - ssh root@10.73.53.167 'rm -rf /data/documentation-portal/coverage/oe-cloud'
+    - scp oe-cloud.tar root@10.73.53.167:/data/documentation-portal/coverage/
+    - ssh root@10.73.53.167 'mkdir -p /data/documentation-portal/coverage/oe-cloud'
+    - ssh root@10.73.53.167 'tar -xf /data/documentation-portal/coverage/oe-cloud.tar -C /data/documentation-portal/coverage/oe-cloud'
+    - ssh root@10.73.53.167 'rm -rf /data/documentation-portal/coverage/oe-cloud.tar'
     - echo "Coverage report updated"
     - docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down
     - exit $exit_status
@@ -101,3 +102,44 @@ postgrestest:
   tags:
     - EVF-PAAS
 
+
+swarm:
+  stage: test
+  script: 
+    - "export DOMAIN_NAME=evfapp.dev"
+    - "REGISTRY=registry.${DOMAIN_NAME}"
+    - "name=${CI_PROJECT_DIR##*builds/}"
+    - "appName=${name##*/}"
+    - "appUserName=${name%/*}"
+    - "branchName=${CI_BUILD_REF_NAME}"
+    - "email=$(git log --reverse -n 1 $CI_BUILD_REF --pretty=format:\"%ae\")"
+    - "appName=${appName//[^[:alnum:]]/}"
+    - "appUserName=${appUserName//[^[:alnum:]]/}"
+    - "branchName=${branchName//[^[:alnum:]]/}"
+    - "if [ $branchName == \"master\" ]; then export APP_IMAGE_NAME=$appUserName\"-\"$appName; else export APP_IMAGE_NAME=$appUserName\"-\"$branchName\"-\"$appName; fi"
+    - "APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')"
+    - "NETWORK_NAME=${APP_IMAGE_NAME}"
+    - docker stack rm $APP_IMAGE_NAME
+    - "npm set registry $NPM_REGISTRY"
+    - "echo \"Npm Registry - \"${NPM_REGISTRY}"
+    - "echo \"App will be pushed to registry - \"${REGISTRY}"
+    - "echo \"The image name in registry - \"$APP_IMAGE_NAME"
+    - "npm install --no-optional"
+    - "node test/actor-tests/prepareIntegrationTest.js"
+    - "time docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$https_proxy -t $REGISTRY/$APP_IMAGE_NAME:latest ."
+    - "time docker push $REGISTRY/$APP_IMAGE_NAME:latest"
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
+    - "mv -f qqq2.yml qqq.yml"
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
+    - "mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js"
+    - docker stack deploy -c qqq.yml $APP_IMAGE_NAME
+    - echo "10.73.96.121    ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+    - "mocha test/actor-tests/actorIntegrationTest.js"
+    - "node test/actor-tests/cleanupIntegrationTest.js"
+  tags:
+    - EVF-PAAS13
