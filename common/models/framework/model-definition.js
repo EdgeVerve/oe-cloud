@@ -80,7 +80,28 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         modelDefinition.app.personalizedModels[modeldefinition.name][ctxStr] = {
           'modelId': modeldefinition.name, 'context': ctxStr
         };
-      } else {
+      } else if (modeldefinition.variantOf) {
+          debugger;
+          var parentVariantModel = loopback.findModel(modeldefinition.variantOf, ctx.options);
+          if (parentVariantModel) {
+            debug('Found a parent model (not a variant itself)');
+            var parentVariantMongodbParam = parentVariantModel.definition.settings.mongodb;
+            if (parentVariantMongodbParam) {
+              var parentVariantCollectionName = parentVariantMongodbParam.collection;
+              if (parentVariantCollectionName) {
+                modeldefinition.mongodb = {
+                  collection: parentVariantCollectionName
+                };
+              }
+            }
+          }
+          if (!modeldefinition.mongodb) {
+            modeldefinition.mongodb = {
+              collection: modeldefinition.variantOf
+            };
+          }
+        }
+      else {
         let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
         if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
           modeldefinition.mongodb = {
