@@ -18,6 +18,7 @@ var models = bootstrap.models;
 var eventHistoryManager = require('../lib/event-history-manager');
 var debug = require('debug')('failsafe-observer-test');
 var uuid = require('node-uuid');
+var loopback = require('loopback');
 
 chai.use(require('chai-datetime'));
 
@@ -119,7 +120,8 @@ describe('failsafe-observer-mixin', function () {
     }
 
     function deleteModelInst(modelName, cb) {
-        models[modelName].destroyAll({}, defaultContext, function (err, info) {
+        var model = loopback.getModel(modelName, defaultContext);
+        model.destroyAll({}, defaultContext, function (err, info) {
             if (err) {
                 cb(err);
             } else {
@@ -165,14 +167,15 @@ describe('failsafe-observer-mixin', function () {
     it('Should -- make TestModel availabe in the app with failsafe observers fields on Model', function (done) {
         var failSafeObserverFields = ['_fsObservers', 'failSafeObserve'];
         var mixins = ['FailsafeObserverMixin'];
-        expect(models[modelName]).to.be.ok;
+        var model = loopback.getModel(modelName, defaultContext);
+        expect(model).to.be.ok;
         expect(Object.keys(models[modelName].settings.mixins)).to.include.members(mixins);
         expect(Object.keys(models[modelName])).to.include.members(failSafeObserverFields);
         done();
     });
 
     it('Should register an observer in _fsObservers object when adding new oberver ', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var test = false;
         var observerLength = model._fsObservers['after save'].observers.length;
         model.observe('after save', function testObserver(ctx, next) {
@@ -191,7 +194,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should not rerun an after save observer if it finished executing without error', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             if (counter <= 1) {
@@ -215,7 +218,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should not rerun an after save observer if it finished executing without error for base model', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var childModel = models[childModelName];
         var counter = 0;
         model.observe('after save', function (ctx, next) {
@@ -239,7 +242,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should not rerun an after save observer when error is not retriable for base model', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var err = new Error('testError');
         var childModel = models[childModelName];
         var counter = 0;
@@ -259,7 +262,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should not rerun an after save observer when error is not retriable', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var err = new Error('testError');
         var counter = 0;
         model.observe('after save', function (ctx, next) {
@@ -278,7 +281,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should rerun an after save observer untill it doesn\'t return an error', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             if (counter < 2) {
@@ -300,7 +303,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should rerun an after save observer on base model untill it doesn\'t return an error', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             if (counter < 2) {
@@ -319,7 +322,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should not rerun an after save observer after MAX_RETRY times (set to 4)', function (done) {
-        var model = models[modelName];
+        var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             if (counter === 4) {

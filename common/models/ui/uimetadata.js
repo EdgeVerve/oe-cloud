@@ -224,7 +224,7 @@ module.exports = function UIMetadata(UIMetadata) {
               var uitype = modelField.type;
               if (uitype === 'string') {
                 if (modelField.enumtype) {
-                  var enumModel = app.loopback.findModel(modelField.enumtype);
+                  var enumModel = app.loopback.findModel(modelField.enumtype, options);
                   if (enumModel) {
                     modelField.listdata = enumModel.settings.enumList;
                   }
@@ -433,7 +433,7 @@ module.exports = function UIMetadata(UIMetadata) {
 
         if (ctrlMeta.enumtype || fieldMeta.enumtype || modelMeta.enumtype) {
           var enumname = ctrlMeta.enumtype || fieldMeta.enumtype || modelMeta.enumtype;
-          var enumModel = app.loopback.findModel(enumname);
+          var enumModel = app.loopback.findModel(enumname, options);
           if (enumModel) {
             // enumtype is pointing to model
             ctrlMeta.listdata = enumModel.settings.enumList;
