@@ -209,6 +209,12 @@ module.exports = function uiComponent(UIComponent) {
         callback(err);
       }
       if (fetchAsHtml) {
+       if (component.importUrls) {
+          var importLinks = component.importUrls.map(function createLinks(importUrl) {
+            return '<link rel="import" dynamic-link href="' + importUrl + '">';
+          });
+          html = importLinks.join('\n') + '\n' + html;
+        }
         mergeAsHTML(html, response, callback);
       } else {
         callback(null, response);
