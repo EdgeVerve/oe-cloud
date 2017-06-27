@@ -17,112 +17,83 @@
 
 var bootstrap = require('./bootstrap');
 var chai = bootstrap.chai;
+var uuid = require('node-uuid');
 var expect = chai.expect;
 var app = bootstrap.app;
 var models = bootstrap.models;
+var api = bootstrap.api;
 var loopback = require('loopback');
 var debug = require('debug')('caching-test');
 var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+var accessToken = null;
 
 describe('Caching Test', function () {
 
     var modelName = 'CachingTest';
+    var TestModel = null;
     var dsname = 'db';
     var dbname = dsname;
-
-    var TestModelSchema = {
-        'name': {
-            'type': 'string',
-            'required': true
-        }
-    };
-    var opts = {
-        strict: true,
-        plural: modelName + "s",
-        base: 'BaseEntity',
-        cacheable: true
-    };
-
-
-    var TestModel = null;
+    
     var result1, result2 = null;
-    var id, dataSource;
+    var id, dataSource; 
+    var i = 1;  
+    
 
-    before('Create Test Model and do cache test', function (done) {
-        this.timeout(20000);
-        // Temporarily enable Caching (will be disabled in the "after()" function
-        config.disablecaching = false;
-        // Get a datasource
-        dataSource = app.datasources[dsname];
+    function apiPostRequest(url, postData, callback, done) {
+        var version = uuid.v4();
+        postData._version = version;
+        api
+            .set('Accept', 'application/json')
+            .post(bootstrap.basePath + url + '?access_token=' + accessToken)
+            .send(postData)
+            .end(function(err, res) {
+                if (err || res.body.error) {
+                    return done(err || (new Error(JSON.stringify(res.body.error))));
+                } else {
+                    return callback(res, done);
+                }
+            });
+    }
 
-        // Create a TestModel and attache it to the dataSource
-        TestModel = loopback.createModel(modelName, TestModelSchema, opts);
-        app.model(TestModel, {
-            dataSource: dsname
-        });
-        TestModel.attachTo(dataSource);
-
-        // Delete all records in the table associated with this TestModel
-        TestModel.destroyAll({}, bootstrap.defaultContext, function (err, info) {
-            if (err) {
-                console.log('caching test clean up ', err, info);
-            }
-            proceed(dataSource.name,done);
-        });
-    });
+    function apiGetRequest(url, callback, done) {
+        var version = uuid.v4();
+        api
+            .set('Accept', 'application/json')
+            .get(bootstrap.basePath + url + '?access_token=' + accessToken)
+            .send()
+            .end(function(err, res) {
+                if (err || res.body.error) {
+                    return done(err || (new Error(JSON.stringify(res.body.error))));
+                } else {
+                    return callback(res, done);
+                }
+            });
+    }
 
     // Create a record in TestModel with caching enabled and 
     // fetch the inserted record using standard framework API,
     // so that it gets cached
-    function proceed(dataSourceName,done) {
-        // Add a record
-        TestModel.create({
-            name: "Ajith"
-        }, bootstrap.defaultContext, function (err, data) {
-            if (err) {
-                console.log(err);
-                done();
-            } else {
-                id = data.id;
-                debug("Record created: id", id);
-                TestModel.find({
-                    "where": {
-                        "id": id
-                    }
-                }, bootstrap.defaultContext, function (err1, data1) {
-                    if (err1) {
-                        console.log(err1);
-                        done(err1);
-                    } else {
-                        result1 = data1;
-                        debug('Found records: result1', result1);
-                        proceed2(dataSourceName,done);
-                    }
-                });
-            }
-        });
+    function stage1_creat(done){
+        id = uuid.v4();
+        apiPostRequest('/'+modelName +'s/', {"name":  "Ajith" + i++, "id": id}, stage2_find, done);
     }
 
+    function stage2_find(result, done) {
+        apiGetRequest('/'+modelName +'s/'+id, stage3_updateDB, done);
+    };
 
-    // Delete the new record directly from DB using MongoDB API,
-    // bypassing cache eviction
-    function proceed2(dataSourceName,done) {
-        if (dataSourceName === 'mongodb') {
-            var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
-            MongoClient.connect(url, function (err, db) {
-                if (err) {
-                    done(err);
-                } else {
-                    // console.log("Connected to mongod server");
-                    db.collection(modelName).remove({}, function (err, numberRemoved) {
-                        if (err) {
-                            done(err);
-                        }
-                        debug("Number of records removed " + numberRemoved);
-                        proceed3(done);
+    function stage3_updateDB (result, done) {
+        result1 = result;
+        if (dataSource.name === 'mongodb') {
+            MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
+                if (err) return done(err);
+                else {
+                    db.collection(modelName).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
+                        if (err) return done(err);
+                        else stage4_find(result, done);
                     });
                 }
             });
@@ -131,40 +102,113 @@ describe('Caching Test', function () {
             var pg = require('pg');
             var client = new pg.Client(connectionString);
             client.connect(function (err) {
-                if (err) {
-                    done(err);
-                } else {
-                    // console.log("Connected to Postgres server");
+                if (err) done(err); 
+                else {
                     var query = client.query("DELETE from " + modelName.toLowerCase(),function(err,result){
-                         if (err) {
-                            done(err);
-                        }
+                         if (err) done(err);
                         debug("Number of records removed " + result.rowCount);
-                        proceed3(done);
+                        stage4_find(result, done);
                     });
                 }
             });
         }
     }
 
-    // Fetch the record with same filter condition
-    function proceed3(done) {
-        TestModel.find({
-            "where": {
-                "id": id
-            }
-        }, bootstrap.defaultContext, function (err2, data2) {
-            if (err2) {
-                console.log(err2);
-                done(err2);
-            } else {
-                result2 = data2;
-                debug('result2', result2);
-                done();
-            }
+    function stage4_find(result, done) {
+        apiGetRequest('/'+modelName +'s/'+id, stage5_saveResult, done);
+    };
 
-        });
+    function stage5_saveResult(result, done){
+        result2 = result;
+        done();
     }
+
+    before('Create Test Model and do cache test', function (done) {
+        // Temporarily enable Caching (will be disabled in the "after()" function
+        config.disablecaching = false;
+        // Get a datasource
+        dataSource = app.datasources[dsname];
+
+        var TestModelSchema = {
+            'name': {
+                'type': 'string',
+                'required': true
+            }
+        };
+        var opts = {
+            strict: true,
+            plural: modelName + "s",
+            base: 'BaseEntity',
+            cacheable: true
+        };
+
+        // Create a TestModel and attache it to the dataSource
+        TestModel = loopback.createModel(modelName, TestModelSchema, opts);
+        app.model(TestModel, {dataSource: dsname});
+        TestModel.attachTo(dataSource);
+
+        // Delete all records in the table associated with this TestModel
+        TestModel.destroyAll({}, bootstrap.defaultContext, function (err, info) {
+            if (err) {
+                console.log('caching test clean up ', err, info);
+            }
+            done();
+        });
+    });
+
+     before('login using admin', function fnLogin(done) {
+        var sendData = {
+            'username': 'admin',
+            'password': 'admin'
+        };
+
+        api
+            .set('x-evproxy-db-lock', '1')
+            .post(bootstrap.basePath + '/BaseUsers/login')
+            .send(sendData)
+            .expect(200).end(function(err, res) {
+                if (err) {
+                    log.error(log.defaultContext(), err);
+                    return done(err);
+                } else {
+                    accessToken = res.body.id;
+                    return done();
+                }
+            });
+    });
+
+    describe('Caching Test - when dblock off', function () {
+        before('Run test', function(done) {
+             api.set('x-evproxy-db-lock', '0');
+            stage1_creat(done);
+        });
+
+        it('Should cache the TestModel when cacheable is set to "true"', function (done) {
+            expect(models[modelName]).not.to.be.null;
+            expect(result1).not.to.be.null;
+            expect(result2).not.to.be.null;
+            expect(result1.body).to.deep.equal(result2.body);
+            done();
+        });
+    });
+
+    describe('Caching Test - when dblock on', function () {
+
+        before('set the dbLock header', function(done) {
+            api.set('x-evproxy-db-lock', '1');
+            stage1_creat(done);
+        });
+
+        it('Should cache the TestModel when cacheable is set to "true"', function (done) {
+            if (result1.body.name !== result2.body.name)  return done();
+            else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+        });
+
+         after('unset the dbLock header', function(done) {
+            api.set('x-evproxy-db-lock', '0');
+            return done();
+        });
+    });
 
     after('Cleanup', function (done) {
         config.disablecaching = true;
@@ -174,15 +218,6 @@ describe('Caching Test', function () {
             }
             done();
         });
-    });
-
-
-    it('Should cache the TestModel when cacheable is set to "true"', function (done) {
-        expect(models[modelName]).not.to.be.null;
-        expect(result1).not.to.be.null;
-        expect(result2).not.to.be.null;
-        expect(result1).to.deep.equal(result2);
-        done();
     });
 
 });
