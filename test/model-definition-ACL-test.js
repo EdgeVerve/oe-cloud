@@ -90,7 +90,7 @@ describe(chalk.blue('model-definition-ACL'), function () {
 
       var BaseUser = {
         'username': 'TestUser1',
-        'email': 'TestUser2@ev.com',
+        'email': 'TestUser1@ev.com',
         'tenantId': 'test-tenant',
         'password': 'password++'
       };
@@ -103,7 +103,7 @@ describe(chalk.blue('model-definition-ACL'), function () {
 
       var BaseUser2 = {
         'username': 'TestUser2',
-        'email': 'TestUser1@ev.com',
+        'email': 'TestUser2@ev.com',
         'tenantId': 'test-tenant',
         'password': 'password++'
       };
@@ -212,16 +212,6 @@ describe(chalk.blue('model-definition-ACL'), function () {
         postData.acls.push(aclUser);
         postData.acls.push(aclRole);
         postData.acls.push(aclDenyEveryone);
-
-        models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-          var model = loopback.getModel(modelName, bootstrap.defaultContest);
-          expect(model).not.to.be.null;
-          expect(model.settings.acls).to.deep.include.members(postData.acls); //.to.be.eql(postData.acls);
-          expect(mode.definition.properties).not.to.be.undefined;
-          debug('model ' + modelName + ' is available now, test case passed.');
-          done();
-        });
-
         api
           .post(modelDefitnionUrl)
           .send(postData)
@@ -230,6 +220,14 @@ describe(chalk.blue('model-definition-ACL'), function () {
             if (err || res.body.error) {
               done(err || (new Error(res.body.error.details.message)));
             }
+            else {
+              var model = res.body;
+              expect(model).not.to.be.null;
+              expect(model.acls).to.deep.include.members(postData.acls); //.to.be.eql(postData.acls);
+              expect(model.properties).not.to.be.undefined;
+
+              return done()
+            };
           });
       });
 
@@ -262,11 +260,11 @@ describe(chalk.blue('model-definition-ACL'), function () {
         };
         var postUrl = baseUrl + '/' + plural + '?access_token=' + accessToken;
         //console.log('postUrl - ',postUrl);
-
         api
           .post(postUrl)
           .send(postData)
-          .expect(200).end(function (err, res) {
+          .end(function (err, res) {
+            expect(res.status, 200);
             debug('response body : ' + JSON.stringify(res.body, null, 4));
             if (err || res.body.error) {
               done(err || (new Error(res.body.error.message)));
@@ -279,13 +277,14 @@ describe(chalk.blue('model-definition-ACL'), function () {
 
       it('shoult not be Authorized to Find records for USER 1', function (done) {
         var postUrl = baseUrl + '/' + plural + '/' + dataId + '?access_token=' + accessToken;
-
+        console.log(postUrl);
         api1
           .get(postUrl)
           .set('tenant_id', 'test-tenant')
           .set('remote_user', BaseUser.username)
           .send()
-          .expect(401).end(function (err, res) {
+          .end(function (err, res) {
+            expect(res.status, 401);
             debug('response body : ' + JSON.stringify(res.body, null, 4));
             if (err) {
               done(err);
