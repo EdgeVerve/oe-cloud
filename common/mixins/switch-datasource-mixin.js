@@ -11,7 +11,6 @@
     * @Author Atul
     */
 
-var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('switch-datasource-mixin');
 var appinstance = require('../../server/server.js').app;
@@ -160,7 +159,6 @@ function getDataSourceForName(app, model, dsname, scope) {
 }
 
 module.exports = function SwitchDatasourceMixin(model) {
-
   var originalDataSource = {};
 
   model.getDataSource = function switchDatasource(options) {
