@@ -169,8 +169,8 @@ describe('failsafe-observer-mixin', function () {
         var mixins = ['FailsafeObserverMixin'];
         var model = loopback.getModel(modelName, defaultContext);
         expect(model).to.be.ok;
-        expect(Object.keys(models[modelName].settings.mixins)).to.include.members(mixins);
-        expect(Object.keys(models[modelName])).to.include.members(failSafeObserverFields);
+        expect(Object.keys(model.settings.mixins)).to.include.members(mixins);
+        expect(Object.keys(model)).to.include.members(failSafeObserverFields);
         done();
     });
 
@@ -219,7 +219,7 @@ describe('failsafe-observer-mixin', function () {
 
     it('should not rerun an after save observer if it finished executing without error for base model', function (done) {
         var model = loopback.getModel(modelName, defaultContext);
-        var childModel = models[childModelName];
+        var childModel = loopback.getModel(childModelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             if (counter <= 1) {
@@ -244,7 +244,7 @@ describe('failsafe-observer-mixin', function () {
     it('should not rerun an after save observer when error is not retriable for base model', function (done) {
         var model = loopback.getModel(modelName, defaultContext);
         var err = new Error('testError');
-        var childModel = models[childModelName];
+        var childModel = loopback.getModel(childModelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
             err.retriable = false;
