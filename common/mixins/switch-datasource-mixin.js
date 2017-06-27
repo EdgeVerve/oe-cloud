@@ -160,28 +160,6 @@ function getDataSourceForName(app, model, dsname, scope) {
 }
 
 module.exports = function SwitchDatasourceMixin(model) {
-  /**
-  *
-  *
-  * This function returns overriden model or in other words personalized model
-  * As of now this function is written in switch-datasource-mixin.js file because logic to find overriden model can be easily reused.
-  * As of now this function is async and requires callback. When logic of data source personalization is reused, it can be made with sync call
-  * this will be changed in future till all scenarios are tested. there could be some overhead as of now.
-  * @param {object} options - options
-  * @param {callback} cb - callback to be called
-  * @return {void} it returns none. however upon finding overriden model- callback is called along with overriden model
-  * @function
-  */
-  model.getOverridenModel = function getOverridenModelFn(options) {
-    if (!options) {
-      options = {};
-    }
-    var model = loopback.findModel(this.modelName, options);
-    if (model) {
-      return model;
-    }
-    return this;
-  };
 
   var originalDataSource = {};
 

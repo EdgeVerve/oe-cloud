@@ -41,6 +41,9 @@ module.exports = function DBModels(app, cb) {
   var keys = Object.keys(app.models);
   async.eachSeries(keys, function asyncForEachKey(key, callback) {
     // first disable ChangeStream for file based models
+    var model = app.models[key];
+    model.clientModelName = key;
+    util.attachOverrideModelFunction(model);
     app.models[key].disableRemoteMethod('createChangeStream', true);
     app.locals.modelNames[key.toLowerCase()] = app.models[key].modelName;
     app.locals.modelNames[key] = app.models[key].modelName;

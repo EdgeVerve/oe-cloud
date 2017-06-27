@@ -109,7 +109,12 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   var mdBeforeSave = function mdBeforeSave(ctx, next) {
     log.debug(ctx.options, 'DEBUG: boot/db-models.js: ModelDefinition Before save called.');
     var modeldefinition = ctx.instance || ctx.currentInstance || ctx.data;
-    var contextString = util.createCollectionWithContext(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
+    var contextString;
+    if (ctx.options.ignoreAutoscope) {
+      contextString = util.createCollectionWithContext(modelDefinition.definition.settings.autoscope, {});
+    } else {
+      contextString = util.createCollectionWithContext(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
+    }
     modeldefinition.modelId = modeldefinition.modelId || (modeldefinition.name + '-' + contextString);
 
     // check the validitiy of modeldefinition(like checking the validity of expressions attached to a model)
