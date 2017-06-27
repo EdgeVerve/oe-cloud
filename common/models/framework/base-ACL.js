@@ -70,7 +70,7 @@ module.exports = function DBTransactionFn(BaseACL) {
     var roleModel = registry.getModelByType('BaseRole');
     this.find({
       where: {
-        model: modelName, property: propertyQuery,
+        model: model.clientModelName, property: propertyQuery,
         accessType: accessTypeQuery
       }
     }, context.remotingContext.req.callContext, function modelFindCb(err, acls) {

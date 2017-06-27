@@ -114,7 +114,7 @@ module.exports = function DataACLFn(DataACL) {
 
     accessType = accessType || AccessContext.WRITE;
 
-    var modelName = Model.modelName;
+    var modelName = Model.clientModelName || Model.modelName;
     var accessTypeQuery = {
       inq: [accessType, DataACL.ALL]
     };
