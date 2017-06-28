@@ -72,17 +72,16 @@ module.exports = function JWTAssertionFn(options) {
         if (req.accessToken) {
           return next();
         }
+        var options = {};
+        options.ignoreAutoScope = true;
+        options.fetchAllScopes = true;
         // User login.
-        User.findOne({
-          where: {
-            username
-          }
-        }, req.callContext, (err, user) => {
+        User.findOne({ where: { username } }, options, (err, user) => {
           if (err) {
             next(null);
             // Here you can ask for password reset or signup.
           } else if (user) {
-            user.createAccessToken(User.DEFAULT_TTL, req.callContext, (err, token) => {
+            user.createAccessToken(User.DEFAULT_TTL, options, (err, token) => {
               if (err) {
                 next(err);
               }
