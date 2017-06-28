@@ -60,9 +60,9 @@ module.exports = function (BaseJournalEntity) {
     var nonAtomicActivityList = instance.nonAtomicActivitiesList;
 
     var createOperationContext = function (activity, callback) {
-      var Model = getActorModel(activity.modelName);
+      var Model = getActorModel(activity.modelName, ctx.options);
       var operationContext = {};
-      var query = {where: {id: activity.entityId}, limit: 1};
+      var query = { where: { id: activity.entityId }, limit: 1 };
       Model.find(query, options, function (err, actor) {
         if (err) {
           return callback(err);
@@ -243,9 +243,9 @@ module.exports = function (BaseJournalEntity) {
     });
   });
 
-  function getActorModel(modelName) {
+  function getActorModel(modelName, options) {
     if (!actorModelsMap[modelName]) {
-      actorModelsMap[modelName] = loopback.getModel(modelName);
+      actorModelsMap[modelName] = loopback.getModel(modelName, options);
     }
     return actorModelsMap[modelName];
   }

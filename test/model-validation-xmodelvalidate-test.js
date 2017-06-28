@@ -33,12 +33,12 @@ describe(chalk.blue('X-Model-Validation test'), function () {
 
     before('setup test data', function (done) {
         models.ModelDefinition.events.once('model-' + 'Guest' + '-available', function () {
-            var referredModel = loopback.getModel('Invitee');
+            var referredModel = loopback.getModel('Invitee', bootstrap.defaultContext);
 
             // Invitees
             var data = [{ 'inviteeName': 'Ajith' },
-                        { 'inviteeName': 'Rama' },
-                        { 'inviteeName': 'Anirudh' }];
+            { 'inviteeName': 'Rama' },
+            { 'inviteeName': 'Anirudh' }];
 
             referredModel.create(data, bootstrap.defaultContext, function (err, results) {
                 expect(err).to.be.null;
@@ -48,11 +48,11 @@ describe(chalk.blue('X-Model-Validation test'), function () {
 
         // Create the Invitee Model
         models.ModelDefinition.create({
-                    'name': 'Invitee',
-                    'base': 'BaseEntity',
-                    'properties': {
-                        'inviteeName': 'string'
-                    }
+            'name': 'Invitee',
+            'base': 'BaseEntity',
+            'properties': {
+                'inviteeName': 'string'
+            }
         }, bootstrap.defaultContext, function (err, model) {
             if (err) {
                 console.log(err);
@@ -60,15 +60,15 @@ describe(chalk.blue('X-Model-Validation test'), function () {
 
                 // Create the Guest model if Invitee creation is successful
                 models.ModelDefinition.create({
-                        'name': 'Guest',
-                        'base': 'BaseEntity',
-                        'properties': {
-                            'guestName': {
-                                'type': 'string',
-                                'xmodelvalidate': { 'model': 'Invitee' , 'field': 'inviteeName' }
-                            }
+                    'name': 'Guest',
+                    'base': 'BaseEntity',
+                    'properties': {
+                        'guestName': {
+                            'type': 'string',
+                            'xmodelvalidate': { 'model': 'Invitee', 'field': 'inviteeName' }
                         }
-                    }, bootstrap.defaultContext, function (err, model) {
+                    }
+                }, bootstrap.defaultContext, function (err, model) {
                     if (err) {
                         console.log(err);
                     }
@@ -78,10 +78,10 @@ describe(chalk.blue('X-Model-Validation test'), function () {
             expect(err).to.be.not.ok;
         });
     });
- 
+
     it('X-Model-Validation Test - Should succeed', function (done) {
 
-        var mainModel = loopback.getModel('Guest');
+        var mainModel = loopback.getModel('Guest', bootstrap.defaultContext);
         var data = [{ 'guestName': 'Ajith' }, { 'guestName': 'Mohan' }];
         mainModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err[0]).to.be.undefined;
