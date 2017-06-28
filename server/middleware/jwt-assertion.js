@@ -68,7 +68,7 @@ module.exports = function JWTAssertionFn(options) {
       if (user) {
         const User = loopback.getModelByType(jwtConfig.trustedApp ? 'TrustedApp' : 'BaseUser');
         const username = jwtConfig.trustedApp ? user[jwtConfig.keyToVerify] || '' : user.username || user.email || '';
-        const query = (User.modelName === 'TrustedApp') ? { appId: username } : { username };
+        const query = jwtConfig.trustedApp ? { appId: username } : { username };
         req.accessToken = cachedTokens[username];
         // TODO check validity of token @kpraveen
         if (req.accessToken) {
@@ -82,7 +82,7 @@ module.exports = function JWTAssertionFn(options) {
             next(null);
             // Here you can ask for password reset or signup.
           } else if (user) {
-            if (User.modelName !== 'BaseUser') {
+            if (jwtConfig.trustedApp) {
               // trustedApp hence header should contain email and username
               var email = req.headers.email || null;
               var uname = req.headers.username || null;
