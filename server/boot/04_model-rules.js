@@ -42,7 +42,7 @@ module.exports = function ModelRule(app, cb) {
     ignoreAutoScope: true,
     fetchAllScopes: true
   };
-    // Using fetchAllScopes and ignoreAutoScope to retrieve all the records from DB. i.e. from all tenants.
+  // Using fetchAllScopes and ignoreAutoScope to retrieve all the records from DB. i.e. from all tenants.
   modelRuleModel.find(filter, options, function (err, results) {
     log.debug(log.defaultContext(), 'modelRuleModel.find executed.');
     if (err) {
@@ -57,7 +57,7 @@ module.exports = function ModelRule(app, cb) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(ModelRule.modelName) before save hooks when ModelRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
-        attachBeforeSaveHookToModel(results[i].modelName);
+        attachBeforeSaveHookToModel(results[i].modelName,options);
       }
       cb();
     } else {
@@ -67,10 +67,10 @@ module.exports = function ModelRule(app, cb) {
 };
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
-messaging.subscribe('modelRuleAttachHook', function (modelName) {
+messaging.subscribe('modelRuleAttachHook', function (modelName,options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to attach before save hook for model ', modelName);
-  attachBeforeSaveHookToModel(modelName);
+  attachBeforeSaveHookToModel(modelName,options);
 });
 
 /**
@@ -85,7 +85,7 @@ function modelRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('modelRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  attachBeforeSaveHookToModel(data.modelName);
+  attachBeforeSaveHookToModel(data.modelName,ctx.options);
   next();
 }
 
@@ -99,7 +99,7 @@ function modelRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
   // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
-  if (loopback.findModel(modelName)) {
+  if (loopback.findModel(modelName, ctx.options)) {
     next();
   } else {
     // Not sure it is the right way to construct error object to sent in the response.
@@ -113,9 +113,9 @@ function modelRuleBeforeSave(ctx, next) {
  *
  * @param {string} modelName - Model name
  */
-function attachBeforeSaveHookToModel(modelName) {
+function attachBeforeSaveHookToModel(modelName,options) {
   // Can we avoid this step and get the ModelConstructor from context.
-  var model = loopback.findModel(modelName);
+  var model = loopback.findModel(modelName,options);
   // Setting the flag that Model Rule exists which will be used for validation rules
   model.settings._isModelRuleExists = true;
   // Checking whether before save observer hook is already attached or not.
@@ -147,7 +147,7 @@ function checkHookisAlreadyAttached(model) {
   if (beforeSaveObserversArray && beforeSaveObserversArray.length > 0) {
     // Using javascript array.find function.
     returnRes = beforeSaveObserversArray.find(function (observer) {
-      return observer.name ===  '_decsionTableBeforeSaveHook';
+      return observer.name === '_decsionTableBeforeSaveHook';
     });
     return returnRes;
   }
@@ -176,7 +176,7 @@ function executeDecisionTableRules(modelCtx, model, next) {
       disabled: false
     }
   };
-    // Querying the ModelRule model with model context options since it is from 'before save' hook.
+  // Querying the ModelRule model with model context options since it is from 'before save' hook.
   modelRuleModel.find(filter, modelCtx.options, function (err, results) {
     if (err) {
       // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
@@ -200,7 +200,7 @@ function executeDecisionTableRules(modelCtx, model, next) {
           modelCtx.data = modelCtx.instance = payload;
           next(err);
         });
-      }  else {
+      } else {
         log.debug(log.defaultContext(), 'No default rules to execute.');
         next();
       }

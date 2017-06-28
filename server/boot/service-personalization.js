@@ -53,7 +53,7 @@ module.exports = function ServicePersonalization(app, cb) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
-        attachRemoteHooksToModel(results[i].modelName);
+        attachRemoteHooksToModel(results[i].modelName, options);
       }
       cb();
     } else {
@@ -63,10 +63,10 @@ module.exports = function ServicePersonalization(app, cb) {
 };
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
-messaging.subscribe('personalizationRuleAttachHook', function (modelName) {
+messaging.subscribe('personalizationRuleAttachHook', function (modelName, options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to ');
-  attachRemoteHooksToModel(modelName);
+  attachRemoteHooksToModel(modelName, options);
 });
 
 /**
@@ -79,7 +79,7 @@ function personalizationRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
   // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
-  if (loopback.findModel(modelName)) {
+  if (loopback.findModel(modelName, ctx.options)) {
     next();
   } else {
     // Not sure it is the right way to construct error object to sent in the response.
@@ -100,7 +100,7 @@ function personalizationRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('personalizationRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  attachRemoteHooksToModel(data.modelName);
+  attachRemoteHooksToModel(data.modelName, ctx.options);
   next();
 }
 
@@ -109,9 +109,9 @@ function personalizationRuleAfterSave(ctx, next) {
  *
  * @param {string} modelName - Model name
  */
-function attachRemoteHooksToModel(modelName) {
+function attachRemoteHooksToModel(modelName, options) {
   // Can we avoid this step and get the ModelConstructor from context.
-  var model = loopback.findModel(modelName);
+  var model = loopback.findModel(modelName, options);
   // Setting the flag that Personalization Rule exists, need to check where it will be used.
   if (!model.settings._personalizationRuleExists) {
     model.settings._personalizationRuleExists = true;

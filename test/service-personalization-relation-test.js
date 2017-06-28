@@ -24,6 +24,9 @@ describe(chalk.blue('service - personalization - relation test'), function () {
   var Address = 'AddressServPersn';
   this.timeout(20000);
 
+  var addressMOdel;
+  var customerModel;
+
   before('setup test data', function (done) {
     //upload data
     var data = [
@@ -73,8 +76,10 @@ describe(chalk.blue('service - personalization - relation test'), function () {
         }
       }
 
-    }, bootstrap.defaultContext, function () {
-
+    }, bootstrap.defaultContext, function (err, data) {
+      if (err) {
+        done(err);
+      }
       models.ModelDefinition.create({
         name: Customer,
         base: 'BaseEntity',
@@ -98,9 +103,14 @@ describe(chalk.blue('service - personalization - relation test'), function () {
             }
           }
         }
-      }, bootstrap.defaultContext, function () {
+      }, bootstrap.defaultContext, function (err, data) {
+        if (err) {
+          done(err);
+        }
+        addressMOdel = loopback.getModel(Address, bootstrap.defaultContext);
+        customerModel = loopback.getModel(Customer, bootstrap.defaultContext);
 
-        models.CustomerServPersn.create(data, bootstrap.defaultContext, function (err, res) {
+        customerModel.create(data, bootstrap.defaultContext, function (err, res) {
           if (err) {
             console.log('data creation error');
             done(err);
@@ -128,8 +138,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
         console.log('Error - not able to delete modelDefinition entry for mysettings');
         return done();
       }
-      var model = loopback.getModel('CustomerServPersn');
-      model.destroyAll({}, bootstrap.defaultContext, function () {
+      customerModel.destroyAll({}, bootstrap.defaultContext, function () {
         done();
       });
     });
