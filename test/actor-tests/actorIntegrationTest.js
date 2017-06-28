@@ -89,7 +89,7 @@ describe(chalk.blue('integrationTest'), function() {
         funcCheckArray.push(check1Balance);
       }
 
-      async.parallel(funcCheckArray, function (err, results) {
+      async.series(funcCheckArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
@@ -152,7 +152,7 @@ request.post(
 
     tempIds = ids.slice();
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     process.exit(-1);
@@ -206,7 +206,7 @@ function addBudget() {
       funcArray.push(budgetAdd);
     }
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
@@ -267,7 +267,7 @@ function deleteAmount() {
       funcArray.push(debit);
     }
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
