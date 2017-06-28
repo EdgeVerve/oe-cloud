@@ -51,8 +51,9 @@ describe(chalk.blue('model-definition-test'), function () {
         it('should allow creating model with no properties', function (done) {
             var modelName = 'NoProps';
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                expect(models[modelName]).not.to.be.null;
-                expect(models[modelName].definition.properties).not.to.be.undefined;
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model).not.to.be.null;
+                expect(model.definition.properties).not.to.be.undefined;
                 debug('model ' + modelName + ' is available now, test case passed.');
                 done();
             });
@@ -141,9 +142,10 @@ describe(chalk.blue('model-definition-test'), function () {
             };
 
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                expect(models[modelName]).not.to.be.null;
-                expect(models[modelName].settings.acls).to.deep.include.members([acl]);
-                expect(models[modelName].properties).to.be.undefined;
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model).not.to.be.null;
+                expect(model.settings.acls).to.deep.include.members([acl]);
+                expect(model.properties).to.be.undefined;
                 debug('model ' + modelName + ' is available now, test case passed.');
                 done();
             });
@@ -263,9 +265,10 @@ describe(chalk.blue('model-definition-test'), function () {
 
             var modelName = 'TestMyCart';
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                debug('model ' + modelName + ' is available now, test case passed.');
-                expect(models[modelName].definition.properties).not.to.be.null;
-                expect(models[modelName].definition.properties).not.to.be.undefined;
+              debug('model ' + modelName + ' is available now, test case passed.');
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model.definition.properties).not.to.be.null;
+                expect(model.definition.properties).not.to.be.undefined;
                 //debug('model '+modelName+' properties.',models[modelName].definition.properties);
                 done();
             });
@@ -373,9 +376,10 @@ describe(chalk.blue('model-definition-test'), function () {
                 if (err) {
                     done(err);
                 } else {
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                         to.include.members(Object.keys(models.BaseEntity.definition.properties));
                     modelDetails = res;
                     done();
@@ -450,9 +454,10 @@ describe(chalk.blue('model-definition-test'), function () {
             modelDetails.acls.push(acl);
 
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                expect(models[modelName]).not.to.be.null;
-                expect(models[modelName].settings.acls).to.deep.include.members([acl]);
-                expect(models[modelName].properties).to.be.undefined;
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model).not.to.be.null;
+                expect(model.settings.acls).to.deep.include.members([acl]);
+                expect(model.properties).to.be.undefined;
                 debug('model ' + modelName + ' is available now, test case passed.');
                 done();
             });
@@ -528,12 +533,13 @@ describe(chalk.blue('model-definition-test'), function () {
                 if (err) {
                     done(err);
                 } else {
-                    modelDetails = res;
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  modelDetails = res;
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                         to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                    expect(Object.keys(model.definition.properties)).
                         to.include.members(Object.keys(postData.properties));
                     done();
                 }
