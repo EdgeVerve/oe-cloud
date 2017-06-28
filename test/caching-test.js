@@ -104,7 +104,8 @@ describe('Caching Test', function () {
             client.connect(function (err) {
                 if (err) done(err); 
                 else {
-                    var query = client.query("DELETE from " + modelName.toLowerCase(),function(err,result){
+                    //var query = client.query("DELETE from " + modelName.toLowerCase(), function(err,result){
+                    var query = client.query("UPDATE " + modelName.toLowerCase() + " SET name = 'value2' WHERE _id == '" + id + "'" ,function(err,result){
                          if (err) done(err);
                         debug("Number of records removed " + result.rowCount);
                         stage4_find(result, done);
