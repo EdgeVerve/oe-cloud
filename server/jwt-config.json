@@ -2,6 +2,6 @@
     "issuer": "mycompany.com",
     "audience": "mycompany.net",
     "secretOrKey": "secret",
-    "trustedApp": true,
+    "trustedApp": false,
     "keyToVerify": "client_id"
 }
