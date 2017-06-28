@@ -67,7 +67,7 @@ module.exports = function JWTAssertionFn(options) {
       }
       if (user) {
         const User = loopback.getModelByType(jwtConfig.trustedApp ? 'TrustedApp' : 'BaseUser');
-        const username = user[jwtConfig.keyToVerify] || user.username || user.email || '';
+        const username = jwtConfig.trustedApp ? user[jwtConfig.keyToVerify] || '' : user.username || user.email || '';
         const query = (User.modelName === 'TrustedApp') ? { appId: username } : { username };
         req.accessToken = cachedTokens[username];
         // TODO check validity of token @kpraveen
@@ -82,28 +82,28 @@ module.exports = function JWTAssertionFn(options) {
             next(null);
             // Here you can ask for password reset or signup.
           } else if (user) {
-            if (User.modelName.toLowerCase() !== 'baseuser') {
-              // trustedApp hence header will contain roles
-              // get supported roles
-              var rolesToAdd = [];
-              if (req.headers.roles && user.supportedRoles) {
-                rolesToAdd = JSON.parse(req.headers.roles).map(r => {
-                  return user.supportedRoles.some(x => x === r) ? { 'id': r, 'type': 'ROLE' } : null;
-                });
-              }
-              // req.callContext["principals"] = rolesToAdd;
-              // next();
-              // return;
-              var usrCtx = loopback.getModelByType('BaseUser');
-              var uname = req.headers.username || user.username || null;
+            if (User.modelName !== 'BaseUser') {
+              // trustedApp hence header should contain email and username
               var email = req.headers.email || null;
-              if (uname) {
+              var uname = req.headers.username || null;
+              if (uname && email) {
+                // verify supported Roles
+                var rolesToAdd;
+                if (req.headers.roles && user.supportedRoles) {
+                  rolesToAdd = JSON.parse(req.headers.roles).map(r => {
+                    if (user.supportedRoles.some(x => x === r)) {
+                      return { 'id': r, 'type': 'ROLE' };
+                    }
+                  });
+                }
                 req.accessToken = cachedTokens[uname];
                 // TODO check validity of token @kpraveen
                 if (req.accessToken) {
-                  req.callContext.principals = rolesToAdd;
+                  req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
                   return next();
                 }
+                // find user for the request
+                var usrCtx = loopback.getModelByType('BaseUser');
                 usrCtx.findOne({
                   where: {
                     username: uname
@@ -113,15 +113,12 @@ module.exports = function JWTAssertionFn(options) {
                     next(err);
                   }
                   if (u) {
+                    // user found, create access token and next
                     u.createAccessToken(usrCtx.DEFAULT_TTL, req.callContext, (err, token) => {
                       if (err) {
                         next(err);
                       }
                       if (token) {
-                        const data = {};
-                        data.id = uname;
-                        data.token = token;
-                        // token = null; //delete
                         req.accessToken = token;
                         cachedTokens[uname] = token;
                         req.callContext.principals = rolesToAdd;
@@ -132,19 +129,17 @@ module.exports = function JWTAssertionFn(options) {
                       }
                     });
                   } else {
+                    // user doesnot exixt create user for first time
                     usrCtx.create({ 'username': uname, 'email': email, 'password': uuid.v4() }, req.callContext, function (err, newUser) {
                       if (err) {
                         next(err);
                       } else if (newUser) {
+                        // user created now create access token and next
                         newUser.createAccessToken(usrCtx.DEFAULT_TTL, req.callContext, (err, token) => {
                           if (err) {
                             next(err);
                           }
                           if (token) {
-                            const data = {};
-                            data.id = uname;
-                            data.token = token;
-                            // token = null; //delete
                             req.accessToken = token;
                             cachedTokens[uname] = token;
                             req.callContext.principals = rolesToAdd;
@@ -159,7 +154,8 @@ module.exports = function JWTAssertionFn(options) {
                   }
                 });
               } else {
-                next(null);
+                var error = new Error('username and email, both required to be present.');
+                next(error);
               }
             } else {
               user.createAccessToken(User.DEFAULT_TTL, req.callContext, (err, token) => {
@@ -167,10 +163,6 @@ module.exports = function JWTAssertionFn(options) {
                   next(err);
                 }
                 if (token) {
-                  const data = {};
-                  data.id = username;
-                  data.token = token;
-                  // token = null; //delete
                   req.accessToken = token;
                   cachedTokens[username] = token;
                   next();

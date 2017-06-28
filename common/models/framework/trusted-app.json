@@ -19,10 +19,6 @@
         "expiry": {
             "type": "number"
         },
-        "username": {
-            "type": "string",
-            "required": true
-        },
         "supportedRoles": {
             "type": ["string"]
         }
