@@ -128,7 +128,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     log.debug(ctx.options, 'DEBUG: boot/db-models.js: ModelDefinition Before save called.');
     var modeldefinition = ctx.instance || ctx.currentInstance || ctx.data;
     var contextString;
-    if (ctx.options.ignoreAutoscope) {
+    if (ctx.options.ignoreAutoscope || ctx.options.ignoreAutoScope) {
       contextString = util.createCollectionWithContext(modelDefinition.definition.settings.autoscope, {});
     } else {
       contextString = util.createCollectionWithContext(modelDefinition.definition.settings.autoscope, ctx.options.ctx);

@@ -37,7 +37,7 @@ function getScopeMatchedDS(model, list, scope) {
       }
     }
 
-    dsScope.modelName = model.modelName;
+    dsScope.modelName = model.clientModelName || model.modelName;
 
     for (var dsScopeVar in dsScope) {
       if (!dsScope.hasOwnProperty(dsScopeVar)) {
@@ -189,7 +189,7 @@ module.exports = function SwitchDatasourceMixin(model) {
     //        }
     //    }
 
-    var modelName = model.settings.variantOf || model.modelName;
+    var modelName = model.settings.variantOf || model.clientModelName; //model.modelName;
 
     originalDataSource[modelName] = originalDataSource[modelName] || model.dataSource;
 
@@ -228,8 +228,8 @@ module.exports = function SwitchDatasourceMixin(model) {
           return ds;
         }
       }
-    } else if (originalDataSource[model.modelName]) {
-      var dsName = originalDataSource[model.modelName].settings.name;
+    } else if (originalDataSource[model.clientModelName]) {
+      var dsName = originalDataSource[model.clientModelName].settings.name;
       var ds2 = getDataSourceForName(app, model, dsName, scope);
       if (ds2) {
         model.attachTo(ds2);
@@ -237,9 +237,9 @@ module.exports = function SwitchDatasourceMixin(model) {
       }
     }
 
-    if (originalDataSource[model.modelName]) {
+    if (originalDataSource[model.clientModelName]) {
       model.attachTo(originalDataSource[modelName]);
-      return originalDataSource[model.modelName];
+      return originalDataSource[model.clientModelName];
     }
 
     var dsname = model.dataSource.settings.name ? model.dataSource.settings.name : 'db';
