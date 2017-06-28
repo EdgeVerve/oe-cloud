@@ -133,7 +133,7 @@ module.exports = function (BaseActorEntity) {
     var startingSeqNum = startingObj.seqNum;
     var resultState = array.filter(x => x.entityId === entityId).reduce(func, startingStateObj);
     var resultSeqNum = array.map(x => x.seqNum).reduce(Math.max, startingSeqNum);
-    var resultObj = {resultState: resultState, resultSeqNum: resultSeqNum};
+    var resultObj = { resultState: resultState, resultSeqNum: resultSeqNum };
     return resultObj;
   }
 
@@ -162,7 +162,7 @@ module.exports = function (BaseActorEntity) {
     context.doNotDelete = true;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
-        return cb(err, {validation: false});
+        return cb(err, { validation: false });
       }
       var envelope = ctx.envelope;
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
@@ -184,9 +184,9 @@ module.exports = function (BaseActorEntity) {
         if (err) {
           return cb(err);
         } else if (!isValid) {
-          return cb(null, {validation: false});
+          return cb(null, { validation: false });
         }
-        return cb(null, {validation: true, seqNum: envelope.seqNum});
+        return cb(null, { validation: true, seqNum: envelope.seqNum });
       });
     });
   };
@@ -197,14 +197,14 @@ module.exports = function (BaseActorEntity) {
     var self = this;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
-        return cb(err, {validation: false});
+        return cb(err, { validation: false });
       }
       var envelope = ctx.envelope;
       envelope.seqNum = envelope.seqNum + 1;
       ctx.activity.seqNum = envelope.seqNum;
       self.nonAtomicAction(ctx, function () {
         envelope.doNotDelete--;
-        return cb(null, {validation: true, seqNum: envelope.seqNum});
+        return cb(null, { validation: true, seqNum: envelope.seqNum });
       });
     });
   };
@@ -327,9 +327,9 @@ module.exports = function (BaseActorEntity) {
     if (message.journalStatus === 'saved') {
       return actualProcess(cb);
     }
-    var model = loopback.getModel(message.journalEntityType);
+    var model = loopback.getModel(message.journalEntityType, options);
     var query = {
-      where: {_version: message.version}
+      where: { _version: message.version }
     };
     model.findOne(query, options, function (err, result) {
       if (err) {
@@ -397,7 +397,7 @@ module.exports = function (BaseActorEntity) {
   }
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
-    var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName);
+    var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
     var self = this;
@@ -414,12 +414,16 @@ module.exports = function (BaseActorEntity) {
       envelope.processedSeqNum = envelope.seqNum = state.__data.seqNum;
       var query = {};
       if (self.getDataSource().name === 'evmongodb') {
-        query = {where: {or: [
-          {atomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}},
-          {nonAtomicActivitiesList: {elemMatch: {entityId: envelope.actorId, modelName: envelope.modelName, seqNum: {$gte: state.seqNum}}}}
-        ]}};
+        query = {
+          where: {
+            or: [
+              { atomicActivitiesList: { elemMatch: { entityId: envelope.actorId, modelName: envelope.modelName, seqNum: { $gte: state.seqNum } } } },
+              { nonAtomicActivitiesList: { elemMatch: { entityId: envelope.actorId, modelName: envelope.modelName, seqNum: { $gte: state.seqNum } } } }
+            ]
+          }
+        };
       } else {
-        query = {where: {startup: {regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*'}}};
+        query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
       }
       async.each(loopbackModelsCollection, function (model, asyncCb) {
         model.find(query, options, function (err, returnedInstances) {
@@ -433,7 +437,7 @@ module.exports = function (BaseActorEntity) {
           var filterBy = createFilterObj(envelope, state, currentJournalEntity);
           returnedInstances = filterResults(returnedInstances, filterBy);
           for (var i = 0; i < returnedInstances.length; i++) {
-            var startingObj = {stateObj: state.stateObj, seqNum: state.seqNum};
+            var startingObj = { stateObj: state.stateObj, seqNum: state.seqNum };
             self.updateStateData(returnedInstances[i].atomicActivitiesList, startingObj, state, self.atomicInstructions);
             self.updateStateData(returnedInstances[i].nonAtomicActivitiesList, startingObj, state, self.nonAtomicInstructions);
             log.debug(options, self._type, ' ', self.id, ' Starting Balance ', self);
@@ -551,12 +555,12 @@ module.exports = function (BaseActorEntity) {
     return StateModel;
   }
 
-  function getAssociatedModels(actorType) {
+  function getAssociatedModels(actorType, options) {
     if (!associatedModelsMap[actorType]) {
-      var instanceModel = loopback.getModel(actorType);
+      var instanceModel = loopback.getModel(actorType, options);
       associatedModelsMap[actorType] = [];
       associatedModelsMap[actorType] = instanceModel.prototype.associatedModels.map(function (obj) {
-        return loopback.getModel(obj);
+        return loopback.getModel(obj, options);
       });
     }
     return associatedModelsMap[actorType];
