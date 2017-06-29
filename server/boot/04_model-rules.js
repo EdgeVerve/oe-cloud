@@ -114,6 +114,7 @@ function modelRuleBeforeSave(ctx, next) {
  * This function is to attach before save hook for modelName found in  ModelRule model data.
  *
  * @param {string} modelName - Model name
+ * @param {object} options - options
  */
 function attachBeforeSaveHookToModel(modelName, options) {
   // Can we avoid this step and get the ModelConstructor from context.

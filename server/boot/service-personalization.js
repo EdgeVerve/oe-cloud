@@ -108,6 +108,7 @@ function personalizationRuleAfterSave(ctx, next) {
  * This function is to attach remote hooks for given modelName to apply PersonalizationRule.
  *
  * @param {string} modelName - Model name
+ * @param {object} options - options
  */
 function attachRemoteHooksToModel(modelName, options) {
   // Can we avoid this step and get the ModelConstructor from context.
