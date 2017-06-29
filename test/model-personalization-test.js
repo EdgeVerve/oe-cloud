@@ -497,14 +497,14 @@ describe(chalk.blue('Model Personalization test'), function () {
       'filebased': false
     };
 
-    citiapi
+    api
       .set('Accept', 'application/json')
       .post(bootstrap.basePath + '/ModelDefinitions')
       .send(Employeemodel)
       .expect(200).end(function (err, res) {
         //console.log('response body : ' + JSON.stringify(res.body, null, 4));
         if (err || res.body.error) {
-          done(err || (new Error(res.body.error)));
+          return done(err || (new Error(res.body.error)));
         }
         //var results = res.body;
         done();
@@ -512,7 +512,7 @@ describe(chalk.blue('Model Personalization test'), function () {
   });
 
   it('Model Personalization Test - Web API Personalized Employee model for citi should return 0 record from personalized address model', function (done) {
-    citiapi
+    api
       .set('Accept', 'application/json')
       .get(bootstrap.basePath + '/Employees')
       .send()
