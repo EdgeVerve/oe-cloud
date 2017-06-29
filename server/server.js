@@ -24,6 +24,7 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager = require('../lib/event-history-manager.js');
 var memoryPool = require('../lib/actor-pool.js');
+var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
 var app = module.exports.loopback = loopback;
@@ -43,6 +44,7 @@ var mergeConfigJson = null;
 options.bootDirs.push(path.join(__dirname, 'boot'));
 module.exports.options = options;
 preboot.injectOptions();
+secretsManager.populateSecrets();
 
 module.exports.boot = function serverBoot(appinstance, options, cb) {
   var env = options.env || process.env.NODE_ENV || 'development';

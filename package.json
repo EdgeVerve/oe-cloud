@@ -23,6 +23,7 @@
     "bunyan": "^1.5.1",
     "bunyan-prettystream": "",
     "camelcase": "^3.0.0",
+    "cfenv": "^1.0.4",
     "compression": "^1.6.2",
     "connect-ensure-login": "0.1.1",
     "cookie-parser": "1.4.0",
