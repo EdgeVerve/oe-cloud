@@ -43,7 +43,7 @@ module.exports = (app, cb) => {
           elem.push(ctx[autoscope[j]]);
         }
       }
-      var element = elem.join('::');
+      var element = elem.join('-');
       if (app.personalizedModels[modelName] && app.personalizedModels[modelName][element]) {
         return app.personalizedModels[modelName][element];
       }
