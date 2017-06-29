@@ -172,11 +172,11 @@ module.exports = function UIMetadata(UIMetadata) {
 
     if (data.modeltype) {
       var ModelDefn = app.models.ModelDefinition;
-
+      options.flatten = true;
       /** Get details of specified model along with all the related models.
        * allModelsInfo will contain (this, related and embedded)-models and their definition all as key/value pair.
        */
-      ModelDefn.extractMeta(data.modeltype, { flatten: true }, function extractMetaCb(err, flattenedModel) {
+      ModelDefn.extractMeta(data.modeltype, options, function extractMetaCb(err, flattenedModel) {
         if (err) {
           cb(err);
         }
