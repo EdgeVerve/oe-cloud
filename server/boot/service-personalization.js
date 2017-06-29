@@ -251,7 +251,7 @@ function beforeRemoteUpdateAttributesHook(model) {
 function beforeRemoteFindHook(model) {
   model.beforeRemote('find', function (ctx, modelInstance, next) {
     log.debug(ctx.req.callContext, 'beforeRemoteFindHook ', model.modelName, 'called');
-    servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationAccessHookGetRuleCb(rule) {
+    servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationAccessHookGetRuleCb(rule) {
       if (rule !== null && typeof rule !== 'undefined') {
         log.debug(ctx.req.callContext, 'beforeRemoteFindHook personalization rule found , rule: ', rule);
         servicePersonalizer.applyPersonalizationRule(ctx, rule.personalizationRule, function servicePersonalizationAccessHookApplyRuleCb() {
@@ -275,7 +275,7 @@ function beforeRemoteFindHook(model) {
  */
 function afterRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec for ', model.modelName, ' called.');
-  servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
+  servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
     if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
@@ -314,7 +314,7 @@ function afterRemotePersonalizationExec(model, ctx, next) {
  */
 function beforeRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec for ', model.modelName, ' called.');
-  servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
+  servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
     if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
