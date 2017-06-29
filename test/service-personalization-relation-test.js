@@ -29,7 +29,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
 
   before('setup test data', function (done) {
     //upload data
-    var data = [
+    var customerData = [
       {
         'name': 'jenny',
         'age': 23,
@@ -89,7 +89,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
             'type': 'string'
           },
           'age': {
-            'type': 'Number'
+            'type': 'number'
           }
         },
         'relations': {
@@ -110,7 +110,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
         addressMOdel = loopback.getModel(Address, bootstrap.defaultContext);
         customerModel = loopback.getModel(Customer, bootstrap.defaultContext);
 
-        customerModel.create(data, bootstrap.defaultContext, function (err, res) {
+        customerModel.create(customerData, bootstrap.defaultContext, function (err, res) {
           if (err) {
             console.log('data creation error');
             done(err);
@@ -189,8 +189,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
             if (err) {
               done(err);
             }
-
-            var results = JSON.parse(resp.text);
+            var results = resp.body;
             expect(results.length).to.be.equal(3);
             expect(results[0].billingAddress).keys('city', 'state', 'lane', '_isDeleted');
             expect(results[0]).to.include.keys('name', 'age', 'billingAddress', 'id', '_isDeleted');
@@ -238,7 +237,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
               done(err);
             }
 
-            var results = JSON.parse(resp.text);
+            var results = resp.body;
             expect(results.length).to.be.equal(3);
             expect(results[0].billingAddress.city).to.be.equal('Mangalore');
             done();
@@ -278,7 +277,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
           if (err) {
             done(err);
           }
-          var results = JSON.parse(resp.text);
+          var results = resp.body;
           expect(results).to.be.instanceof(Array);
           expect(results.length).to.equal(3);
           expect(results[0].billingAddress.street).to.be.equal('BTM');
@@ -319,7 +318,7 @@ describe(chalk.blue('service - personalization - relation test'), function () {
           if (err) {
             done(err);
           }
-          var results = JSON.parse(resp.text);
+          var results = resp.body;
           expect(results).to.be.instanceof(Array);
           expect(results.length).to.equal(3);
           expect(results[0].billingAddress.street).to.be.equal(undefined);
