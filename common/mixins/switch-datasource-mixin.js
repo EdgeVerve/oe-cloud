@@ -189,7 +189,7 @@ module.exports = function SwitchDatasourceMixin(model) {
     //        }
     //    }
 
-    var modelName = model.settings.variantOf || model.clientModelName; //model.modelName;
+    var modelName = model.settings.variantOf || model.clientModelName;
 
     originalDataSource[modelName] = originalDataSource[modelName] || model.dataSource;
 
