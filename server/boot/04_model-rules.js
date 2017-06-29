@@ -57,7 +57,7 @@ module.exports = function ModelRule(app, cb) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(ModelRule.modelName) before save hooks when ModelRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
-        attachBeforeSaveHookToModel(results[i].modelName,options);
+        attachBeforeSaveHookToModel(results[i].modelName, options);
       }
       cb();
     } else {
@@ -67,10 +67,10 @@ module.exports = function ModelRule(app, cb) {
 };
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
-messaging.subscribe('modelRuleAttachHook', function (modelName,options) {
+messaging.subscribe('modelRuleAttachHook', function (modelName, options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to attach before save hook for model ', modelName);
-  attachBeforeSaveHookToModel(modelName,options);
+  attachBeforeSaveHookToModel(modelName, options);
 });
 
 /**
@@ -85,7 +85,7 @@ function modelRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('modelRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  attachBeforeSaveHookToModel(data.modelName,ctx.options);
+  attachBeforeSaveHookToModel(data.modelName, ctx.options);
   next();
 }
 
@@ -99,7 +99,9 @@ function modelRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
   // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
-  if (loopback.findModel(modelName, ctx.options)) {
+  var model = loopback.findModel(modelName, ctx.options);
+  if (model) {
+    data.modelName = model.modelName;
     next();
   } else {
     // Not sure it is the right way to construct error object to sent in the response.
@@ -113,9 +115,9 @@ function modelRuleBeforeSave(ctx, next) {
  *
  * @param {string} modelName - Model name
  */
-function attachBeforeSaveHookToModel(modelName,options) {
+function attachBeforeSaveHookToModel(modelName, options) {
   // Can we avoid this step and get the ModelConstructor from context.
-  var model = loopback.findModel(modelName,options);
+  var model = loopback.findModel(modelName, options);
   // Setting the flag that Model Rule exists which will be used for validation rules
   model.settings._isModelRuleExists = true;
   // Checking whether before save observer hook is already attached or not.
