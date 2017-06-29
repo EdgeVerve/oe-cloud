@@ -140,7 +140,7 @@ module.exports = function (BaseJournalEntity) {
     }
   };
 
-  BaseJournalEntity.prototype.performBusinessValidations = function (cb) {
+  BaseJournalEntity.prototype.performBusinessValidations = function (cb, options) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
@@ -207,7 +207,7 @@ module.exports = function (BaseJournalEntity) {
           }
         });
       }
-    });
+    }, ctx.options);
   });
 
   BaseJournalEntity.observe('after delete', function (ctx, next) {
