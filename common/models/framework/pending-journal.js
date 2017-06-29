@@ -37,7 +37,7 @@ module.exports = function (PendingJournal) {
     var journalModel = loopback.findModel(instance.journalName, ctxRetry);
     var journalData = JSON.parse(instance.savedData);
     journalData.fromPending = true;
-    
+
     journalModel.create(journalData, ctxRetry, function (err, res) {
       if (err) {
         if (err.retriable === false) {
