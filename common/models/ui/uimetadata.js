@@ -239,7 +239,7 @@ module.exports = function UIMetadata(UIMetadata) {
                 if (modelField.itemtype === 'model') {
                   uitype = 'grid';
                   modelField.columndefs = [];
-                  modelField.gridIdentifier = modelField.modeltype;
+                  modelField.gridIdentifier = app.models[modelField.modeltype].clientModelName; //modelField.modeltype;
                 } else {
                   // array of primitives of type 'itemtype'
                   uitype = 'tags';
@@ -312,7 +312,7 @@ module.exports = function UIMetadata(UIMetadata) {
         // Do not call getRestUrl since that needs model, and we need below restUrl when model is not available.
         data.resturl = data.resturl || '/api/' + inflection.pluralize(data.modeltype);
         data.title = data.title || data.modeltype;
-
+        delete options.flatten;
         enrichFromPropertyStore(app, fieldsMaster, data, options, function uiMetadataPrepareDataEnrichCb(err, data) {
           if (err) {
             cb(err);
