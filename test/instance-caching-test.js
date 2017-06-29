@@ -80,13 +80,13 @@ function apiGetRequest(url, callback, done) {
     });
 }
 
-function mongoDeleteById(id, cb) {
+function mongoDeleteById(id, newModelName, cb) {
   var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
   MongoClient.connect(url, function (err, db) {
     if (err) {
       return cb(err);
     } else {
-      db.collection(modelName).deleteOne({ _id: id }, function (err, numberRemoved) {
+      db.collection(newModelName).deleteOne({ _id: id }, function (err, numberRemoved) {
         if (err) {
           return cb(err);
         }
@@ -213,11 +213,12 @@ describe('Instance Caching Test', function () {
           return done(err);
         } else {
           result1 = Object.assign({}, data.toObject());
-          mongoDeleteById(id, function (err) {
+          mongoDeleteById(id, TestModel.modelName, function (err) {
             if (err) {
               return done(err);
             }
             TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+              console.log(data2);
               if (err) {
                 return done(err);
               } else if (data2.length === 0) {
@@ -253,7 +254,7 @@ describe('Instance Caching Test', function () {
                 return done('find should return one instance');
               }
               result1 = Object.assign({}, data[0].toObject());
-              mongoDeleteById(id, function (err) {
+              mongoDeleteById(id, TestModel.modelName, function (err) {
                 if (err) {
                   return done(err);
                 }
@@ -296,7 +297,7 @@ describe('Instance Caching Test', function () {
               return done(err);
             }
             result1 = Object.assign({}, data.toObject());
-            mongoDeleteById(id, function (err) {
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
               }
@@ -338,7 +339,7 @@ describe('Instance Caching Test', function () {
               return done(err);
             }
             result1 = Object.assign({}, data.toObject());
-            mongoDeleteById(id, function (err) {
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
               }
@@ -382,7 +383,7 @@ describe('Instance Caching Test', function () {
               return done(err);
             }
             result1 = Object.assign({}, data.toObject(), { name: 'Eduardo', assign: { new: 'should only see this field' } });
-            mongoDeleteById(id, function (err) {
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
               }
@@ -505,7 +506,7 @@ describe('Instance Caching Test', function () {
             if (info.count !== 1) {
               return done('too many instance with name Praveen');
             }
-            mongoDeleteById(id, function (err) {
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
               }
@@ -542,7 +543,7 @@ describe('Instance Caching Test', function () {
         MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
           if (err) return done(err);
           else {
-            db.collection(modelNameNoInstanceCache).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
+            db.collection(TestModelNoInstanceCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
               if (err) return done(err);
               else apiRequest_find(result, comperCacheToDb);
             });
