@@ -1586,7 +1586,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     personalizedModel1 = loopback.getModel(modelName1, bootstrap.defaultContext);
     personalizedModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
     personalizedModelScope = loopback.getModel(myScopeModel, bootstrap.defaultContext);
-    PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel, bootstrap.defaultContext);
+    PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel1, bootstrap.defaultContext);
     done();
   });
 
