@@ -523,7 +523,6 @@ before('Create Test Model with No InstanceCache', function (done) {
         });
 
         it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function(done) {
-            var id = uuid.v4();
             /**
              * 1. create new modle instance 
              * 2. run a find query 
@@ -531,7 +530,8 @@ before('Create Test Model with No InstanceCache', function (done) {
              * 4. change the db directly in the DB.
              * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
              */
-           
+            var id = uuid.v4();
+
             apiPostRequest('/'+modelNameNoInstanceCache +'s/', {"name": "value1", "id": id}, apiRequest_find, done);
  
              function apiRequest_find(result, callback) {
