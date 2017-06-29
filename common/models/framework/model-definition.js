@@ -456,6 +456,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     };
 
     allDefinitions[model.definition.name] = modelDefn;
+    allDefinitions[model.clientModelName] = modelDefn;
 
     if (options.dependencies) {
       Object.keys(relations).forEach(function relationsForEachKey(relationName) {
@@ -525,7 +526,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
        * If we are returning a different personalized model against the requested one,
        * also make sure this is available under original requested name
        */
-      if (model.modelName !== modelName) {
+      if (model.clientModelName !== modelName) {
         allDefinitions[modelName] = allDefinitions[model.modelName];
       }
       result = allDefinitions;

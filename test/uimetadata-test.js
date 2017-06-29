@@ -402,9 +402,9 @@ describe(chalk.blue('ui-metadata'), function () {
   });
 
   after('destroy model', function (done) {
-    var TestEmployee = loopback.getMOdel('TestEmployee', bootstrap.defaultContext);
-    var TestProject = loopback.getMOdel('TestProject', bootstrap.defaultContext);
-    var UIMetadata = loopback.getMOdel('UIMetadata', bootstrap.defaultContext);
+    var TestEmployee = loopback.getModel('TestEmployee', bootstrap.defaultContext);
+    var TestProject = loopback.getModel('TestProject', bootstrap.defaultContext);
+    var UIMetadata = loopback.getModel('UIMetadata', bootstrap.defaultContext);
     TestEmployee.destroyAll({}, bootstrap.defaultContext, function (err) {
       if (err) {
         console.error(err);
@@ -430,7 +430,6 @@ describe(chalk.blue('ui-metadata'), function () {
   });
 
   it('should return UIMetadata with appropriate model defaults', function (done) {
-
     api
       .get(bootstrap.basePath + '/UIMetadata/' + modelName + '/render')
       .set('tenant_id', 'test-tenant')
@@ -898,6 +897,7 @@ describe(chalk.blue('ui-metadata'), function () {
 
 
   it('should have all model properties in grid-columndefs except those starting with _ (underscore) and scope',
+
     function (done) {
       api
         .get(bootstrap.basePath + '/UIMetadata/testmetadata/render')
