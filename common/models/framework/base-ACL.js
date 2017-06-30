@@ -83,7 +83,11 @@ module.exports = function DBTransactionFn(BaseACL) {
       var inRoleTasks = [];
 
       acls = acls.concat(staticACLs);
-      if (context.remotingContext && context.remotingContext.req && context.remotingContext.req.callContext && context.remotingContext.req.callContext.principals) {
+      if (context.remotingContext &&
+                context.remotingContext.req &&
+                context.remotingContext.req.callContext &&
+                context.remotingContext.req.callContext.principals &&
+                context.remotingContext.req.callContext.principals.length > 0) {
         context.principals = context.principals.concat(context.remotingContext.req.callContext.principals);
       }
       acls.forEach(function aclsForEach(acl) {
