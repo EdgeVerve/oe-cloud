@@ -4,7 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// Not able to use routes:after - middleware to log the response due to 
+// Not able to use routes:after - middleware to log the response due to
 // https://github.com/strongloop/loopback/issues/1234#issuecomment-158415183
 var log = require('oe-logger')('response-logger');
 
