@@ -230,14 +230,14 @@ module.exports = function startNodeRed(server, callback) {
           if (err) {
             return res.status(500).json(err);
           }
-          return res.json(_.sortBy(flowArray, 'order'));
+          return res.json({ flows: _.sortBy(flowArray, 'order') });
         });
       });
     } else {
       var autoscopeField = getAutoscopeField(flowModel, req.callContext);
       flowModel.find({ where: { name: autoscopeField } }, req.callContext, function flowModelFind(err, results) {
         if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' });
+          return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' + err});
         }
         results.forEach(function resultsForEach(r) {
           r.flow.forEach(function prepareFlowsArray(f) {
@@ -247,7 +247,11 @@ module.exports = function startNodeRed(server, callback) {
         if (results.length > 0) {
           res.cookie('_version', results[0]._version, { httpOnly: true, secure: (process.env.PROTOCOL && process.env.PROTOCOL === 'https' ? true : false) });
         }
-        return res.json(flowArray);
+        if (results.length == 0) {
+          return res.json({ flows: flowArray, rev: null});
+        }
+        else 
+        return res.json({ flows: flowArray, rev: results[0]._version });
       });
     }
   });
@@ -272,7 +276,7 @@ module.exports = function startNodeRed(server, callback) {
     if (!req.accessToken) {
       return res.status(401).json({ error: 'unauthorized' });
     }
-    var reqFlows = req.body;
+    var reqFlows = req.body.flows;
     var deploymentType = req.get('Node-RED-Deployment-Type') || 'full';
 
     if (deploymentType === 'reload') {
@@ -283,6 +287,8 @@ module.exports = function startNodeRed(server, callback) {
     var nodesToRemove = [];
     var dbFlows = [];
     var allflows = redNodes.getFlows();
+    allflows = allflows ? allflows.flows : [];
+    allflows = allflows || [];
 
     if (server.get('nodeRedSplitToFiles')) {
       var dir = settings.userDir;
@@ -335,13 +341,20 @@ module.exports = function startNodeRed(server, callback) {
           if (err) {
             return res.status(500).json(err);
           }
-          return res.status(204).end();
+          redNodes.setFlows(reqFlows, 'full').then(function setFlowsCb() {
+              return res.status(200).json({ rev: null });
+            }).otherwise(function setFlowsOtherwiseCb(err) {
+              console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
+              return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS' });
+          });
+
+          //return res.status(200).end();
         });
       });
     } else {
       flowModel.find({ where: { name: autoscopeField } }, req.callContext, function findCb(err, results) {
         if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: 'flow not found.' });
+          return res.status(500).json({ error: 'Internal server error', message: 'flow not found.' , err});
         }
         if (results.length > 1) {
           return res.status(500).json({ error: 'Internal server error', message: 'There were more flows found for a unique context.' });
@@ -351,8 +364,9 @@ module.exports = function startNodeRed(server, callback) {
         if (results.length === 1 && results[0]._version) {
           id = results[0].id;
           version = results[0]._version;
-          if (version !== req.cookies._version) {
-            return res.status(500).json({ error: 'Invalid record version', message: 'Record of version that you are modifying is not matching. Reload the node red flows. Warning : Your modifications will be lost.' });
+          if (version !== req.body.rev ) { //req.cookies._version) {
+            //return res.status(500).json({ error: 'Invalid record version', message: 'Record of version that you are modifying is not matching. Reload the node red flows. Warning : Your modifications will be lost.' });
+            return res.status(409).json({ code: "version_mismatch"  });
           }
         } else {
           version = uuid.v4();
@@ -408,7 +422,8 @@ module.exports = function startNodeRed(server, callback) {
           }
           redNodes.setFlows(allflows, deploymentType).then(function setFlowsCb() {
             res.cookie('_version', results._version, { httpOnly: true, secure: (process.env.PROTOCOL && process.env.PROTOCOL === 'https' ? true : false) });
-            return res.status(204).end();
+            //return res.status(200).end();
+            return res.status(200).json({ rev: results._version });
           }).otherwise(function setFlowsOtherwiseCb(err) {
             console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
             return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS' });
@@ -452,32 +467,64 @@ module.exports = function startNodeRed(server, callback) {
   // / this function reloads all the flows from database.
   // / this function is being exported from this module so that it can be easily called.
   function reload(redNodes, callback) {
-    console.log(' *** NODE-RED : RELOADING FLOWS *** ');
-    var flowArray = [];
-    var options = {};
-    options.ignoreAutoScope = true;
-    options.fetchAllScopes = true;
-    var flowModel = loopback.findModel('NodeRedFlow');
-    flowModel.find({}, options, function findCb(err, results) {
-      if (err) {
-        callback(err);
-      }
-      results.forEach(function resultsForEach(r) {
-        r.flow.forEach(function prepareFlowArrayFn(f) {
-          flowArray.push(f);
+    if (server.get('nodeRedSplitToFiles')) {
+      var dir = settings.userDir;
+      fs.readdir(dir, function (err, results) {
+        if (err) {
+          return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' });
+        }
+        var files = results.filter(function (file) {
+          return (file.startsWith('red_') && path.extname(file) === '.json');
+        });
+        async.concat(files, function (file, cb) {
+          fs.readFile(path.join(dir, file), function (err, contents) {
+            if (err) {
+              return cb({ error: 'Internal server error', message: 'No nodered flows found' });
+            }
+            cb(null, JSON.parse(contents));
+          });
+        }, function (err, flowArray) {
+          if (err) {
+            callback(err);
+          } else {
+            redNodes.setFlows(flowArray).then(function setFlowsFn() {
+              callback();
+            }).otherwise(function setFlowsOtherwiseFn(err) {
+              console.log('node red error');
+              callback(err);
+            });
+          }
+
         });
       });
-      if (flowArray.length > 0) {
-        redNodes.setFlows(flowArray).then(function setFlowsFn() {
-          callback();
-        }).otherwise(function setFlowsOtherwiseFn(err) {
-          console.log('node red error');
+    } else {
+      console.log(' *** NODE-RED : RELOADING FLOWS *** ');
+      var flowArray = [];
+      var options = {};
+      options.ignoreAutoScope = true;
+      options.fetchAllScopes = true;
+      var flowModel = loopback.findModel('NodeRedFlow');
+      flowModel.find({}, options, function findCb(err, results) {
+        if (err) {
           callback(err);
+        }
+        results.forEach(function resultsForEach(r) {
+          r.flow.forEach(function prepareFlowArrayFn(f) {
+            flowArray.push(f);
+          });
         });
-      } else {
-        return callback();
-      }
-    });
+        if (flowArray.length > 0) {
+          redNodes.setFlows(flowArray).then(function setFlowsFn() {
+            callback();
+          }).otherwise(function setFlowsOtherwiseFn(err) {
+            console.log('node red error');
+            callback(err);
+          });
+        } else {
+          return callback();
+        }
+      });
+    }
   }
 
 
