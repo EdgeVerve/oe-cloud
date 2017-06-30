@@ -210,14 +210,14 @@ module.exports = function startNodeRed(server, callback) {
     // return res.json(redNodes.getFlows());
     var flowArray = [];
 
-    if (server.get('splitToFiles')) {
+    if (server.get('nodeRedSplitToFiles')) {
       var dir = settings.userDir;
       fs.readdir(dir, function (err, results) {
         if (err) {
           return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' });
         }
         var files = results.filter(function (file) {
-          return (path.extname(file) === '.json' && file !== '.config.json' && file !== 'node-red-flows.json');
+          return (file.startsWith('red_') && path.extname(file) === '.json');
         });
         async.concat(files, function (file, cb) {
           fs.readFile(path.join(dir, file), function (err, contents) {
@@ -284,7 +284,7 @@ module.exports = function startNodeRed(server, callback) {
     var dbFlows = [];
     var allflows = redNodes.getFlows();
 
-    if (server.get('splitToFiles')) {
+    if (server.get('nodeRedSplitToFiles')) {
       var dir = settings.userDir;
       var tabs = [];
       var nodes = [];
@@ -298,14 +298,14 @@ module.exports = function startNodeRed(server, callback) {
       });
       nodes = reqFlows.slice(tabs.length);
       var tabNames = tabs.map(function (tab) {
-        return tab.label + '_' + tab.id + '.json';
+        return 'red_' + tab.label + '_' + tab.id + '.json';
       });
       fs.readdir(dir, function (err, results) {
         if (err) {
           return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO SAVE FLOWS TO FILE'});
         }
         var files = results.filter(function (file) {
-          return (path.extname(file) === '.json' && file !== '.config.json');
+          return (file.startsWith('red_') && path.extname(file) === '.json');
         });
         // delete the flow files for which flows are deleted
         files.forEach(function (file) {
@@ -320,7 +320,7 @@ module.exports = function startNodeRed(server, callback) {
           return tab;
         });
         async.concat(tabs, function (tab, cb) {
-          var fName = path.join(dir, tab.label + '_' + tab.id + '.json');
+          var fName = path.join(dir, 'red_' + tab.label + '_' + tab.id + '.json');
           var flow = nodes.filter(function (f) {
             return f.z === tab.id;
           });

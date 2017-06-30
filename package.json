@@ -58,7 +58,7 @@
     "node-uuid": "1.4.7",
     "oe-explorer": "git+http://10.73.97.24/oecloud.io/oe-explorer.git#v0.9.0-beta",
     "oe-logger": "0.8.0",
-    "oe-swagger-ui": "git+http://deostroll@10.73.97.24/oecloud.io/oe-swagger-ui.git#v0.9.0-beta",
+    "oe-swagger-ui": "git+http://10.73.97.24/oecloud.io/oe-swagger-ui.git#v0.9.0-beta",
     "passport-google-oauth": "0.1.5",
     "passport-jwt": "^2.0.0",
     "passport-local": "1.0.0",
