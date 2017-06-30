@@ -65,6 +65,7 @@ describe(chalk.blue('service-personalization'), function () {
     dataSource = app.dataSources['db'];
     ProductCatalog = dataSource.createModel('ProductCatalog', ProductCatalogSchema, opts);
     ProductCatalog.attachTo(dataSource);
+    ProductCatalog.clientModelName = 'ProductCatalog';
     app.model(ProductCatalog);
 
     // Populate some data.
@@ -185,6 +186,7 @@ describe(chalk.blue('service-personalization'), function () {
     productOwnerUrl = bootstrap.basePath + '/' + productOwnerOpts.plural;
     var ProductOwner = dataSource.createModel('ProductOwner', ProductOwnerSchema, productOwnerOpts);
     ProductOwner.attachTo(dataSource);
+    ProductOwner.clientModelName = 'ProductOwner';
     app.model(ProductOwner);
 
     var owner1 = {
