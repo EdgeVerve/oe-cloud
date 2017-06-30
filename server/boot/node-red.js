@@ -247,10 +247,9 @@ module.exports = function startNodeRed(server, callback) {
         if (results.length > 0) {
           res.cookie('_version', results[0]._version, { httpOnly: true, secure: (process.env.PROTOCOL && process.env.PROTOCOL === 'https' ? true : false) });
         }
-        if (results.length == 0) {
+        if (results.length === 0) {
           return res.json({ flows: flowArray, rev: null});
         }
-        else 
         return res.json({ flows: flowArray, rev: results[0]._version });
       });
     }
@@ -342,19 +341,19 @@ module.exports = function startNodeRed(server, callback) {
             return res.status(500).json(err);
           }
           redNodes.setFlows(reqFlows, 'full').then(function setFlowsCb() {
-              return res.status(200).json({ rev: null });
-            }).otherwise(function setFlowsOtherwiseCb(err) {
-              console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
-              return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS' });
+            return res.status(200).json({ rev: null });
+          }).otherwise(function setFlowsOtherwiseCb(err) {
+            console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
+            return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS' });
           });
 
-          //return res.status(200).end();
+          // return res.status(200).end();
         });
       });
     } else {
       flowModel.find({ where: { name: autoscopeField } }, req.callContext, function findCb(err, results) {
         if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: 'flow not found.' , err});
+          return res.status(500).json({ error: 'Internal server error', message: 'flow not found.', err});
         }
         if (results.length > 1) {
           return res.status(500).json({ error: 'Internal server error', message: 'There were more flows found for a unique context.' });
@@ -364,9 +363,8 @@ module.exports = function startNodeRed(server, callback) {
         if (results.length === 1 && results[0]._version) {
           id = results[0].id;
           version = results[0]._version;
-          if (version !== req.body.rev ) { //req.cookies._version) {
-            //return res.status(500).json({ error: 'Invalid record version', message: 'Record of version that you are modifying is not matching. Reload the node red flows. Warning : Your modifications will be lost.' });
-            return res.status(409).json({ code: "version_mismatch"  });
+          if (version !== req.body.rev ) {
+            return res.status(409).json({ code: 'version_mismatch'  });
           }
         } else {
           version = uuid.v4();
@@ -422,7 +420,7 @@ module.exports = function startNodeRed(server, callback) {
           }
           redNodes.setFlows(allflows, deploymentType).then(function setFlowsCb() {
             res.cookie('_version', results._version, { httpOnly: true, secure: (process.env.PROTOCOL && process.env.PROTOCOL === 'https' ? true : false) });
-            //return res.status(200).end();
+            // return res.status(200).end();
             return res.status(200).json({ rev: results._version });
           }).otherwise(function setFlowsOtherwiseCb(err) {
             console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
@@ -471,7 +469,7 @@ module.exports = function startNodeRed(server, callback) {
       var dir = settings.userDir;
       fs.readdir(dir, function (err, results) {
         if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' });
+          callback(err);
         }
         var files = results.filter(function (file) {
           return (file.startsWith('red_') && path.extname(file) === '.json');
@@ -494,7 +492,6 @@ module.exports = function startNodeRed(server, callback) {
               callback(err);
             });
           }
-
         });
       });
     } else {
