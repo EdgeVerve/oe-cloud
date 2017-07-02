@@ -1265,7 +1265,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 });
             }, function(err) {
                 if (err) {
-                    return setTimeout(retrycb, 20000, err);
+                    return setTimeout(retrycb, 15000, err);
                 } else {
                     return retrycb(null, true);
                 }
