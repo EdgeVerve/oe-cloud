@@ -41,7 +41,7 @@ function apiRequest(url, postData, callback, done) {
 }
 
 describe(chalk.blue('actor-pattern-db-lock-test'), function() {
-    this.timeout(60000);
+    this.timeout(100000);
     var afterTest = {};
 
     before('login using admin', function fnLogin(done) {
@@ -1265,7 +1265,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 });
             }, function(err) {
                 if (err) {
-                    return setTimeout(retrycb, 10000, err);
+                    return setTimeout(retrycb, 20000, err);
                 } else {
                     return retrycb(null, true);
                 }
