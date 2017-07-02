@@ -279,6 +279,10 @@
         "public": true,
         "dataSource": "db"
     },
+    "TrustedApp": {
+        "public": true,
+        "dataSource": "db"
+    },
     "Lock": {
         "public": false,
         "dataSource": "db"
