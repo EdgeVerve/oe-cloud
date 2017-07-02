@@ -89,7 +89,7 @@ describe(chalk.blue('actor-pattern-test'), function() {
         function addAllFunctions() {
 
             var transferDefinition = loopback.getModel('TestTransfer');
-            transferDefinition.prototype.performBusinessValidations = function(cb) {
+            transferDefinition.prototype.performBusinessValidations = function(options, cb) {
                 cb();
             };
 
