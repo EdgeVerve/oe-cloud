@@ -4,10 +4,6 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// var loopback = require ('loopback');
-// var uuid = require ('node-uuid');
-// var logger = require ('../../lib/logger');
-// var debug = require('debug')('req-logging-filter');
 var log = require('oe-logger')('req-logging-filter');
 
 /**
@@ -19,8 +15,9 @@ var log = require('oe-logger')('req-logging-filter');
 
 module.exports = function ReqLoggingFilter(options) {
   return function doLog(req, res, next) {
-    // log runs into circular json object issues - this is a problem that should be dealt with
-    log.debug(req.callContext, 'Request received -- ', req);
+    log.debug(req.callContext, req.method, ' ', req.url);
+    if (req._body) log.debug(req.callContext, 'Body: ', req.body);
+    log.debug(req.callContext, 'Headers: ', req.headers, ' Query: ', req.query);
     next();
   };
 };

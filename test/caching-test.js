@@ -98,6 +98,8 @@ describe('Caching Test', function () {
                 }
             });
         } else {
+            var loopbackModelNoCache = loopback.getModel(modelName);
+            var idFieldName =  loopbackModelNoCache.definition.idName();
             var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
             var pg = require('pg');
             var client = new pg.Client(connectionString);
@@ -105,8 +107,10 @@ describe('Caching Test', function () {
                 if (err) done(err); 
                 else {
                     //var query = client.query("DELETE from " + modelName.toLowerCase(), function(err,result){
-                    var query = client.query("UPDATE " + modelName.toLowerCase() + " SET name = 'value2' WHERE _id == '" + id + "'" ,function(err,result){
-                         if (err) done(err);
+                    var query = client.query("UPDATE " + modelName.toLowerCase() + " SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                         if (err)  {
+                             return done(err);
+                         }
                         debug("Number of records removed " + result.rowCount);
                         stage4_find(result, done);
                     });

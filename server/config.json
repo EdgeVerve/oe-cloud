@@ -48,7 +48,7 @@
   "disableNodered": true,
   "nodeRedUserDir": "nodered/",
   "useDefaultNodeRedStorage": false,
-  "splitToFiles": false,
+  "nodeRedSplitToFiles": false,
   "app": "oecloud.io",
   "realm": "oecloud",
   "encryptionAlgorithm": "crypto.aes256",

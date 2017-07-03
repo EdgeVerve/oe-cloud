@@ -88,18 +88,20 @@ module.exports = function JWTAssertionFn(options) {
               var uname = req.headers.username || null;
               if (uname && email) {
                 // verify supported Roles
-                var rolesToAdd;
+                var rolesToAdd = [];
                 if (req.headers.roles && user.supportedRoles) {
-                  rolesToAdd = JSON.parse(req.headers.roles).map(r => {
-                    if (user.supportedRoles.some(x => x === r)) {
-                      return { 'id': r, 'type': 'ROLE' };
+                  JSON.parse(req.headers.roles).forEach(function (element) {
+                    if (user.supportedRoles.some(x => x === element)) {
+                      rolesToAdd.push({ 'id': element, 'type': 'ROLE' });
                     }
                   });
                 }
                 req.accessToken = cachedTokens[uname];
                 // TODO check validity of token @kpraveen
                 if (req.accessToken) {
-                  req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                  if (rolesToAdd && rolesToAdd.length > 0) {
+                    req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                  }
                   return next();
                 }
                 // find user for the request
@@ -121,7 +123,9 @@ module.exports = function JWTAssertionFn(options) {
                       if (token) {
                         req.accessToken = token;
                         cachedTokens[uname] = token;
-                        req.callContext.principals = rolesToAdd;
+                        if (rolesToAdd && rolesToAdd.length > 0) {
+                          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                        }
                         next();
                       } else {
                         log.error(req.callContext, 'could not create access token!!!!');
@@ -142,7 +146,9 @@ module.exports = function JWTAssertionFn(options) {
                           if (token) {
                             req.accessToken = token;
                             cachedTokens[uname] = token;
-                            req.callContext.principals = rolesToAdd;
+                            if (rolesToAdd && rolesToAdd.length > 0) {
+                              req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                            }
                             next();
                           } else {
                             log.error(req.callContext, 'could not create access token!!!!');

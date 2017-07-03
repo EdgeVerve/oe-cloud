@@ -90,7 +90,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
         function addAllFunctions() {
 
             var transferDefinition = loopback.getModel('TestTransfer');
-            transferDefinition.prototype.performBusinessValidations = function(cb) {
+            transferDefinition.prototype.performBusinessValidations = function(options, cb) {
                 cb();
             };
 
@@ -1266,7 +1266,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 });
             }, function(err) {
                 if (err) {
-                    return setTimeout(retrycb, 30000, err);
+                    return setTimeout(retrycb, 10000, err);
                 } else {
                     return retrycb(null, true);
                 }
