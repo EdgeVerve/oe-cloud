@@ -89,7 +89,7 @@ describe(chalk.blue('integrationTest'), function() {
         funcCheckArray.push(check1Balance);
       }
 
-      async.parallel(funcCheckArray, function (err, results) {
+      async.series(funcCheckArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
@@ -105,36 +105,18 @@ describe(chalk.blue('integrationTest'), function() {
 it('should log in', function(done) {
 console.log('Base Url is ', baseurl);
 request.post(
-              baseurl + "BaseUsers", {
-                json: createLoginData
-              },
-              function(error, response, body) {
-                if (error) {
-			            console.log("error:", error);
-                  done(error);
-                } else {
-                  login();
-		            }
-	});
-
-function login() {
-request.post(
               baseurl + "BaseUsers/login", {
                 json: loginData
               },
               function(error, response, body) {
-                if (error) {
-			            console.log("error:", error);
-                  done(error);
+                if (error || body.error) {
+			            console.log("error:", error || body.error);
+                  done(error || body.error);
                 } else {
-                  if (body.error !== undefined) {
-                    console.log("error: ", body);
-                  }
                   token = body.id;
                   setup(body.id);
 		            }
 	});
-}
 
   function setup(token) {
     console.log('start init actor', token);
@@ -170,7 +152,7 @@ request.post(
 
     tempIds = ids.slice();
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     process.exit(-1);
@@ -224,7 +206,7 @@ function addBudget() {
       funcArray.push(budgetAdd);
     }
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
@@ -285,7 +267,7 @@ function deleteAmount() {
       funcArray.push(debit);
     }
 
-    async.parallel(funcArray, function (err, results) {
+    async.series(funcArray, function (err, results) {
                                 if (err) {
                                     console.log(err);
                                     done(err);
