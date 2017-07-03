@@ -140,7 +140,7 @@ module.exports = function (BaseJournalEntity) {
     }
   };
 
-  BaseJournalEntity.prototype.performBusinessValidations = function (cb, options) {
+  BaseJournalEntity.prototype.performBusinessValidations = function (options, cb) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
@@ -180,7 +180,7 @@ module.exports = function (BaseJournalEntity) {
 
     ctx.options.journalProcessStartTime = new Date();
     var instance = ctx.instance;
-    instance.performBusinessValidations(function (err) {
+    instance.performBusinessValidations(ctx.options, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
         if (err && err.retriable === false) {
@@ -207,7 +207,7 @@ module.exports = function (BaseJournalEntity) {
           }
         });
       }
-    }, ctx.options);
+    });
   });
 
   BaseJournalEntity.observe('after delete', function (ctx, next) {

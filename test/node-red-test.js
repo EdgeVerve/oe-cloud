@@ -72,9 +72,9 @@ describe(chalk.blue('Node-red test'), function () {
         api.set('Accept', 'application/json')
             .post(postUrl)
             .set('accessToken', accessToken)
-            .send(flows)
+          .send({ flows: flows } )
             .end(function (err, resp) {
-                expect(resp.status).to.be.equal(204);
+                expect(resp.status).to.be.equal(200);
                 done(err);
             });
     });
@@ -89,11 +89,11 @@ describe(chalk.blue('Node-red test'), function () {
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
-                expect(resp.body.length).to.be.equal(4);
-                _version = resp.req.res.headers['set-cookie'];
+                expect(resp.body.flows.length).to.be.equal(4);
+                _version = resp.body.rev; //resp.req.res.headers['set-cookie'];
                 console.log('cookie ', _version);
-                expect(resp.body[0].label).to.be.equal('node-red-test-tenant');
-                expect(resp.body[3].name).to.be.equal('node-red-test-tenant');
+                expect(resp.body.flows[0].label).to.be.equal('node-red-test-tenant');
+                expect(resp.body.flows[3].name).to.be.equal('node-red-test-tenant');
                 return done();
             });
     });
@@ -112,10 +112,10 @@ describe(chalk.blue('Node-red test'), function () {
         api.set('Accept', 'application/json')
             .post(postUrl)
             .set('accessToken', accessToken)
-            .set('Cookie', [_version])
-            .send(flows)
+            //.set('Cookie', [_version])
+          .send({ flows: flows, rev: _version })
             .end(function (err, resp) {
-                expect(resp.status).to.be.equal(204);
+                expect(resp.status).to.be.equal(200);
                 done(err);
             });
     });
@@ -161,7 +161,7 @@ describe(chalk.blue('Node-red test'), function () {
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
-                expect(resp.body.length).to.be.equal(0);
+                expect(resp.body.flows.length).to.be.equal(0);
                 return done();
             });
     });
@@ -181,9 +181,9 @@ describe(chalk.blue('Node-red test'), function () {
         api.set('Accept', 'application/json')
             .post(postUrl)
             .set('accessToken', accessToken)
-            .send(flows)
+          .send({ flows: flows })
             .end(function (err, resp) {
-                expect(resp.status).to.be.equal(204);
+                expect(resp.status).to.be.equal(200);
                 done(err);
             });
     });
@@ -199,9 +199,9 @@ describe(chalk.blue('Node-red test'), function () {
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
-                expect(resp.body.length).to.be.equal(4);
-                expect(resp.body[0].label).to.be.equal('node-red-default');
-                expect(resp.body[3].name).to.be.equal('node-red-default');
+                expect(resp.body.flows.length).to.be.equal(4);
+                expect(resp.body.flows[0].label).to.be.equal('node-red-default');
+                expect(resp.body.flows[3].name).to.be.equal('node-red-default');
                 return done();
             });
     });

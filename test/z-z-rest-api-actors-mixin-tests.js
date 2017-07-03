@@ -85,7 +85,7 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
         function addAllFunctions() {
 
             var transferDefinition = loopback.getModel('TestTransfer');
-            transferDefinition.prototype.performBusinessValidations = function (cb) {
+            transferDefinition.prototype.performBusinessValidations = function (options, cb) {
                 cb();
             };
 

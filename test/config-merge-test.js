@@ -141,15 +141,13 @@ describe(chalk.blue('Config files merge test'), function () {
         './middleware/model-discovery-filter': {}
       },
       'routes:after': {
-        './middleware/res-logging-filter': {}
-      },
+        },
       'files': {
         'loopback#static': {
           'params': '$!../client'
         }
       },
       'final': {
-        './middleware/res-logging-filter': {},
         'loopback#urlNotFound': {}
       },
       'final:after': {
@@ -210,7 +208,7 @@ describe(chalk.blue('Config files merge test'), function () {
     expect(serverMiddleware).not.to.be.empty;
     expect(serverMiddleware).not.to.be.undefined;
     expect(Object.getOwnPropertyNames(serverMiddleware['routes:before']).length).to.be.equal(8);
-    expect(Object.getOwnPropertyNames(serverMiddleware.final).length).to.be.equal(3);
+    expect(Object.getOwnPropertyNames(serverMiddleware.final).length).to.be.equal(2);
     expect(Object.getOwnPropertyNames(serverMiddleware['final:after']).length).to.be.equal(1);
     done();
   });
