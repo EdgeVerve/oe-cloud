@@ -101,6 +101,11 @@ module.exports = function preAuthContextPopulator(options) {
       callContext.ctx.lang = req.headers[langKey].split(',')[0];
     }
 
+    var requestKey = 'x-request-id';
+    if (!callContext.ctx.requestId && req.headers[requestKey]) {
+      callContext.ctx.requestId = req.headers[requestKey];
+    }
+
     Object.keys(callContext.ctx).map(function callcontextKeysMapFn(key, index) {
       callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
     });
