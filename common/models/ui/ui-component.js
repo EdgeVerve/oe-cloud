@@ -209,7 +209,7 @@ module.exports = function uiComponent(UIComponent) {
         callback(err);
       }
       if (fetchAsHtml) {
-       if (component.importUrls) {
+        if (component.importUrls) {
           var importLinks = component.importUrls.map(function createLinks(importUrl) {
             return '<link rel="import" dynamic-link href="' + importUrl + '">';
           });
