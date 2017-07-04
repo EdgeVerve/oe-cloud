@@ -178,7 +178,7 @@ describe(chalk.blue('UIElement'), function() {
         this.timeout(2000);
 
         var UIComponent = bootstrap.models['UIComponent'];
-        UIComponent.modelmeta(testModelName, context, function(err, data) {
+        UIComponent.modelmeta(testModelName, bootstrap.defaultContext, function(err, data) {
             //expect(data.models[testModelName].designation).to.be.defined;
             var context2 =  {
             ctx: {
@@ -186,7 +186,7 @@ describe(chalk.blue('UIElement'), function() {
                 remoteUser: 'admin'
             }
             };
-            UIComponent.modelmeta(testModelName, context2, function(err, data) {
+            UIComponent.modelmeta(testModelName, bootstrap.defaultContext, function(err, data) {
                 //expect(data.models[testModelName].designation).to.be.defined;
                 done();
             });
@@ -204,8 +204,8 @@ describe(chalk.blue('UIElement'), function() {
         };
         this.timeout(15000);
         var UIComponent = bootstrap.models['UIComponent'];
-        UIComponent.configure([testModelName], context, function(err, data) {
-            UIComponent.component('modelperson-form.html', context, function(err, data) {
+        UIComponent.configure([testModelName], bootstrap.defaultContext, function(err, data) {
+            UIComponent.component('modelperson-form.html', bootstrap.defaultContext, function(err, data) {
                 expect(data).not.to.be.null;
                 done();
             });

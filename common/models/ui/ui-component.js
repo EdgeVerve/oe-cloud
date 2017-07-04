@@ -239,6 +239,7 @@ module.exports = function uiComponent(UIComponent) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
           var modelAndType = componentName.split('-');
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
+          modelName = loopback.findModel(modelName, options).modelName;
           var templateType = modelAndType[1];
           var types = ['form', 'list'];
           if (modelName && templateType && types.indexOf(templateType) !== -1) {
@@ -297,9 +298,8 @@ module.exports = function uiComponent(UIComponent) {
     } else if (typeof callback === 'undefined' && typeof options === 'function') {
       callback = options;
       options = {};
-    }
-
-    var modelName = UIComponent.app.locals.modelNames[name] || name;
+    }   
+    var modelName = loopback.findModel(name, options).modelName || name;
     metaoptions = metaoptions || {};
     var app = this.app;
     var response = {};
@@ -508,7 +508,8 @@ module.exports = function uiComponent(UIComponent) {
 
     var tasks = [];
     modelList.forEach(function defaultUICreator(modelName) {
-      modelName = UIComponent.app.locals.modelNames[modelName] || modelName;
+      modelName = UIComponent.app.locals.modelNames[modelName];
+      modelName = loopback.findModel(modelName, options).modelName || modelName;
       var model = UIComponent.app.models[modelName];
       if (model && model.shared) {
         var templates = ['form', 'list'];
@@ -581,17 +582,17 @@ module.exports = function uiComponent(UIComponent) {
       path: '/simulate'
     },
     returns: [{
-      arg: 'body',
-      type: 'string',
-      root: true
-    },
-    {
-      arg: 'Content-Type',
-      type: 'string',
-      http: {
-        target: 'header'
+        arg: 'body',
+        type: 'string',
+        root: true
+      },
+      {
+        arg: 'Content-Type',
+        type: 'string',
+        http: {
+          target: 'header'
+        }
       }
-    }
     ]
   });
 
@@ -635,17 +636,17 @@ module.exports = function uiComponent(UIComponent) {
       path: '/component/:name'
     },
     returns: [{
-      arg: 'body',
-      type: 'string',
-      root: true
-    },
-    {
-      arg: 'Content-Type',
-      type: 'string',
-      http: {
-        target: 'header'
+        arg: 'body',
+        type: 'string',
+        root: true
+      },
+      {
+        arg: 'Content-Type',
+        type: 'string',
+        http: {
+          target: 'header'
+        }
       }
-    }
     ]
   });
 
