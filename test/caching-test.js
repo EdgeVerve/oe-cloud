@@ -204,7 +204,7 @@ describe('Caching Test', function () {
             stage1_creat(done);
         });
 
-        it('Should cache the TestModel when cacheable is set to "true"', function (done) {
+        xit('Should cache the TestModel when cacheable is set to "true"', function (done) {
             if (result1.body.name !== result2.body.name)  return done();
             else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
         });
