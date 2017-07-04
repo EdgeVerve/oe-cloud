@@ -209,6 +209,12 @@ module.exports = function uiComponent(UIComponent) {
         callback(err);
       }
       if (fetchAsHtml) {
+        if (component.importUrls) {
+          var importLinks = component.importUrls.map(function createLinks(importUrl) {
+            return '<link rel="import" dynamic-link href="' + importUrl + '">';
+          });
+          html = importLinks.join('\n') + '\n' + html;
+        }
         mergeAsHTML(html, response, callback);
       } else {
         callback(null, response);
@@ -298,7 +304,7 @@ module.exports = function uiComponent(UIComponent) {
     } else if (typeof callback === 'undefined' && typeof options === 'function') {
       callback = options;
       options = {};
-    }   
+    }
     var modelName = loopback.findModel(name, options).modelName || name;
     metaoptions = metaoptions || {};
     var app = this.app;
@@ -582,17 +588,17 @@ module.exports = function uiComponent(UIComponent) {
       path: '/simulate'
     },
     returns: [{
-        arg: 'body',
-        type: 'string',
-        root: true
-      },
-      {
-        arg: 'Content-Type',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
+      arg: 'body',
+      type: 'string',
+      root: true
+    },
+    {
+      arg: 'Content-Type',
+      type: 'string',
+      http: {
+        target: 'header'
       }
+    }
     ]
   });
 
@@ -636,17 +642,17 @@ module.exports = function uiComponent(UIComponent) {
       path: '/component/:name'
     },
     returns: [{
-        arg: 'body',
-        type: 'string',
-        root: true
-      },
-      {
-        arg: 'Content-Type',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
+      arg: 'body',
+      type: 'string',
+      root: true
+    },
+    {
+      arg: 'Content-Type',
+      type: 'string',
+      http: {
+        target: 'header'
       }
+    }
     ]
   });
 

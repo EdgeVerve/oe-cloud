@@ -170,11 +170,11 @@ describe(chalk.blue('business-validations-tests'), function () {
 
   it('trivial bussiness validation + atomic action pass --> transaction should pass', function (done) {
 
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'trivial implementation');
-      cb();
-    };
+      var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'trivial implementation');
+            cb();
+        };
 
     //credit an account 20 and then debit the same account 10
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -248,11 +248,11 @@ describe(chalk.blue('business-validations-tests'), function () {
 
   it('trivial bussiness validation + atomic action fails --> transaction should fail', function (done) {
 
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'trivial implementation');
-      cb();
-    };
+      var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'trivial implementation');
+            cb();
+        };
 
     //fail to debit from a new account
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -285,11 +285,11 @@ describe(chalk.blue('business-validations-tests'), function () {
   it('synchronous bussiness validation pass + atomic action pass --> transaction should pass', function (done) {
     var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
 
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'synchronous implementation');
-      doSynchronousActions();
-      cb();
-    };
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'synchronous implementation');
+            doSynchronousActions();
+            cb();
+        };
 
     //credit an account 20 and then debit the same account 10
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -365,13 +365,13 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('synchronous bussiness validation pass + atomic action fails --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'synchronous implementation');
-      doSynchronousActions();
-      cb();
-    };
+    it('synchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'synchronous implementation');
+            doSynchronousActions();
+            cb();
+        };
 
     //fail to debit from a new account
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -401,14 +401,14 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('synchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'synchronous implementation');
-      doSynchronousActions();
-      log.error(log.defaultContext(), 'failing synchronous actions on purpose');
-      cb(new Error('failing synchronous actions on purpose'));
-    };
+    it('synchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'synchronous implementation');
+            doSynchronousActions();
+            log.error(log.defaultContext(), 'failing synchronous actions on purpose');
+            cb(new Error('failing synchronous actions on purpose'));
+        };
 
     //debit the account 0
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -438,14 +438,14 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('synchronous bussiness validation fails + atomic action should fail but does not start --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'synchronous implementation');
-      doSynchronousActions();
-      log.error(log.defaultContext(), 'failing synchronous actions on purpose');
-      cb(new Error('failing sync actions on purpose'));
-    };
+    it('synchronous bussiness validation fails + atomic action should fail but does not start --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'synchronous implementation');
+            doSynchronousActions();
+            log.error(log.defaultContext(), 'failing synchronous actions on purpose');
+            cb(new Error('failing sync actions on purpose'));
+        };
 
     //fail to debit from a new account
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -475,12 +475,12 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('asynchronous bussiness validation pass + atomic action pass --> transaction should pass', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'asynchronous implementation');
-      doAsynchronousActions(cb);
-    };
+    it('asynchronous bussiness validation pass + atomic action pass --> transaction should pass', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'asynchronous implementation');
+            doAsynchronousActions(cb);
+        };
 
     //credit an account 20 and then debit the same account 10
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -552,12 +552,12 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('asynchronous bussiness validation pass + atomic action fails --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'asynchronous implementation');
-      doAsynchronousActions(cb);
-    };
+    it('asynchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'asynchronous implementation');
+            doAsynchronousActions(cb);
+        };
 
     //fail to debit from a new account
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -587,12 +587,12 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('asynchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'asynchronous implementation');
-      doAsynchronousActionsFail(cb);
-    };
+    it('asynchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'asynchronous implementation');
+            doAsynchronousActionsFail(cb);
+        };
 
     //debit an account 0
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
@@ -622,12 +622,12 @@ describe(chalk.blue('business-validations-tests'), function () {
     }
   });
 
-  it('asynchronous bussiness validation fails + atomic action should fails but does not start --> transaction should fail', function (done) {
-    var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-    transferDefinition.prototype.performBusinessValidations = function (cb) {
-      log.debug(log.defaultContext(), 'asynchronous implementation');
-      doAsynchronousActionsFail(cb);
-    };
+    it('asynchronous bussiness validation fails + atomic action should fails but does not start --> transaction should fail', function(done) {
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+            log.debug(log.defaultContext(), 'asynchronous implementation');
+            doAsynchronousActionsFail(cb);
+        };
 
     //fail to debit from a new account
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);

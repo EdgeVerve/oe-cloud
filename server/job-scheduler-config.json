@@ -8,6 +8,7 @@
          "eventName" : "sendToWorkflow",
          "payload" : {"isReconciliation":true},
          "enable" : false,
+         "id": "35aec784-d01d-4f4f-9380-9b1d3cc4b8a6",
          "_newVersion": "35aec784-d01d-4f4f-9380-9b1d3cc4b8a6"
       },
       {
@@ -18,6 +19,7 @@
           "eventName" : "sendToWorkflow",
           "payload" : {"isReconciliation":true},
           "enable" : false,
+          "id": "97e16369-c3a1-4b53-85d5-1cc3eabd7ad9",
           "_newVersion": "97e16369-c3a1-4b53-85d5-1cc3eabd7ad9"
        },
       {
@@ -28,6 +30,7 @@
             "eventName": "reconcile",
             "payload": { },
             "enable": false,
+            "id": "c5134a12-8f80-40c1-852f-6c2c2d506f3d",
             "_newVersion": "c5134a12-8f80-40c1-852f-6c2c2d506f3d"
        }
    ]

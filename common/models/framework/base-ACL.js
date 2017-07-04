@@ -27,16 +27,16 @@ var ACL = loopback.ACL;
 
 module.exports = function DBTransactionFn(BaseACL) {
   /**
- * Check if the request has the permission to access.
- * @param {Object} context See below.
- * @property {Object[]} principals An array of principals.
- * @property {String|Model} model The model name or model class.
- * @property {*} id The model instance ID.
- * @property {String} property The property/method/relation name.
- * @property {String} accessType The access type:
- *   READ, REPLICATE, WRITE, or EXECUTE.
- * @param {Function} callback Callback function
- */
+     * Check if the request has the permission to access.
+     * @param {Object} context See below.
+     * @property {Object[]} principals An array of principals.
+     * @property {String|Model} model The model name or model class.
+     * @property {*} id The model instance ID.
+     * @property {String} property The property/method/relation name.
+     * @property {String} accessType The access type:
+     *   READ, REPLICATE, WRITE, or EXECUTE.
+     * @param {Function} callback Callback function
+     */
   BaseACL.checkAccessForContext = function checkAccessForContext(context, callback) {
     var registry = this.registry;
 
@@ -55,9 +55,7 @@ module.exports = function DBTransactionFn(BaseACL) {
 
     var accessTypeQuery = (accessType === ACL.ALL) ?
       null :
-      (accessType === ACL.REPLICATE) ?
-        { inq: [ACL.REPLICATE, ACL.WRITE, ACL.ALL] } :
-        { inq: [accessType, ACL.ALL] };
+      (accessType === ACL.REPLICATE) ? { inq: [ACL.REPLICATE, ACL.WRITE, ACL.ALL] } : { inq: [accessType, ACL.ALL] };
 
     var req = new AccessRequest(modelName, property, accessType, ACL.DEFAULT, methodNames);
 
@@ -84,7 +82,13 @@ module.exports = function DBTransactionFn(BaseACL) {
       var inRoleTasks = [];
 
       acls = acls.concat(staticACLs);
-
+      if (context.remotingContext &&
+                context.remotingContext.req &&
+                context.remotingContext.req.callContext &&
+                context.remotingContext.req.callContext.principals &&
+                context.remotingContext.req.callContext.principals.length > 0) {
+        context.principals = context.principals.concat(context.remotingContext.req.callContext.principals);
+      }
       acls.forEach(function aclsForEach(acl) {
         // Check exact matches
         for (var i = 0; i < context.principals.length; i++) {
@@ -156,10 +160,10 @@ module.exports = function DBTransactionFn(BaseACL) {
   });
 
   /*
-   * Adding a remote method called /removeacl as an alternative to the loopback provided
-   * delete method as the 'after delete' event does not provide the deleted object
-   * in the ctx
-   */
+     * Adding a remote method called /removeacl as an alternative to the loopback provided
+     * delete method as the 'after delete' event does not provide the deleted object
+     * in the ctx
+     */
   BaseACL.removeacl = function aclModelRemoveACLFn(id, options, cb) {
     // 'acl' contains the ACL entity for removal
     BaseACL.findById(id, options, function aclModelRemoveACLFindCb(err, acl) {
@@ -179,9 +183,9 @@ module.exports = function DBTransactionFn(BaseACL) {
       // by matching each existing ACL against the ACL to be removed
       model.settings.acls = model.settings.acls.filter(function aclModelRemoveACLFindFilterFn(a) {
         return (!(a.property === acl.property &&
-          a.principalType === acl.principalType &&
-          a.principalId === acl.principalId &&
-          a.permission === acl.permission));
+                    a.principalType === acl.principalType &&
+                    a.principalId === acl.principalId &&
+                    a.permission === acl.permission));
       });
       var response = 'Removed ACL with id ' + id + ' from ' + model.modelName;
       log.debug(options, response);

@@ -239,7 +239,7 @@ module.exports = function UIMetadata(UIMetadata) {
                 if (modelField.itemtype === 'model') {
                   uitype = 'grid';
                   modelField.columndefs = [];
-                  modelField.gridIdentifier = app.models[modelField.modeltype].clientModelName; //modelField.modeltype;
+                  modelField.gridIdentifier = app.models[modelField.modeltype].clientModelName; // modelField.modeltype;
                 } else {
                   // array of primitives of type 'itemtype'
                   uitype = 'tags';

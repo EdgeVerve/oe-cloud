@@ -108,9 +108,9 @@ var createAdminUser = function createAdminUser(done) {
       }
     });
   }],
-    function finalCallback() {
-      done();
-    }
+  function finalCallback() {
+    done();
+  }
   );
 };
 

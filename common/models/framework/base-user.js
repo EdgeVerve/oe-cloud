@@ -330,23 +330,23 @@ module.exports = function BaseUser(BaseUser) {
         callback(null, userProfile ? userProfile : {});
       });
     }],
-      function finalCallBack(err, results) {
-        if (err) {
-          cb(err);
-        }
-        accessToken.roles = results[0];
-        accessToken.department = results[1].department;
-        if (self._autoScope && self._autoScope.tenantId) {
-          accessToken.tenantId = self._autoScope.tenantId;
-          accessToken.userTenantId = self._autoScope.tenantId;
-        } else {
-          log.debug(options, 'base user autoscope or tenant is not present', self.username);
-        }
-        accessToken.username = self.username;
-        accessToken.ttl = userModel.app.get('accessTokenTTL') || Math.min(ttl || userModel.settings.ttl, userModel.settings.maxTTL);
-        options = options || {};
-        self.accessTokens.create(accessToken, options, cb);
-      });
+    function finalCallBack(err, results) {
+      if (err) {
+        cb(err);
+      }
+      accessToken.roles = results[0];
+      accessToken.department = results[1].department;
+      if (self._autoScope && self._autoScope.tenantId) {
+        accessToken.tenantId = self._autoScope.tenantId;
+        accessToken.userTenantId = self._autoScope.tenantId;
+      } else {
+        log.debug(options, 'base user autoscope or tenant is not present', self.username);
+      }
+      accessToken.username = self.username;
+      accessToken.ttl = userModel.app.get('accessTokenTTL') || Math.min(ttl || userModel.settings.ttl, userModel.settings.maxTTL);
+      options = options || {};
+      self.accessTokens.create(accessToken, options, cb);
+    });
 
     return cb.promise;
   };

@@ -84,10 +84,10 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
 
     function addAllFunctions() {
 
-      var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-      transferDefinition.prototype.performBusinessValidations = function (cb) {
-        cb();
-      };
+        var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
+            transferDefinition.prototype.performBusinessValidations = function (options, cb) {
+                cb();
+            };
 
       var accountDefinition = loopback.getModel('TestAccount', bootstrap.defaultContext);
       accountDefinition.prototype.atomicTypes = ['DEBIT'];
