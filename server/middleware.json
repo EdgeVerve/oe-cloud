@@ -69,16 +69,12 @@
     },
     "routes": {
     },
-    "routes:after": {
-        "./middleware/res-logging-filter": {}
-    },
     "files": {
         "loopback#static": {
             "params": "$!../client"
         }
     },
     "final": {
-        "./middleware/res-logging-filter": {},
         "./middleware/url-not-found": {}
     },
     "final:after": {

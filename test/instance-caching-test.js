@@ -22,10 +22,14 @@ var expect = chai.expect;
 var app = bootstrap.app;
 var models = bootstrap.models;
 var loopback = require('loopback');
+var async = require('async');
+var api = bootstrap.api;
 var debug = require('debug')('caching-test');
 var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var logger = require('oe-logger');
+var log = logger('instance-caching-test');
 var defaultContext = {
     ctx: {
         tenantId: 'limits'
@@ -37,7 +41,44 @@ var altContext = {
     }
 };;
 var modelName = 'InstanceCachingTest';
+var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
 var dbname = 'db';
+var accessToken = null;
+
+function apiPostRequest(url, postData, callback, done) {
+    var version = uuid.v4();
+    postData._version = version;
+    api
+        .set('Accept', 'application/json')
+        .set('x-evproxy-db-lock', '1')
+        .post(bootstrap.basePath + url + '?access_token=' + accessToken)
+        .send(postData)
+        .end(function(err, res) {
+            if (err || res.body.error) {
+                //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
+                return done(err || (new Error(JSON.stringify(res.body.error))));
+            } else {
+                return callback(res);
+            }
+        });
+}
+
+function apiGetRequest(url, callback, done) {
+    var version = uuid.v4();
+    api
+        .set('Accept', 'application/json')
+        .set('x-evproxy-db-lock', '1')
+        .get(bootstrap.basePath + url + '?access_token=' + accessToken)
+        .send()
+        .end(function(err, res) {
+            if (err || res.body.error) {
+                //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
+                return done(err || (new Error(JSON.stringify(res.body.error))));
+            } else {
+                return callback(res);
+            }
+        });
+}
 
 function mongoDeleteById(id, cb) {
     var url = 'mongodb://'+mongoHost+':27017/' + dbname;
@@ -57,8 +98,30 @@ function mongoDeleteById(id, cb) {
 }
 
 describe('Instance Caching Test', function () {
-    return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
+   // return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
     var TestModel = null;
+    var TestModelNoInstanceCache = null;
+
+     before('login using admin', function fnLogin(done) {
+        var sendData = {
+            'username': 'admin',
+            'password': 'admin'
+        };
+
+        api
+            .set('x-evproxy-db-lock', '1')
+            .post(bootstrap.basePath + '/BaseUsers/login')
+            .send(sendData)
+            .expect(200).end(function(err, res) {
+                if (err) {
+                    log.error(log.defaultContext(), err);
+                    return done(err);
+                } else {
+                    accessToken = res.body.id;
+                    return done();
+                }
+            });
+    });
 
     before('Create Test Model', function (done) {
         var modelDefinition = loopback.findModel('ModelDefinition');
@@ -81,14 +144,58 @@ describe('Instance Caching Test', function () {
         };
 
         modelDefinition.create(data, bootstrap.defaultContext, function(err, model) {
-            // Delete all records in the table associated with this TestModel
-            TestModel = loopback.getModel(modelName);
-            TestModel.destroyAll({}, defaultContext, function (err, info) {
-                if (err) {
-                    return done(err);
+            if (err) {
+                return done(err);
+            } else {
+                // Delete all records in the table associated with this TestModel
+                TestModel = loopback.getModel(modelName);
+                TestModel.destroyAll({}, defaultContext, function (err, info) {
+                    if (err) {
+                        return done(err);
+                    } else {
+                        done();
+                    }
+                });
+            }
+        });
+    });
+
+before('Create Test Model with No InstanceCache', function (done) {
+        var modelDefinition = loopback.findModel('ModelDefinition');
+        
+        var data = {
+            'name': modelNameNoInstanceCache,
+            'base': 'BaseEntity',
+            'idInjection': true,
+            'options': {
+                instanceCacheSize: 2000,
+                instanceCacheExpiration: 100000,
+                queryCacheSize: 2000,
+                queryCacheExpiration: 5000,
+                disableManualPersonalization: true,
+                disableInstanceCache: true
+            },
+            'properties': {
+                'name': {
+                    'type': 'string'
                 }
-                done();
-            });
+            }
+        };
+
+        modelDefinition.create(data, bootstrap.defaultContext, function(err, model) {
+            if (err) {
+                return done(err);
+            } else {
+                // Delete all records in the table associated with this TestModel
+                TestModelNoInstanceCache = loopback.getModel(modelNameNoInstanceCache);
+                TestModelNoInstanceCache.destroyAll({}, defaultContext, function (err, info) {
+                    if (err) {
+                        return done(err);
+                    } else {
+                        done();
+                    }
+                });
+            }
         });
     });
 
@@ -415,6 +522,63 @@ describe('Instance Caching Test', function () {
             });
         });
 
+        it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function(done) {
+            /**
+             * 1. create new modle instance 
+             * 2. run a find query 
+             * 3. at this point, in a normal case, the instance should be cached
+             * 4. change the db directly in the DB.
+             * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
+             */
+            var id = uuid.v4();
+
+            apiPostRequest('/'+modelNameNoInstanceCache +'s/', {"name": "value1", "id": id}, apiRequest_find, done);
+ 
+             function apiRequest_find(result, callback) {
+                 apiGetRequest('/'+modelNameNoInstanceCache +'s/'+id, callback ? callback : dbQuery_update, done);
+             };
+
+            function dbQuery_update (result) {
+                MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
+                    if (err) return done(err);
+                    else {
+                        db.collection(modelNameNoInstanceCache).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
+                            if (err) return done(err);
+                            else apiRequest_find(result, comperCacheToDb);
+                        });
+                    }
+                });
+            }
+            
+            function comperCacheToDb(result){
+                if (result.body.name === "value2")  return done();
+                else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+            }
+        });
+
+        it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function(done) {
+            var id = uuid.v4();
+            TestModelNoInstanceCache.create({"name": modelNameNoInstanceCache, "id": id}, defaultContext, function(err, result) {
+                if (err) {
+                    return done(err);
+                } else {
+                    result.name = 'karin';
+                    TestModelNoInstanceCache.upsert(result, defaultContext, function(err, data) {
+                        if (err) {
+                            return done(err);
+                        } else {
+                            if (global.evDisableInstanceCache[modelNameNoInstanceCache] 
+                                && !global.instanceCache[modelNameNoInstanceCache]
+                                && !global.queryCache[modelNameNoInstanceCache]){
+                                return done();
+                            } else {
+                                return done(err);
+                            }
+                        }
+                    });
+                }
+            });
+        });
     });
 
     describe('Personalization tests', function () {

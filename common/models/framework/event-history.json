@@ -2,6 +2,7 @@
     "name": "EventHistory",
     "plural": "EventsHistroy",
     "base": "PersistedModel",
+    "strict": true,
     "description": "ensure reliability on failing events on all entities",
     "idInjection": false,
     "properties": {
@@ -16,6 +17,9 @@
         },
         "doStartUpOperation": {
             "type": "boolean"
+        },
+        "eventHistoryMap": {
+            "type": "object"
         }
     }
 }

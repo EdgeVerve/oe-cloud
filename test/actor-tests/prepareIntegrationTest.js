@@ -16,7 +16,7 @@ fs.writeFile("common/models/framework/inventory.json", invjson, function(err) {
     }
 }); 
 
-var inTrans = 'module.exports=function(InventoryTransaction){InventoryTransaction.prototype.performBusinessValidations=function(cb){cb();};};';
+var inTrans = 'module.exports=function(InventoryTransaction){InventoryTransaction.prototype.performBusinessValidations=function(options, cb){cb();};};';
 
 fs.writeFile("common/models/framework/inventoryTransaction.js", inTrans, function(err) {
     if(err) {
