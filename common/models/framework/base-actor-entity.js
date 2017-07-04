@@ -117,7 +117,6 @@ module.exports = function (BaseActorEntity) {
 
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
-    console.log('in get actor from memory, number of messages is ' + envelope.msg_queue.length);
     this.calculatePendingBalance(envelope, options, function (err, actorData) {
       if (err) {
         return cb(err);
@@ -223,7 +222,6 @@ module.exports = function (BaseActorEntity) {
     var journalEntity = context.journalEntity;
     var journalEntityType = journalEntity._type;
     var journalEntityVersion = journalEntity._version;
-    console.log('create message for entity ' + context.activity.entityId);
     var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
     return cb();
@@ -237,9 +235,7 @@ module.exports = function (BaseActorEntity) {
   };
 
   BaseActorEntity.prototype.processMessagesBackground = function (envelope, options, actorCb) {
-    console.log('processing background messages for entity ' + envelope.actor.id);
     var messages = envelope.msg_queue.slice(0);
-    console.log('In process message background, num of messages is  ' + messages.length);
     var self = this;
 
     if (messages.length === 0) {
