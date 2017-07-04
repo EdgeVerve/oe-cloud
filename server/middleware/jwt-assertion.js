@@ -34,8 +34,45 @@ module.exports = function JWTAssertionFn(options) {
   const cachedTokens = {};
 
   const opts = {};
-  // secretOrKey is a REQUIRED string or buffer containing the secret (symmetric) or PEM-encoded public key
-  opts.secretOrKey = jwtConfig.secretOrKey;
+  // function to form publickey
+  function sanitizePublicKey(key) {
+    // Public Key or Certificate must be in this specific format or else the function won't accept it
+    var beginKey = '';
+    var endKey = '';
+    if (key.indexOf('-----BEGIN PUBLIC KEY') > -1) {
+      beginKey = '-----BEGIN PUBLIC KEY-----';
+      endKey = '-----END PUBLIC KEY-----';
+    } else {
+      beginKey = '-----BEGIN CERTIFICATE-----';
+      endKey = '-----END CERTIFICATE-----';
+    }
+
+    key = key.replace('\n', '');
+    key = key.replace(beginKey, '');
+    key = key.replace(endKey, '');
+
+    var result = beginKey;
+    while (key.length > 0) {
+      if (key.length > 64) {
+        result += '\n' + key.substring(0, 64);
+        key = key.substring(64, key.length);
+      } else {
+        result += '\n' + key;
+        key = '';
+      }
+    }
+
+    if (result[result.length] !== '\n') { result += '\n'; }
+    result += endKey + '\n';
+    return result;
+  }
+  // secretOrKey is a REQUIRED string or buffer containing the secret(symmetric) or PEM - encoded public key
+  if (jwtConfig.secretOrKey.indexOf('-----BEGIN') > -1) {
+    opts.secretOrKey = sanitizePublicKey(jwtConfig.secretOrKey);
+  } else {
+    opts.secretOrKey = jwtConfig.secretOrKey;
+  }
+
 
   // issuer: If defined the token issuer (iss) will be verified against this value.
   opts.issuer = jwtConfig.issuer;
