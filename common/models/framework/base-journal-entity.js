@@ -61,6 +61,7 @@ module.exports = function (BaseJournalEntity) {
 
     var createOperationContext = function (activity, callback) {
       var Model = getActorModel(activity.modelName, ctx.options);
+      activity.modelName = Model.modelName;
       var operationContext = {};
       var query = { where: { id: activity.entityId }, limit: 1 };
       Model.find(query, options, function (err, actor) {

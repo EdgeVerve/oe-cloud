@@ -110,7 +110,11 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     modelDefinition.create(data, bootstrap.defaultContext, createTransferModel);
 
-    function createTransferModel() {
+    function createTransferModel(err) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
       var data = {
         'name': 'TestTransfer',
         'base': 'BaseJournalEntity'
@@ -118,8 +122,11 @@ describe(chalk.blue('business-validations-tests'), function () {
       modelDefinition.create(data, bootstrap.defaultContext, addAllFunctions);
     }
 
-    function addAllFunctions() {
-
+    function addAllFunctions(err) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
       var accountDefinition = loopback.getModel('TestAccount', bootstrap.defaultContext);
       accountDefinition.prototype.atomicTypes = ['DEBIT'];
       accountDefinition.prototype.nonAtomicTypes = ['CREDIT'];
