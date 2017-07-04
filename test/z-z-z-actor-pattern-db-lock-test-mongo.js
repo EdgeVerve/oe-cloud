@@ -176,10 +176,11 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
             } else {
               //console.log ("Results: " + res);
               var testAccountLockCounter = 0;
+              var newModelName1 = loopback.findModel('TestAccount', bootstrap.defaultContext);
               res.forEach(function (element) {
                 if (element.modelName === "TestTransfers") {
                   return done(new Error("Lock was acquired on entity where dbLockRequired == false"))
-                } else if (element.modelName === "TestAccount" && element.modelId == testAccountsId) testAccountLockCounter++;
+                } else if (element.modelName === newModelName1.modelName && element.modelId == testAccountsId) testAccountLockCounter++;
               }, this);
 
               if (testAccountLockCounter > 0) {
