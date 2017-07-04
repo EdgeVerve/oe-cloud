@@ -61,7 +61,6 @@ module.exports = function RestApiActorsMixin(Model) {
       context.journalEntity = {
         id: ''
       };
-      console.log(' before rest api - get or create instance for id ' + id);
       memoryPool.getOrCreateInstance(context, options, function (err, newContext) {
         if (err) {
           return next(err);
@@ -69,7 +68,6 @@ module.exports = function RestApiActorsMixin(Model) {
         var envelope = newContext.envelope;
         actor.constructor.instanceLocker().acquire(actor, options, actor._version, function (releaseLockCb) {
           actor.getActorFromMemory(envelope, options, function (err, result) {
-            console.log('result is ' +  JSON.stringify(result));
             if (err) {
               return releaseLockCb(err);
             }
