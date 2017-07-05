@@ -403,9 +403,10 @@ module.exports = function uiComponent(UIComponent) {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
             // assume 'name' ??
-            fmeta.displayproperty = 'name';
+            var displayProperty = (modelTo.base === 'RefCodeBase'?'description':'name');
+            fmeta.displayproperty = displayProperty;
             fmeta.resturl = modelTo.resturl;
-            fmeta.searchurl = fmeta.resturl + '?filter[where][name][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
+            fmeta.searchurl = fmeta.resturl + '?filter[where][' + displayProperty + '][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
             fmeta.dataurl = fmeta.resturl + '/VALUE_STRING';
           }
         } else if (relation.type === 'embedsMany') {
