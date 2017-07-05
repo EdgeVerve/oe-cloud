@@ -1245,12 +1245,19 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
 
     after('check state is updated against DB', function(done) {
         var stateModel = loopback.getModel('State');
-        async.retry({times: 50}, function(retrycb) {
+        async.retry({times: 5}, function(retrycb) {
             async.eachOf(afterTest, function(value, stateId, cb) {
                 var query = {
                     where: {id: stateId}
                 };
-                stateModel.find(query, bootstrap.defaultContext, function(err, res) {
+                var dbLockContext = {
+                    ctx: {
+                        tenantId: 'test-tenant',
+                        remoteUser: 'test-user'
+                    },
+                    lockMode : 'dbLock'
+                };
+                stateModel.find(query, dbLockContext, function(err, res) {
                     if (err) {
                         log.error(log.defaultContext(), err);
                         return cb(err);
@@ -1265,7 +1272,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 });
             }, function(err) {
                 if (err) {
-                    return setTimeout(retrycb, 1000, err);
+                    return setTimeout(retrycb, 10000, err);
                 } else {
                     return retrycb(null, true);
                 }
