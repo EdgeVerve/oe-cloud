@@ -101,7 +101,7 @@ module.exports = function DBModels(app, cb) {
       where: {
         filebased: false
       },
-      order: "_createdOn"
+      order: '_createdOn'
     }, options, function dbModelsModelDefinitionFindCb(err, results) {
       if (err) {
         log.warn(options, {
