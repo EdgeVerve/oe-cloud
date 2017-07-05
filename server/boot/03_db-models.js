@@ -100,7 +100,8 @@ module.exports = function DBModels(app, cb) {
     modelDefinition.find({
       where: {
         filebased: false
-      }
+      },
+      order: "_createdOn"
     }, options, function dbModelsModelDefinitionFindCb(err, results) {
       if (err) {
         log.warn(options, {
