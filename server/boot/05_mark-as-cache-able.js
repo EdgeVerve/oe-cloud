@@ -6,8 +6,15 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 */
 var config = require('../../server/config');
 var log = require('oe-logger')('markascacheable');
-var messaging = require('../../lib/common/ev-global-messaging');
+var messaging = require('../../lib/common/global-messaging');
 var loopback = require('loopback');
+
+messaging.subscribe('evictQueryCache', function (modelName) {
+  var model = loopback.findModel(modelName);
+  if (model) {
+    model.evictCache(false);
+  }
+});
 
 messaging.subscribe('evictCache', function (modelName) {
   var model = loopback.findModel(modelName);
@@ -15,7 +22,6 @@ messaging.subscribe('evictCache', function (modelName) {
     model.evictCache(true);
   }
 });
-
 /**
  * This boot script marks as cacheable the models listed under the
  * "modelstocache" property in the config.json application configuration
