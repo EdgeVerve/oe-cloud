@@ -28,25 +28,7 @@ describe(chalk.blue('Relation Validation test'), function () {
 
   before('setup test data', function (done) {
     models.ModelDefinition.events.once('model-' + courseModelName + '-available', function () {
-      var data = [{
-        'name': 'TAJ',
-        'rating': 7,
-        'city': 'MUM',
-        'hotelId': 29
-      },
-      {
-        'name': 'OBEROI',
-        'rating': 8,
-        'city': 'DL',
-        'hotelId': 98,
-        'scope': {
-          'dev': 'android'
-        }
-      }];
-      parentModel.create(data, bootstrap.defaultContext, function (err, results) {
-        expect(err).to.be.null;
-        done();
-      });
+      return;
     });
 
     models.ModelDefinition.create({
@@ -190,6 +172,25 @@ describe(chalk.blue('Relation Validation test'), function () {
                   restaurantModel = loopback.getModel(restaurantModelName, bootstrap.defaultContext);
                   courseModel = loopback.getModel(courseModelName, bootstrap.defaultContext);
                   expect(err).to.be.not.ok;
+                  var data = [{
+                    'name': 'TAJ',
+                    'rating': 7,
+                    'city': 'MUM',
+                    'hotelId': 29
+                  },
+                  {
+                    'name': 'OBEROI',
+                    'rating': 8,
+                    'city': 'DL',
+                    'hotelId': 98,
+                    'scope': {
+                      'dev': 'android'
+                    }
+                  }];
+                  parentModel.create(data, bootstrap.defaultContext, function (err, results) {
+                    expect(err).to.be.null;
+                    done();
+                  });
                 });
               }
               expect(err).to.be.not.ok;

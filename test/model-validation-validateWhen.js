@@ -26,52 +26,8 @@ describe(chalk.blue('Validation validateWhen test'), function () {
 
     before('setup test data', function (done) {
         models.ModelDefinition.events.once('model-' + childModelName + '-available', function () {
+          return;
 
-            var cust1 = {
-                'id': 101,
-                'name': 'Mike',
-                'dob': '1936-06-10',
-                'cityType': 'Urban',
-                'age': 80,
-                'accNo': 1001
-            };
-            var cust2 = {
-                'id': 102,
-                'name': 'John',
-                'dob': '1998-05-05',
-                'cityType': 'Urban',
-                'age': 18,
-                'accNo': 1002
-            };
-            var cust3 = {
-                'id': 103,
-                'name': 'Jack',
-                'dob': '1951-02-01',
-                'cityType': 'Semi-Urban',
-                'age': 65,
-                'accNo': 1003
-            };
-            var cust4 = {
-                'id': 104,
-                'name': 'Jill',
-                'dob': '1961-03-03',
-                'cityType': 'Rural',
-                'age': 55,
-                'accNo': 1004
-            };
-            parentModel.create(cust1, bootstrap.defaultContext, function (err, results) {
-                expect(err).to.be.null;
-                parentModel.create(cust2, bootstrap.defaultContext, function (err, results) {
-                    expect(err).to.be.null;
-                    parentModel.create(cust3, bootstrap.defaultContext, function (err, results) {
-                        expect(err).to.be.null;
-                        parentModel.create(cust4, bootstrap.defaultContext, function (err, results) {
-                            expect(err).to.be.null;
-                            done();
-                        });
-                    });
-                });
-            });
         });
 
         models.ModelDefinition.create({
@@ -219,6 +175,51 @@ describe(chalk.blue('Validation validateWhen test'), function () {
                             childModel = loopback.getModel(childModelName, bootstrap.defaultContext)
                             addressModel = loopback.getModel(addressModelName, bootstrap.defaultContext)
                             expect(err).to.be.not.ok;
+                            var cust1 = {
+                              'id': 101,
+                              'name': 'Mike',
+                              'dob': '1936-06-10',
+                              'cityType': 'Urban',
+                              'age': 80,
+                              'accNo': 1001
+                            };
+                            var cust2 = {
+                              'id': 102,
+                              'name': 'John',
+                              'dob': '1998-05-05',
+                              'cityType': 'Urban',
+                              'age': 18,
+                              'accNo': 1002
+                            };
+                            var cust3 = {
+                              'id': 103,
+                              'name': 'Jack',
+                              'dob': '1951-02-01',
+                              'cityType': 'Semi-Urban',
+                              'age': 65,
+                              'accNo': 1003
+                            };
+                            var cust4 = {
+                              'id': 104,
+                              'name': 'Jill',
+                              'dob': '1961-03-03',
+                              'cityType': 'Rural',
+                              'age': 55,
+                              'accNo': 1004
+                            };
+                            parentModel.create(cust1, bootstrap.defaultContext, function (err, results) {
+                              expect(err).to.be.null;
+                              parentModel.create(cust2, bootstrap.defaultContext, function (err, results) {
+                                expect(err).to.be.null;
+                                parentModel.create(cust3, bootstrap.defaultContext, function (err, results) {
+                                  expect(err).to.be.null;
+                                  parentModel.create(cust4, bootstrap.defaultContext, function (err, results) {
+                                    expect(err).to.be.null;
+                                    done();
+                                  });
+                                });
+                              });
+                            });
                         });
                     }
                     expect(err).to.be.not.ok;

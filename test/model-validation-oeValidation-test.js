@@ -31,7 +31,7 @@ describe(chalk.blue('EV Validation test'), function () {
 
   before('setup test data', function (done) {
     models.ModelDefinition.events.once('model-' + childModelName + '-available', function () {
-
+      return;
       var data = [{
         'fuel': 'petrol'
       },
@@ -117,6 +117,21 @@ describe(chalk.blue('EV Validation test'), function () {
           childModel = loopback.getModel(childModelName, bootstrap.defaultContext);
           errorModel = loopback.getModel(errorModelName);
           expect(err).to.be.not.ok;
+
+          var data = [{
+            'fuel': 'petrol'
+          },
+          {
+            'fuel': 'diesel',
+            'scope': {
+              'location': 'INDIA'
+            }
+          }];
+          parentModel.create(data, bootstrap.defaultContext, function (err, results) {
+            expect(err).to.be.null;
+            return done();
+          });
+
         });
       }
       expect(err).to.be.not.ok;
