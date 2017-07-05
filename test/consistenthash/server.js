@@ -14,6 +14,7 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var modelName = 'ConsistentHashModel';
 var os = require('os');
+var loopback=require('loopback');
 
 describe('Consistent Hash Server', function () {
   var model;
