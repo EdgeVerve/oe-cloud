@@ -61,6 +61,7 @@ describe('Consistent Hash Server', function () {
           checkAndCreateData(done);
         });
       } else {
+        model = loopback.getModel(modelName, bootstrap.defaultContext);
         checkAndCreateData(done);
       }
     });
