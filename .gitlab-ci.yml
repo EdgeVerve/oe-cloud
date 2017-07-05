@@ -25,6 +25,7 @@ buildjob:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
+    - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
