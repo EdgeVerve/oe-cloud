@@ -52,7 +52,7 @@ describe('Consistent Hash Server', function () {
           },
           filebased: false
         };
-        models.ModelDefinition.create(consistHashModel, bootstrap.defaultContext, function (err, model) {
+        models.ModelDefinition.create(consistHashModel, bootstrap.defaultContext, function (err, modelRes) {
           if (err) {
             console.log(err);
           }
