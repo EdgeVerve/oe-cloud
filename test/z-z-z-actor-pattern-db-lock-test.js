@@ -1251,7 +1251,14 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 var query = {
                     where: {id: stateId}
                 };
-                stateModel.find(query, bootstrap.defaultContext, function(err, res) {
+                var dbLockContext = {
+                    ctx: {
+                        tenantId: 'test-tenant',
+                        remoteUser: 'test-user'
+                    },
+                    lockMode : 'dbLock'
+                };
+                stateModel.find(query, dbLockContext, function(err, res) {
                     if (err) {
                         log.error(log.defaultContext(), err);
                         return cb(err);
