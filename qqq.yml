@@ -1,19 +1,19 @@
 version: "3"
 services:
   mongo:
-    image: registry.evfapp.dev/alpine-mongo:latest
+    image: ${REGISTRY}/alpine-mongo:latest
     networks:
-      - $NETWORK_NAME
+      - ${NETWORK_NAME}
       
   broadcaster:
-    image: registry.evfapp.dev/evf-broadcaster-server:latest
+    image: ${REGISTRY}/evf-broadcaster-server:latest
     environment:
       SERVICE_PORTS: "2345"
     networks:
-      - $NETWORK_NAME
+      - ${NETWORK_NAME}
  
   routerservice:
-    image: registry.evfapp.dev/evfpaas-router-service:latest
+    image: ${REGISTRY}/evfpaas-router-service:latest
     environment:
       HASH_RING_REFRESH_TIME_INTERVAL: "10000"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
@@ -22,10 +22,9 @@ services:
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
-      - $NETWORK_NAME
+      - ${NETWORK_NAME}
       - router_network
-
-       
+  
   web:
     image: $REGISTRY/${APP_IMAGE_NAME}:latest
     depends_on:
@@ -37,7 +36,7 @@ services:
       update_config:
         delay: 60s
     environment:
-      VIRTUAL_HOST:  "https://${APP_IMAGE_NAME}.${DOMAIN_NAME},${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+      VIRTUAL_HOST: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME},${APP_IMAGE_NAME}.${DOMAIN_NAME}"
       SERVICE_PORTS: "3000"
       FORCE_SSL: "yes"
       CONSISTENT_HASH: "true"
@@ -50,7 +49,7 @@ services:
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
-      - $NETWORK_NAME
+      - ${NETWORK_NAME}
       - router_network
 
 networks:
