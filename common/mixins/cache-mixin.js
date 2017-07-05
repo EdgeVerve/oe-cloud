@@ -21,7 +21,6 @@
 var logger = require('oe-logger');
 var log = logger('cache-mixin');
 var messaging = require('../../lib/common/global-messaging');
-// var uuid = require('node-uuid');
 
 module.exports = function CacheMixin(Model) {
   // Add an 'After Save' observer for this Model to evict the cache
@@ -29,7 +28,7 @@ module.exports = function CacheMixin(Model) {
   // is updated.
   Model.evObserve('after save', clearCacheOnSave);
   Model.evObserve('after delete', clearCacheOnDelete);
-  Model.evObserve('after cache', evictCache);
+  Model.evObserve('after cache', evictQueryCache);
 
   // create the global evDisableInstanceCache object if not present
   if (!global.evDisableInstanceCache) {
@@ -86,7 +85,8 @@ function clearCacheOnDelete(ctx, next) {
  * @param {object} ctx - The context object containing the model instance.
  * @param {function} next - The function to be called for letting Loopback know that it can proceed with the next hook.
  */
-var evictCache = function evCacheMixinEvictCacheCb(ctx, next) {
-  messaging.publish('evictCache', ctx.Model.modelName);
+
+var evictQueryCache = function evCacheMixinEvictQueryCacheCb(ctx, next) {
+  messaging.publish('evictQueryCache', ctx.Model.modelName);
   next();
 };
