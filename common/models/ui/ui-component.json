@@ -52,25 +52,27 @@
 			"type": "object",
 			"description" : "Any data which can be used by UI for this component"
 		},
-        "polymerConfig" : {
+    "polymerConfig" : {
 			"type": "object",
 			"description" : "Polymer Configuration, used for polymer registration"
 		},
-        "autoInjectFields" : {
+    "autoInjectFields" : {
 			"type": "boolean",
 			"description" : "Whether remaining model fields should be auto injected or not",
-            "default" : true
-        },
-        "excludeFields" : {
+      "default" : true
+    },
+    "excludeFields" : {
 			"type": "object",
 			"description" : "Fields which are to be excluded from injection"
-        },     
-        "oeValidations": {
-            "type": [
-                "Validation"
-            ],
-            "required": false
-        }
+    },     
+    "oeValidations": {
+      "type": ["Validation"],
+      "required": false
+    },
+		"importUrls":{
+			"type":["string"],
+			"description" : "Additionals Import links for the component"
+		}
 	},
 	"validations": [],
 	"relations": {},
