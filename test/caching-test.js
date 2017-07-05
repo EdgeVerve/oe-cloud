@@ -208,7 +208,7 @@ describe('Caching Test', function () {
 
         it('Should not use cache when when dblock on', function (done) {
             if (result1.body.name !== result2.body.name)  return done();
-            else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+            else return done(new Error("The query was cached although dblock is on"));
         });
 
          after('unset the dbLock header', function(done) {
