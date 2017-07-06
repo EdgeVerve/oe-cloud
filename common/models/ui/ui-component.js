@@ -212,7 +212,7 @@ module.exports = function uiComponent(UIComponent) {
 
     async.parallel(tasks, function finalMergeTask(err, results) {
       if (err) {
-        callback(err, undefined);
+        callback(err);
       } else {
         if (fetchAsHtml) {
           if (component.importUrls) {
@@ -241,14 +241,14 @@ module.exports = function uiComponent(UIComponent) {
     };
 
 
-    //Prefer find and results[0] instead of findOne 
-    //so that data-personalization is applied effectively.
+    // Prefer find and results[0] instead of findOne
+    // so that data-personalization is applied effectively.
     UIComponent.find(where, options, function findOneCb(err, results) {
       if (err) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
-      var component = results? results[0]:undefined;
+      var component = results ? results[0] : undefined;
       if (!component) {
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
@@ -411,7 +411,7 @@ module.exports = function uiComponent(UIComponent) {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
             // assume 'name' ??
-            var displayProperty = (modelTo.base === 'RefCodeBase'?'description':'name');
+            var displayProperty = (modelTo.base === 'RefCodeBase'? 'description' : 'name');
             fmeta.displayproperty = displayProperty;
             fmeta.resturl = modelTo.resturl;
             fmeta.searchurl = fmeta.resturl + '?filter[where][' + displayProperty + '][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
@@ -535,8 +535,8 @@ module.exports = function uiComponent(UIComponent) {
                 name: componentName
               }
             };
-            //Prefer find and results[0] over findOne
-            //for data-personalization to work effectively
+            // Prefer find and results[0] over findOne
+            // for data-personalization to work effectively
             UIComponent.find(filter, options, function findComponentCb(err, results) {
               if (err) {
                 done(err);
