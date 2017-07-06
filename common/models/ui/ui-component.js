@@ -411,7 +411,7 @@ module.exports = function uiComponent(UIComponent) {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
             // assume 'name' ??
-            var displayProperty = (modelTo.base === 'RefCodeBase'? 'description' : 'name');
+            var displayProperty = (modelTo.base === 'RefCodeBase' ? 'description' : 'name');
             fmeta.displayproperty = displayProperty;
             fmeta.resturl = modelTo.resturl;
             fmeta.searchurl = fmeta.resturl + '?filter[where][' + displayProperty + '][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
