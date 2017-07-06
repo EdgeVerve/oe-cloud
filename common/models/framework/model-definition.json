@@ -130,6 +130,7 @@
     "relations": {},
     "acls": [],
     "methods": {},
+	  "cacheable": true,
     "enumList": {
         "type": ["object"]
     }

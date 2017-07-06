@@ -19,6 +19,7 @@ var logger = require('oe-logger');
 var log = logger('actor-pattern-db-lock-tests');
 var api = bootstrap.api;
 var async = require('async');
+var uuid = require('node-uuid');
 
 var accessToken;
 
@@ -41,7 +42,7 @@ function apiRequest(url, postData, callback, done) {
 }
 
 describe(chalk.blue('actor-pattern-db-lock-test'), function() {
-    this.timeout(40000);
+    this.timeout(60000);
     var afterTest = {};
 
     before('login using admin', function fnLogin(done) {
@@ -1097,15 +1098,15 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
     it('should create 9 accounts in parallel. Then credit them with 1000 in parallel. Then debit 3*10 from all of them in parallel', function(done) {
 
         var ids = [];
-        ids.push('aa1');
-        ids.push('bb1');
-        ids.push('cc1');
-        ids.push('dd1');
-        ids.push('ee1');
-        ids.push('ff1');
-        ids.push('gg1');
-        ids.push('hh1');
-        ids.push('ii1');
+        ids.push('aa11'); //_' + uuid.v4()
+        ids.push('bb11');
+        ids.push('cc11');
+        ids.push('dd11');
+        ids.push('ee11');
+        ids.push('ff11');
+        ids.push('gg11');
+        ids.push('hh11');
+        ids.push('ii11');
 
         var createData = {
             stateObj: {quantity: 0}
@@ -1250,7 +1251,14 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                 var query = {
                     where: {id: stateId}
                 };
-                stateModel.find(query, bootstrap.defaultContext, function(err, res) {
+                var dbLockContext = {
+                    ctx: {
+                        tenantId: 'test-tenant',
+                        remoteUser: 'test-user'
+                    },
+                    lockMode : 'dbLock'
+                };
+                stateModel.find(query, dbLockContext, function(err, res) {
                     if (err) {
                         log.error(log.defaultContext(), err);
                         return cb(err);
