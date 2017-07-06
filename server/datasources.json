@@ -9,13 +9,12 @@
     },
     "db": {
         "host": "localhost",
-        "port": 27017,
-        "url": "mongodb://localhost:27017/db",
+        "port": 5432,
         "database": "db",
-        "password": "admin",
+        "password": "postgres",
         "name": "db",
-        "connector": "mongodb",
-        "user": "admin",
+        "connector": "postgresql",
+        "user": "postgres",
         "connectionTimeout": 50000
     },
     "emailDs": {
