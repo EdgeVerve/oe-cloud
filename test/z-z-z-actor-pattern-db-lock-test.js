@@ -41,7 +41,7 @@ function apiRequest(url, postData, callback, done) {
 }
 
 describe(chalk.blue('actor-pattern-db-lock-test'), function () {
-  this.timeout(40000);
+  this.timeout(60000);
   var afterTest = {};
 
   before('login using admin', function fnLogin(done) {
@@ -1250,7 +1250,14 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
         var query = {
           where: { id: stateId }
         };
-        stateModel.find(query, bootstrap.defaultContext, function (err, res) {
+	var dbLockContext = {
+	                    ctx: {
+                        tenantId: 'test-tenant',
+                        remoteUser: 'test-user'
+                    },
+                    lockMode : 'dbLock'
+                };
+        stateModel.find(query, dbLockContext, function (err, res) {
           if (err) {
             log.error(log.defaultContext(), err);
             return cb(err);
@@ -1265,7 +1272,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
         });
       }, function (err) {
         if (err) {
-          return setTimeout(retrycb, 3000, err);
+          return setTimeout(retrycb, 10000, err);
         } else {
           return retrycb(null, true);
         }
