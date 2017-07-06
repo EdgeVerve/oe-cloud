@@ -234,12 +234,14 @@ module.exports = function uiComponent(UIComponent) {
     };
 
 
-    UIComponent.findOne(where, options, function findOneCb(err, component) {
+    //Prefer find and results[0] instead of findOne 
+    //so that data-personalization is applied effectively.
+    UIComponent.find(where, options, function findOneCb(err, results) {
       if (err) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
-
+      var component = results? results[0]:undefined;
       if (!component) {
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
@@ -527,12 +529,14 @@ module.exports = function uiComponent(UIComponent) {
                 name: componentName
               }
             };
-            UIComponent.findOne(filter, options, function findComponentCb(err, component) {
+            //Prefer find and results[0] over findOne
+            //for data-personalization to work effectively
+            UIComponent.find(filter, options, function findComponentCb(err, results) {
               if (err) {
                 done(err);
               }
-              if (component) {
-                done(null, component);
+              if (results && results[0]) {
+                done(null, results[0]);
               } else {
                 createComponent(model, templateType, options, done);
               }
