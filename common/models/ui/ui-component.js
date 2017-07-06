@@ -47,6 +47,12 @@ module.exports = function uiComponent(UIComponent) {
                       callback(err3, data2.toString());
                     }
                   });
+                } else {
+                  var error = new Error();
+                  error.message = 'Template ' + template + ' not found';
+                  error.code = 'TEMPLATE_TYPE_MISSING';
+                  error.statusCode = 422;
+                  callback(error, '');
                 }
               });
             } else {
@@ -206,18 +212,19 @@ module.exports = function uiComponent(UIComponent) {
 
     async.parallel(tasks, function finalMergeTask(err, results) {
       if (err) {
-        callback(err);
-      }
-      if (fetchAsHtml) {
-        if (component.importUrls) {
-          var importLinks = component.importUrls.map(function createLinks(importUrl) {
-            return '<link rel="import" dynamic-link href="' + importUrl + '">';
-          });
-          html = importLinks.join('\n') + '\n' + html;
-        }
-        mergeAsHTML(html, response, callback);
+        callback(err, undefined);
       } else {
-        callback(null, response);
+        if (fetchAsHtml) {
+          if (component.importUrls) {
+            var importLinks = component.importUrls.map(function createLinks(importUrl) {
+              return '<link rel="import" dynamic-link href="' + importUrl + '">';
+            });
+            html = importLinks.join('\n') + '\n' + html;
+          }
+          mergeAsHTML(html, response, callback);
+        } else {
+          callback(null, response);
+        }
       }
     });
   };
@@ -248,8 +255,7 @@ module.exports = function uiComponent(UIComponent) {
           var modelAndType = componentName.split('-');
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
           var templateType = modelAndType[1];
-          var types = ['form', 'list'];
-          if (modelName && templateType && types.indexOf(templateType) !== -1) {
+          if (modelName && templateType) {
             var model = UIComponent.app.models[modelName];
             component = defaultComponent(model, templateType);
             // add autoInjectFields = true to render the form if templateType is form.
