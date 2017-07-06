@@ -3,6 +3,7 @@ stages:
   - test
 
 cache:
+  untracked: true
   paths: 
     - node_modules/
 
@@ -48,6 +49,7 @@ buildjob:
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
   artifacts:
     untracked: true
+    expire_in: 2h
     paths:
       - node_modules/
   tags:
