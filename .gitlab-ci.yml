@@ -35,16 +35,16 @@ buildjob:
     - echo "Building oe-cloud image..."
     - time npm install --no-optional
     - time evf-paas build & buildpid=$!
-    # - mkdir -p /data/db
-    # - mongod --dbpath /data/db &
-    # - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-    # - export APP_URL=http://localhost:8080/api
-    # - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-    # - mocha test/consistenthash/server.js &
-    # - sleep 60
-    # - mocha test/consistenthash/server.js 3100 &
-    # - sleep 60
-    # - mocha test/consistenthash/client.js 3200
+    - mkdir -p /data/db
+    - mongod --dbpath /data/db &
+    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
+    - export APP_URL=http://localhost:8080/api
+    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - mocha test/consistenthash/server.js &
+    - sleep 60
+    - mocha test/consistenthash/server.js 3100 &
+    - sleep 60
+    - mocha test/consistenthash/client.js 3200
     - wait ${buildpid}
     - echo "Image ($REGISTRY/$APP_IMAGE_NAME:latest) built and pushed to registry"
   tags:
