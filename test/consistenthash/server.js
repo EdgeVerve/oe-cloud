@@ -14,6 +14,7 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var modelName = 'ConsistentHashModel';
 var os = require('os');
+var loopback=require('loopback');
 
 describe('Consistent Hash Server', function () {
   var model;
@@ -51,17 +52,16 @@ describe('Consistent Hash Server', function () {
           },
           filebased: false
         };
-        models.ModelDefinition.create(consistHashModel, bootstrap.defaultContext, function (err, model) {
+        models.ModelDefinition.create(consistHashModel, bootstrap.defaultContext, function (err, modelRes) {
           if (err) {
             console.log(err);
           }
           expect(err).to.be.null;
           model = loopback.getModel(modelName, bootstrap.defaultContext);
-        });
-        models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
           checkAndCreateData(done);
         });
       } else {
+        model = loopback.getModel(modelName, bootstrap.defaultContext);
         checkAndCreateData(done);
       }
     });

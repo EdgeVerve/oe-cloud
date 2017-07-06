@@ -45,6 +45,7 @@ module.exports = function DBModels(app, cb) {
     // first disable ChangeStream for file based models
     var model = app.models[key];
     model.clientModelName = key;
+    model.clientPlural = model.pluralModelName;
     util.attachOverrideModelFunction(model);
     model.disableRemoteMethod('createChangeStream', true);
     app.locals.modelNames[key.toLowerCase()] = model.modelName;

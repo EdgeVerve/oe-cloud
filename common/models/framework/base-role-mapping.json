@@ -30,5 +30,6 @@
         }
     },
     "acls": [],
+		"cacheable": true,
     "methods": {}
 }

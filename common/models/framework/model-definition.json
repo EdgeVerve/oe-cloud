@@ -1,157 +1,163 @@
 {
-	"name": "ModelDefinition",
-	"base": "BaseEntity",
-	"strict": true,
-	"plural": "ModelDefinitions",
-	"description": "This model stores application models metadata",
-	"options": {
-		"validateUpsert": true,
-		"isFrameworkModel": true
-	},
-	"properties": {
-		"properties": {
-			"type": "object"
-		},
-		"readonly": {
-			"type": "boolean",
-			"default": false
-		},
-		"name": {
-			"type": "string",
-			"required": true,
-			"unique": "ignoreCase",
-			"max": 100,
-			"notin": [
-				"Model",
-				"PersistedModel",
-				"User",
-				"AccessToken",
-				"ACL",
-				"RoleMapping",
-				"Role"
-			],
-			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
-		},
-		"description": {
-			"type": "string",
-			"max": 500
-		},
-		"plural": {
-			"type": "string",
-			"unique": "ignoreCase",
-			"max": 105,
-			"pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
-		},
-		"base": {
-			"type": "string",
-			"max": 100
-		},
-		"strict": {
-			"type": "boolean",
-			"default": false
-		},
-		"public": {
-			"type": "boolean",
-			"default": true
-		},
-		"idInjection": {
-			"type": "boolean",
-			"default": false
-		},
-		"validateUpsert": {
-			"type": "boolean",
-			"default": false
-		},
-		"validations": {
-			"type": [
-				"object"
-			]
-		},
-		"relations": {
-			"type": "object"
-		},
-		"acls": {
-			"type": [
-				"object"
-			]
-		},
-		"methods": {
-			"type": "object"
-		},
-		"filebased": {
-			"type": "boolean",
-			"default": false
-		},
-		"compositeModels": {
-			"type": "object"
-		},
-		"CompositeTransaction": {
-			"type": "boolean",
-			"default": false
-		},
-		"dataSourceName": {
-			"type": "string",
-			"default": "db",
-			"max": 30
-		},
-		"autoscope": {
-			"type": [
-				"string"
-			]
-		},
-		"hierarchyScope": {
-			"type": [
-				"string"
-			]
-		},
-		"mixins": {
-			"type": "object"
-		},
-		"mongodb": {
-			"type": "object"
-		},
-		"variantOf": {
-			"type": "string"
-		},
-		"upward": {
-			"type": "boolean",
-			"default": false
-		},
-		"options": {
-			"type": "object"
-		},
-		"oeValidations": {
-			"type": "object"
-		},
-		"enableDefaultUI": {
-			"type": "boolean",
-			"default": false,
-			"description": "This flag is for application use to enable ui component/routes etc. for this model"
-		},
-		"enableRemoteProxy": {
-			"type": "boolean",
-			"default": true
-		},
-		"clientModelName": {
-			"type": "string"
-		},
-		"clientPlural": {
-			"type": "string"
-		},
-		"modelId": {
-			"type": "string"
-		}
-	},
-	"hidden": [
-		"filebased"
-	],
-	"validations": [],
-	"relations": {},
-	"acls": [],
-	"methods": {},
-	"enumList": {
-		"type": [
-			"object"
-		]
-	}
+  "name": "ModelDefinition",
+  "base": "BaseEntity",
+  "strict": true,
+  "plural": "ModelDefinitions",
+  "description": "This model stores application models metadata",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "properties": {
+      "type": "object"
+    },
+    "readonly": {
+      "type": "boolean",
+      "default": false
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": "ignoreCase",
+      "max": 100,
+      "notin": [
+        "Model",
+        "PersistedModel",
+        "User",
+        "AccessToken",
+        "ACL",
+        "RoleMapping",
+        "Role"
+      ],
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "description": {
+      "type": "string",
+      "max": 500
+    },
+    "plural": {
+      "type": "string",
+      "unique": "ignoreCase",
+      "max": 105,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "base": {
+      "type": "string",
+      "max": 100
+    },
+    "strict": {
+      "type": "boolean",
+      "default": false
+    },
+    "public": {
+      "type": "boolean",
+      "default": true
+    },
+    "idInjection": {
+      "type": "boolean",
+      "default": false
+    },
+    "validateUpsert": {
+      "type": "boolean",
+      "default": false
+    },
+    "validations": {
+      "type": [
+        "object"
+      ]
+    },
+    "relations": {
+      "type": "object"
+    },
+    "acls": {
+      "type": [
+        "object"
+      ]
+    },
+    "methods": {
+      "type": "object"
+    },
+    "filebased": {
+      "type": "boolean",
+      "default": false
+    },
+    "compositeModels": {
+      "type": "object"
+    },
+    "CompositeTransaction": {
+      "type": "boolean",
+      "default": false
+    },
+    "dataSourceName": {
+      "type": "string",
+      "default": "db",
+      "max": 30
+    },
+    "autoscope": {
+      "type": [
+        "string"
+      ]
+    },
+    "hierarchyScope": {
+      "type": [
+        "string"
+      ]
+    },
+    "mixins": {
+      "type": "object"
+    },
+    "mongodb": {
+      "type": "object"
+    },
+    "variantOf": {
+      "type": "string"
+    },
+    "upward": {
+      "type": "boolean",
+      "default": false
+    },
+    "options": {
+      "type": "object"
+    },
+    "oeValidations": {
+      "type": "object"
+    },
+    "enableDefaultUI": {
+      "type": "boolean",
+      "default": false,
+      "description": "This flag is for application use to enable ui component/routes etc. for this model"
+    },
+    "enableRemoteProxy": {
+      "type": "boolean",
+      "default": true
+    },
+    "clientModelName": {
+      "type": "string"
+    },
+    "clientPlural": {
+      "type": "string"
+    },
+    "modelId": {
+      "type": "string"
+    },
+    "hidden": {
+      "type": [
+        "string"
+      ]
+    }
+  },
+  "hidden": [
+    "filebased"
+  ],
+  "cacheable": true,
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {},
+  "enumList": {
+    "type": [
+      "object"
+    ]
+  }
 }

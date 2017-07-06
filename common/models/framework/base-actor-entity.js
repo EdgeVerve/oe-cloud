@@ -280,7 +280,7 @@ module.exports = function (BaseActorEntity) {
     });
   };
 
-  BaseActorEntity.prototype.MAX_RETRY_COUNT = 3;
+  BaseActorEntity.prototype.MAX_RETRY_COUNT = 10;
 
   BaseActorEntity.prototype.processPendingMessage = function (message, atomicAmount) {
     return atomicAmount;

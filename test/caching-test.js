@@ -149,6 +149,8 @@ describe('Caching Test', function () {
 
         // Create a TestModel and attache it to the dataSource
         TestModel = loopback.createModel(modelName, TestModelSchema, opts);
+        TestModel.clientModelName=modelName;
+        TestModel.clientPlural=modelName+'s';
         app.model(TestModel, {dataSource: dsname});
         TestModel.attachTo(dataSource);
 
@@ -195,18 +197,20 @@ describe('Caching Test', function () {
             expect(result1.body).to.deep.equal(result2.body);
             done();
         });
+
     });
 
     describe('Caching Test - when dblock on', function () {
 
         before('set the dbLock header', function(done) {
+            id = result1 = result2 = null;
             api.set('x-evproxy-db-lock', '1');
             stage1_creat(done);
         });
 
-        xit('Should cache the TestModel when cacheable is set to "true"', function (done) {
+        it('Should not use cache when when dblock on', function (done) {
             if (result1.body.name !== result2.body.name)  return done();
-            else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+            else return done(new Error("The query was cached although dblock is on"));
         });
 
          after('unset the dbLock header', function(done) {
