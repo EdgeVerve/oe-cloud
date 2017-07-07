@@ -40,7 +40,7 @@ module.exports = function CacheMixin(Model) {
   // is deleted.
   // check if this model is defined/declared to be cacheable
   if (Model.definition && Model.definition.settings && Model.definition.settings.cacheable) {
-    log.debug(log.defaultContext(), 'EV_CACHE', 'Marking as Cacheable model:', Model.modelName);
+    log.info(log.defaultContext(), 'EV_CACHE', 'Marking as Cacheable model:', Model.modelName);
 
     // create the global evcacheables object if not present
     if (!global.evcacheables) { global.evcacheables = {}; }

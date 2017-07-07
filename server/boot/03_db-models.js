@@ -53,7 +53,8 @@ module.exports = function DBModels(app, cb) {
     var ds = model.getDataSource(util.bootContext());
     ds.autoupdate(model.modelName, function (err, result) {
       if (err) {
-        callback(err);
+        log.error(util.bootContext(), 'ds.autoupdate for model="', model.modelName, '" Error: ', err);
+        return callback(err);
       }
       return findOrCreateModelDefinition();
     });
@@ -74,12 +75,14 @@ module.exports = function DBModels(app, cb) {
       DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
       modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
         if (err) {
-          callback(err);
+          log.error(util.bootContext(), 'modelDefinition.findOne name="', key, '" Error: ', err);
+          return callback(err);
         }
         if (!res) {
           modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
             if (err) {
-              callback(err);
+              log.error(util.bootContext(), 'modelDefinition.create obj=', modelDefinitionObject, ' Error: ', err);
+              return callback(err);
             }
             callback();
           });
