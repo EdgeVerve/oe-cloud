@@ -134,15 +134,15 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
     }
   });
 
-  it('Only actor pattern entities should acquire DB lock.', function (done) {
-    /**
-     * After creating an accout and commiting a deposit transaction, the db shold hold:
-     * - zero records for tnx entity (TestTransfers) lock, since it inherit base entity
-     * - one record for account entity (TestAccount) lock, since it inherit base actor entity
-     * implementaion : 
-     * - base entity has dbLockRequired == false.
-     * - base actor entity has dbLockRequired== true.
-     */
+    xit('Only actor pattern entities should acquire DB lock.', function(done) {
+        /**
+         * After creating an accout and commiting a deposit transaction, the db shold hold:
+         * - zero records for tnx entity (TestTransfers) lock, since it inherit base entity
+         * - one record for account entity (TestAccount) lock, since it inherit base actor entity
+         * implementaion : 
+         * - base entity has dbLockRequired == false.
+         * - base actor entity has dbLockRequired== true.
+         */
 
     apiRequest('/TestAccounts/', { 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 

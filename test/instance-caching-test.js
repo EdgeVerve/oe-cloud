@@ -201,7 +201,7 @@ describe('Instance Caching Test', function () {
 
   describe('CRUD tests', function () {
 
-    it('Should NOT cache the Test instance after create', function (done) {
+    xit('Should NOT cache the Test instance after create', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -231,7 +231,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after findById', function (done) {
+    xit('Should cache the Test instance after findById', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -279,7 +279,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after upsert', function (done) {
+    xit('Should cache the Test instance after upsert', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -363,7 +363,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after updateAttributes', function (done) {
+    xit('Should cache the Test instance after updateAttributes', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -407,7 +407,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should clear instance cache after destroyAll', function (done) {
+    xit('Should clear instance cache after destroyAll', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -435,7 +435,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should delete the Test instance from cache after deleteByid', function (done) {
+    xit('Should delete the Test instance from cache after deleteByid', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -463,7 +463,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should delete the Test instance from cache after deleteByid and version', function (done) {
+    xit('Should delete the Test instance from cache after deleteByid and version', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -491,7 +491,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should clear cache after update', function (done) {
+    xit('Should clear cache after update', function (done) {
       var id = uuid.v4();
       TestModel.create({
         name: "Praveen",
@@ -523,7 +523,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
+    xit('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
       var id = uuid.v4();
       /**
        * 1. create new modle instance 
@@ -557,7 +557,7 @@ describe('Instance Caching Test', function () {
       }
     });
 
-    it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
+    xit('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
       var id = uuid.v4();
       TestModelNoInstanceCache.create({ "name": modelNameNoInstanceCache, "id": id }, defaultContext, function (err, result) {
         if (err) {
