@@ -426,9 +426,20 @@ function dataPersonalizationAccess(ctx, next) {
       exeContextArray = exeContextArray.concat(callContext['whereKeys' + ctx.Model.modelName]);
     }
     if (ctx.Model.dataSource.connector.name === 'mongodb') {
-      if (ctx.query.scope) {
+      if (ctx.query.scope && Object.keys(ctx.query.scope).length === 0) {
+        let autoscopeCondition = [];
+        autoscope.forEach(item=>{
+          if (Array.isArray(context[item])) {
+            let itemsArr;
+            item.forEach(elem=>itemsArr.push(`${item}:${elem}`));
+            itemsArr.push(`${item}:${defaultValue}`);
+            autoscopeCondition.push({'_scope': {elemMatch: {$in: itemsArr}}});
+          } else {
+            autoscopeCondition.push({'_scope': {elemMatch: {$in: [`${item}:${context[item]}`, `${item}:${defaultValue}`]}}});
+          }
+        });
         finalQuery = {
-          'where': {'_scope': {'exists': {'$in': exeContextArray}}}
+          'where': {'and': autoscopeCondition}
         };
       } else {
         finalQuery = {
