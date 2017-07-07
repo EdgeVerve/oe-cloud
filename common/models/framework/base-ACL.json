@@ -25,6 +25,5 @@
   "relations": {
   },
   "acls": [],
-	"cacheable": true,
   "methods": {}
 }
