@@ -31,6 +31,5 @@
         }
     },
     "acls": [],
-	  "cacheable": true,
     "methods": {}
 }
