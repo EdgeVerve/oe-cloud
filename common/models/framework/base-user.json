@@ -113,7 +113,6 @@
     }
   ],
   "methods": {},
-	"cacheable": true,
   "hidden": [
     "failedTries",
     "status"
