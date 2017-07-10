@@ -254,6 +254,8 @@ module.exports = function ModelValidations(Model) {
       }
       if (res && res[0] && res[0].validationRules && res[0].validationRules.length > 0) {
         var rules = res[0].validationRules;
+        inst.options = options;
+        inst.options.modelName = model.modelName;
         async.concat(rules, function (rule, cb) {
           desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
             if (err) {
@@ -266,6 +268,9 @@ module.exports = function ModelValidations(Model) {
             cb(null, errorArr);
           });
         }, function (err, results) {
+          if (inst && inst.options) {
+            delete inst.options;
+          }
           if (err) {
             results.push(err);
           }
