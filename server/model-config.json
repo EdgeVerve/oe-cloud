@@ -229,15 +229,15 @@
     },
     "BaseActorEntity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "BaseJournalEntity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "ActorActivity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "State": {
         "dataSource": "db",
@@ -260,10 +260,6 @@
         "dataSource": "db"
     },
     "DesignerElement": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "MinimumState": {
         "public": true,
         "dataSource": "db"
     },
