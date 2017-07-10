@@ -133,7 +133,8 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     } else {
       contextString = util.createContextString(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
     }
-    modeldefinition.modelId = modeldefinition.modelId || (modeldefinition.name + '-' + contextString);
+    modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
+      modelDefinition.definition.settings.autoscope);
 
     // check the validitiy of modeldefinition(like checking the validity of expressions attached to a model)
     util.isModelDefinitionValid(modeldefinition, ctx.options, function checkModelDefinitionValidCb(err) {
