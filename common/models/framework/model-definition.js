@@ -148,11 +148,8 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           log.debug(ctx.options, 'Created plural ', modeldefinition.plural, 'for model', modeldefinition.name);
         }
         modeldefinition.clientPlural = modeldefinition.plural;
-
-        if (!modeldefinition.base) {
-          if (modeldefinition.variantOf) {
-            modeldefinition.base = modeldefinition.variantOf;
-          }
+        if (modeldefinition.variantOf) {
+          modeldefinition.base = modeldefinition.variantOf;
         }
       }
       if (!modeldefinition.base) {

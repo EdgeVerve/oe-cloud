@@ -226,7 +226,9 @@ function setDesignerPath(DesignerPath, server) {
     var modelEndPoints = _.groupBy(routes, function modelEndPoints(d) {
       return d.path.split('/')[1];
     });
-    var result = model ? modelEndPoints[model] : modelEndPoints;
+    var baseModel = util.checkModelWithPlural(req.app, model);
+    var actualModel = loopback.findModel(baseModel, req.callContext);
+    var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
     res.send(JSON.stringify(result));
   });
   server.get('/designer.html', function sendDesignerHomePage(req, res) {
