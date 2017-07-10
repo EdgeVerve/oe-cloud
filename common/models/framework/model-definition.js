@@ -136,6 +136,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
       modelDefinition.definition.settings.autoscope);
 
+    if (ctx.IsNewInstance && ctx.options.upsertWithNewRecord) {
+      modeldefinition.filebased = false;
+      modeldefinition.variantOf = modeldefinition.name;
+    }
     // check the validitiy of modeldefinition(like checking the validity of expressions attached to a model)
     util.isModelDefinitionValid(modeldefinition, ctx.options, function checkModelDefinitionValidCb(err) {
       // if model is not valid then pass the error forward and do not create the model
