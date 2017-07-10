@@ -84,7 +84,7 @@
       "accessType": "READ"
     },
     {
-      "principalType": "USER",
+      "principalType": "ROLE",
       "principalId": "admin",
       "permission": "ALLOW",
       "property": "switchTenant",
