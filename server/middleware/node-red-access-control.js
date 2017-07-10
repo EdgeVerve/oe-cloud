@@ -1,9 +1,7 @@
 var logger = require('oe-logger');
 var log = logger('node-red-access-control');
 
-/**
- *  Denie access to Node Red for non Admin users.
- */
+
 function isAdmin(req) {
   var role = false;
   if (req.accessToken) {
@@ -14,6 +12,11 @@ function isAdmin(req) {
   }
   return role;
 }
+
+/**
+ *  Denie access to Node Red for non Admin users.
+ */
+
 module.exports = function nodeRedAccessControl(options) {
   return function (req, res, next) {
     if (req.originalUrl.startsWith('/red/')) {
