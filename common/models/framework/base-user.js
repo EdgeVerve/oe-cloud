@@ -317,19 +317,19 @@ module.exports = function BaseUser(BaseUser) {
         });
       });
     },
-    function userProfile(callback) {
-      var UserProfile = loopback.getModelByType('UserProfile');
-      UserProfile.findOne({
-        where: {
-          userId: self.id
-        }
-      }, options, function dbCallbackFn(err, userProfile) {
-        if (err) {
-          callback(err);
-        }
-        callback(null, userProfile ? userProfile : {});
-      });
-    }],
+      function userProfile(callback) {
+        var UserProfile = loopback.getModelByType('UserProfile');
+        UserProfile.findOne({
+          where: {
+            userId: self.id
+          }
+        }, options, function dbCallbackFn(err, userProfile) {
+          if (err) {
+            callback(err);
+          }
+          callback(null, userProfile ? userProfile : {});
+        });
+      }],
     function finalCallBack(err, results) {
       if ( err) {
         cb(err);
