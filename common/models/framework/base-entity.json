@@ -24,6 +24,7 @@
         "SoftDeleteMixin": true,
         "VersionMixin": true,
         "HistoryMixin": true,
+        "RetrySupportMixin": false,
         "IdempotentMixin": true,
         "FailsafeObserverMixin": true,
         "DataHierarchyMixin": false
