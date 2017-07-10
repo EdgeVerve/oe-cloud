@@ -314,16 +314,31 @@ describe(chalk.blue('Model Personalization test'), function () {
         expect(results[0].address[0].city).to.equal('Bangalore');
         // previous records for icici are still retain  as new records are will use same collection
         // user can have new collection if he/she wants
+        debugger;
         Employee.find({
           include: 'address'
         }, iciciCtx, function (err, results) {
-          expect(results.length).to.equal(1);
+          expect(results.length).to.equal(3);
           expect(results[0]).to.have.property('name');
           expect(results[0]).to.have.property('id');
           expect(results[0]).to.have.property('address');
-          expect(results[0].name).to.equal('Icici Tom');
-          expect(results[0].__data.address[0]).to.have.property('city');
-          expect(results[0].__data.address[0].city).to.equal('Bangalore');
+          expect(results[0]).to.have.property('age');
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            if (results[i].name === 'Icici Tom' ) {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Bangalore') {
+                  expect(results[i].age).to.equal(10);
+                  doneFlag = true;
+                  break;
+                }
+              }
+            }
+          }
+          expect(doneFlag).to.be.true;
+          //expect(results[2].name).to.equal('Icici Tom');
+          //expect(results[2].__data.address[0]).to.have.property('city');
+          //expect(results[2].__data.address[0].city).to.equal('Bangalore');
 
           done();
         });
@@ -414,22 +429,34 @@ describe(chalk.blue('Model Personalization test'), function () {
         // will see this new record of address is created in newly created address collection
         // while Employee will be in same old collection
         expect(results.length).to.equal(1);
-        expect(results[0]).to.have.property('name');
-        expect(results[0]).to.have.property('id');
-        expect(results[0]).to.have.property('address');
-        expect(results[0].name).to.equal('Citi Tom');
-        expect(results[0].address[0]).to.have.property('city');
-        expect(results[0].address[0].city).to.equal('Citi Bangalore');
+
         Employee.find({
           include: 'address'
         }, citiCtx, function (err, results) {
           expect(results.length).to.equal(2);
-          //expect(results[0].name).to.equal('John'); // Employee is still using base Employee
-          expect(results[1].name).to.equal('Citi Tom');
-          //expect(results[0].__data.address.length).to.equal(0); // address got overriden so old records will not be available
-          expect(results[1].__data.address[0]).to.have.property('city'); //address is coming from newer model
-          expect(results[1].__data.address[0].city).to.equal('Citi Bangalore');
-          expect(results[1].__data.address[0].zip).to.equal('560001');
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            if (results[i].name === 'Citi Tom') {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Citi Bangalore') {
+                  expect(results[i]).to.have.property('name');
+                  expect(results[i]).to.have.property('id');
+                  expect(results[i]).to.have.property('address');
+                  expect(results[i].__data.address[j]).to.have.property('zip');
+                  expect(results[i].name).to.equal('Citi Tom');
+                  doneFlag = true;
+                  break;
+                }
+              }
+            }
+          }
+          expect(doneFlag).to.be.true;
+          ////expect(results[0].name).to.equal('John'); // Employee is still using base Employee
+          //expect(results[1].name).to.equal('Citi Tom');
+          ////expect(results[0].__data.address.length).to.equal(0); // address got overriden so old records will not be available
+          //expect(results[1].__data.address[0]).to.have.property('city'); //address is coming from newer model
+          //expect(results[1].__data.address[0].city).to.equal('Citi Bangalore');
+          //expect(results[1].__data.address[0].zip).to.equal('560001');
 
           done();
         });
@@ -445,8 +472,15 @@ describe(chalk.blue('Model Personalization test'), function () {
         console.log(err);
         return done(err);
       }
-      expect(results.length).to.equal(1);
-      expect(results[0].city).to.equal('Citi Bangalore');
+      expect(results.length).to.equal(3);
+      var doneFlag = false;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].city === 'Citi Bangalore') {
+          doneFlag = true;
+          break;
+        }
+      }
+      expect(doneFlag).to.be.true;
       done();
     });
   });

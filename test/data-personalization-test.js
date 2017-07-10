@@ -2997,11 +2997,15 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
         personalizedModel2.upsert(postData, callContext, function (err, res) {
           if (err) {
-            expect(err).not.to.be.null;
-            expect(err).not.to.be.undefined;
-            done();
-          } else {
-            done(new Error('Should not update the record of other tenant'));
+            return done(err);
+            //expect(err).not.to.be.null;
+            //expect(err).not.to.be.undefined;
+            //done();
+          }
+          else {
+            //done(new Error('Should not update the record of other tenant'));
+            expect(res.id).to.not.equal(postData.id);
+            return done();
           }
         });
       }
