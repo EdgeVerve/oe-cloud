@@ -48,7 +48,8 @@
         }
     },
     "auth:after": {
-        "./middleware/post-auth-context-populator": {}
+        "./middleware/post-auth-context-populator": {}, 
+        "./middleware/node-red-access-control": {}
     },
     "parse": {},
     "routes:before": {
