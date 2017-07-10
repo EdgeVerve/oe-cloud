@@ -150,15 +150,17 @@ module.exports = function failsafeObserverMixin(Model) {
 };
 
 function updateHostNameAndTime(ctx, next) {
-  var instance = ctx.instance;
-  if (instance) {
-    if (instance.currentHNT.hostName !== currHostName) {
-      instance.oldHNT = instance.currentHNT;
-      instance.currentHNT.hostName = currHostName;
-    }
+  var instance;
+  if (ctx.isNewInstance) {
+    instance = ctx.instance;
     instance.currentHNT.updateTime = new Date();
-    if (ctx.isNewInstance) {
-      instance.oldHNT.updateTime = instance.currentHNT.updateTime;
+    instance.oldHNT.updateTime = instance.currentHNT.updateTime;
+  } else if (ctx.currentInstance) {
+    instance = ctx.data;
+    if (currHostName !== ctx.currentInstance.currentHNT.hostName) {
+      instance.oldHNT = ctx.currentInstance.currentHNT;
+      instance.currentHNT.hostName = currHostName;
+      instance.currentHNT.updateTime = new Date();
     }
   }
   return next();
