@@ -247,10 +247,6 @@
         "public": true,
         "dataSource": "db"
     },
-    "BaseReplayableEntity": {
-        "public": false,
-        "dataSource": "db"
-    },
     "RoutingRules": {
         "public": true,
         "dataSource": "db"
@@ -287,7 +283,7 @@
         "public": false,
         "dataSource": "db"
     },
-    "PendingJournal": {
+    "Note": {
         "public": true,
         "dataSource": "db"
     }
