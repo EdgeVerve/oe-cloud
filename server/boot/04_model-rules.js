@@ -192,7 +192,12 @@ function executeDecisionTableRules(modelCtx, model, next) {
         // Default rules need to be executed in sequence and enrich the payload data.
         async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
           log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
+          payload.options = modelCtx.options;
+          payload.options.modelName = model.modelName;
           desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {
+            if (enrichedData && enrichedData.options) {
+              delete enrichedData.options;
+            }
             payload = enrichedData;
             ruleCb(err);
           });
