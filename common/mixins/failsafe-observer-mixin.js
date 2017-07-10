@@ -2,7 +2,10 @@ var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
 var UUID = require('node-uuid');
+var os = require('os');
 var eventHistroyManager = require('./../../lib/event-history-manager.js');
+var process = require('process');
+var currHostName = process.env.HOSTNAME || os.hostname();
 
 var observerTypes = ['after save', 'after delete'];
 
@@ -10,6 +13,33 @@ module.exports = function failsafeObserverMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
     return;
   }
+
+  // register createEventHistory method as a remote method on the model
+  Model.remoteMethod('createEventHistory', {
+    http: {
+      path: '/createEventHistory',
+      verb: 'post'
+    },
+    isStatic: false,
+    accepts: {
+      arg: 'context',
+      type: 'object'
+    },
+    returns: {
+      arg: 'response',
+      type: 'object',
+      root: true
+    }
+  });
+
+  Model.prototype.createEventHistory = function (context, options, cb) {
+    var modelName = context.modelName;
+    var version = context.version;
+    var trigger = context.trigger;
+    var ctx = context.ctx;
+    eventHistroyManager.create(modelName, version, trigger, ctx);
+    return cb();
+  };
 
   var FailSafeObserver = function (fn) {
     var _fn = fn;
@@ -41,9 +71,20 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
-  Model.defineProperty('_processed', {
-    type: 'boolean',
-    default: false
+  Model.defineProperty('currentHNT', {
+    type: 'object',
+    default: {
+      hostName: currHostName,
+      updateTime: new Date()
+    }
+  });
+
+  Model.defineProperty('oldHNT', {
+    type: 'object',
+    default: {
+      hostName: currHostName,
+      updateTime: new Date()
+    }
   });
 
   Model.defineProperty('_fsCtx', {
@@ -51,10 +92,15 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', '_processed']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', 'currentHNT', 'oldHNT']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx', '_processed'];
+    Model.definition.settings.hidden = ['_fsCtx', 'currentHNT', 'oldHNT'];
   }
+
+  Model.definition.options = Model.definition.options || {};
+  Model.definition.options.proxyEnabled = true;
+  Model.definition.options.proxyMethods = Model.definition.options.proxyMethods || [];
+  Model.definition.options.proxyMethods.push({ name: 'createEventHistory' });
 
   Model.failSafeObserve = function (eventName, observer) {
     if (!(observer instanceof FailSafeObserver)) {
@@ -93,6 +139,7 @@ module.exports = function failsafeObserverMixin(Model) {
   }
 
   Model.evObserve('before save', failsafeObserverBeforeSave);
+  Model.evObserve('before save', updateHostNameAndTime);
   Model.evObserve('before delete', failsafeObserverBeforeDelete);
 
   observerTypes.forEach(type => converteObservers(type));
@@ -101,6 +148,21 @@ module.exports = function failsafeObserverMixin(Model) {
   Model.evObserve('after save', _failsafeObserverAfterSave);
   Model.evObserve('after delete', _failsafeObserverAfterDelete);
 };
+
+function updateHostNameAndTime(ctx, next) {
+  var instance = ctx.instance;
+  if (instance) {
+    if (instance.currentHNT.hostName !== currHostName) {
+      instance.oldHNT = instance.currentHNT;
+      instance.currentHNT.hostName = currHostName;
+    }
+    instance.currentHNT.updateTime = new Date();
+    if (ctx.isNewInstance) {
+      instance.oldHNT.updateTime = instance.currentHNT.updateTime;
+    }
+  }
+  return next();
+}
 
 function failsafeObserverBeforeDelete(ctx, next) {
   var version;
