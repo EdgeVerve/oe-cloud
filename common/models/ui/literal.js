@@ -84,10 +84,10 @@ module.exports = function Literal(Literal) {
       locale = locale.substring(0, locale.length - 5);
     }
 
-    // ignoring the locale passed.
-    // this is being picked up from request-header in the scope.
     var filter = {};
-
+    // set the locale in context for scope-query
+    options.ctx = options.ctx || {};
+    options.ctx.lang = locale;
     Literal.find(filter, options, function literalFindCb(err, data) {
       if (err) {
         cb(err);
