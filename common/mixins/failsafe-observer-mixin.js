@@ -71,30 +71,34 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
-  Model.defineProperty('currentHNT', {
-    type: 'object',
-    default: {
-      hostName: currHostName,
-      updateTime: new Date()
-    }
+  Model.defineProperty('currentHostName', {
+    type: String,
+    default: currHostName
   });
 
-  Model.defineProperty('oldHNT', {
-    type: 'object',
-    default: {
-      hostName: currHostName,
-      updateTime: new Date()
-    }
+  Model.defineProperty('currentUpdateTime', {
+    type: 'timestamp',
+    default: new Date()
+  });
+
+  Model.defineProperty('oldHostName', {
+    type: String,
+    default: currHostName
+  });
+
+  Model.defineProperty('oldUpdateTime', {
+    type: 'timestamp',
+    default: new Date()
   });
 
   Model.defineProperty('_fsCtx', {
-    type: 'string'
+    type: String
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', 'currentHNT', 'oldHNT']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx', 'currentHNT', 'oldHNT'];
+    Model.definition.settings.hidden = ['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime'];
   }
 
   Model.definition.options = Model.definition.options || {};
@@ -153,14 +157,15 @@ function updateHostNameAndTime(ctx, next) {
   var instance;
   if (ctx.isNewInstance) {
     instance = ctx.instance;
-    instance.currentHNT.updateTime = new Date();
-    instance.oldHNT.updateTime = instance.currentHNT.updateTime;
+    instance.currentUpdateTime = new Date();
+    instance.oldUpdateTime = instance.currentUpdateTime;
   } else if (ctx.currentInstance) {
     instance = ctx.data;
-    if (currHostName !== ctx.currentInstance.currentHNT.hostName) {
-      instance.oldHNT = ctx.currentInstance.currentHNT;
-      instance.currentHNT.hostName = currHostName;
-      instance.currentHNT.updateTime = new Date();
+    if (currHostName !== ctx.currentInstance.currentHostName) {
+      instance.oldUpdateTime = ctx.currentInstance.currentUpdateTime;
+      instance.oldHostName = ctx.currentInstance.currentHostName;
+      instance.currentHostName = currHostName;
+      instance.currentUpdateTime = new Date();
     }
   }
   return next();
