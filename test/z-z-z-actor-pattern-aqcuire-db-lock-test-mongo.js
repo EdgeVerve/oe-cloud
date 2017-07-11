@@ -10,6 +10,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @author Karin Angel
  */
 var loopback = require('loopback');
+var app = bootstrap.app;
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
 var uuid = require('node-uuid');
