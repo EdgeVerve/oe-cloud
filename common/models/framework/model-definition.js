@@ -281,6 +281,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           if (!modeldefinition.filebased) {
             util.createModel(modelDefinition.app, modeldefinition, ctx.options, function dbModelsMdAfterSaveModelDefFindModelCreateCb() {
               modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
+              doAutoUpdate(modelDefinition.app, modeldefinition, ctx.options);
               // Find all child models and re-create them so that the new base properties
               // are reflected in them
               modelDefinition.find({
@@ -304,6 +305,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
                     util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
                       log.debug(ctx.options, 'emitting event model available ', md.name);
                       modelDefinition.events.emit('model-' + md.name + '-available');
+                      doAutoUpdate(modelDefinition.app, md, ctx.options);
                     });
                   });
                 }
@@ -316,6 +318,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       util.createModel(modelDefinition.app, modeldefinition, ctx.options, function dbModelMdAfterSaveMdFileBasedCreateCb() {
         log.debug(ctx.options, 'emitting event model available ', modeldefinition.name);
         modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
+        doAutoUpdate(modelDefinition.app, modeldefinition, ctx.options);
         // Find all child models and re-create them so that the new base properties
         // are reflected in them
         modelDefinition.find({
@@ -337,6 +340,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
               util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdFileBasedCreateMdFindCreateForEachCreateModelCb() {
                 log.debug(ctx.options, 'emitting event model available ', md.name);
                 modelDefinition.events.emit('model-' + md.name + '-available');
+                doAutoUpdate(modelDefinition.app, md, ctx.options);
               });
             });
           }
@@ -346,6 +350,21 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     }
     next();
   };
+
+  function doAutoUpdate(app, modeldefinition, options) {
+    var model = app.models[modeldefinition.name];
+    var ds = model.getDataSource(options);
+    log.debug(options, 'Performing autoupdate on model "', modeldefinition.name, '"');
+    if (ds) {
+      ds.autoupdate(modeldefinition.name, function (err, result) {
+        if (err) {
+          log.error(options, 'ds.autoupdate for model="', modeldefinition.name, '" Error: ', err);
+        }
+      });
+    } else {
+      log.warn(options, 'Unable to get datasource for model - ', modeldefinition.name);
+    }
+  }
 
   /**
    * This function returns the plural form of specified input word
