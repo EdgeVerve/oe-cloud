@@ -28,6 +28,8 @@ var debug = require('debug')('caching-test');
 var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var pg = require('pg');
+var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
 var defaultContext = {
@@ -43,6 +45,7 @@ var altContext = {
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
 var dbname = 'db';
+var dataSource;
 var accessToken = null;
 
 function apiPostRequest(url, postData, callback, done) {
@@ -81,28 +84,50 @@ function apiGetRequest(url, callback, done) {
 }
 
 function mongoDeleteById(id, cb) {
-    var url = 'mongodb://'+mongoHost+':27017/' + dbname;
-    MongoClient.connect(url, function (err, db) {
-        if (err) {
-            return cb(err);
-        } else {
-            db.collection(modelName).deleteOne({_id: id}, function (err, numberRemoved) {
+    if (dataSource.name === 'mongodb') {
+          var url = 'mongodb://'+mongoHost+':27017/' + dbname;
+          MongoClient.connect(url, function (err, db) {
                 if (err) {
                     return cb(err);
+                } else {
+                    db.collection(modelName).deleteOne({_id: id}, function (err, numberRemoved) {
+                        if (err) {
+                            return cb(err);
+                        }
+                        debug("Number of records removed " + numberRemoved);
+                        cb();
+                    });
                 }
-                debug("Number of records removed " + numberRemoved);
+        });
+    } else {
+        var loopbackModelNoCache = loopback.getModel(modelName);
+        var idFieldName =  loopbackModelNoCache.definition.idName();
+        var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+        var client = new pg.Client(connectionString);
+        client.connect(function (err) {
+            if (err) 
+                cb(err); 
+            else {
+                var query = client.query("DELETE from " + modelName.toLowerCase() + "  WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                if (err)  {
+                    return done(err);
+                }
+                debug("Number of records removed " + result.rowCount);
                 cb();
             });
         }
     });
+    }   
+    
 }
 
 describe('Instance Caching Test', function () {
    // return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
     var TestModel = null;
-    var TestModelNoInstanceCache = null;
+    var TestModelNoInstanceCache = null;    
 
      before('login using admin', function fnLogin(done) {
+        dataSource = app.datasources[dbname];
         var sendData = {
             'username': 'admin',
             'password': 'admin'
@@ -125,6 +150,7 @@ describe('Instance Caching Test', function () {
 
     before('Create Test Model', function (done) {
         var modelDefinition = loopback.findModel('ModelDefinition');
+        dataSource = app.datasources[dbname];
         var data = {
             'name': modelName,
             'base': 'BaseEntity',
@@ -162,7 +188,7 @@ describe('Instance Caching Test', function () {
 
 before('Create Test Model with No InstanceCache', function (done) {
         var modelDefinition = loopback.findModel('ModelDefinition');
-        
+        dataSource = app.datasources[dbname];
         var data = {
             'name': modelNameNoInstanceCache,
             'base': 'BaseEntity',
@@ -200,8 +226,8 @@ before('Create Test Model with No InstanceCache', function (done) {
     });
 
     describe('CRUD tests', function () {
-
-        xit('Should NOT cache the Test instance after create', function (done) {
+        dataSource = app.datasources[dbname];
+        it('Should NOT cache the Test instance after create', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -230,7 +256,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should cache the Test instance after findById', function (done) {
+        it('Should cache the Test instance after findById', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -320,7 +346,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should cache the Test instance after save', function (done) {
+        it('Should cache the Test instance after save', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -362,7 +388,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should cache the Test instance after updateAttributes', function (done) {
+        it('Should cache the Test instance after updateAttributes', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -406,7 +432,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should clear instance cache after destroyAll', function (done) {
+        it('Should clear instance cache after destroyAll', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -434,7 +460,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should delete the Test instance from cache after deleteByid', function (done) {
+        it('Should delete the Test instance from cache after deleteByid', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -462,7 +488,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should delete the Test instance from cache after deleteByid and version', function (done) {
+        it('Should delete the Test instance from cache after deleteByid and version', function (done) {
             var id = uuid.v4();
             var result1, result2;
             TestModel.create({
@@ -490,7 +516,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should clear cache after update', function (done) {
+        it('Should clear cache after update', function (done) {
             var id = uuid.v4();
             TestModel.create({
                 name: "Praveen",
@@ -522,7 +548,7 @@ before('Create Test Model with No InstanceCache', function (done) {
             });
         });
 
-        xit('Should not cache in instance cache if disableInstanceCache flag is on, test1', function(done) {
+        it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function(done) {
             /**
              * 1. create new modle instance 
              * 2. run a find query 
@@ -539,24 +565,45 @@ before('Create Test Model with No InstanceCache', function (done) {
              };
 
             function dbQuery_update (result) {
-                MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
-                    if (err) return done(err);
-                    else {
-                        db.collection(modelNameNoInstanceCache).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
-                            if (err) return done(err);
-                            else apiRequest_find(result, comperCacheToDb);
+                if (dataSource.name === 'mongodb') {
+                    MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
+                        if (err) return done(err);
+                        else {
+                            db.collection(modelNameNoInstanceCache).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
+                                if (err) return done(err);
+                                else apiRequest_find(result, comperCacheToDb);
+                            });
+                        }
+                    });
+                } else {
+                     var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache);
+                     var idFieldName =  loopbackModelNoCache.definition.idName();
+                     var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+                     var client = new pg.Client(connectionString);
+                     client.connect(function (err) {
+                            if (err) 
+                                done(err); 
+                            else {
+                                var query = client.query("UPDATE " + modelNameNoInstanceCache.toLowerCase() + " SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                                if (err)  {
+                                    return done(err);
+                                }
+                                else {
+                                    apiRequest_find(result, comperCacheToDb);
+                                }
                         });
                     }
-                });
-            }
-            
-            function comperCacheToDb(result){
+                 });
+            } 
+        }
+
+       function comperCacheToDb(result){
                 if (result.body.name === "value2")  return done();
-                else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+                else return done(new Error("Model cached to instance cache, although disableInstanceCache flag is on"));
             }
         });
 
-        xit('Should not cache in instance cache if disableInstanceCache flag is on, test2', function(done) {
+        it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function(done) {
             var id = uuid.v4();
             TestModelNoInstanceCache.create({"name": modelNameNoInstanceCache, "id": id}, defaultContext, function(err, result) {
                 if (err) {
