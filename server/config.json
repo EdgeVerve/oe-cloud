@@ -77,7 +77,6 @@
     "globalMessagingMode": "multicast",
     "memoryInterval": 1000,
     "memoryPoolChunk": 3,
-    "enableEventHistoryManager": true,
     "eventReliabilityReplayThreshold": 3000,
     "eventReliabilityReplayInterval": 2000,
     "eventReliabilityDbPersistenceInterval": 2000,

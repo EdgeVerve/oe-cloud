@@ -2,14 +2,15 @@ var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
 var UUID = require('node-uuid');
-var eventHistroyManager = require('./../../lib/event-history-manager.js');
-var enableEventHistoryManager = require('./../../server/config.json').enableEventHistoryManager;
+var eventHistroyManager;
+var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
 
 module.exports = function failsafeObserverMixin(Model) {
-  if (enableEventHistoryManager === false) {
+  if (disableEventHistoryManager) {
     return;
   }
+  eventHistroyManager = require('./../../lib/event-history-manager.js');
   if (Model.modelName === 'BaseEntity') {
     return;
   }

@@ -22,7 +22,7 @@ var logger = require('oe-logger');
 var errorHandler = require('strong-error-handler');
 var log = logger('Server');
 var passport = require('../lib/passport.js');
-var eventHistroyManager = require('../lib/event-history-manager.js');
+var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
@@ -185,7 +185,9 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
-      if (appinstance.get('enableEventHistoryManager') !== false) {
+      var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
+      if (!disableEventHistoryManager) {
+        eventHistroyManager = require('../lib/event-history-manager.js');
         eventHistroyManager.init(appinstance);
       }
       // start the web server
@@ -228,45 +230,45 @@ function finalBoot(appinstance, options, cb) {
         appinstance.get('remoting').errorHandler = {
           handler: function remotingErrorHandler(err, req, res, defaultHandler) {
             /* res.status(err.statusCode || err.status);
-                        var finalError = {};
-                        finalError.message = err.message || err.toString();
-                        var errors = [];
-                        errors = appinstance.buildError(err, req.callContext);
-                        finalError.txnId = req.callContext ? req.callContext.txnId : '';
-                        finalError.requestId = req.callContext ? req.callContext.requestId : '';
-                        finalError.errors = errors;
-                        log.error(options, 'error :', JSON.stringify(finalError));*/
+                                    var finalError = {};
+                                    finalError.message = err.message || err.toString();
+                                    var errors = [];
+                                    errors = appinstance.buildError(err, req.callContext);
+                                    finalError.txnId = req.callContext ? req.callContext.txnId : '';
+                                    finalError.requestId = req.callContext ? req.callContext.requestId : '';
+                                    finalError.errors = errors;
+                                    log.error(options, 'error :', JSON.stringify(finalError));*/
             log.error(options, 'error :', JSON.stringify(err));
             defaultHandler(err);
           }
         };
 
         /* appinstance.buildError = function appinstanceBuildError(err, context) {
-                  var errors = [];
-                  if (err instanceof Array) {
-                    // concat all errors to form a single error array
-                    Object.keys(err).forEach(function configLocalHandlerForEach(error) {
-                      var errorObj = err[error];
-                      if (errorObj.details && errorObj.details.messages.errs) {
-                        errors = errors.concat(errorObj.details.messages.errs);
-                      } else if (errorObj.details && errorObj.details.messages) {
-                        errors = errors.concat(errorObj.details.messages);
-                      } else {
-                        errors = errors.concat(errorObj);
-                      }
-                    });
-                  } else if (err.details && err.details.messages) {
-                    errors = err.details.messages.errs ? err.details.messages.errs : err.details.messages;
-                  } else {
-                    // single server error convert it to array of single error
-                    var errObj = {};
-                    errObj.code = err.code || err.errCode;
-                    errObj.message = err.message || err.errMessage;
-                    errObj.path = err.path;
-                    errors.push(errObj);
-                  }
-                  return errors;
-                };*/
+                          var errors = [];
+                          if (err instanceof Array) {
+                            // concat all errors to form a single error array
+                            Object.keys(err).forEach(function configLocalHandlerForEach(error) {
+                              var errorObj = err[error];
+                              if (errorObj.details && errorObj.details.messages.errs) {
+                                errors = errors.concat(errorObj.details.messages.errs);
+                              } else if (errorObj.details && errorObj.details.messages) {
+                                errors = errors.concat(errorObj.details.messages);
+                              } else {
+                                errors = errors.concat(errorObj);
+                              }
+                            });
+                          } else if (err.details && err.details.messages) {
+                            errors = err.details.messages.errs ? err.details.messages.errs : err.details.messages;
+                          } else {
+                            // single server error convert it to array of single error
+                            var errObj = {};
+                            errObj.code = err.code || err.errCode;
+                            errObj.message = err.message || err.errMessage;
+                            errObj.path = err.path;
+                            errors.push(errObj);
+                          }
+                          return errors;
+                        };*/
       });
     };
 
