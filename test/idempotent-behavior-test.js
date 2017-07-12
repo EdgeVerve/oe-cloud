@@ -513,7 +513,7 @@ describe(chalk.blue('Idempotent behaviour --Programatic'), function () {
     relations: {
       'state': {
         'type': 'hasOne',
-        'model': 'State'
+        'model': 'TestState'
       }
     },
     plural: modelName,
