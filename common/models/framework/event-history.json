@@ -9,9 +9,6 @@
         "hostName": {
             "type": "string"
         },
-        "timestampMap": {
-            "type": "Date"
-        },
         "timestamp": {
             "type": "Date"
         },
