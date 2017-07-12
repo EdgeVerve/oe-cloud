@@ -14,9 +14,6 @@
         },
         "doStartUpOperation": {
             "type": "boolean"
-        },
-        "eventHistoryMap": {
-            "type": "object"
         }
     },
     "options": {
