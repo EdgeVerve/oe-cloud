@@ -24,7 +24,7 @@
     {
       "accessType": "*",
       "principalType": "ROLE",
-      "principalId": "$evvryone",
+      "principalId": "$everyone",
       "permission": "DENY"
     },
     {
