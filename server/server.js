@@ -126,7 +126,7 @@ function finalBoot(appinstance, options, cb) {
   }
 
   appinstance.set('apiInfo', getApiInfo());
-  
+
   bootWithMigrate(appinstance, options, function serverFinalBootCb(err) {
     if (err) {
       throw err;
@@ -585,13 +585,13 @@ module.exports.loadOptionsFromConfig = function loadOptionsFromConfig(appRootPat
 };
 
 function getApiInfo() {
-  var cwd = process.cwd()
+  var cwd = process.cwd();
   var pkgFile = path.join(cwd, 'package.json');
   var pkg = require(pkgFile);
-  var desc = pkg.description || (function(){ console.warn('No description found in package.json...Using a default description.'); return 'An oe-cloud based API application'; })();
+  var desc = pkg.description || (function () { console.warn('No description found in package.json...Using a default description.'); return 'An oe-cloud based API application'; })();
   var apiInfo = {
     description: desc
-  }
+  };
 
   return apiInfo;
 }
