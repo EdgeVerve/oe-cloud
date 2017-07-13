@@ -234,3 +234,90 @@ describe(chalk.blue('Node-red test'), function () {
         });
     });
 });
+
+describe(chalk.blue('Access control to node-red test'), function () {
+
+    var accessToken_developer;
+    var accessToken_admin;
+
+    before('Login to framework as Non Admin user', function (done) {
+
+        var user_developer = {
+            'username': 'nonAdminUser',
+            'password': 'nonAdminUser',
+            'email': 'nonAdminUser@mycompany.com',
+            'id': 'developer'
+        };
+
+        bootstrap.createTestUser(user_developer, 'developer', function (){
+            var userDetails = {
+                'password': user_developer.password,
+                'email': user_developer.email
+            };
+            
+            bootstrap.login(userDetails, function (token) {
+                accessToken_developer = token;
+                return done();
+            });
+        });      
+
+    });
+
+    before('Login to framework as Admin user', function (done) {
+        bootstrap.login({ 'username': 'admin', 'password': 'admin' }, function (token) {
+            accessToken_admin = token;
+            return done();
+        });
+    });
+
+    it('Node-Red Test - Admin user Should able to accesws node red rout', function (done) {
+        var api = defaults(supertest(bootstrap.app));
+        var url = '/red/flows?access_token=' + accessToken_admin;
+
+        api.set('Accept', 'application/json')
+            .set('accessToken', accessToken_admin)
+            .get(url)
+            .end(function (err, resp) {
+                expect(resp.status).to.be.equal(200);
+                return done();
+            });
+    });
+
+    it('Node-Red Test - non admin user Should Not able to accesws node red rout', function (done) {
+        var api = defaults(supertest(bootstrap.app));
+        var url = '/red/flows?access_token=' + accessToken_developer;
+
+        api.set('Accept', 'application/json')
+            .set('accessToken', accessToken_developer)
+            .get(url)
+            .end(function (err, resp) {
+                expect(resp.status).to.be.equal(401);
+                return done();
+            });
+    });
+
+    it('Node-Red Test - non admin user Should Not able to create node red flow', function (done) {
+
+        var flows = [{ "id": "5b4e055c.3134cc", "type": "tab", "label": "node-red-test-tenant" },
+        { "id": "f2978c55.016ab", "type": "async-observer", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant", "modelname": "Literal", "method": "access", "x": 162, "y": 191, "wires": [["f5c48f2.d0e007"]] },
+        { "id": "f5c48f2.d0e007", "type": "function", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant", "func": "console.log('******* test-tenant ********');\nvar loopback = global.get('loopback');\nvar literalModel = loopback.findModel('" + "Literal" + "');\nliteralModel.emit(\"notifyLiteral\", msg.callContext);\n\nreturn msg;", "outputs": 1, "noerr": 0, "x": 439, "y": 165, "wires": [["9a0d6af6.7e8ec8"]] },
+        { "id": "9a0d6af6.7e8ec8", "type": "debug", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant", "active": true, "console": "false", "complete": "true", "x": 661, "y": 147, "wires": [] }];
+
+        var api = defaults(supertest(bootstrap.app));
+        var postUrl = '/red' + '/flows?access_token=' + accessToken_developer;
+
+        api.set('Accept', 'application/json')
+            .post(postUrl)
+            .set('accessToken', accessToken_developer)
+            .send({ flows: flows } )
+            .end(function (err, resp) {
+                expect(resp.status).to.be.equal(401);
+                done(err);
+            });
+    });
+
+
+    after('cleanup', function (done) {
+        done();
+    });
+});
