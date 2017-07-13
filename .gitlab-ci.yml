@@ -154,5 +154,6 @@ swarm:
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; exit ${app_exit_status}; fi
     - mocha test/actor-tests/actorIntegrationTest.js
     - node test/actor-tests/cleanupIntegrationTest.js
+    - docker stack rm ${APP_IMAGE_NAME}
   tags:
     - CEP_RUNNER
