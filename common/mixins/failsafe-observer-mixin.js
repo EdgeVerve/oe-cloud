@@ -2,6 +2,9 @@ var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
 var UUID = require('node-uuid');
+var os = require('os');
+var process = require('process');
+var currHostName = process.env.HOSTNAME || os.hostname();
 var eventHistroyManager;
 var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
@@ -14,6 +17,33 @@ module.exports = function failsafeObserverMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
     return;
   }
+
+  // register createEventHistory method as a remote method on the model
+  Model.remoteMethod('createEventHistory', {
+    http: {
+      path: '/createEventHistory',
+      verb: 'post'
+    },
+    isStatic: false,
+    accepts: {
+      arg: 'context',
+      type: 'object'
+    },
+    returns: {
+      arg: 'response',
+      type: 'object',
+      root: true
+    }
+  });
+
+  Model.prototype.createEventHistory = function (context, options, cb) {
+    var modelName = context.modelName;
+    var version = context.version;
+    var trigger = context.trigger;
+    var ctx = context.ctx;
+    eventHistroyManager.create(modelName, version, trigger, ctx);
+    return cb();
+  };
 
   var FailSafeObserver = function (fn) {
     var _fn = fn;
@@ -45,20 +75,40 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
-  Model.defineProperty('_processed', {
-    type: 'boolean',
-    default: false
+  Model.defineProperty('currentHostName', {
+    type: String,
+    default: currHostName
+  });
+
+  Model.defineProperty('currentUpdateTime', {
+    type: 'timestamp',
+    default: new Date()
+  });
+
+  Model.defineProperty('oldHostName', {
+    type: String,
+    default: currHostName
+  });
+
+  Model.defineProperty('oldUpdateTime', {
+    type: 'timestamp',
+    default: new Date()
   });
 
   Model.defineProperty('_fsCtx', {
-    type: 'string'
+    type: String
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', '_processed']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx', '_processed'];
+    Model.definition.settings.hidden = ['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime'];
   }
+
+  Model.definition.options = Model.definition.options || {};
+  Model.definition.options.proxyEnabled = true;
+  Model.definition.options.proxyMethods = Model.definition.options.proxyMethods || [];
+  Model.definition.options.proxyMethods.push({ name: 'createEventHistory' });
 
   Model.failSafeObserve = function (eventName, observer) {
     if (!(observer instanceof FailSafeObserver)) {
@@ -98,6 +148,7 @@ module.exports = function failsafeObserverMixin(Model) {
   }
 
   Model.evObserve('before save', failsafeObserverBeforeSave);
+  Model.evObserve('before save', updateHostNameAndTime);
   Model.evObserve('before delete', failsafeObserverBeforeDelete);
 
   observerTypes.forEach(type => converteObservers(type));
@@ -106,6 +157,24 @@ module.exports = function failsafeObserverMixin(Model) {
   Model.evObserve('after save', _failsafeObserverAfterSave);
   Model.evObserve('after delete', _failsafeObserverAfterDelete);
 };
+
+function updateHostNameAndTime(ctx, next) {
+  var instance;
+  if (ctx.isNewInstance) {
+    instance = ctx.instance;
+    instance.currentUpdateTime = new Date();
+    instance.oldUpdateTime = instance.currentUpdateTime;
+  } else if (ctx.currentInstance) {
+    instance = ctx.data;
+    if (currHostName !== ctx.currentInstance.currentHostName) {
+      instance.oldUpdateTime = ctx.currentInstance.currentUpdateTime;
+      instance.oldHostName = ctx.currentInstance.currentHostName;
+      instance.currentHostName = currHostName;
+      instance.currentUpdateTime = new Date();
+    }
+  }
+  return next();
+}
 
 function failsafeObserverBeforeDelete(ctx, next) {
   var version;
