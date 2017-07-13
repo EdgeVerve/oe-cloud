@@ -10,6 +10,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @author Karin Angel
  */
 var loopback = require('loopback');
+var bootstrap = require('./bootstrap');
 var app = bootstrap.app;
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
@@ -144,6 +145,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
          * - base entity has dbLockRequired == false.
          * - base actor entity has dbLockRequired== true.
          */
+        var dbname = 'db';
         var dataSource = app.datasources[dbname];
         if (dataSource.name !== 'mongodb') {
               return done();
@@ -187,6 +189,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function() {
                         }, this);
 
                         if (testAccountLockCounter > 0)  {
+                            console.log('test succeeded. counter is ' + testAccountLockCounter );
                             return done();
                         } else {
                             return done(new Error ("No TestAccounts Lock found, should be atleast one."));
