@@ -701,7 +701,7 @@ function dataPersonalizationAfterAccess(ctx, next) {
         delete obj.score;
         delete obj.weight;
       });
-      if (ctx.query.scope) {
+      if (ctx.query.scope && Object.keys(ctx.query.scope).length !== 0) {
         ctx.accdata = resultData;
       } else {
         ctx.accdata = calculateUnique(ctx.Model.definition.properties, resultData);
@@ -807,7 +807,7 @@ var calculateUnique = function calcUniqFn(modelProp, resultData) {
   Object.keys(modelProp).forEach((key) => {
     const prop = modelProp[key];
     if (prop.unique) {
-      if (typeof prop.unique === 'boolean') {
+      if (typeof prop.unique === 'boolean' || typeof prop.unique === 'string') {
         uniq.push(key);
       } else if (typeof prop.unique === 'object') {
         prop.unique.scopedTo ? uniq = uniq.concat(prop.unique.scopedTo) : null;
