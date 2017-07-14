@@ -246,7 +246,7 @@ module.exports = function uiComponent(UIComponent) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
-      var component = results ? results[0] : undefined;
+      var component = results ? results[0] : null;
       if (!component) {
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
