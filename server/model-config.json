@@ -223,35 +223,23 @@
         "public": true,
         "dataSource": "db"
     },
-    "ReconciliationEvent": {
-        "public": false,
-        "dataSource": "db"
-    },
     "BaseActorEntity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "BaseJournalEntity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "ActorActivity": {
         "dataSource": "db",
-        "public": true
+        "public": false
     },
     "State": {
         "dataSource": "db",
         "public": false
     },
     "EventHistory": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "BaseReplayableEntity": {
-        "public": false,
-        "dataSource": "db"
-    },
-    "RoutingRules": {
         "public": true,
         "dataSource": "db"
     },
@@ -264,10 +252,6 @@
         "dataSource": "db"
     },
     "DesignerElement": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "MinimumState": {
         "public": true,
         "dataSource": "db"
     },
@@ -285,10 +269,6 @@
     },
     "Lock": {
         "public": false,
-        "dataSource": "db"
-    },
-    "PendingJournal": {
-        "public": true,
         "dataSource": "db"
     }
 }

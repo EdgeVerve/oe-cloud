@@ -451,6 +451,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     var relations = model.relations;
     var modelDefn = {
       id: model.definition.name,
+      base: model.base.modelName,
       plural: model.pluralModelName,
       resturl: config.restApiRoot + model.http.path,
       properties: properties,

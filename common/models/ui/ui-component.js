@@ -47,6 +47,12 @@ module.exports = function uiComponent(UIComponent) {
                       callback(err3, data2.toString());
                     }
                   });
+                } else {
+                  var error = new Error();
+                  error.message = 'Template ' + template + ' not found';
+                  error.code = 'TEMPLATE_TYPE_MISSING';
+                  error.statusCode = 422;
+                  callback(error, '');
                 }
               });
             } else {
@@ -207,17 +213,18 @@ module.exports = function uiComponent(UIComponent) {
     async.parallel(tasks, function finalMergeTask(err, results) {
       if (err) {
         callback(err);
-      }
-      if (fetchAsHtml) {
-        if (component.importUrls) {
-          var importLinks = component.importUrls.map(function createLinks(importUrl) {
-            return '<link rel="import" dynamic-link href="' + importUrl + '">';
-          });
-          html = importLinks.join('\n') + '\n' + html;
-        }
-        mergeAsHTML(html, response, callback);
       } else {
-        callback(null, response);
+        if (fetchAsHtml) {
+          if (component.importUrls) {
+            var importLinks = component.importUrls.map(function createLinks(importUrl) {
+              return '<link rel="import" dynamic-link href="' + importUrl + '">';
+            });
+            html = importLinks.join('\n') + '\n' + html;
+          }
+          mergeAsHTML(html, response, callback);
+        } else {
+          callback(null, response);
+        }
       }
     });
   };
@@ -234,12 +241,14 @@ module.exports = function uiComponent(UIComponent) {
     };
 
 
-    UIComponent.findOne(where, options, function findOneCb(err, component) {
+    // Prefer find and results[0] instead of findOne
+    // so that data-personalization is applied effectively.
+    UIComponent.find(where, options, function findOneCb(err, results) {
       if (err) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
-
+      var component = results ? results[0] : undefined;
       if (!component) {
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
@@ -247,8 +256,7 @@ module.exports = function uiComponent(UIComponent) {
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
           modelName = loopback.findModel(modelName, options).modelName;
           var templateType = modelAndType[1];
-          var types = ['form', 'list'];
-          if (modelName && templateType && types.indexOf(templateType) !== -1) {
+          if (modelName && templateType) {
             var model = UIComponent.app.models[modelName];
             component = defaultComponent(model, templateType);
             // add autoInjectFields = true to render the form if templateType is form.
@@ -403,9 +411,10 @@ module.exports = function uiComponent(UIComponent) {
             fmeta.type = 'typeahead';
             fmeta.valueproperty = relation.keyTo;
             // assume 'name' ??
-            fmeta.displayproperty = 'name';
+            var displayProperty = (modelTo.base === 'RefCodeBase' ? 'description' : 'name');
+            fmeta.displayproperty = displayProperty;
             fmeta.resturl = modelTo.resturl;
-            fmeta.searchurl = fmeta.resturl + '?filter[where][name][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
+            fmeta.searchurl = fmeta.resturl + '?filter[where][' + displayProperty + '][regexp]=/^SEARCH_STRING/i&filter[limit]=5';
             fmeta.dataurl = fmeta.resturl + '/VALUE_STRING';
           }
         } else if (relation.type === 'embedsMany') {
@@ -527,12 +536,14 @@ module.exports = function uiComponent(UIComponent) {
                 name: componentName
               }
             };
-            UIComponent.findOne(filter, options, function findComponentCb(err, component) {
+            // Prefer find and results[0] over findOne
+            // for data-personalization to work effectively
+            UIComponent.find(filter, options, function findComponentCb(err, results) {
               if (err) {
                 done(err);
               }
-              if (component) {
-                done(null, component);
+              if (results && results[0]) {
+                done(null, results[0]);
               } else {
                 createComponent(model, templateType, options, done);
               }

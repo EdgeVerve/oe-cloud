@@ -28,6 +28,8 @@ var debug = require('debug')('caching-test');
 var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var pg = require('pg');
+var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
 var defaultContext = {
@@ -43,6 +45,7 @@ var altContext = {
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
 var dbname = 'db';
+var dataSource;
 var accessToken = null;
 
 function apiPostRequest(url, postData, callback, done) {
@@ -81,6 +84,7 @@ function apiGetRequest(url, callback, done) {
 }
 
 function mongoDeleteById(id, newModelName, cb) {
+ if (dataSource.name === 'mongodb') {
   var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
   MongoClient.connect(url, function (err, db) {
     if (err) {
@@ -95,6 +99,26 @@ function mongoDeleteById(id, newModelName, cb) {
       });
     }
   });
+} else {
+        var loopbackModelNoCache = loopback.getModel(modelName,bootstrap.defaultContext);
+        var idFieldName =  loopbackModelNoCache.definition.idName();
+        var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+        var client = new pg.Client(connectionString);
+        client.connect(function (err) {
+            if (err) 
+                cb(err); 
+            else {
+                var query = client.query("DELETE from \"" + loopbackModelNoCache.modelName.toLowerCase() + "\"  WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                if (err)  {
+                    return cb(err);
+                }
+                debug("Number of records removed " + result.rowCount);
+                cb();
+            });
+        }
+    });
+    }   
+
 }
 
 describe('Instance Caching Test', function () {
@@ -103,6 +127,7 @@ describe('Instance Caching Test', function () {
   var TestModelNoInstanceCache = null;
 
   before('login using admin', function fnLogin(done) {
+    dataSource = app.datasources[dbname];
     var sendData = {
       'username': 'admin',
       'password': 'admin'
@@ -125,6 +150,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
+    dataSource = app.datasources[dbname];
     var data = {
       'name': modelName,
       'base': 'BaseEntity',
@@ -162,7 +188,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model with No InstanceCache', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
-
+    dataSource = app.datasources[dbname];
     var data = {
       'name': modelNameNoInstanceCache,
       'base': 'BaseEntity',
@@ -200,8 +226,8 @@ describe('Instance Caching Test', function () {
   });
 
   describe('CRUD tests', function () {
-
-    xit('Should NOT cache the Test instance after create', function (done) {
+    dataSource = app.datasources[dbname];
+    it('Should NOT cache the Test instance after create', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -218,7 +244,6 @@ describe('Instance Caching Test', function () {
               return done(err);
             }
             TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-              console.log(data2);
               if (err) {
                 return done(err);
               } else if (data2.length === 0) {
@@ -231,7 +256,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should cache the Test instance after findById', function (done) {
+    it('Should cache the Test instance after findById', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -279,7 +304,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should cache the Test instance after upsert', function (done) {
+    it('Should cache the Test instance after upsert', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -298,6 +323,48 @@ describe('Instance Caching Test', function () {
             }
             result1 = Object.assign({}, data.toObject());
             mongoDeleteById(id, TestModel.modelName, function (err) {
+	           if(err) {
+                                return done(err);
+                            }
+                            TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
+                                if (err) {
+                                    return done(err);
+                                } else if(data2.length === 0) {
+                                    return done('instance not cached')
+                                }
+                                result2 = Object.assign({},data2[0].toObject());
+                                expect(models[modelName]).not.to.be.null;
+                                expect(result1).not.to.be.null;
+                                expect(result2).not.to.be.null;
+                                //expect(result1).to.deep.equal(result2);
+                                expect(result1.__data === result2.__data).to.be.true;
+                                return done();
+                            })
+                        });
+                    });
+                }
+            });
+        });
+
+        it('Should cache the Test instance after save', function (done) {
+            var id = uuid.v4();
+            var result1, result2;
+            TestModel.create({
+                name: 'Lior',
+                id: id
+            }, defaultContext, function (err, data) {
+                if (err) {
+                    console.log(err);
+                    return done(err);
+                } else {
+                    data.name = 'Tamar';
+                    data.save(defaultContext, function(err, data) {
+                        if (err) {
+                            console.log(err);
+                            return done(err);
+                        }
+                        result1 = Object.assign({},data.toObject());
+                        mongoDeleteById(id, TestModel.modelName,function(err) {
               if (err) {
                 return done(err);
               }
@@ -321,24 +388,26 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should cache the Test instance after save', function (done) {
+    it('Should cache the Test instance after updateAttributes', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
         name: 'Lior',
+ assign: {
+                    change: 'this field should be deleted'
+                },
         id: id
       }, defaultContext, function (err, data) {
         if (err) {
           console.log(err);
           return done(err);
         } else {
-          data.name = 'Tamar';
-          data.save(defaultContext, function (err, data) {
+          data.updateAttributes({name: 'Eduardo', assign:{new: 'should only see this field'}}, defaultContext, function(err, data) {
             if (err) {
               console.log(err);
               return done(err);
             }
-            result1 = Object.assign({}, data.toObject());
+            result1 = Object.assign({}, data.toObject(), {name: 'Eduardo', assign:{new: 'should only see this field'}});
             mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
@@ -363,51 +432,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should cache the Test instance after updateAttributes', function (done) {
-      var id = uuid.v4();
-      var result1, result2;
-      TestModel.create({
-        name: 'Lior',
-        assign: {
-          change: 'this field should be deleted'
-        },
-        id: id
-      }, defaultContext, function (err, data) {
-        if (err) {
-          console.log(err);
-          return done(err);
-        } else {
-          data.updateAttributes({ name: 'Eduardo', assign: { new: 'should only see this field' } }, defaultContext, function (err, data) {
-            if (err) {
-              console.log(err);
-              return done(err);
-            }
-            result1 = Object.assign({}, data.toObject(), { name: 'Eduardo', assign: { new: 'should only see this field' } });
-            mongoDeleteById(id, TestModel.modelName, function (err) {
-              if (err) {
-                return done(err);
-              }
-              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-                if (err) {
-                  return done(err);
-                } else if (data2.length === 0) {
-                  return done('instance not cached')
-                }
-                result2 = Object.assign({}, data2[0].toObject());
-                expect(models[modelName]).not.to.be.null;
-                expect(result1).not.to.be.null;
-                expect(result2).not.to.be.null;
-                expect(result1).to.deep.equal(result2);
-                expect(result1.__data === result2.__data).to.be.true;
-                return done();
-              })
-            });
-          });
-        }
-      });
-    });
-
-    xit('Should clear instance cache after destroyAll', function (done) {
+it('Should clear instance cache after destroyAll', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -435,7 +460,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should delete the Test instance from cache after deleteByid', function (done) {
+    it('Should delete the Test instance from cache after deleteByid', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -463,7 +488,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should delete the Test instance from cache after deleteByid and version', function (done) {
+    it('Should delete the Test instance from cache after deleteByid and version', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -491,7 +516,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should clear cache after update', function (done) {
+    it('Should clear cache after update', function (done) {
       var id = uuid.v4();
       TestModel.create({
         name: "Praveen",
@@ -523,8 +548,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    xit('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
-      var id = uuid.v4();
+    it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
       /**
        * 1. create new modle instance 
        * 2. run a find query 
@@ -532,6 +556,7 @@ describe('Instance Caching Test', function () {
        * 4. change the db directly in the DB.
        * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
        */
+      var id = uuid.v4();
 
       apiPostRequest('/' + modelNameNoInstanceCache + 's/', { "name": "value1", "id": id }, apiRequest_find, done);
 
@@ -540,24 +565,45 @@ describe('Instance Caching Test', function () {
       };
 
       function dbQuery_update(result) {
+        var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
+      if (dataSource.name === 'mongodb') {
         MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
           if (err) return done(err);
           else {
-            db.collection(TestModelNoInstanceCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
+            db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
               if (err) return done(err);
               else apiRequest_find(result, comperCacheToDb);
             });
           }
         });
-      }
+                } else {
+                     var idFieldName =  loopbackModelNoCache.definition.idName();
+                     var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+                     var client = new pg.Client(connectionString);
+                     client.connect(function (err) {
+                            if (err) 
+                                done(err); 
+                            else {
+                                var query = client.query("UPDATE \"" + loopbackModelNoCache.modelName.toLowerCase() + "\" SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                                if (err)  {
+                                    return done(err);
+                                }
+                                else {
+                                    apiRequest_find(result, comperCacheToDb);
+                                }
+                        });
+                    }
+                 });
+            } 
+        }
 
       function comperCacheToDb(result) {
         if (result.body.name === "value2") return done();
-        else return done(new Error("Modle cached to instance cache, although disableInstanceCache flag is on"));
+        else return done(new Error("Model cached to instance cache, although disableInstanceCache flag is on"));
       }
     });
 
-    xit('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
+    it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
       var id = uuid.v4();
       TestModelNoInstanceCache.create({ "name": modelNameNoInstanceCache, "id": id }, defaultContext, function (err, result) {
         if (err) {

@@ -6,9 +6,6 @@
     "description": "ensure reliability on failing events on all entities",
     "idInjection": false,
     "properties": {
-        "eventHistoryArray": {
-            "type": "array"
-        },
         "hostName": {
             "type": "string"
         },
@@ -17,9 +14,10 @@
         },
         "doStartUpOperation": {
             "type": "boolean"
-        },
-        "eventHistoryMap": {
-            "type": "object"
         }
+    },
+    "options": {
+        "proxyEnabled": true,
+        "proxyMethods": [{"name":"createEventHistoryRemote"}]
     }
 }
