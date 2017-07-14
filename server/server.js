@@ -57,6 +57,7 @@ module.exports.boot = function serverBoot(appinstance, options, cb) {
   }
   var appListPath = path.resolve(path.join(appinstance.locals.apphome, 'app-list.json'));
   var appListExists = fs.existsSync(appListPath) ? true : false;
+
   // helmet removes x-powered-by and add xss filters for security purpose
   appinstance.use(helmet());
   if (require.main !== module && appListExists) {
@@ -123,6 +124,8 @@ function finalBoot(appinstance, options, cb) {
       dbm(appinstance, options, cb);
     });
   }
+
+  appinstance.set('apiInfo', getApiInfo());
 
   bootWithMigrate(appinstance, options, function serverFinalBootCb(err) {
     if (err) {
@@ -580,3 +583,15 @@ module.exports.loadOptionsFromConfig = function loadOptionsFromConfig(appRootPat
     }
   });
 };
+
+function getApiInfo() {
+  var cwd = process.cwd();
+  var pkgFile = path.join(cwd, 'package.json');
+  var pkg = require(pkgFile);
+  var desc = pkg.description || (function () { console.warn('No description found in package.json...Using a default description.'); return 'An oe-cloud based API application'; })();
+  var apiInfo = {
+    description: desc
+  };
+
+  return apiInfo;
+}
