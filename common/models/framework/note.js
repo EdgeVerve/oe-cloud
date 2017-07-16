@@ -20,6 +20,7 @@ module.exports = function (Model) {
 
   Model.observe('after save', function (ctx, next) {
     var err = new Error('Note after save fail');
+    console.log('failing on after save Note');
     return next(err);
   });
 };
