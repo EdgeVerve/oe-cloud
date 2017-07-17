@@ -269,17 +269,5 @@
     "Lock": {
         "public": false,
         "dataSource": "db"
-    },
-    "Inventory": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "InventoryTransaction": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "Note": {
-        "public": true,
-        "dataSource": "db"
     }
 }
