@@ -62,7 +62,7 @@ mongotest:
     - export DB=mongo
     - export STARTUP_CMD="grunt test-with-coverage"
     - export FILE_NAME=docker-compose.test.env.yml
-    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}-${CI_BUILD_ID}
     - export NETWORK_NAME=${STACK_NAME}
     - export exit_status=0
     - export nameWebService=${STACK_NAME}"_web"
