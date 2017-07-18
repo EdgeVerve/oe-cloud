@@ -269,5 +269,9 @@
     "Lock": {
         "public": false,
         "dataSource": "db"
+    },
+    "Note": {
+        "public": true,
+        "dataSource": "db"
     }
 }
