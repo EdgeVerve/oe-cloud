@@ -87,15 +87,15 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     };
 
     api
-            .post(bootstrap.basePath + '/BaseUsers/login')
-            .send(sendData)
-            .expect(200).end(function (err, res) {
-              if (err) {
-                return done(err);
-              }
-              accessToken = res.body.id;
-              return done();
-            });
+      .post(bootstrap.basePath + '/BaseUsers/login')
+      .send(sendData)
+      .expect(200).end(function (err, res) {
+        if (err) {
+          return done(err);
+        }
+        accessToken = res.body.id;
+        return done();
+    });
   });
 
   before('create test models', function createModels(done) {
@@ -965,7 +965,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
                     }).catch(function (err) {
                       expect(err).to.be.ok;
                       expect(JSON.parse(err.message).status).to.be.equal(422);
-                      expect(JSON.parse(err.message).errors[0].code).to.be.equal('DATA_ERROR_071');
+                      expect(JSON.parse(err.message).code).to.be.equal('DATA_ERROR_071');
                     });
       });
 
