@@ -53,6 +53,7 @@
     }
   },
   "validations": [],
+  "cacheable": true,
   "relations": {},
   "acls": [],
   "methods": {}
