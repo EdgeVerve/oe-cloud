@@ -314,7 +314,6 @@ describe(chalk.blue('Model Personalization test'), function () {
         expect(results[0].address[0].city).to.equal('Bangalore');
         // previous records for icici are still retain  as new records are will use same collection
         // user can have new collection if he/she wants
-        debugger;
         Employee.find({
           include: 'address'
         }, iciciCtx, function (err, results) {

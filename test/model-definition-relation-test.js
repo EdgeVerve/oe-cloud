@@ -456,7 +456,6 @@ describe(chalk.blue('model-definition-relation     Programmatically'), function 
 
       it('Should get data for given relation ', function (done) {
         var model = loopback.findModel(modelName, bootstrap.defaultContext);
-        debugger;
         model.find({
           include: 'subCategories'
         }, bootstrap.defaultContext, function (err, data) {
