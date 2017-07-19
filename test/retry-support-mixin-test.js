@@ -22,6 +22,8 @@ var api = bootstrap.api;
 
 var accessToken;
 
+var modelId;
+
 function apiRequest(url, postData, callback, done) {
     var version = uuid.v4();
     postData._version = version;
@@ -85,6 +87,7 @@ describe(chalk.blue('retry-support-tests'), function() {
             if (err) { 
                 return done(err);
             }
+            modelId = res.id.toString();
             done();
         });
     });
@@ -141,13 +144,13 @@ describe(chalk.blue('retry-support-tests'), function() {
     });
 
     after('delete all modelDefinition models', function(done) {
-        //        models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function(err, res) {
-        //                    if (err) {
-        //                        done(err);
-        //                    } else {
-        //                        done();
-        //                    }
-        //           });
-        done();
+        var modelDefinition = loopback.findModel('ModelDefinition');
+        modelDefinition.destroyById(modelId, bootstrap.defaultContext, function(err, res) {
+                            if (err) {
+                                done(err);
+                            } else {
+                                done();
+                            }
+                   });
     });
 });
