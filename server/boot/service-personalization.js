@@ -283,7 +283,7 @@ function afterRemotePersonalizationExec(model, ctx, next) {
         var callContext = ctx.req.callContext;
         var postProcessingFns = callContext.postProcessingFns ? callContext.postProcessingFns[callContext.modelName] : null;
         if (postProcessingFns && typeof postProcessingFns !== 'undefined') {
-          log.debug(ctx.req.callContext, 'PostProcessingFunctions = ', JSON.stringify(postProcessingFns));
+          log.debug(ctx.req.callContext, 'PostProcessingFunctions = ', postProcessingFns);
           log.debug(ctx.req.callContext, 'looping through and executing PostProcessingFunctions');
           for (var i in postProcessingFns) {
             if (postProcessingFns.hasOwnProperty(i)) {
@@ -322,7 +322,7 @@ function beforeRemotePersonalizationExec(model, ctx, next) {
         var callContext = ctx.req.callContext;
         var preProcessingFns = callContext.preProcessingFns ? callContext.preProcessingFns[callContext.modelName] : null;
         if (preProcessingFns && typeof preProcessingFns !== 'undefined') {
-          log.debug(ctx.req.callContext, 'PreProcessingFunctions = ', JSON.stringify(preProcessingFns));
+          log.debug(ctx.req.callContext, 'PreProcessingFunctions = ', preProcessingFns);
           log.debug(ctx.req.callContext, 'looping through and executing PreProcessingFunctions');
           for (var i in preProcessingFns) {
             if (preProcessingFns.hasOwnProperty(i)) {

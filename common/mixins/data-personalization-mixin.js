@@ -552,7 +552,7 @@ function dataPersonalizationAccess(ctx, next) {
 
   // Merging the query formed with the existing query if any.
   mergeQuery(ctx.query, finalQuery);
-  log.debug(ctx.options, 'Final formed query', JSON.stringify(ctx.query));
+  log.debug(ctx.options, 'Final formed query', ctx.query);
   next();
 }
 

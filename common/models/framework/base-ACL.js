@@ -150,7 +150,7 @@ module.exports = function DBTransactionFn(BaseACL) {
       var model = loopback.findModel(ctx.instance.model, ctx.options);
       if (model) {
         model.settings.acls.push(acl);
-        log.debug(ctx.options, 'Added new ACL ', JSON.stringify(acl), ' to application');
+        log.debug(ctx.options, 'Added new ACL ', acl, ' to application');
       }
     } else {
       log.debug(ctx.options, 'Updated %s matching %j', ctx.Model.pluralModelName, ctx.where);

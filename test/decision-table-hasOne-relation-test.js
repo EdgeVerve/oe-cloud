@@ -13,7 +13,7 @@ var loopback = require('loopback');
 var app = bootstrap.app;
 var models = bootstrap.models;
 var parentModelName = "SupplierModel";
-var childModelName = "AccountModel";
+var childModelName = "AccountsModel";
 
 describe(chalk.blue('Decision table hasOne relation check'), function () {
   var parentModel;

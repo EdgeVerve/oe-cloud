@@ -10,6 +10,7 @@ var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
 
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 
 describe('ZZ Final Cleanup', function() {
 	this.timeout(120000);
@@ -42,5 +43,27 @@ describe('ZZ Final Cleanup', function() {
     it('Should delete collections', function(done) {
 		expect(1).to.be.equal(1);
 		done();
+    });
+
+	it('Should delete postgres db', function(done) {
+		if (process.env.POSTGRES_HOST) {
+			var Pool = require('pg').Pool;
+			var pool = new Pool({
+				"user": "postgres",
+				"password": "postgres",
+				"host": postgresHost,
+				"database": "postgres"
+			});
+			pool.query("DROP DATABASE IF EXISTS db", function(err, result){
+				if(err) {
+					console.log("Failed to clean Postgres DB");
+					console.log(err);
+					done(err);
+				}
+				done();
+			});
+		} else {
+			done();
+		}
     });
 });

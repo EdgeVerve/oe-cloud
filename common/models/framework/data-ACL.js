@@ -222,7 +222,7 @@ module.exports = function DataACLFn(DataACL) {
           }
         });
 
-        log.debug(callContext, 'filter in dataacl ', JSON.stringify(filter));
+        log.debug(callContext, 'filter in dataacl ', filter);
 
         var failed = [];
         if (accessType === 'READ') {

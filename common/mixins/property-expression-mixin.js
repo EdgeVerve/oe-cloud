@@ -22,7 +22,7 @@ module.exports = function PropertyExpressionMixin(Model) {
     // expression mixin
     return;
   }
-  log.debug(log.defaultContext(), 'PropertyExpressionMixin invoked for ', Model.modelName, 'prop expr ', JSON.stringify(propertyUtils.propertyExpressions(Model)));
+  log.debug(log.defaultContext(), 'PropertyExpressionMixin invoked for ', Model.modelName, 'prop expr ', propertyUtils.propertyExpressions(Model));
   // get property expressions from property-expression-util
   Model.propertyUtils = propertyUtils.propertyExpressions(Model);
   if (typeof Model.propertyUtils !== 'undefined' && Model.propertyUtils.length > 0) {
@@ -44,7 +44,7 @@ function injectPropertyExprVal(ctx, next) {
   log.debug(ctx.options, 'PropertyExpressionMixin Saving entity - ', ctx.Model.modelName);
   if (ctx.instance) {
     evaluateExpressions(ctx, function returnBack() {
-      log.debug(ctx.options, 'returned: ', JSON.stringify(ctx.instance));
+      log.debug(ctx.options, 'returned: ', ctx.instance);
       next();
     });
   } else {
@@ -55,9 +55,9 @@ function injectPropertyExprVal(ctx, next) {
 
 // function to traverse through sub models and call evaluateExpressions
 function getSubModels(inst) {
-  log.debug(log.defaultContext(), 'in sub models', JSON.stringify(inst));
+  log.debug(log.defaultContext(), 'in sub models', inst);
   var properties = inst.constructor.definition.properties;
-  log.debug(log.defaultContext(), 'in sub models properties', JSON.stringify(properties));
+  log.debug(log.defaultContext(), 'in sub models properties', properties);
   var model;
   Object.keys(properties).forEach(function propertyExpressions(property) {
     // if type of the property is an array which is of Model type then collect the property expressions for the Model properties
@@ -67,7 +67,7 @@ function getSubModels(inst) {
       log.debug(log.defaultContext(), 'shared class ', properties[property].type.sharedClass);
       model = properties[property].type;
       var instance = inst.__data[property];
-      log.debug(log.defaultContext(), 'shareid class instance ', JSON.stringify(instance));
+      log.debug(log.defaultContext(), 'shareid class instance ', instance);
       if (instance && model.settings.mixins.PropertyExpressionMixin) {
         log.debug(log.defaultContext(), 'rules added for  ', model.modelName);
         evaluateExpressions(instance);
@@ -93,7 +93,7 @@ function getSubModels(inst) {
 
 function iterateArrayProps(instances, model) {
   instances.forEach(function instacnesForEachFn(instance) {
-    log.debug(log.defaultContext(), 'instance in type array ', JSON.stringify(instance));
+    log.debug(log.defaultContext(), 'instance in type array ', instance);
     if (instance && model.settings.mixins.PropertyExpressionMixin) {
       log.debug(log.defaultContext(), 'rules added for ', model.modelName);
       evaluateExpressions(instance);
@@ -109,7 +109,7 @@ function evaluateExpressions(ctx, callback) {
   var ast = self.constructor._ast;
   var propertyExpressionPromises = [];
   var propMapper = [];
-  log.debug(options, 'valid instance found:', JSON.stringify(ast));
+  log.debug(options, 'valid instance found:', ast);
   var count = -1;
   var data = self.toObject(true);
   self.constructor.propertyUtils.forEach(function propExpressionsForEach(obj) {
@@ -122,7 +122,7 @@ function evaluateExpressions(ctx, callback) {
   });
   // all settled promises are accumalated and attached to properties
   Promise.all(propertyExpressionPromises).then(function propertiesPromiseFn(results) {
-    log.debug(options, 'eval result ', JSON.stringify(results));
+    log.debug(options, 'eval result ', results);
     for (var i = 0; i < propMapper.length; i++) {
       log.debug(options, 'property', propMapper[i]);
       if (typeof instance[propMapper[i].toString()] === 'undefined') {
@@ -134,7 +134,7 @@ function evaluateExpressions(ctx, callback) {
         instance[propMapper[i].toString()] = results[i];
       }
     }
-    log.debug(options, 'post update ', JSON.stringify(instance));
+    log.debug(options, 'post update ', instance);
     getSubModels(instance);
     ctx.instance = instance;
     callback();
