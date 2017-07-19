@@ -5,7 +5,6 @@ The Program may contain/reference third party or open source components, the rig
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
 
-var parser = require('ua-parser-js');
 var log = require('oe-logger')('db-lock-contributor');
 var config = require('../config.js');
 var DB_LOCK_MODE = config.dbLockMode;
@@ -20,10 +19,10 @@ var DB_LOCK_MODE = config.dbLockMode;
 
 module.exports = function dbLockContributor(options) {
   return function dbLockContributorFn(req, res, next) {
-    if (!(parser(req.headers['x-evproxy-db-lock']).ua) || parser(req.headers['x-evproxy-db-lock']).ua === '0') {
+    if (!req.headers['x-evproxy-db-lock'] || req.headers['x-evproxy-db-lock'] === '0') {
       log.debug(req.callContext, 'x-evproxy-db-lock header is undefined');
       next();
-    } else if (parser(req.headers['x-evproxy-db-lock']).ua === '1') {
+    } else if (req.headers['x-evproxy-db-lock'] === '1') {
       log.debug(req.callContext, 'x-evproxy-db-lockk header has value of 1');
       req.callContext.lockMode = DB_LOCK_MODE;
       next();

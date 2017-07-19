@@ -47,7 +47,7 @@ module.exports = function postAuthContextPopulator(options) {
       callContext.accessToken = req.accessToken.id;
       req.callContext = callContext;
 
-      log.debug(req.callContext, 'postAuthContextPopulator : context setting as  = ', JSON.stringify(callContext));
+      log.debug(req.callContext, 'postAuthContextPopulator : context setting as  = ', callContext);
     }
     next();
   };

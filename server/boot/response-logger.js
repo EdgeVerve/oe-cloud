@@ -10,7 +10,7 @@ var log = require('oe-logger')('response-logger');
 
 module.exports = function responseLogger(app) {
   app.remotes().after('**', function afterRemoteListner(ctx, next) {
-    log.debug(ctx.req.callContext, ctx.res.statusCode, ' Body: ', JSON.stringify(ctx.result), ' Headers: ', ctx.res._headers);
+    log.debug(ctx.req.callContext, ctx.res.statusCode, ' Body: ', ctx.result, ' Headers: ', ctx.res._headers);
     next();
   });
 };
