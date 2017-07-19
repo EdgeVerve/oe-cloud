@@ -27,7 +27,7 @@ module.exports = function ContextPopulatorFilter(options) {
       var loopbackContext = loopback.getCurrentContext();
       if (loopbackContext) {
         loopbackContext.set('callContext', req.callContext);
-        log.debug(req.callContext, 'context set = ', JSON.stringify(req.callContext));
+        log.debug(req.callContext, 'context set = ', req.callContext);
       } else {
         throw (new Error('call context is null'));
       }

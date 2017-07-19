@@ -111,7 +111,7 @@ module.exports = function preAuthContextPopulator(options) {
     });
 
     req.callContext = callContext;
-    log.debug(req.callContext, 'context setting as  = ', JSON.stringify(callContext));
+    log.debug(req.callContext, 'context setting as  = ', callContext);
     next();
   };
 };
