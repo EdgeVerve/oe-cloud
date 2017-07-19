@@ -92,5 +92,6 @@
     "userName":"admin",
     "password":"admin",
     "email":"admin@mycompany.com"
-  }
+  },
+  "actorChunkSize" : 10
 }
