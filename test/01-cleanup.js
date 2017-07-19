@@ -38,6 +38,14 @@ describe('ZZ Final Cleanup', function() {
 				});
 			});
 		});
+    });
+
+    it('Should delete collections', function(done) {
+		expect(1).to.be.equal(1);
+		done();
+    });
+
+	it('Should delete postgres db', function(done) {
 		if (process.env.POSTGRES_HOST) {
 			var Pool = require('pg').Pool;
 			var pool = new Pool({
@@ -54,11 +62,8 @@ describe('ZZ Final Cleanup', function() {
 				}
 				done();
 			});
+		} else {
+			done();
 		}
-    });
-
-    it('Should delete collections', function(done) {
-		expect(1).to.be.equal(1);
-		done();
     });
 });
