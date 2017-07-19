@@ -58,7 +58,7 @@ module.exports = function failsafeObserverMixin(Model) {
           }
           next();
         } else {
-          log.error(ctx.options, 'failSafe observer: ', _fn.name, ' failed with error: ', error.message);
+          log.debug(ctx.options, 'failSafe observer: ', _fn.name, ' failed with error: ', error.message);
           next(error);
         }
       });
