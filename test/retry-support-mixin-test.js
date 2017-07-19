@@ -67,7 +67,7 @@ describe(chalk.blue('retry-support-tests'), function() {
     before('create test models', function createModels(done) {
         var modelDefinition = loopback.findModel('ModelDefinition');
         var data = {
-            'name': 'TestAccount',
+            'name': 'TestRetryAccount',
             'base': 'BaseEntity',
             'properties': { 
                 'yodels': {
@@ -97,7 +97,7 @@ describe(chalk.blue('retry-support-tests'), function() {
 
             api
                 .set('Accept', 'application/json')
-                .get(bootstrap.basePath + '/TestAccounts/isRetryable?access_token=' + accessToken)
+                .get(bootstrap.basePath + '/TestRetryAccounts/isRetryable?access_token=' + accessToken)
                 .send()
                 .end((err, res) => {
                     if (err) {
@@ -115,7 +115,7 @@ describe(chalk.blue('retry-support-tests'), function() {
 
             api
                 .set('Accept', 'application/json')
-                .get(bootstrap.basePath + '/TestAccounts/primaryKeyField?access_token=' + accessToken)
+                .get(bootstrap.basePath + '/TestRetryAccounts/primaryKeyField?access_token=' + accessToken)
                 .send()
                 .end((err, res) => {
                     if (err) {
@@ -132,7 +132,7 @@ describe(chalk.blue('retry-support-tests'), function() {
     var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
 
     after('delete all the test accounts', function(done) {
-        var testAccount = loopback.getModel('TestAccount');
+        var testAccount = loopback.getModel('TestRetryAccount');
         testAccount.destroyAll({}, deleteContext, function(err) {
             if (err) {
                 log.error(err);
