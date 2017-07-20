@@ -13,112 +13,112 @@ var chai = require('chai');
 chai.use(require('chai-things'));
 
 var modelName = 'OrganisationModel';
-describe(chalk.blue('Validation custom function test'), function() {
+describe(chalk.blue('Validation custom function test'), function () {
 
-    this.timeout(50000);
+  this.timeout(50000);
 
-    before('setup test data', function(done) {
-        models.ModelDefinition.events.once('model-' + modelName + '-available', function() {
-            done();
-        });
-
-        models.ModelDefinition.create({
-            'name': modelName,
-            'base': 'BaseEntity',
-            'strict': false,
-            'idInjection': true,
-            'options': {
-                'validateUpsert': true
-            },
-            'properties': {
-                'name': {
-                    'type': 'string',
-                    'unique': true,
-                    'required': true
-                },
-                'location': {
-                    'type': 'string'
-                }
-            },
-            'validations': [],
-            'relations': {},
-            'acls': [],
-            'methods': {}
-        }, bootstrap.defaultContext, function(err, modelDefinitionData) {
-            if (err) {
-                console.log(err);
-            }
-            expect(err).to.be.not.ok;
-            var model = loopback.getModel(modelName);
-            model.customValidations = [];
-            var customArr = [];
-
-            function locationLengthCheck(data, options, cb) {
-                if (data.location.length < 4) {
-                    cb(null, {
-                        'fieldName': 'location',
-                        'errMessage': 'minimum length violated for location',
-                        'errCode': 'custom-err'
-                    });
-                } else {
-                    cb(null, null);
-                }
-            }
-
-            function locationValueCheck(data, options, cb) {
-                if (['INDIA', 'AUSTRALIA', 'CANADA'].indexOf(data.location) < 0) {
-                    cb(null, {
-                        'fieldName': 'location',
-                        'errMessage': 'location is out of the allowed list',
-                        'errCode': 'custom-err'
-                    });
-                } else {
-                    cb(null, null);
-                }
-            }
-
-            customArr.push(locationLengthCheck);
-            customArr.push(locationValueCheck);
-
-            model.customValidations = customArr;
-        });
+  before('setup test data', function (done) {
+    models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
+      done();
     });
 
-    after('destroy test models', function(done) {
-        models.ModelDefinition.destroyAll({
-            name: modelName
-        }, bootstrap.defaultContext, function(err, d) {
-            if (err) {
-                console.log('Error - not able to delete modelDefinition entry for mysettings');
-                return done();
-            }
-            var model = loopback.getModel(modelName);
-            model.destroyAll({}, bootstrap.defaultContext, function() {
-                done();
-            });
-        });
-    });
+    models.ModelDefinition.create({
+      'name': modelName,
+      'base': 'BaseEntity',
+      'strict': false,
+      'idInjection': true,
+      'options': {
+        'validateUpsert': true
+      },
+      'properties': {
+        'name': {
+          'type': 'string',
+          'unique': true,
+          'required': true
+        },
+        'location': {
+          'type': 'string'
+        }
+      },
+      'validations': [],
+      'relations': {},
+      'acls': [],
+      'methods': {}
+    }, bootstrap.defaultContext, function (err, modelDefinitionData) {
+      if (err) {
+        console.log(err);
+      }
+      expect(err).to.be.not.ok;
+      var model = loopback.getModel(modelName, bootstrap.defaultContext);
+      model.customValidations = [];
+      var customArr = [];
 
-    it('Validation Test - Should fail to insert data', function(done) {
-        var model = loopback.getModel(modelName);
-        var data = {
-            'location': "USA"
-        };
-        model.create(data, bootstrap.defaultContext, function(err, results) {
-            expect(err).to.be.not.null;
-            done();
-        });
+      function locationLengthCheck(data, options, cb) {
+        if (data.location.length < 4) {
+          cb(null, {
+            'fieldName': 'location',
+            'errMessage': 'minimum length violated for location',
+            'errCode': 'custom-err'
+          });
+        } else {
+          cb(null, null);
+        }
+      }
+
+      function locationValueCheck(data, options, cb) {
+        if (['INDIA', 'AUSTRALIA', 'CANADA'].indexOf(data.location) < 0) {
+          cb(null, {
+            'fieldName': 'location',
+            'errMessage': 'location is out of the allowed list',
+            'errCode': 'custom-err'
+          });
+        } else {
+          cb(null, null);
+        }
+      }
+
+      customArr.push(locationLengthCheck);
+      customArr.push(locationValueCheck);
+
+      model.customValidations = customArr;
     });
-    it('Validation Test - Should successfully insert data', function(done) {
-        var model = loopback.getModel(modelName);
-        var data = {
-            'name': "OrganisationOne",
-            'location': "INDIA"
-        };
-        model.create(data, bootstrap.defaultContext, function(err, results) {
-            expect(err).to.be.null;
-            done();
-        });
+  });
+
+  after('destroy test models', function (done) {
+    models.ModelDefinition.destroyAll({
+      name: modelName
+    }, bootstrap.defaultContext, function (err, d) {
+      if (err) {
+        console.log('Error - not able to delete modelDefinition entry for mysettings');
+        return done();
+      }
+      var model = loopback.getModel(modelName, bootstrap.defaultContext);
+      model.destroyAll({}, bootstrap.defaultContext, function () {
+        done();
+      });
     });
+  });
+
+  it('Validation Test - Should fail to insert data', function (done) {
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
+    var data = {
+      'location': "USA"
+    };
+    model.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err).to.be.not.null;
+      done();
+    });
+  });
+  it('Validation Test - Should successfully insert data', function (done) {
+    var model = loopback.getModel(modelName, bootstrap.defaultContext);
+    var data = {
+      'name': "OrganisationOne",
+      'location': "INDIA"
+    };
+    model.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err).to.be.null;
+      done();
+    });
+  });
 
 });

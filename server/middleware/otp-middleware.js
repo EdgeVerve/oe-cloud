@@ -11,7 +11,7 @@ var DEFAULT_TTL_OTP = 180000;
 var logger = require('oe-logger');
 var log = logger('otp-middleware');
 var crypto = require('crypto');
-
+var loopback = require('loopback');
 /**
  * This middleware is used to check and apply otp authentication if enabled on model.
  * If enabled then send otp and store posted data, and on next request validate otp.
@@ -38,8 +38,8 @@ module.exports = function otpMiddleware(options) {
     var app = req.app;
 
     var invokedPlural = req.callContext.modelName;
-    var modelName = util.checkModelWithPlural(app, invokedPlural);
-    var model = app.models[modelName];
+    var baseModel = util.checkModelWithPlural(app, invokedPlural);
+    var model = loopback.findModel(baseModel, req.callContext);
 
     if (!model) {
       return next();

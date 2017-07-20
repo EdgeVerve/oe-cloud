@@ -29,67 +29,67 @@ chai.use(require('chai-things'));
 
 
 describe(chalk.blue('X-Model-Validation test'), function () {
-    this.timeout(20000);
+  this.timeout(20000);
 
-    before('setup test data', function (done) {
-        models.ModelDefinition.events.once('model-' + 'Guest' + '-available', function () {
-            var referredModel = loopback.getModel('Invitee');
+  before('setup test data', function (done) {
+    models.ModelDefinition.events.once('model-' + 'Guest' + '-available', function () {
+      var referredModel = loopback.getModel('Invitee', bootstrap.defaultContext);
 
-            // Invitees
-            var data = [{ 'inviteeName': 'Ajith' },
-                        { 'inviteeName': 'Rama' },
-                        { 'inviteeName': 'Anirudh' }];
+      // Invitees
+      var data = [{ 'inviteeName': 'Ajith' },
+      { 'inviteeName': 'Rama' },
+      { 'inviteeName': 'Anirudh' }];
 
-            referredModel.create(data, bootstrap.defaultContext, function (err, results) {
-                expect(err).to.be.null;
-                done();
-            });
-        });
+      referredModel.create(data, bootstrap.defaultContext, function (err, results) {
+        expect(err).to.be.null;
+        done();
+      });
+    });
 
-        // Create the Invitee Model
+    // Create the Invitee Model
+    models.ModelDefinition.create({
+      'name': 'Invitee',
+      'base': 'BaseEntity',
+      'properties': {
+        'inviteeName': 'string'
+      }
+    }, bootstrap.defaultContext, function (err, model) {
+      if (err) {
+        console.log(err);
+      } else {
+
+        // Create the Guest model if Invitee creation is successful
         models.ModelDefinition.create({
-                    'name': 'Invitee',
-                    'base': 'BaseEntity',
-                    'properties': {
-                        'inviteeName': 'string'
-                    }
-        }, bootstrap.defaultContext, function (err, model) {
-            if (err) {
-                console.log(err);
-            } else {
-
-                // Create the Guest model if Invitee creation is successful
-                models.ModelDefinition.create({
-                        'name': 'Guest',
-                        'base': 'BaseEntity',
-                        'properties': {
-                            'guestName': {
-                                'type': 'string',
-                                'xmodelvalidate': { 'model': 'Invitee' , 'field': 'inviteeName' }
-                            }
-                        }
-                    }, bootstrap.defaultContext, function (err, model) {
-                    if (err) {
-                        console.log(err);
-                    }
-                    expect(err).to.be.not.ok;
-                });
+          'name': 'Guest',
+          'base': 'BaseEntity',
+          'properties': {
+            'guestName': {
+              'type': 'string',
+              'xmodelvalidate': { 'model': 'Invitee', 'field': 'inviteeName' }
             }
-            expect(err).to.be.not.ok;
+          }
+        }, bootstrap.defaultContext, function (err, model) {
+          if (err) {
+            console.log(err);
+          }
+          expect(err).to.be.not.ok;
         });
+      }
+      expect(err).to.be.not.ok;
     });
- 
-    it('X-Model-Validation Test - Should succeed', function (done) {
+  });
 
-        var mainModel = loopback.getModel('Guest');
-        var data = [{ 'guestName': 'Ajith' }, { 'guestName': 'Mohan' }];
-        mainModel.create(data, bootstrap.defaultContext, function (err, results) {
-            expect(err[0]).to.be.undefined;
-            expect(err[1]).not.to.be.undefined;
-            done();
-        });
+  it('X-Model-Validation Test - Should succeed', function (done) {
 
+    var mainModel = loopback.getModel('Guest', bootstrap.defaultContext);
+    var data = [{ 'guestName': 'Ajith' }, { 'guestName': 'Mohan' }];
+    mainModel.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err[0]).to.be.undefined;
+      expect(err[1]).not.to.be.undefined;
+      done();
     });
+
+  });
 
 
 });

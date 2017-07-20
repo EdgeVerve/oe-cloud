@@ -172,11 +172,11 @@ module.exports = function UIMetadata(UIMetadata) {
 
     if (data.modeltype) {
       var ModelDefn = app.models.ModelDefinition;
-
+      options.flatten = true;
       /** Get details of specified model along with all the related models.
        * allModelsInfo will contain (this, related and embedded)-models and their definition all as key/value pair.
        */
-      ModelDefn.extractMeta(data.modeltype, { flatten: true }, function extractMetaCb(err, flattenedModel) {
+      ModelDefn.extractMeta(data.modeltype, options, function extractMetaCb(err, flattenedModel) {
         if (err) {
           cb(err);
         }
@@ -224,7 +224,7 @@ module.exports = function UIMetadata(UIMetadata) {
               var uitype = modelField.type;
               if (uitype === 'string') {
                 if (modelField.enumtype) {
-                  var enumModel = app.loopback.findModel(modelField.enumtype);
+                  var enumModel = app.loopback.findModel(modelField.enumtype, options);
                   if (enumModel) {
                     modelField.listdata = enumModel.settings.enumList;
                   }
@@ -239,7 +239,7 @@ module.exports = function UIMetadata(UIMetadata) {
                 if (modelField.itemtype === 'model') {
                   uitype = 'grid';
                   modelField.columndefs = [];
-                  modelField.gridIdentifier = modelField.modeltype;
+                  modelField.gridIdentifier = app.models[modelField.modeltype].clientModelName;
                 } else {
                   // array of primitives of type 'itemtype'
                   uitype = 'tags';
@@ -312,7 +312,7 @@ module.exports = function UIMetadata(UIMetadata) {
         // Do not call getRestUrl since that needs model, and we need below restUrl when model is not available.
         data.resturl = data.resturl || '/api/' + inflection.pluralize(data.modeltype);
         data.title = data.title || data.modeltype;
-
+        delete options.flatten;
         enrichFromPropertyStore(app, fieldsMaster, data, options, function uiMetadataPrepareDataEnrichCb(err, data) {
           if (err) {
             cb(err);
@@ -433,7 +433,7 @@ module.exports = function UIMetadata(UIMetadata) {
 
         if (ctrlMeta.enumtype || fieldMeta.enumtype || modelMeta.enumtype) {
           var enumname = ctrlMeta.enumtype || fieldMeta.enumtype || modelMeta.enumtype;
-          var enumModel = app.loopback.findModel(enumname);
+          var enumModel = app.loopback.findModel(enumname, options);
           if (enumModel) {
             // enumtype is pointing to model
             ctrlMeta.listdata = enumModel.settings.enumList;

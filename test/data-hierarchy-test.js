@@ -21,6 +21,10 @@ var async = require('async');
 
 describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
   this.timeout(50000);
+  var RegionModel;
+  var ProductModel;
+  var SettingsModel;
+
   var regionModel = 'Region';
   var regionModelDetails = {
     name: regionModel,
@@ -113,6 +117,9 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
                 log.debug(bootstrap.defaultContext, 'unable to create Settings model');
                 done(err);
               } else {
+                RegionModel = loopback.getModel(regionModel, bootstrap.defaultContext);
+                ProductModel = loopback.getModel(productModel, bootstrap.defaultContext);
+                SettingsModel = loopback.getModel(settingsModel, bootstrap.defaultContext);
                 done();
               }
             });
@@ -128,15 +135,15 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
       'tenantId': 'test-tenant',
       'username': 'testuser'
     };
-    models[regionModel].destroyAll({}, callContext, function (err, result) {
+    RegionModel.destroyAll({}, callContext, function (err, result) {
       if (err) {
         done(err);
       }
-      models[productModel].destroyAll({}, callContext, function (err, result) {
+      ProductModel.destroyAll({}, callContext, function (err, result) {
         if (err) {
           done(err);
         }
-        models[settingsModel].destroyAll({}, callContext, function (err, result) {
+        SettingsModel.destroyAll({}, callContext, function (err, result) {
           if (err) {
             done(err);
           }
@@ -152,8 +159,6 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
       'tenantId': 'test-tenant',
       'username': 'testuser'
     };
-    var myModel = models[regionModel];
-
 
     async.series([
       function (callback) {
@@ -161,7 +166,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'regionName': 'Continents',
           'id': 'root'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -178,7 +183,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'regionName': 'Asia',
           'id': 'asia'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -196,7 +201,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'id': 'india',
           'parentId': 'asia'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -214,7 +219,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'id': 'delhi',
           'parentId': 'india'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -232,7 +237,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'id': 'bangalore',
           'parentId': 'india'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -250,7 +255,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'id': 'japan',
           'parentId': 'asia'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -268,7 +273,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
           'id': 'tokyo',
           'parentId': 'japan'
         };
-        myModel.create(testData, callContext, function (err, result) {
+        RegionModel.create(testData, callContext, function (err, result) {
           if (err) {
             callback(err);
           } else {
@@ -292,8 +297,6 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
   it('Create products hierarchy based on region', function (done) {
     var callContext = {};
 
-    var product = models[productModel];
-
     async.series([
       function (callback) {
         callContext.ctx = {
@@ -304,7 +307,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         var newProduct = {
           'productName': 'Coca-Cola'
         };
-        product.create(newProduct, callContext, function (err, res) {
+        ProductModel.create(newProduct, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -327,7 +330,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         var newProduct = {
           'productName': 'Diet coke'
         };
-        product.create(newProduct, callContext, function (err, res) {
+        ProductModel.create(newProduct, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -350,7 +353,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         var newProduct = {
           'productName': 'Coke Zero'
         };
-        product.create(newProduct, callContext, function (err, res) {
+        ProductModel.create(newProduct, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -373,7 +376,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         var newProduct = {
           'productName': 'Pulpy Orange'
         };
-        product.create(newProduct, callContext, function (err, res) {
+        ProductModel.create(newProduct, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -398,14 +401,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get products based on regional context Asia/India', function (done) {
     var callContext = {};
-    var product = models[productModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,'
     };
 
-    product.find({}, callContext, function (err, res) {
+    ProductModel.find({}, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -422,14 +424,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get products based on regional context Asia/India/Delhi', function (done) {
     var callContext = {};
-    var product = models[productModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,delhi,'
     };
 
-    product.find({}, callContext, function (err, res) {
+    ProductModel.find({}, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -447,14 +448,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get products based on regional context Asia/India with depth *', function (done) {
     var callContext = {};
-    var product = models[productModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,'
     };
 
-    product.find({ 'depth': '*' }, callContext, function (err, res) {
+    ProductModel.find({ 'depth': '*' }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -471,14 +471,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get products based on regional context Asia/India with depth 1', function (done) {
     var callContext = {};
-    var product = models[productModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,'
     };
 
-    product.find({ 'depth': '1' }, callContext, function (err, res) {
+    ProductModel.find({ 'depth': '1' }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -495,14 +494,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get products based on regional context Asia/India with depth 3(Actual level of hierarchy ends at 1)', function (done) {
     var callContext = {};
-    var product = models[productModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,'
     };
 
-    product.find({ 'depth': '3' }, callContext, function (err, res) {
+    ProductModel.find({ 'depth': '3' }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -520,8 +518,6 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
   it('Create SystemSetings based on regionHierarchy', function (done) {
     var callContext = {};
 
-    var settings = models[settingsModel];
-
     async.series([
       function (callback) {
         callContext.ctx = {
@@ -535,7 +531,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             'maxLength': 8
           }
         };
-        settings.create(newSetting, callContext, function (err, res) {
+        SettingsModel.create(newSetting, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -561,7 +557,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             'maxLength': 12
           }
         };
-        settings.create(newSetting, callContext, function (err, res) {
+        SettingsModel.create(newSetting, callContext, function (err, res) {
           if (err) {
             callback(err);
           } else {
@@ -586,14 +582,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get settings based on regional context Asia/India with upward true on model', function (done) {
     var callContext = {};
-    var settings = models[settingsModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,'
     };
 
-    settings.find({}, callContext, function (err, res) {
+    SettingsModel.find({}, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -611,14 +606,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get settings based on regional context Asia/India/Bangalore with upward true on model without depth', function (done) {
     var callContext = {};
-    var settings = models[settingsModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,bangalore,'
     };
 
-    settings.find({}, callContext, function (err, res) {
+    SettingsModel.find({}, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -636,14 +630,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get settings based on regional context Asia/India/Bangalore with upward true on model with depth 1', function (done) {
     var callContext = {};
-    var settings = models[settingsModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,bangalore,'
     };
 
-    settings.find({ 'depth': '1' }, callContext, function (err, res) {
+    SettingsModel.find({ 'depth': '1' }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -661,14 +654,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get settings based on regional context Asia/India/Delhi with upward true on model(Test for fallback)', function (done) {
     var callContext = {};
-    var settings = models[settingsModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,delhi,'
     };
 
-    settings.find({}, callContext, function (err, res) {
+    SettingsModel.find({}, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -685,14 +677,13 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
   it('Get settings based on regional context Asia/India/Delhi with upward true on model with depth(Test for fallback)', function (done) {
     var callContext = {};
-    var settings = models[settingsModel];
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
       'regionHierarchy': ',root,asia,india,delhi,'
     };
 
-    settings.find({ 'depth': 1 }, callContext, function (err, res) {
+    SettingsModel.find({ 'depth': 1 }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -712,6 +703,10 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
 
 
 describe(chalk.blue('Data Hierarchy Test --REST'), function () {
+  var RegionModel;
+  var ProductModel;
+  var SettingsModel;
+
   var regionModel = 'Region';
   var productModel = 'Product';
   var settingsModel = 'SystemSettings';
@@ -742,7 +737,7 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
           next(err);
         } else if (instance.length) {
           // console.log("========================= instance", instance);
-          models[regionModel].findOne({ where: { regionName: instance[0].region } }, bootstrap.defaultContext, function (err, res) {
+          RegionModel.findOne({ where: { regionName: instance[0].region } }, bootstrap.defaultContext, function (err, res) {
             if (err) {
               next(err);
             } else if (res) {
@@ -862,6 +857,9 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
         if (err) {
           done(err);
         } else {
+          RegionModel = loopback.getModel(regionModel, bootstrap.defaultContext);
+          ProductModel = loopback.getModel(productModel, bootstrap.defaultContext);
+          SettingsModel = loopback.getModel(settingsModel, bootstrap.defaultContext);
           done();
         }
       });
@@ -869,11 +867,11 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
 
   after('Remove Data from Test Models', function (done) {
     var atModel = loopback.getModelByType('AccessToken');
-    models[regionModel].destroyAll({}, bootstrap.defaultContext, function (err, result) {
+    RegionModel.destroyAll({}, bootstrap.defaultContext, function (err, result) {
       if (err) {
         done(err);
       }
-      models[productModel].destroyAll({}, bootstrap.defaultContext, function (err, result) {
+      ProductModel.destroyAll({}, bootstrap.defaultContext, function (err, result) {
         atModel.removeObserver('before save');
         if (err) {
           done(err);
