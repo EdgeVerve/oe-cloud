@@ -286,6 +286,8 @@ describe(chalk.blue('JWT assertion inherited model test'), function () {
     };
 
     var newmodel = loopback.createModel(modelDetails);
+    newmodel.clientModelName=newUserModel;
+    newmodel.clientPlural=newUserModel+'s';
     app.model(newmodel, {
       dataSource: 'db'
     });

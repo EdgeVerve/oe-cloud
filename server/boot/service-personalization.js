@@ -53,7 +53,7 @@ module.exports = function ServicePersonalization(app, cb) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
-        attachRemoteHooksToModel(results[i].modelName);
+        attachRemoteHooksToModel(results[i].modelName, options);
       }
       cb();
     } else {
@@ -63,10 +63,10 @@ module.exports = function ServicePersonalization(app, cb) {
 };
 
 // Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
-messaging.subscribe('personalizationRuleAttachHook', function (modelName) {
+messaging.subscribe('personalizationRuleAttachHook', function (modelName, options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to ');
-  attachRemoteHooksToModel(modelName);
+  attachRemoteHooksToModel(modelName, options);
 });
 
 /**
@@ -79,7 +79,7 @@ function personalizationRuleBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
   // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.modelName;
-  if (loopback.findModel(modelName)) {
+  if (loopback.findModel(modelName, ctx.options)) {
     next();
   } else {
     // Not sure it is the right way to construct error object to sent in the response.
@@ -100,7 +100,7 @@ function personalizationRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('personalizationRuleAttachHook', data.modelName);
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  attachRemoteHooksToModel(data.modelName);
+  attachRemoteHooksToModel(data.modelName, ctx.options);
   next();
 }
 
@@ -108,10 +108,11 @@ function personalizationRuleAfterSave(ctx, next) {
  * This function is to attach remote hooks for given modelName to apply PersonalizationRule.
  *
  * @param {string} modelName - Model name
+ * @param {object} options - options
  */
-function attachRemoteHooksToModel(modelName) {
+function attachRemoteHooksToModel(modelName, options) {
   // Can we avoid this step and get the ModelConstructor from context.
-  var model = loopback.findModel(modelName);
+  var model = loopback.findModel(modelName, options);
   // Setting the flag that Personalization Rule exists, need to check where it will be used.
   if (!model.settings._personalizationRuleExists) {
     model.settings._personalizationRuleExists = true;
@@ -250,7 +251,7 @@ function beforeRemoteUpdateAttributesHook(model) {
 function beforeRemoteFindHook(model) {
   model.beforeRemote('find', function (ctx, modelInstance, next) {
     log.debug(ctx.req.callContext, 'beforeRemoteFindHook ', model.modelName, 'called');
-    servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationAccessHookGetRuleCb(rule) {
+    servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationAccessHookGetRuleCb(rule) {
       if (rule !== null && typeof rule !== 'undefined') {
         log.debug(ctx.req.callContext, 'beforeRemoteFindHook personalization rule found , rule: ', rule);
         servicePersonalizer.applyPersonalizationRule(ctx, rule.personalizationRule, function servicePersonalizationAccessHookApplyRuleCb() {
@@ -274,7 +275,7 @@ function beforeRemoteFindHook(model) {
  */
 function afterRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec for ', model.modelName, ' called.');
-  servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
+  servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
     if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'afterRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
@@ -282,7 +283,7 @@ function afterRemotePersonalizationExec(model, ctx, next) {
         var callContext = ctx.req.callContext;
         var postProcessingFns = callContext.postProcessingFns ? callContext.postProcessingFns[callContext.modelName] : null;
         if (postProcessingFns && typeof postProcessingFns !== 'undefined') {
-          log.debug(ctx.req.callContext, 'PostProcessingFunctions = ', JSON.stringify(postProcessingFns));
+          log.debug(ctx.req.callContext, 'PostProcessingFunctions = ', postProcessingFns);
           log.debug(ctx.req.callContext, 'looping through and executing PostProcessingFunctions');
           for (var i in postProcessingFns) {
             if (postProcessingFns.hasOwnProperty(i)) {
@@ -313,7 +314,7 @@ function afterRemotePersonalizationExec(model, ctx, next) {
  */
 function beforeRemotePersonalizationExec(model, ctx, next) {
   log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec for ', model.modelName, ' called.');
-  servicePersonalizer.getPersonalizationRuleForModel(model.modelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
+  servicePersonalizer.getPersonalizationRuleForModel(model.clientModelName, ctx, function servicePersonalizationMixinBeforeCreateGetReverse(rule) {
     if (rule !== null && typeof rule !== 'undefined') {
       log.debug(ctx.req.callContext, 'beforeRemotePersonalizationExec personalization rule found , rule: ', rule);
       log.debug(ctx.req.callContext, 'applying PersonalizationRule now');
@@ -321,7 +322,7 @@ function beforeRemotePersonalizationExec(model, ctx, next) {
         var callContext = ctx.req.callContext;
         var preProcessingFns = callContext.preProcessingFns ? callContext.preProcessingFns[callContext.modelName] : null;
         if (preProcessingFns && typeof preProcessingFns !== 'undefined') {
-          log.debug(ctx.req.callContext, 'PreProcessingFunctions = ', JSON.stringify(preProcessingFns));
+          log.debug(ctx.req.callContext, 'PreProcessingFunctions = ', preProcessingFns);
           log.debug(ctx.req.callContext, 'looping through and executing PreProcessingFunctions');
           for (var i in preProcessingFns) {
             if (preProcessingFns.hasOwnProperty(i)) {

@@ -17,7 +17,7 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
-	
+var loopback = require('loopback');
 describe(chalk.blue('basic-test'), function () {
 
     var testModelName = 'MyModel';
@@ -52,8 +52,8 @@ describe(chalk.blue('basic-test'), function () {
 
     before('create model', function (done) {
         async.series([
-        function createModel(cb) {
-                var model = bootstrap.models[testModelName];
+            function createModel(cb) {
+                var model = loopback.findModel(testModelName, bootstrap.defaultContext);
                 if (model) {
                     cb();
                 } else {
@@ -66,20 +66,20 @@ describe(chalk.blue('basic-test'), function () {
                         }
                     });
                 }
-        },
-        function (cb) {
+            },
+            function (cb) {
                 // this line is just to test context lost problem
                 bootstrap.createTestUser(iciciUser, 'admin', cb);
-        },
-        function alldone() {
+            },
+            function alldone() {
                 done();
-        }
-    ]);
+            }
+        ]);
     });
 
     it('create and find data ', function (done) {
 
-        var model = bootstrap.models[testModelName];
+        var model = loopback.getModel(testModelName, bootstrap.defaultContext);
         model.destroyAll({}, bootstrap.defaultContext, function (err, res) {
             model.create(data, bootstrap.defaultContext, function (err, res) {
                 model.find({
@@ -89,7 +89,7 @@ describe(chalk.blue('basic-test'), function () {
                 }, bootstrap.defaultContext, function (err, res) {
                     log.debug(bootstrap.defaultContext, 'verify data ', err, res);
                     expect(res[0].description).to.be.equal("OK");
-                    res[0].reload(bootstrap.defaultContext, function(err, reload) {
+                    res[0].reload(bootstrap.defaultContext, function (err, reload) {
                         expect(reload.description).to.be.equal("OK");
                         done();
                     });
@@ -98,16 +98,16 @@ describe(chalk.blue('basic-test'), function () {
         });
     });
 
-    it('create with upsert', function(done) {
+    it('create with upsert', function (done) {
         var data = {
             "name": "Name2",
             "description": "Created with upsert"
-        };  
-        var model = bootstrap.models[testModelName];
-        model.upsert(data, bootstrap.defaultContext, function(err, res) {
+        };
+        var model = loopback.getModel(testModelName, bootstrap.defaultContext);
+        model.upsert(data, bootstrap.defaultContext, function (err, res) {
             log.debug(bootstrap.defaultContext, ' verify data ', err, res);
             expect(res.name).to.be.equal("Name2");
-            model.find({}, bootstrap.defaultContext, function(err, res) {
+            model.find({}, bootstrap.defaultContext, function (err, res) {
                 expect(res.length).to.be.equal(2);
                 done();
             });
@@ -140,7 +140,7 @@ describe(chalk.blue('basic-test'), function () {
     });
 
     after('after clean up', function (done) {
-        var model = bootstrap.models[testModelName];
+        var model = loopback.getModel(testModelName, bootstrap.defaultContext);
         model.destroyAll({}, bootstrap.defaultContext, function (err, info) {
             if (err) {
                 done(err);
@@ -148,7 +148,7 @@ describe(chalk.blue('basic-test'), function () {
                 log.debug(bootstrap.defaultContext, 'number of record deleted -> ', info.count);
                 ModelDefinition.destroyAll({
                     "name": testModelName
-                }, bootstrap.defaultContext, function(){
+                }, bootstrap.defaultContext, function () {
                     done();
                 });
             }
