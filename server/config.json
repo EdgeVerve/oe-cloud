@@ -81,7 +81,7 @@
     "eventReliabilityReplayInterval": 2000,
     "eventReliabilityDbPersistenceInterval": 2000,
     "eventReliabilityMaxRetry": 50,
-    "eventHistoryStartUpInstancesToFetch": 10,
+    "eventHistoryStartUpInstancesToFetch": 50,
     "eventHistoryStartUpInterval": 3000,
     "maxMessagesToProcess": 100,
     "intervalActorCanBeDirty": 600,
