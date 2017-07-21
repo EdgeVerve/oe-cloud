@@ -54,13 +54,20 @@ describe('ZZ Final Cleanup', function() {
 				"host": postgresHost,
 				"database": "postgres"
 			});
-			pool.query("DROP DATABASE IF EXISTS db", function(err, result){
+			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'TARGET_DB' AND pid <> pg_backend_pid()", function(err, result){
 				if(err) {
-					console.log("Failed to clean Postgres DB");
+					console.log("Failed to disconnect open connections to Postgres DB");
 					console.log(err);
 					done(err);
 				}
-				done();
+				pool.query("DROP DATABASE IF EXISTS db", function(err, result){
+					if(err) {
+						console.log("Failed to clean Postgres DB");
+						console.log(err);
+						done(err);
+					}
+					done();
+				});
 			});
 		} else {
 			done();
