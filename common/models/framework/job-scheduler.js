@@ -89,8 +89,8 @@ module.exports = function JobScheduler(jobScheduler) {
           var modelsToApply = getFilteredModels(models, modelQuery);
           if (modelsToApply) {
             modelsToApply.forEach(function jobSchedulerOnScheduledJobApplyForEachFn(modelname) {
-              var model = loopback.getModel(modelname);
               options = options || {};
+              var model = loopback.getModel(modelname, options);
               schedulerConfig.payload = schedulerConfig.payload || {};
               schedulerConfig.payload.callContext = _.cloneDeep(options);
               options.fetchAllScopes = true;
@@ -138,13 +138,13 @@ function getFilteredModels(models, modelQuery) {
     switch (modelQuery.operation) {
       case 'EqualsTo':
         if (res === modelQuery.value) {
-          modelsToApply.push(model.definition.name);
+          modelsToApply.push(model.modelName);
         }
         break;
 
       case 'NotEqualsTo':
         if (res !== modelQuery.value) {
-          modelsToApply.push(model.definition.name);
+          modelsToApply.push(model.modelName);
         }
         break;
       default:

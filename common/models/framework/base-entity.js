@@ -140,7 +140,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
     var data = ctx.instance || ctx.currentInstance || ctx.data || ctx.accdata;
     var props = ctx.Model.definition.properties;
     data.forEach(function (item) {
-      ctx.Model.settings.propsToEncrypt.forEach( function (key) {
+      ctx.Model.settings.propsToEncrypt.forEach(function (key) {
         if (props.hasOwnProperty(key)) {
           log.debug(ctx.options, 'To be decrypted:', key, item[key]);
           item[key] = decrypt(item[key]);
@@ -286,7 +286,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
       var propprops = ctx.Model.definition.properties[key];
       if (propprops.xmodelvalidate && propprops.xmodelvalidate.model && propprops.xmodelvalidate.field) {
         log.debug(ctx.options, 'To be validated:', data[key], 'against', propprops.xmodelvalidate);
-        var Model = loopback.findModel(propprops.xmodelvalidate.model);
+        var Model = loopback.findModel(propprops.xmodelvalidate.model, ctx.options);
         if (!Model) {
           return callback();
         }

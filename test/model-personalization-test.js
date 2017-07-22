@@ -29,514 +29,539 @@ var supertest = require('supertest');
 /// 8. we will also check same through Web API.
 
 
-describe(chalk.blue('Model Personalization test'), function() {
+describe(chalk.blue('Model Personalization test'), function () {
 
-    this.timeout(60000);
-    // globalscope , iciciscope and citiscope
-    var globalCtx = {
-        ignoreAutoScope: true,
-        ctx: {}
-    };
+  this.timeout(60000);
+  // globalscope , iciciscope and citiscope
+  var globalCtx = {
+    ignoreAutoScope: true,
+    ctx: {}
+  };
 
-    var iciciCtx = {
-        ctx: {
-            tenantId: 'icici',
-            remoteUser: 'iciciuser'
-        }
-    };
+  var iciciCtx = {
+    ctx: {
+      tenantId: 'icici',
+      remoteUser: 'iciciuser'
+    }
+  };
 
-    var citiCtx = {
-        ctx: {
-            tenantId: 'citi',
-            remoteUser: 'citiuser2'
-        }
-    };
+  var citiCtx = {
+    ctx: {
+      tenantId: 'citi',
+      remoteUser: 'citiuser2'
+    }
+  };
 
-    var citiUser = {
-        'username': 'citiuser2',
-        'password': 'password++',
-        'email': 'asdsad@gmail.com',
-        'tenantId': 'citi'
-    };
+  var citiUser = {
+    'username': 'citiuser2',
+    'password': 'password++',
+    'email': 'asdsad@gmail.com',
+    'tenantId': 'citi'
+  };
 
-    var token = bootstrap.createJWToken(citiUser);
+  var token = bootstrap.createJWToken(citiUser);
 
-    var citiapi = defaults(supertest(bootstrap.app));
+  var citiapi = defaults(supertest(bootstrap.app));
 
-    before('setup test data', function(done) {
-        bootstrap.createTestUser(citiUser, 'ev-admin', function() {
+  before('setup test data', function (done) {
+    bootstrap.createTestUser(citiUser, 'ev-admin', function () {
 
-            // this will be in default tenant scope
-            models.ModelDefinition.create({
-                'name': 'Employee',
-                'idInjection': false,
-                'base': 'BaseEntity',
-                properties: {
-                    'name': {
-                        'type': 'string',
-                        'required': true
-                    }
-                },
-                'relations': {
-                    'address': {
-                        'type': 'hasMany',
-                        'model': 'EmployeeAddress',
-                        'foreignKey': 'EmployeeId'
-                    }
-                },
-                'filebased': false,
-                'acls': [{
-                    'principalType': 'ROLE',
-                    'principalId': '$everyone',
-                    'permission': 'ALLOW',
-                    'accessType': '*'
-                }]
-            }, globalCtx, function(err, model) {
-                expect(err).to.be.not.ok;
+      // this will be in default tenant scope
+      models.ModelDefinition.create({
+        'name': 'Employee',
+        'idInjection': false,
+        'base': 'BaseEntity',
+        properties: {
+          'name': {
+            'type': 'string',
+            'required': true
+          }
+        },
+        'relations': {
+          'address': {
+            'type': 'hasMany',
+            'model': 'EmployeeAddress',
+            'foreignKey': 'EmployeeId'
+          }
+        },
+        'filebased': false,
+        'acls': [{
+          'principalType': 'ROLE',
+          'principalId': '$everyone',
+          'permission': 'ALLOW',
+          'accessType': '*'
+        }]
+      }, globalCtx, function (err, model) {
+        expect(err).to.be.not.ok;
 
-                models.ModelDefinition.create({
-                    name: 'EmployeeAddress',
-                    'idInjection': false,
-                    base: 'BaseEntity',
-                    properties: {
-                        'city': {
-                            'type': 'string',
-                            'required': true
-                        }
-                    },
-                    'relations': {},
-                    filebased: false
-                }, globalCtx, function(err2, model2) {
-                    expect(err2).to.be.not.ok;
-                    done();
-                });
-            });
-        });
-
-
-    });
-
-    after('destroy test models', function(done) {
-        models.ModelDefinition.destroyAll({
-            name: 'Employee'
-        }, bootstrap.defaultContext, function(err){
-            if (err) {
-                return done(err);
-            }
-            models.ModelDefinition.destroyAll({
-                name: 'EmployeeAddress'
-           }, bootstrap.defaultContext, function(err){
-                if (err) {
-                    return done(err);
-                }
-                models.Employee.destroyAll({}, globalCtx, function(err){
-                    if (err) {
-                        return done(err);
-                    }
-                    models.EmployeeAddress.destroyAll({}, globalCtx, function(err){
-                        if (err) {
-                            return done(err);
-                        }
-                        models.ModelDefinition.destroyAll({}, globalCtx, function(err){
-                            if (err) {
-                                return done(err);
-                            }
-                            return done();
-                        });
-                    });
-                });
-            });
-        });
-    });
-
-    it('Populate data as Icicic - 2 Employee record should be created and 2 address records each should be created', function(done) {
-        var Employee = loopback.getModel('Employee');
-        Employee.create([{
-            'name': 'Tom',
-            'id': 1,
-            'address': [{
-                'city': 'Denver',
-                'id': 11
-            }, {
-                'id': 12,
-                'city': 'Frankfort'
-            }]
-        }, {
-            'name': 'Harry',
-            'id': 2,
-            'address': [{
-                'city': 'London',
-                'id': 21
-            }, {
-                'id': 22,
-                'city': 'Paris'
-            }]
-        }], iciciCtx, function(err, results) {
-            if (err) {
-                return done(err);
-            }
-            expect(results[0]).to.have.property('name');
-            expect(results[0]).to.have.property('id');
-            expect(results[0]).to.have.property('address');
-            expect(results[0].name).to.equal('Tom');
-            expect(results[0].address[0]).to.have.property('city');
-            expect(results[0].address[0].city).to.equal('Denver');
-            expect(results[0].address[1].city).to.equal('Frankfort');
-            expect(results[1]).to.have.property('name');
-            expect(results[1]).to.have.property('id');
-            expect(results[1]).to.have.property('address');
-            expect(results[1].name).to.equal('Harry');
-            expect(results[1].address[0]).to.have.property('city');
-            expect(results[1].address[0].city).to.equal('London');
-            expect(results[1].address[1].city).to.equal('Paris');
-            done();
-        });
-    });
-
-    it('Model Personalization Populate data as Citi - 1 Employee record should be created and 2 address records should be created', function(done) {
-        var Employee = loopback.getModel('Employee');
-        Employee.create([{
-                'name': 'John',
-                'id': 11,
-                'address': [{
-                    'city': 'Mumbai',
-                    'id': 111
-                }, {
-                    'id': 112,
-                    'city': 'Delhi'
-                }]
-            }
-        ], citiCtx, function(err, results) {
-            if (err) {
-                return done(err);
-            }
-            expect(results[0]).to.have.property('name');
-            expect(results[0]).to.have.property('id');
-            expect(results[0]).to.have.property('address');
-            expect(results[0].name).to.equal('John');
-            expect(results[0].address[0]).to.have.property('city');
-            expect(results[0].address[0].city).to.equal('Mumbai');
-            expect(results[0].address[1].city).to.equal('Delhi');
-            done();
-        });
-    });
-
-
-    it('Model Personalization Test - Fetch data as Citi - should return ONE Employees and two addresses for it', function(done) {
-        var Employee = loopback.getModel('Employee');
-        Employee.find({
-            include: 'address'
-        }, citiCtx, function(err, results) {
-            if (err) {
-                console.log(err);
-                return done(err);
-            }
-            //console.log(JSON.stringify(results));
-            expect(results.length).to.equal(1);
-            expect(results[0]).to.have.property('name');
-            expect(results[0]).to.have.property('id');
-            expect(results[0]).to.have.property('address');
-            expect(results[0].name).to.equal('John');
-            expect(results[0].__data.address[0]).to.have.property('city');
-            expect(results[0].__data.address[0].city).to.equal('Mumbai');
-
-            done();
-        });
-    });
-
-
-    it('Model Personalization Test - Fetch data as Icici - should return TWO Employees and ONE addresses for each', function(done) {
-        var Employee = loopback.getModel('Employee');
-        Employee.find({
-            include: 'address'
-        }, iciciCtx, function(err, results) {
-            if (err) {
-                console.log(err);
-                return done(err);
-            }
-            //console.log(JSON.stringify(results));
-            expect(results.length).to.equal(2);
-            expect(results[0]).to.have.property('name');
-            expect(results[0]).to.have.property('id');
-            expect(results[0]).to.have.property('address');
-            expect(results[0].name).to.equal('Tom');
-            expect(results[0].__data.address[0]).to.have.property('city');
-            expect(results[0].__data.address[0].city).to.equal('Denver');
-            done();
-        });
-    });
-
-
-
-    it('Model Personalization Test - Personalized Employee model for icici', function(done) {
-        // new Employee model will b created in mongo
-        // mongo:true is set so that new collection will be used
         models.ModelDefinition.create({
-            'name': 'Employee',
-            'variantOf': 'Employee',
-            'idInjection': false,
-            'base': 'Employee',
-            'mongodb': true,
-            properties: {
-                'age': {
-                    'type': 'number'
-                }
-            },
-            'filebased': false,
-            'acl': []
-        }, iciciCtx, function(err, m) {
-            if (err) {
-                console.log(err);
-                return done(err);
+          name: 'EmployeeAddress',
+          'idInjection': false,
+          base: 'BaseEntity',
+          properties: {
+            'city': {
+              'type': 'string',
+              'required': true
             }
-            var model = loopback.getModel('Employee');
-            model.getOverridenModel(iciciCtx, function(err, Employee) {
-                Employee.create([{
-                    'name': 'Icici Tom',
-                    'age': 10,
-                    'id': 31,
-                    'address': [{
-                        'city': 'Bangalore',
-                        'id': 311
-                    }]
-                }], iciciCtx, function(err, results) {
-                    if (err) {
-                        console.log(JSON.stringify(err));
-                        return done(err);
-                    }
-                    // previous records for icici are lost as new records are gone to new collection
-                    //therefore whenever model is personalized it will always use new model and underlaying mongo collection
-                    expect(results.length).to.equal(1);
-                    expect(results[0]).to.have.property('name');
-                    expect(results[0]).to.have.property('id');
-                    expect(results[0]).to.have.property('address');
-                    expect(results[0].name).to.equal('Icici Tom');
-                    expect(results[0].address[0]).to.have.property('city');
-                    expect(results[0].address[0].city).to.equal('Bangalore');
-
-                    Employee.find({
-                        include: 'address'
-                    }, iciciCtx, function(err, results) {
-                        expect(results.length).to.equal(1);
-                        expect(results[0]).to.have.property('name');
-                        expect(results[0]).to.have.property('id');
-                        expect(results[0]).to.have.property('address');
-                        expect(results[0].name).to.equal('Icici Tom');
-                        expect(results[0].__data.address[0]).to.have.property('city');
-                        expect(results[0].__data.address[0].city).to.equal('Bangalore');
-
-                        done();
-                    });
-
-                });
-            });
+          },
+          'relations': {},
+          filebased: false
+        }, globalCtx, function (err2, model2) {
+          expect(err2).to.be.not.ok;
+          done();
         });
+      });
     });
 
 
-    it('Model Personalization Test - Address is not personalized and it should return 3 records for icici', function(done) {
-        // two records from 1st testcase and other is just when we personalized
-        var model = loopback.getModel('EmployeeAddress');
-        model.getOverridenModel(iciciCtx, function(err, address) {
-            address.find({}, iciciCtx, function(err, results) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                }
-                expect(results.length).to.equal(5);
-                expect(results[0].city).to.equal('Denver');
-                done();
+  });
+
+  after('destroy test models', function (done) {
+    models.ModelDefinition.destroyAll({
+      name: 'Employee'
+    }, bootstrap.defaultContext, function (err) {
+      if (err) {
+        return done(err);
+      }
+      models.ModelDefinition.destroyAll({
+        name: 'EmployeeAddress'
+      }, globalCtx, function (err) {
+        if (err) {
+          return done(err);
+        }
+        loopback.findModel('Employee', iciciCtx).destroyAll({}, globalCtx, function (err) {
+          if (err) {
+            return done(err);
+          }
+          loopback.findModel('EmployeeAddress', iciciCtx).destroyAll({}, globalCtx, function (err) {
+            if (err) {
+              return done(err);
+            }
+            models.ModelDefinition.destroyAll({}, globalCtx, function (err) {
+              if (err) {
+                return done(err);
+              }
+              return done();
             });
+          });
         });
+      });
     });
+  });
+
+  it('Populate data as Icicic - 2 Employee record should be created and 2 address records each should be created', function (done) {
+    var Employee = loopback.getModel('Employee', bootstrap.defaultContext);
+    Employee.create([{
+      'name': 'Tom',
+      'id': 1,
+      'address': [{
+        'city': 'Denver',
+        'id': 11
+      }, {
+        'id': 12,
+        'city': 'Frankfort'
+      }]
+    }, {
+      'name': 'Harry',
+      'id': 2,
+      'address': [{
+        'city': 'London',
+        'id': 21
+      }, {
+        'id': 22,
+        'city': 'Paris'
+      }]
+    }], iciciCtx, function (err, results) {
+      if (err) {
+        return done(err);
+      }
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('Tom');
+      expect(results[0].address[0]).to.have.property('city');
+      expect(results[0].address[0].city).to.equal('Denver');
+      expect(results[0].address[1].city).to.equal('Frankfort');
+      expect(results[1]).to.have.property('name');
+      expect(results[1]).to.have.property('id');
+      expect(results[1]).to.have.property('address');
+      expect(results[1].name).to.equal('Harry');
+      expect(results[1].address[0]).to.have.property('city');
+      expect(results[1].address[0].city).to.equal('London');
+      expect(results[1].address[1].city).to.equal('Paris');
+      done();
+    });
+  });
+
+  it('Model Personalization Populate data as Citi - 1 Employee record should be created and 2 address records should be created', function (done) {
+    var Employee = loopback.getModel('Employee', bootstrap.defaultContext);
+    Employee.create([{
+      'name': 'John',
+      'id': 11,
+      'address': [{
+        'city': 'Mumbai',
+        'id': 111
+      }, {
+        'id': 112,
+        'city': 'Delhi'
+      }]
+    }
+    ], citiCtx, function (err, results) {
+      if (err) {
+        return done(err);
+      }
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].address[0]).to.have.property('city');
+      expect(results[0].address[0].city).to.equal('Mumbai');
+      expect(results[0].address[1].city).to.equal('Delhi');
+      done();
+    });
+  });
 
 
-    it('Model Personalization Test - Fetch data as Citi - should still return ONE Employees and two addresses for it', function(done) {
-        // demonstrating that for citi - nothing yet affected
-        var Employee = loopback.getModel('Employee');
+  it('Model Personalization Test - Fetch data as Citi - should return ONE Employees and two addresses for it', function (done) {
+    var Employee = loopback.getModel('Employee', citiCtx);
+    Employee.find({
+      include: 'address'
+    }, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(1);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+
+      done();
+    });
+  });
+
+
+  it('Model Personalization Test - Fetch data as Icici - should return TWO Employees and ONE addresses for each', function (done) {
+    var Employee = loopback.getModel('Employee', iciciCtx);
+    Employee.find({
+      include: 'address'
+    }, iciciCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(2);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('Tom');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Denver');
+      done();
+    });
+  });
+
+
+
+  it('Model Personalization Test - Personalized Employee model for icici', function (done) {
+    // new Employee model will b created in mongo
+    // mongo:true is set so that new collection will be used
+    models.ModelDefinition.create({
+      'name': 'Employee',
+      'variantOf': 'Employee',
+      'idInjection': false,
+      'base': 'Employee',
+      mongodb: {
+        collection : 'employee-icici'
+      },
+      properties: {
+        'age': {
+          'type': 'number'
+        }
+      },
+      'acl': []
+    }, iciciCtx, function (err, m) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      var Employee = loopback.getModel('Employee', iciciCtx);
+      Employee.create([{
+        'name': 'Icici Tom',
+        'age': 10,
+        'id': 31,
+        'address': [{
+          'city': 'Bangalore',
+          'id': 311
+        }]
+      }], iciciCtx, function (err, results) {
+        if (err) {
+          console.log(JSON.stringify(err));
+          return done(err);
+        }
+
+        expect(results.length).to.equal(1);
+        expect(results[0]).to.have.property('name');
+        expect(results[0]).to.have.property('id');
+        expect(results[0]).to.have.property('address');
+        expect(results[0].name).to.equal('Icici Tom');
+        expect(results[0].address[0]).to.have.property('city');
+        expect(results[0].address[0].city).to.equal('Bangalore');
+        // previous records for icici are still retain  as new records are will use same collection
+        // user can have new collection if he/she wants
         Employee.find({
-            include: 'address'
-        }, citiCtx, function(err, results) {
-            if (err) {
-                console.log(err);
-                return done(err);
+          include: 'address'
+        }, iciciCtx, function (err, results) {
+          expect(results.length).to.equal(3);
+          expect(results[0]).to.have.property('name');
+          expect(results[0]).to.have.property('id');
+          expect(results[0]).to.have.property('address');
+          expect(results[0]).to.have.property('age');
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            if (results[i].name === 'Icici Tom' ) {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Bangalore') {
+                  expect(results[i].age).to.equal(10);
+                  doneFlag = true;
+                  break;
+                }
+              }
             }
-            //console.log(JSON.stringify(results));
-            expect(results.length).to.equal(1);
-            expect(results[0]).to.have.property('name');
-            expect(results[0]).to.have.property('id');
-            expect(results[0]).to.have.property('address');
-            expect(results[0].name).to.equal('John');
-            expect(results[0].__data.address[0]).to.have.property('city');
-            expect(results[0].__data.address[0].city).to.equal('Mumbai');
+          }
+          expect(doneFlag).to.be.true;
+          //expect(results[2].name).to.equal('Icici Tom');
+          //expect(results[2].__data.address[0]).to.have.property('city');
+          //expect(results[2].__data.address[0].city).to.equal('Bangalore');
 
-            done();
+          done();
         });
+
+      });
+
     });
+  });
 
 
-    it('Model Personalization Test - Personalized Address model for citi', function(done) {
-        //EmployeeAddress model is personalized and new model with random number will be created
-        //mongodb: true is set thus it will create new collection
-        models.ModelDefinition.create({
-            'name': 'EmployeeAddress',
-            'variantOf': 'EmployeeAddress',
-            'idInjection': false,
-            'base': 'EmployeeAddress',
-            'mongodb': true,
-            properties: {
-                'zip': {
-                    'type': 'string'
+  it('Model Personalization Test - Address is not personalized and it should return 5 records for icici', function (done) {
+    // two records from 1st testcase and other is just when we personalized
+    var address = loopback.getModel('EmployeeAddress', iciciCtx);
+
+    address.find({}, iciciCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      expect(results.length).to.equal(5);
+      expect(results[0].city).to.equal('Denver');
+      done();
+    });
+  });
+
+
+  it('Model Personalization Test - Fetch data as Citi - should still return ONE Employees and two addresses for it', function (done) {
+    // demonstrating that for citi - nothing yet affected
+    var Employee = loopback.getModel('Employee', citiCtx);
+    Employee.find({
+      include: 'address'
+    }, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      //console.log(JSON.stringify(results));
+      expect(results.length).to.equal(1);
+      expect(results[0]).to.have.property('name');
+      expect(results[0]).to.have.property('id');
+      expect(results[0]).to.have.property('address');
+      expect(results[0].name).to.equal('John');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+
+      done();
+    });
+  });
+
+
+  it('Model Personalization Test - Personalized Address model for citi', function (done) {
+    //EmployeeAddress model is personalized and new model with random number will be created
+    //mongodb: true is set thus it will create new collection
+    models.ModelDefinition.create({
+      'name': 'EmployeeAddress',
+      'variantOf': 'EmployeeAddress',
+      'idInjection': false,
+      'base': 'EmployeeAddress',
+      mongodb: {
+        collection: 'employeeaddress-citi'
+      },
+      properties: {
+        'zip': {
+          'type': 'string'
+        }
+      },
+      'filebased': false
+    }, citiCtx, function (err, m) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      var Employee = loopback.getModel('Employee', citiCtx);
+      Employee.create([{
+        'name': 'Citi Tom',
+        'age': 10,
+        'id': 51,
+        'address': [{
+          'city': 'Citi Bangalore',
+          'zip': '560001',
+          'id': 511
+        }]
+      }], citiCtx, function (err, results) {
+        if (err) {
+          console.log(JSON.stringify(err));
+          return done(err);
+        }
+        // will see this new record of address is created in newly created address collection
+        // while Employee will be in same old collection
+        expect(results.length).to.equal(1);
+
+        Employee.find({
+          include: 'address'
+        }, citiCtx, function (err, results) {
+          expect(results.length).to.equal(2);
+          var doneFlag = false;
+          for (var i = 0; i < results.length && !doneFlag; ++i) {
+            if (results[i].name === 'Citi Tom') {
+              for (var j = 0; j < results[i].__data.address.length; ++j) {
+                if (results[i].__data.address[j].city === 'Citi Bangalore') {
+                  expect(results[i]).to.have.property('name');
+                  expect(results[i]).to.have.property('id');
+                  expect(results[i]).to.have.property('address');
+                  expect(results[i].__data.address[j]).to.have.property('zip');
+                  expect(results[i].name).to.equal('Citi Tom');
+                  doneFlag = true;
+                  break;
                 }
-            },
-            'filebased': false
-        }, citiCtx, function(err, m) {
-            if (err) {
-                console.log(err);
-                return done(err);
+              }
             }
-            var model = loopback.getModel('Employee');
-            model.getOverridenModel(citiCtx, function(err, Employee) {
-                Employee.create([{
-                    'name': 'Citi Tom',
-                    'age': 10,
-                    'id': 51,
-                    'address': [{
-                        'city': 'Citi Bangalore',
-                        'zip': '560001',
-                        'id': 511
-                    }]
-                }], citiCtx, function(err, results) {
-                    if (err) {
-                        console.log(JSON.stringify(err));
-                        return done(err);
-                    }
-                    // will see this new record of address is created in newly created address collection
-                    // while Employee will be in same old collection
-                    expect(results.length).to.equal(1);
-                    expect(results[0]).to.have.property('name');
-                    expect(results[0]).to.have.property('id');
-                    expect(results[0]).to.have.property('address');
-                    expect(results[0].name).to.equal('Citi Tom');
-                    expect(results[0].address[0]).to.have.property('city');
-                    expect(results[0].address[0].city).to.equal('Citi Bangalore');
+          }
+          expect(doneFlag).to.be.true;
+          ////expect(results[0].name).to.equal('John'); // Employee is still using base Employee
+          //expect(results[1].name).to.equal('Citi Tom');
+          ////expect(results[0].__data.address.length).to.equal(0); // address got overriden so old records will not be available
+          //expect(results[1].__data.address[0]).to.have.property('city'); //address is coming from newer model
+          //expect(results[1].__data.address[0].city).to.equal('Citi Bangalore');
+          //expect(results[1].__data.address[0].zip).to.equal('560001');
 
-                    Employee.find({
-                        include: 'address'
-                    }, citiCtx, function(err, results) {
-                        expect(results.length).to.equal(2);
-                        expect(results[0].name).to.equal('John'); // Employee is still using base Employee
-                        expect(results[1].name).to.equal('Citi Tom');
-                        expect(results[0].__data.address.length).to.equal(0); // address got overriden so old records will not be available
-                        expect(results[1].__data.address[0]).to.have.property('city'); //address is coming from newer model
-                        expect(results[1].__data.address[0].city).to.equal('Citi Bangalore');
-                        expect(results[1].__data.address[0].zip).to.equal('560001');
-
-                        done();
-                    });
-
-                });
-            });
+          done();
         });
+
+      });
     });
+  });
 
-    it('Model Personalization Test - Personalized Address model for citi should return 1 record from personalized address model', function(done) {
-        var model = loopback.getModel('EmployeeAddress');
-        model.getOverridenModel(citiCtx, function(err, address) {
-            address.find({}, citiCtx, function(err, results) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                }
-                expect(results.length).to.equal(1);
-                expect(results[0].city).to.equal('Citi Bangalore');
-                done();
-            });
-        });
+  it('Model Personalization Test - Personalized Address model for citi should return 1 record from personalized address model. Sepeate collection for address', function (done) {
+    var address = loopback.getModel('EmployeeAddress', citiCtx);
+    address.find({}, citiCtx, function (err, results) {
+      if (err) {
+        console.log(err);
+        return done(err);
+      }
+      expect(results.length).to.equal(3);
+      var doneFlag = false;
+      for (var i = 0; i < results.length; ++i) {
+        if (results[i].city === 'Citi Bangalore') {
+          doneFlag = true;
+          break;
+        }
+      }
+      expect(doneFlag).to.be.true;
+      done();
     });
+  });
 
-    xit('Model Personalization Test - AA Web API Employee model should return 2 records', function(done) {
-        console.log(citiapi);
-        console.log('citi ', token);
-        citiapi.set('x-jwt-assertion', token)
-            .set('Accept', 'application/json')
-            .get(bootstrap.basePath + '/Employees')
-            .send()
-            .expect(200).end(function(err, res) {
-                //console.log('response body : ' + JSON.stringify(res.body, null, 4));
-                if (err || res.body.error) {
-                    done(err || (new Error(res.body.error)));
-                }
-                var results = res.body;
-                expect(results.length).to.equal(2);
-                expect(results[0].name).to.equal('John');
-                expect(results[1].name).to.equal('Citi Tom');
-                done();
-            });
-    });
+  xit('Model Personalization Test - AA Web API Employee model should return 2 records', function (done) {
+    citiapi.set('x-jwt-assertion', token)
+      .set('Accept', 'application/json')
+      .get(bootstrap.basePath + '/Employees')
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          done(err || (new Error(res.body.error)));
+        }
+        var results = res.body;
+        expect(results.length).to.equal(2);
+        expect(results[0].name).to.equal('John');
+        expect(results[1].name).to.equal('Citi Tom');
+        done();
+      });
+  });
 
 
-    xit('Model Personalization Test - Web API Personalized Address model for citi should return 1 record from personalized address model', function(done) {
-        citiapi.set('x-jwt-assertion', token)
-            .set('Accept', 'application/json')
-            .get(bootstrap.basePath + '/EmployeeAddresses')
-            .send()
-            .expect(200).end(function(err, res) {
-                //console.log('response body : ' + JSON.stringify(res.body, null, 4));
-                if (err || res.body.error) {
-                    return done(err || (new Error(res.body.error)));
-                }
-                var results = res.body;
-                expect(results.length).to.equal(1);
-                expect(results[0].city).to.equal('Citi Bangalore');
-                done();
-            });
-    });
+  xit('Model Personalization Test - Web API Personalized Address model for citi should return 1 record from personalized address model', function (done) {
+    citiapi.set('x-jwt-assertion', token)
+      .set('Accept', 'application/json')
+      .get(bootstrap.basePath + '/EmployeeAddresses')
+      .send()
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        var results = res.body;
+        expect(results.length).to.equal(2);
+        expect(results[0].city).to.equal('Citi Bangalore');
+        done();
+      });
+  });
 
-    it('Model Personalization Test - Personalized Employee model for citi', function(done) {
+  it('Model Personalization Test - Personalized Employee model for citi', function (done) {
 
-        var Employeemodel = {
-            'name': 'Employee',
-            'variantOf': 'Employee',
-            'idInjection': false,
-            'base': 'Employee',
-            'mongodb': true,
-            properties: {
-                'firstName': {
-                    'type': 'string'
-                }
-            },
-            'filebased': false
-        };
+    var Employeemodel = {
+      'name': 'Employee',
+      'variantOf': 'Employee',
+      'idInjection': false,
+      'mongodb': true,
+      properties: {
+        'firstName': {
+          'type': 'string'
+        }
+      },
+      'filebased': false
+    };
 
-        api
-            .set('Accept', 'application/json')
-            .post(bootstrap.basePath + '/ModelDefinitions')
-            .send(Employeemodel)
-            .expect(200).end(function(err, res) {
-                //console.log('response body : ' + JSON.stringify(res.body, null, 4));
-                if (err || res.body.error) {
-                    done(err || (new Error(res.body.error)));
-                }
-                //var results = res.body;
-                done();
-            });
-    });
+    api
+      .set('Accept', 'application/json')
+      .post(bootstrap.basePath + '/ModelDefinitions')
+      .send(Employeemodel)
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        //var results = res.body;
+        done();
+      });
+  });
 
-    it('Model Personalization Test - Web API Personalized Employee model for citi should return 0 record from personalized address model', function(done) {
-        api
-            .set('Accept', 'application/json')
-            .get(bootstrap.basePath + '/Employees')
-            .send()
-            .expect(200).end(function(err, res) {
-                //console.log('response body : ' + JSON.stringify(res.body, null, 4));
-                if (err || res.body.error) {
-                    return done(err || (new Error(res.body.error)));
-                }
-                var results = res.body;
-                expect(results.length).to.equal(0);
-                done();
-            });
-    });
+  it('Model Personalization Test - Web API Personalized Employee model for citi should return 0 record from personalized address model', function (done) {
+    api
+      .set('Accept', 'application/json')
+      .get(bootstrap.basePath + '/Employees')
+      .send()
+      .expect(200).end(function (err, res) {
+        //console.log('response body : ' + JSON.stringify(res.body, null, 4));
+        if (err || res.body.error) {
+          return done(err || (new Error(res.body.error)));
+        }
+        var results = res.body;
+        expect(results.length).to.equal(0);
+        done();
+      });
+  });
 
 });

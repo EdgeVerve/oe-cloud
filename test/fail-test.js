@@ -17,6 +17,7 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
+var loopback = require('loopback');
 
 describe(chalk.blue('fail-test'), function () {
 
@@ -33,7 +34,7 @@ describe(chalk.blue('fail-test'), function () {
             }
         }
     };
-    
+
     var accessToken;
 
 
@@ -42,8 +43,8 @@ describe(chalk.blue('fail-test'), function () {
 
     before('create model', function (done) {
         async.series([
-        function createModel(cb) {
-                var model = bootstrap.models[testModelName];
+            function createModel(cb) {
+                var model = loopback.findModel(testModelName, bootstrap.defaultContext);
                 if (model) {
                     cb();
                 } else {
@@ -56,12 +57,12 @@ describe(chalk.blue('fail-test'), function () {
                         }
                     });
                 }
-        },
-        function alldone() {
+            },
+            function alldone() {
                 done();
-        }
-    ]);
-});
+            }
+        ]);
+    });
 
     before('login using admin', function fnLogin(done) {
         var sendData = {
@@ -72,7 +73,7 @@ describe(chalk.blue('fail-test'), function () {
         bootstrap.api
             .post(bootstrap.basePath + '/BaseUsers/login')
             .send(sendData)
-            .expect(200).end(function(err, res) {
+            .expect(200).end(function (err, res) {
                 if (err) {
                     return done(err);
                 } else {
@@ -88,7 +89,7 @@ describe(chalk.blue('fail-test'), function () {
             "description": "create"
         };
         var context = bootstrap.defaultContext;
-        var model = bootstrap.models[testModelName];
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         model.create(data, context, function (err, res) {
             model.find({
                 "where": {
@@ -119,7 +120,7 @@ describe(chalk.blue('fail-test'), function () {
             "description": "create"
         };
         var context = bootstrap.defaultContext;
-        var model = bootstrap.models[testModelName];
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         model.upsert(data, context, function (err, res) {
             expect(err).to.not.exist;
             res.description = 'update via upsert';
@@ -132,26 +133,26 @@ describe(chalk.blue('fail-test'), function () {
         });
     });
 
-    it('Should fail on REST put without _version', function() {
-        var model = bootstrap.models[testModelName];
+    it('Should fail on REST put without _version', function () {
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         var createData = {
             "name": "Record3",
             "description": "create"
         };
-        model.create(createData, bootstrap.defaultContext, function(err, res) {
+        model.create(createData, bootstrap.defaultContext, function (err, res) {
             bootstrap.api
-            .set('Accept', 'application/json')
-            .put(bootstrap.basePath + '/FailedVehicles/' + res.id + '?access_token=' + accessToken)
-            .send({description: "updateAttributes",})
-            .end(function(err, res) {
+                .set('Accept', 'application/json')
+                .put(bootstrap.basePath + '/FailedVehicles/' + res.id + '?access_token=' + accessToken)
+                .send({ description: "updateAttributes", })
+                .end(function (err, res) {
                     // test case failing
                     //expect(res.status).to.not.be.equal(200);
                 });
-            });
+        });
     });
 
     after('after clean up', function (done) {
-        var model = bootstrap.models[testModelName];
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         model.destroyAll({}, bootstrap.defaultContext, function (err, info) {
             if (err) {
                 done(err);

@@ -8,6 +8,7 @@ var chalk = require('chalk');
 var async = require('async');
 var bootstrap = require('./bootstrap');
 var chai = require('chai');
+var loopback = require('loopback');
 
 var models = bootstrap.models;
 var expect = bootstrap.chai.expect;
@@ -122,7 +123,8 @@ describe(chalk.blue('grid-config'), function () {
     });
 
     after('destroy model', function (done) {
-        models['GridOrder'].destroyAll({}, bootstrap.defaultContext, function (err) {
+        var gridOrder = loopback.getModel('GridOrder', bootstrap.defaultContext);
+        gridOrder.destroyAll({}, bootstrap.defaultContext, function (err) {
             if (err) {
                 console.error(err);
             }

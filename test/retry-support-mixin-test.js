@@ -132,7 +132,7 @@ describe(chalk.blue('retry-support-tests'), function() {
     var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
 
     after('delete all the test accounts', function(done) {
-        var testAccount = loopback.getModel('TestRetryAccount');
+        var testAccount = loopback.getModel('TestRetryAccount', bootstrap.defaultContext);
         testAccount.destroyAll({}, deleteContext, function(err) {
             if (err) {
                 log.error(err);

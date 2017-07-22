@@ -13,8 +13,9 @@ var expect = chai.expect;
 chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
+var loopback = require('loopback');
 
-describe(chalk.blue('concurrency-test'), function() {
+describe(chalk.blue('concurrency-test'), function () {
     this.timeout(2000);
     var testModelName = 'MyConcurrentModel';
     var url = bootstrap.basePath + '/' + testModelName + 's';
@@ -34,19 +35,19 @@ describe(chalk.blue('concurrency-test'), function() {
 
     var ModelDefinition = bootstrap.models.ModelDefinition;
 
-    before('create model', function(done) {
-        var model = bootstrap.models[testModelName];
+    before('create model', function (done) {
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         if (model) {
             done();
         } else {
-            ModelDefinition.create(testModelDetails, bootstrap.defaultContext, function(err, res) {
+            ModelDefinition.create(testModelDetails, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     console.log('unable to create model ', err);
                     done(err);
                 } else {
-                    var model = bootstrap.models[testModelName];
+                    var model = loopback.findModel(testModelName, bootstrap.defaultContext);
                     model.evObserve('before save', function testBeforeSaveFnConc(ctx, next) {
-                        process.nextTick(function() {
+                        process.nextTick(function () {
                             next();
                         });
                     });
@@ -61,13 +62,13 @@ describe(chalk.blue('concurrency-test'), function() {
         'email': 'foo@gmail.com',
         'tenantId': 'test-tenant'
     };
-    before('create model', function(done) {
+    before('create Test User', function (done) {
         bootstrap.createTestUser(user1, 'admin', done);
     });
 
     var accessToken = '';
 
-    it('login', function(done) {
+    it('login', function (done) {
         var postData = {
             'username': user1.username,
             'password': user1.password
@@ -80,7 +81,7 @@ describe(chalk.blue('concurrency-test'), function() {
             .set('tenant_id', 'test-tenant')
             .post(postUrl)
             .send(postData)
-            .expect(200).end(function(err, response) {
+            .expect(200).end(function (err, response) {
                 accessToken = response.body.id;
                 done();
             });
@@ -93,19 +94,19 @@ describe(chalk.blue('concurrency-test'), function() {
     };
 
 
-    it('create and find data ', function(done) {
-        var model = bootstrap.models[testModelName];
-        model.destroyAll({}, bootstrap.defaultContext, function(err, res) {
-            model.create(data, bootstrap.defaultContext, function(err, res) {
+    it('create and find data ', function (done) {
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
+        model.destroyAll({}, bootstrap.defaultContext, function (err, res) {
+            model.create(data, bootstrap.defaultContext, function (err, res) {
                 model.find({
                     'where': {
                         'name': 'Name1'
                     }
-                }, bootstrap.defaultContext, function(err, res) {
+                }, bootstrap.defaultContext, function (err, res) {
                     savedInstance = res[0];
                     log.debug(bootstrap.defaultContext, 'verify data ', err, res);
                     expect(res[0].description).to.be.equal('OK');
-                    res[0].reload(bootstrap.defaultContext, function(err, reload) {
+                    res[0].reload(bootstrap.defaultContext, function (err, reload) {
                         expect(reload.description).to.be.equal('OK');
                         done();
                     });
@@ -114,7 +115,7 @@ describe(chalk.blue('concurrency-test'), function() {
         });
     });
 
-    it('concurrency with url', function(done) {
+    it('concurrency with url', function (done) {
         var count = 0;
         var errorCount = 0;
         var concurrentData1 = JSON.parse(JSON.stringify(savedInstance));
@@ -128,7 +129,7 @@ describe(chalk.blue('concurrency-test'), function() {
         api.set('Accept', 'application/json')
             .put(postUrl)
             .send(concurrentData1)
-            .end(function(err, resp) {
+            .end(function (err, resp) {
                 count++;
                 if (err || resp.status !== 200) {
                     errorCount++;
@@ -148,7 +149,7 @@ describe(chalk.blue('concurrency-test'), function() {
         api.set('Accept', 'application/json')
             .put(postUrl)
             .send(concurrentData2)
-            .end(function(err, resp) {
+            .end(function (err, resp) {
                 count++;
                 if (err || resp.status !== 200) {
                     errorCount++;
@@ -165,16 +166,16 @@ describe(chalk.blue('concurrency-test'), function() {
             });
     });
 
-    it('concurrency with js', function(done) {
+    it('concurrency with js', function (done) {
         var count = 0;
         var errorCount = 0;
-        var model = bootstrap.models[testModelName];
+        var model = loopback.findModel(testModelName, bootstrap.defaultContext);
         var concurrentData1 = JSON.parse(JSON.stringify(savedInstance));
         concurrentData1.name = 'Name2';
         var concurrentData2 = JSON.parse(JSON.stringify(savedInstance));
         concurrentData2.name = 'Name3';
 
-        model.upsert(concurrentData1, bootstrap.defaultContext, function(err, data) {
+        model.upsert(concurrentData1, bootstrap.defaultContext, function (err, data) {
             if (err) {
                 errorCount++;
             }
@@ -187,7 +188,7 @@ describe(chalk.blue('concurrency-test'), function() {
                 }
             }
         });
-        model.upsert(concurrentData2, bootstrap.defaultContext, function(err, data) {
+        model.upsert(concurrentData2, bootstrap.defaultContext, function (err, data) {
             if (err) {
                 errorCount++;
             }
