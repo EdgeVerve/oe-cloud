@@ -32,7 +32,7 @@ function getAutoscopeField(model, callContext) {
 
 var levelNames = {
   10: 'fatal',
-  20: "error",
+  20: 'error',
   30: 'warn',
   40: 'info',
   50: 'debug',
@@ -104,7 +104,7 @@ module.exports = function startNodeRed(server, callback) {
     logging: {
       'oe-logger': {
         handler: initLogger,
-        level:  'metric',
+        level: 'metric',
         metrics: nodeRedMetrics,
         audit: nodeRedAudit
       }
