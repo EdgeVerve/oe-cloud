@@ -217,6 +217,13 @@ function finalBoot(appinstance, options, cb) {
           if (err) {
             return next(err);
           }
+
+          var proxyKey = appinstance.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
+          if (ctx.req && ctx.req.headers && proxyKey) {
+            if (ctx.req.headers['x-evproxy-internal-key'] === proxyKey) {
+              return next();
+            }
+          }
           var DataACL = loopback.getModelByType('DataACL');
           DataACL.applyFilter(ctx, next);
         });
