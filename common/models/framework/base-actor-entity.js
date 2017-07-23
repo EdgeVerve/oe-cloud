@@ -553,6 +553,8 @@ module.exports = function (BaseActorEntity) {
           next();
         }
       });
+    } else {
+      next();
     }
   });
 
