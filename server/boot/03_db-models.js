@@ -44,6 +44,9 @@ module.exports = function DBModels(app, cb) {
   async.eachSeries(keys, function asyncForEachKey(key, callback) {
     // first disable ChangeStream for file based models
     var model = app.models[key];
+    model.clientModelName = key;
+    model.clientPlural = model.pluralModelName;
+    util.attachOverrideModelFunction(model);
     model.disableRemoteMethod('createChangeStream', true);
     app.locals.modelNames[key.toLowerCase()] = model.modelName;
     app.locals.modelNames[key] = model.modelName;
@@ -101,7 +104,8 @@ module.exports = function DBModels(app, cb) {
     modelDefinition.find({
       where: {
         filebased: false
-      }
+      },
+      order: '_createdOn'
     }, options, function dbModelsModelDefinitionFindCb(err, results) {
       if (err) {
         log.warn(options, {

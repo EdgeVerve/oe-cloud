@@ -20,7 +20,13 @@ var app = bootstrap.app;
 describe(chalk.blue('Data Personalization Test --REST'), function DatPersonalizationRest() {
   // Testmodel  has no autoscoped variable.
   this.timeout(1000000);
-  var modelName = 'DataPersonalizationTestModel';
+  var personalizedModel;
+  var personalizedModel1;
+  var personalizedModel2;
+  var personalizedModelScope;
+  var PersonalizedModelWithScopeAsModel;
+
+  var modelName = 'DataPersonalizationModel';
   var modelDetails = {
     name: modelName,
     base: 'BaseEntity',
@@ -82,7 +88,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     ]
   };
 
-  var myScopeModel = 'MyScope';
+  var myScopeModel = 'CustomScope';
   var modelDetailsScope = {
     name: myScopeModel,
     base: 'BaseEntity',
@@ -357,7 +363,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       function asyncModel(callback) {
         models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function modelCreate(err, res) {
           if (err) {
-            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationTestModel model');
+            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel model');
             callback(err);
           } else {
             callback();
@@ -367,7 +373,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       function asyncModelOne(callback) {
         models.ModelDefinition.create(modelDetails1, bootstrap.defaultContext, function modelOneCreate(err, res) {
           if (err) {
-            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationTestModel1 model');
+            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel1 model');
             callback(err);
           } else {
             callback();
@@ -377,7 +383,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       function asyncModelTwo(callback) {
         models.ModelDefinition.create(modelDetails2, bootstrap.defaultContext, function modelTwoCreate(err, res) {
           if (err) {
-            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationTestModel2 model');
+            log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel2 model');
             callback(err);
           } else {
             callback();
@@ -407,6 +413,11 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         if (err) {
           done(err);
         } else {
+          personalizedModel = loopback.getModel(modelName, bootstrap.defaultContext);
+          personalizedModel1 = loopback.getModel(modelName1, bootstrap.defaultContext);
+          personalizedModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
+          personalizedModelScope = loopback.getModel(myScopeModel, bootstrap.defaultContext);
+          PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel, bootstrap.defaultContext);
           done();
         }
       });
@@ -432,15 +443,15 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       'roles': '0'
     };
 
-    models[modelName].destroyAll({}, callContext, function modelDestroyAll(err, result) {
+    personalizedModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
       if (err) {
         done(err);
       }
-      models[modelName1].destroyAll({}, callContext, function modelDestroyAll(err, result) {
+      personalizedModel1.destroyAll({}, callContext, function modelDestroyAll(err, result) {
         if (err) {
           done(err);
         }
-        models[modelName2].destroyAll({}, callContext, function modelDestroyAll(err, result) {
+        personalizedModel2.destroyAll({}, callContext, function modelDestroyAll(err, result) {
           if (err) {
             done(err);
           }
@@ -1278,7 +1289,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       'tenantId': '0'
     };
 
-    models.ModelDefinition.create(modelDetailsUnique, callContext, function (err, res) {
+    models.ModelDefinition.create(modelDetailsUnique, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -1332,14 +1343,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 describe(chalk.blue('Data Personalization Test --Programatic'), function () {
   // this.timeout(1000000);
   // Testmodel  has no autoscoped variable.
-  var modelName = 'DataPersonalizationTestModel';
+  var modelName = 'DataPersonalizationModel';
 
   // Testmodel one has one autoscoped variable(tenantId)
   var modelName1 = 'DataPersonalizationModelOne';
 
   // Testmodel two has two autoscoped variable(tenantId,username)
   var modelName2 = 'DataPersonalizationModelTwo';
-
+  var myScopeModel = 'CustomScope';
   var myScopeModel1 = 'ModelWithScopeAsModel';
 
   var testData = [
@@ -1564,6 +1575,21 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     }
   ];
 
+  var personalizedModel;
+  var personalizedModel1;
+  var personalizedModel2;
+  var personalizedModelScope;
+  var PersonalizedModelWithScopeAsModel;
+
+  before('Create Test Models', function (done) {
+    personalizedModel = loopback.getModel(modelName, bootstrap.defaultContext);
+    personalizedModel1 = loopback.getModel(modelName1, bootstrap.defaultContext);
+    personalizedModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
+    personalizedModelScope = loopback.getModel(myScopeModel, bootstrap.defaultContext);
+    PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel1, bootstrap.defaultContext);
+    done();
+  });
+
   after('Remove Test Model', function (done) {
     var callContext = {};
     callContext.ctx = {
@@ -1584,17 +1610,17 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'roles': '0'
     };
 
-    models[modelName].destroyAll({}, callContext, function (err, result) {
+    personalizedModel.destroyAll({}, callContext, function (err, result) {
       if (err) {
         done(err);
       }
       // console.log('destroy response1 ', err, result);
-      models[modelName1].destroyAll({}, callContext, function (err, result) {
+      personalizedModel1.destroyAll({}, callContext, function (err, result) {
         if (err) {
           done(err);
         }
         // console.log('destroy response2 ', err, result);
-        models[modelName2].destroyAll({}, callContext, function (err, result) {
+        personalizedModel2.destroyAll({}, callContext, function (err, result) {
           if (err) {
             done(err);
           }
@@ -1617,7 +1643,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName2].create(testData, callContext, function (err, result) {
+    personalizedModel2.create(testData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1638,7 +1664,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName].create(testData1, callContext, function (err, result) {
+    personalizedModel.create(testData1, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1662,7 +1688,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1708,7 +1734,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1735,7 +1761,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     var callContext = {};
     callContext.ctx = {};
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         expect(err).not.to.be.null;
         done();
@@ -1766,7 +1792,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         expect(err).not.to.be.null;
         done();
@@ -1788,7 +1814,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1817,7 +1843,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1846,7 +1872,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    models[modelName].find({}, callContext, function (err, result) {
+    personalizedModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1873,7 +1899,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done();
       } else {
@@ -1901,7 +1927,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1931,7 +1957,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '30'
     };
 
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1955,7 +1981,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0',
       'defaults': '0'
     };
-    models[modelName2].find({}, callContext, function (err, result) {
+    personalizedModel2.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1985,7 +2011,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2015,7 +2041,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    models[modelName1].find({}, callContext, function (err, result) {
+    personalizedModel1.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2035,7 +2061,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     };
     var callContext = { ctx: {} };
     callContext.ignoreAutoScope = 'true';
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2066,7 +2092,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    models[modelName1].find({}, callContext, function (err, result) {
+    personalizedModel1.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2093,7 +2119,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    models[modelName1].find({
+    personalizedModel1.find({
       'where': {
         'scope.device': 'ios'
       }
@@ -2115,7 +2141,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     var callContext = {};
     callContext.ignoreAutoScope = true;
 
-    models[modelName1].find({}, callContext, function (err, result) {
+    personalizedModel1.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2148,7 +2174,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[myScopeModel1].create(postData, callContext, function (err, result) {
+    PersonalizedModelWithScopeAsModel.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2181,7 +2207,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    models[myScopeModel1].find({ 'where': { 'name': 'modelScopeAsModel' } }, callContext, function (err, result) {
+    PersonalizedModelWithScopeAsModel.find({ 'where': { 'name': 'modelScopeAsModel' } }, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2222,13 +2248,13 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '0',
       'device': '0'
     };
-    models[myScopeModel1].find({ 'where': { 'name': 'modelScopeAsModel' } }, callContext, function (err, res) {
+    PersonalizedModelWithScopeAsModel.find({ 'where': { 'name': 'modelScopeAsModel' } }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         postData._version = res[0]._version;
         postData.id = res[0].id;
-        models[myScopeModel1].upsert(postData, callContext, function (err, result) {
+        PersonalizedModelWithScopeAsModel.upsert(postData, callContext, function (err, result) {
           if (err) {
             done(err);
           } else {
@@ -2259,12 +2285,12 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     callContext.ctxWeights = {
       'tenantId': '0'
     };
-    models[myScopeModel1].find({ 'where': { 'name': 'modelScopeAsModelUpdate' } }, callContext, function (err, res) {
+    PersonalizedModelWithScopeAsModel.find({ 'where': { 'name': 'modelScopeAsModelUpdate' } }, callContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         // console.log("================", res);
-        models[myScopeModel1].deleteById(res[0].id, callContext, function (err, result) {
+        PersonalizedModelWithScopeAsModel.deleteById(res[0].id, callContext, function (err, result) {
           if (err) {
             done(err);
           } else {
@@ -2522,10 +2548,11 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
     models.ModelDefinition.create(modelWithOutMixin, bootstrap.defaultContext, function (err, res) {
       if (err) {
-        log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationTestModel model');
+        log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel model');
         done(err);
       } else {
-        models.ModelWithOutMixin.create(data, bootstrap.defaultContext, function (err, result) {
+        var ModelWithOutMixins = loopback.getModel('ModelWithOutMixin', bootstrap.defaultContext);
+        ModelWithOutMixins.create(data, bootstrap.defaultContext, function (err, result) {
           if (err) {
             done(err);
           } else {
@@ -2545,7 +2572,8 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
   it('- Test for mixin applied property on model while getting data', function (done) {
     var callContext = { ctx: {} };
 
-    models.ModelWithOutMixin.find({}, callContext, function (err, result) {
+    var ModelWithOutMixins = loopback.getModel('ModelWithOutMixin', bootstrap.defaultContext);
+    ModelWithOutMixins.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2578,7 +2606,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2590,7 +2618,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         postData.id = result.id;
         postData._version = result._version;
         postData.name = 'changedName';
-        models[modelName1].upsert(postData, callContext, function (err, res) {
+        personalizedModel1.upsert(postData, callContext, function (err, res) {
           if (err) {
             done(err);
           } else {
@@ -2610,7 +2638,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
               'org': '1'
             };
 
-            models[modelName1].find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
+            personalizedModel1.find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
               if (err) {
                 done(err);
               } else {
@@ -2618,7 +2646,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
                 expect(res1).to.be.empty;
                 expect(res1).not.to.be.undefined;
 
-                models[modelName1].find({}, callContext, function (err, res2) {
+                personalizedModel1.find({}, callContext, function (err, res2) {
                   if (err) {
                     done(err);
                   } else {
@@ -2654,7 +2682,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2669,7 +2697,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         postData.name = 'upsertTestRecordChanged';
         postData.scope.unit = 'finacle';
 
-        models[modelName1].upsert(postData, callContext, function (err, res) {
+        personalizedModel1.upsert(postData, callContext, function (err, res) {
           if (err) {
             done(err);
           } else {
@@ -2691,7 +2719,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
               'unit': '1'
             };
 
-            models[modelName1].find({ where: { 'name': 'upsertTestRecord' } }, callContext, function (err, res1) {
+            personalizedModel1.find({ where: { 'name': 'upsertTestRecord' } }, callContext, function (err, res1) {
               if (err) {
                 done(err);
               } else {
@@ -2700,7 +2728,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
                 expect(res1).not.to.be.undefined;
                 expect(res1[0].name).to.be.equal('upsertTestRecord');
 
-                models[modelName1].find({}, callContext, function (err, res2) {
+                personalizedModel1.find({}, callContext, function (err, res2) {
                   if (err) {
                     done(err);
                   } else {
@@ -2739,7 +2767,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'org': '1'
     };
 
-    models[modelName1].create(postData, callContext, function (err, result) {
+    personalizedModel1.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2758,7 +2786,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         };
 
 
-        models[modelName1].upsert(postData, callContext, function (err, res) {
+        personalizedModel1.upsert(postData, callContext, function (err, res) {
           if (err) {
             done(err);
           } else {
@@ -2768,7 +2796,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
             expect(res._scope).to.be.instanceof(Array);
             expect(res.name).to.be.equal('newRecordChanged');
 
-            models[modelName1].find({}, callContext, function (err, res1) {
+            personalizedModel1.find({}, callContext, function (err, res1) {
               if (err) {
                 done(err);
               } else {
@@ -2783,7 +2811,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
                 };
 
 
-                models[modelName1].find({}, callContext, function (err, res2) {
+                personalizedModel1.find({}, callContext, function (err, res2) {
                   if (err) {
                     done(err);
                   } else {
@@ -2821,7 +2849,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName2].create(postData, callContext, function (err, result) {
+    personalizedModel2.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2834,7 +2862,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         postData._version = result._version;
         postData.name = 'changedName';
 
-        models[modelName2].upsert(postData, callContext, function (err, res) {
+        personalizedModel2.upsert(postData, callContext, function (err, res) {
           if (err) {
             done(err);
           } else {
@@ -2856,7 +2884,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
               'org': '1'
             };
 
-            models[modelName2].find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
+            personalizedModel2.find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
               if (err) {
                 done(err);
               } else {
@@ -2864,7 +2892,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
                 expect(res1).to.be.empty;
                 expect(res1).not.to.be.undefined;
 
-                models[modelName2].find({}, callContext, function (err, res2) {
+                personalizedModel2.find({}, callContext, function (err, res2) {
                   if (err) {
                     done(err);
                   } else {
@@ -2902,7 +2930,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName2].create(postData, callContext, function (err, result) {
+    personalizedModel2.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2917,7 +2945,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         postData.name = 'upsertTestRecordChanged';
         postData.scope.unit = 'finacle';
 
-        models[modelName2].upsert(postData, callContext, function (err, res) {
+        personalizedModel2.upsert(postData, callContext, function (err, res) {
           if (err) {
             expect(err).not.to.be.null;
             expect(err).not.to.be.undefined;
@@ -2949,7 +2977,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    models[modelName2].create(postData, callContext, function (err, result) {
+    personalizedModel2.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2967,13 +2995,17 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
           'username': 'new-test-case'
         };
 
-        models[modelName2].upsert(postData, callContext, function (err, res) {
+        personalizedModel2.upsert(postData, callContext, function (err, res) {
           if (err) {
-            expect(err).not.to.be.null;
-            expect(err).not.to.be.undefined;
-            done();
-          } else {
-            done(new Error('Should not update the record of other tenant'));
+            return done(err);
+            //expect(err).not.to.be.null;
+            //expect(err).not.to.be.undefined;
+            //done();
+          }
+          else {
+            //done(new Error('Should not update the record of other tenant'));
+            expect(res.id).to.not.equal(postData.id);
+            return done();
           }
         });
       }
@@ -3060,7 +3092,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       if (err) {
         done(err);
       } else {
-        var uniquePropModel = loopback.getModel('ModelUnique');
+        var uniquePropModel = loopback.getModel('ModelUnique', callContext);
         uniquePropModel.create(postData, callContext, function (err, result) {
           if (err) {
             done(err);
@@ -3091,7 +3123,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'category': '0'
     };
 
-    var uniquePropModel = loopback.getModel('ModelUnique');
+    var uniquePropModel = loopback.getModel('ModelUnique', callContext);
     uniquePropModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
@@ -3109,7 +3141,8 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
 describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls --REST'), function () {
   this.timeout(1000000);
-  var modelName = 'DataPersonalizationModel';
+  var modelName = 'DataPersonalizationTestModel';
+  var personalizedModel;
   var newModelDetails = {
     name: modelName,
     base: 'BaseEntity',
@@ -3150,9 +3183,10 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   before('Create Test model', function (done) {
     models.ModelDefinition.create(newModelDetails, bootstrap.defaultContext, function (err, res) {
       if (err) {
-        log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel model');
+        log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationTestModel model');
         done(err);
       } else {
+        personalizedModel = loopback.getModel(modelName, bootstrap.defaultContext);
         done();
       }
     });
@@ -3170,7 +3204,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
       'username': '0'
     };
 
-    models[modelName].destroyAll({}, callContext, function (err, result) {
+    personalizedModel.destroyAll({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {

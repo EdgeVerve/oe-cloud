@@ -9,9 +9,7 @@ var debug = require('debug')('db-models');
 var log = require('oe-logger')('model-definition');
 var inflection = require('inflection');
 var loopback = require('loopback');
-var uuid = require('node-uuid');
 var _ = require('lodash');
-var modelPersonalizer = require('../../../lib/model-personalizer');
 var config = require('../../../server/config');
 var messaging = require('../../../lib/common/global-messaging');
 
@@ -26,10 +24,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       err.retriable = false;
       return next(err);
     }
-    modeldefinition = ctx.args;
     log.debug(ctx.req.callContext, 'modeldefinition', modeldefinition);
 
     if (ctx.req.method === 'DELETE') {
+      modeldefinition = ctx.args;
       modelDefinition.find({
         'where': {
           'id': modeldefinition.id
@@ -72,9 +70,17 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   function mongoSpecificHandling(modeldefinition, ctx, next) {
     if (!modeldefinition.mongodb) {
       debug('Posted modeldefinition does not have the \'mongodb\' property');
-      if (modeldefinition.variantOf) {
-        debug('Posted modeldefinition has the \'variantOf\' property');
-        var parentVariantModel = loopback.findModel(modeldefinition.variantOf);
+      var autoscopeFields = modelDefinition.definition.settings.autoscope;
+      if (modeldefinition.filebased) {
+        let ctxStr = util.createDefaultContextString(autoscopeFields);
+        if (!modelDefinition.app.personalizedModels[modeldefinition.name]) {
+          modelDefinition.app.personalizedModels[modeldefinition.name] = {};
+        }
+        modelDefinition.app.personalizedModels[modeldefinition.name][ctxStr] = {
+          'modelId': modeldefinition.name, 'context': ctxStr
+        };
+      } else if (modeldefinition.variantOf) {
+        var parentVariantModel = loopback.findModel(modeldefinition.variantOf, ctx.options);
         if (parentVariantModel) {
           debug('Found a parent model (not a variant itself)');
           var parentVariantMongodbParam = parentVariantModel.definition.settings.mongodb;
@@ -86,39 +92,27 @@ module.exports = function ModelDefintionFn(modelDefinition) {
               };
             }
           }
-          return next();
         }
-        debug('Did not find a parent model (not a variant itself). Looking for parent which is itself a variant');
-        modelDefinition.findOne({
-          where: {
-            'clientModelName': modeldefinition.variantOf
-          }
-        }, ctx.options, function findOneCb(err, data) {
-          if (!err && data) {
-            debug('Found a parent model which is a variant itself');
-            var parentVariantMongodbParam = data.mongodb;
-            if (parentVariantMongodbParam) {
-              debug('A:it has the mongodb property', parentVariantMongodbParam);
-              var parentVariantCollectionName = parentVariantMongodbParam.collection;
-              if (parentVariantCollectionName) {
-                modeldefinition.mongodb = {
-                  collection: parentVariantCollectionName
-                };
-              }
-            }
-          }
-          // return next();
-        });
-      } else {
-        debug('Posted modeldefinition does not have the \'variantOf\' property');
-        modeldefinition.mongodb = {
-          collection: modeldefinition.name
-        };
-        return next();
+        if (!modeldefinition.mongodb) {
+          modeldefinition.mongodb = {
+            collection: modeldefinition.variantOf
+          };
+        }
+      }      else {
+        let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
+        if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
+          modeldefinition.mongodb = {
+            collection: modeldefinition.name
+          };
+        } else {
+          modeldefinition.mongodb = {
+            collection: modeldefinition.modelId
+          };
+        }
       }
-    } else {
       return next();
     }
+    return next();
   }
 
   /**
@@ -133,6 +127,19 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   var mdBeforeSave = function mdBeforeSave(ctx, next) {
     log.debug(ctx.options, 'DEBUG: boot/db-models.js: ModelDefinition Before save called.');
     var modeldefinition = ctx.instance || ctx.currentInstance || ctx.data;
+    var contextString;
+    if (ctx.options.ignoreAutoscope || ctx.options.ignoreAutoScope) {
+      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, {});
+    } else {
+      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
+    }
+    modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
+      modelDefinition.definition.settings.autoscope);
+
+    if (ctx.IsNewInstance && ctx.options.upsertWithNewRecord) {
+      modeldefinition.filebased = false;
+      modeldefinition.variantOf = modeldefinition.name;
+    }
     // check the validitiy of modeldefinition(like checking the validity of expressions attached to a model)
     util.isModelDefinitionValid(modeldefinition, ctx.options, function checkModelDefinitionValidCb(err) {
       // if model is not valid then pass the error forward and do not create the model
@@ -144,44 +151,21 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           modeldefinition.plural = createPlural(modeldefinition.name);
           log.debug(ctx.options, 'Created plural ', modeldefinition.plural, 'for model', modeldefinition.name);
         }
-        if (!modeldefinition.base) {
-          modeldefinition.base = 'BaseEntity';
-        }
-        // modeldefinition.variantOf = modeldefinition.name;
+        modeldefinition.clientPlural = modeldefinition.plural;
         if (modeldefinition.variantOf) {
-          modeldefinition.clientModelName = modeldefinition.name;
-          modeldefinition.name = modeldefinition.name + '' + uuid.v1().toString().substring(0, 6);
-          modeldefinition.plural = modeldefinition.name;
-        }
-
-        var baseModel = loopback.findModel(modeldefinition.base);
-        if (!baseModel) {
-          //   console.log('invalid model ', modeldefinition.base);
-          var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');
-          err1.retriable = false;
-          next(err1);
-          return;
+          modeldefinition.base = modeldefinition.variantOf;
         }
       }
-
-      if (modeldefinition.variantOf) {
-        var modelDefinitionModel = loopback.findModel('ModelDefinition');
-        modelDefinitionModel.findOne({
-          where: {
-            name: modeldefinition.variantOf
-          }
-        }, ctx.options, function modelDefinitionFindOne(err2, results2) {
-          if (err2 || !results2) {
-            log.error(ctx.options, 'Could not find variant model ', modeldefinition.variantOf);
-            var err3 = new Error('Could not find variant model ' + modeldefinition.variantOf);
-            err3.retriable = false;
-            return next(err3);
-          }
-          return mongoSpecificHandling(modeldefinition, ctx, next);
-        });
-      } else {
-        return mongoSpecificHandling(modeldefinition, ctx, next);
+      if (!modeldefinition.base) {
+        modeldefinition.base = 'BaseEntity';
       }
+      let baseModel = loopback.findModel(modeldefinition.base, ctx.options);
+      if (!baseModel) {
+        var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');
+        err1.retriable = false;
+        return next(err1);
+      }
+      return mongoSpecificHandling(modeldefinition, ctx, next);
     });
   };
 
@@ -250,8 +234,8 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       var where = ctx.where;
       var id;
       // the below logic is to find out id in where clause.
-      // if ev-context-mixin is applied it where = {and} -->  and is a array
-      // if ev-context-mixin is not applied then where clause will be have id in where.id.
+      // if context-mixin is applied it where = {and} -->  and is a array
+      // if context-mixin is not applied then where clause will be have id in where.id.
       var forEachCb = function forEachCb(element) {
         if (!Array.isArray(element)) {
           if (element.id) {
@@ -390,7 +374,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       }
       return result;
   }
-*/
+  */
   // Define 'after save' hook for the ModelDefinition model so
   // that loopback Models can be created at runtime corresponding to
   // the ModelDefinition instance created
@@ -475,6 +459,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     };
 
     allDefinitions[model.definition.name] = modelDefn;
+    allDefinitions[model.clientModelName] = modelDefn;
 
     if (options.dependencies) {
       Object.keys(relations).forEach(function relationsForEachKey(relationName) {
@@ -534,37 +519,29 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     if (options.flatten) {
       options.dependencies = true;
     }
+    var model = loopback.findModel(modelName, options);
+    var result = {};
+    if (model) {
+      var allDefinitions = {};
+      _extractMeta(model, options, allDefinitions);
 
-    modelPersonalizer(modelName, options, function getPersonalizedModelCB(personalizedModelName) {
-      personalizedModelName = personalizedModelName || modelName;
-      var model = loopback.findModel(personalizedModelName);
-      if (!model) {
-        model = loopback.findModel(modelName);
-        personalizedModelName = modelName;
+      /**
+       * If we are returning a different personalized model against the requested one,
+       * also make sure this is available under original requested name
+       */
+      if (model.clientModelName !== modelName) {
+        allDefinitions[modelName] = allDefinitions[model.modelName];
       }
-      var result = {};
-      if (model) {
-        var allDefinitions = {};
-        _extractMeta(model, options, allDefinitions);
-
+      result = allDefinitions;
+      if (options.flatten) {
         /**
-         * If we are returning a different personalized model against the requested one,
-         * also make sure this is available under original requested name
+         * Inter-weave the embedded Model's field as sub-fields.
          */
-        if (personalizedModelName !== modelName) {
-          allDefinitions[modelName] = allDefinitions[personalizedModelName];
-        }
-        result = allDefinitions;
-        if (options.flatten) {
-          /**
-           * Inter-weave the embedded Model's field as sub-fields.
-           */
-          result = _flattenMetadata(personalizedModelName, allDefinitions);
-        }
+        result = _flattenMetadata(model.modelName, allDefinitions);
       }
-      callback && callback(null, result);
-      return result;
-    });
+    }
+    callback && callback(null, result);
+    return result;
   };
 
   modelDefinition.remoteMethod('extractMeta', {

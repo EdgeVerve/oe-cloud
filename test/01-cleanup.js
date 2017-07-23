@@ -13,7 +13,7 @@ var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 
 describe('ZZ Final Cleanup', function() {
-	this.timeout(120000);
+	this.timeout(120001);
 
     before('Delete collections', function(done) {
 		var db = new Db('db', new Server(mongoHost, 27017));
@@ -67,3 +67,6 @@ describe('ZZ Final Cleanup', function() {
 		}
     });
 });
+
+
+

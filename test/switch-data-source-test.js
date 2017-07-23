@@ -10,7 +10,8 @@
 
 var bootstrap = require('./bootstrap');
 var chalk = require('chalk');
-var async = require('async');
+var async = require('async')
+var loopback = require('loopback');
 var log = require('oe-logger')('switch-data-source-test');
 var chai = require('chai');
 var expect = chai.expect;
@@ -19,7 +20,7 @@ var events = require('events');
 var eventEmitter = new events.EventEmitter();
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 
-describe(chalk.blue('switch-data-source-test'), function() {
+describe(chalk.blue('switch-data-source-test'), function () {
 
     this.timeout(60000);
 
@@ -170,7 +171,7 @@ describe(chalk.blue('switch-data-source-test'), function() {
             'connectionTimeout': 50000
         }
 
-   ];
+    ];
 
     var tenant1Scope = {
         ignoreAutoScope: false,
@@ -242,40 +243,40 @@ describe(chalk.blue('switch-data-source-test'), function() {
     var DataSourceDefinition = bootstrap.models.DataSourceDefinition;
     var DataSourceMapping = bootstrap.models.DataSourceMapping;
 
-    var cleanup = function(done) {
-        async.series([function(cb) {
+    var cleanup = function (done) {
+        async.series([function (cb) {
             var model = bootstrap.models['DataSourceDefinition'];
             if (model) {
-                var options = {ctx:{}};
+                var options = { ctx: {} };
                 options.ignoreAutoScope = true;
                 options.fetchAllScopes = true;
-                model.remove({}, options, function() {
+                model.remove({}, options, function () {
                     cb();
                 });
             } else {
                 cb();
             }
-        }, function(cb) {
+        }, function (cb) {
             var model = bootstrap.models['DataSourceMapping'];
             if (model) {
-                model.destroyAll({}, tenant1Scope, function() {
+                model.destroyAll({}, tenant1Scope, function () {
                     cb();
                 });
             } else {
                 cb();
             }
-        }, function(cb) {
+        }, function (cb) {
             var model = bootstrap.models['DataSourceMapping'];
             if (model) {
-                model.destroyAll({}, tenant2Scope, function() {
+                model.destroyAll({}, tenant2Scope, function () {
                     cb();
                 });
             } else {
                 cb();
             }
-        }, function(cb) {
+        }, function (cb) {
 
-            var options = {ctx:{}};
+            var options = { ctx: {} };
             options.fetchAllScopes = true;
             ModelDefinition.remove({
                 'where': {
@@ -283,100 +284,100 @@ describe(chalk.blue('switch-data-source-test'), function() {
                         inq: ['model1', 'model2', 'model3', 'model4', 'model5']
                     }
                 }
-            }, options, function() {
+            }, options, function () {
                 cb();
             });
-        }, function() {
+        }, function () {
             done();
         }]);
     };
 
-    before('setup datasources', function(done) {
+    before('setup datasources', function (done) {
 
         eventEmitter.setMaxListeners(100);
 
-			var callContext = bootstrap.defaultContext;
-			callContext.ignoreAutoScope = true;
-		
-            async.series([function(cb) {
-                    cleanup(cb);
-                },
-        		function(cb) {
-                    async.each(datasources, function(ds, callback) {
-                        DataSourceDefinition.findById(ds.id, callContext, function(err, res) {
+        var callContext = bootstrap.defaultContext;
+        callContext.ignoreAutoScope = true;
+
+        async.series([function (cb) {
+            cleanup(cb);
+        },
+        function (cb) {
+            async.each(datasources, function (ds, callback) {
+                DataSourceDefinition.findById(ds.id, callContext, function (err, res) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'error in datasource find', err);
+                        return callback(err);
+                    }
+                    if (!res) {
+                        DataSourceDefinition.create(ds, callContext, function (err, res) {
                             if (err) {
                                 log.error(log.defaultContext(), 'error in datasource find', err);
                                 return callback(err);
                             }
-                            if (!res) {
-                                DataSourceDefinition.create(ds, callContext, function(err, res) {
-                                    if (err) {
-                                        log.error(log.defaultContext(), 'error in datasource find', err);
-                                        return callback(err);
-                                    }
-                                    callback();
-                                });
-                            } else {
-                                log.debug(log.defaultContext(), 'data source exists ', ds.name, ds.database);
-                                callback();
-                            }
+                            callback();
                         });
-                    }, function(err) {
-                        cb();
-                    });
-                },
-            function(cb) {
-                    Object.keys(bootstrap.app.datasources).forEach(function(dsname) {
-                        log.debug(log.defaultContext(), dsname);
-                    });
-                    ModelDefinition.create(models, bootstrap.defaultContext, function(err, res) {
-                        if (err) {
-                            log.debug(log.defaultContext(), 'unable to create model');
-                            cb();
-                        } else {
-                            cb();
-                        }
-                    });
-                },
-        function(cb) {
-                    DataSourceMapping.create(mappingsForTenant1, tenant1Scope, function(err, res) {
-                        if (err) {
-                            cb(err);
-                        } else {
-                            cb();
-                        }
-                    });
-                },
-        function(cb) {
-                        DataSourceMapping.create(mappingsForTenant2, tenant2Scope, function(err, res) {
-                            if (err) {
-                                cb(err);
-                            } else {
-                                cb();
-                            }
-                        });
-                },
-        function(cb) {
-                    Object.keys(bootstrap.app.datasources).forEach(function iter(id) {
-                        log.debug(log.defaultContext(), id, bootstrap.app.datasources[id].settings);
-                    });
+                    } else {
+                        log.debug(log.defaultContext(), 'data source exists ', ds.name, ds.database);
+                        callback();
+                    }
+                });
+            }, function (err) {
+                cb();
+            });
+        },
+        function (cb) {
+            Object.keys(bootstrap.app.datasources).forEach(function (dsname) {
+                log.debug(log.defaultContext(), dsname);
+            });
+            ModelDefinition.create(models, bootstrap.defaultContext, function (err, res) {
+                if (err) {
+                    log.debug(log.defaultContext(), 'unable to create model');
                     cb();
-                },
-        function() {
-                    done();
-                }]);
+                } else {
+                    cb();
+                }
+            });
+        },
+        function (cb) {
+            DataSourceMapping.create(mappingsForTenant1, tenant1Scope, function (err, res) {
+                if (err) {
+                    cb(err);
+                } else {
+                    cb();
+                }
+            });
+        },
+        function (cb) {
+            DataSourceMapping.create(mappingsForTenant2, tenant2Scope, function (err, res) {
+                if (err) {
+                    cb(err);
+                } else {
+                    cb();
+                }
+            });
+        },
+        function (cb) {
+            Object.keys(bootstrap.app.datasources).forEach(function iter(id) {
+                log.debug(log.defaultContext(), id, bootstrap.app.datasources[id].settings);
+            });
+            cb();
+        },
+        function () {
+            done();
+        }]);
     });
 
-    it('tenant1 and model 1 ', function(done) {
-        var model = bootstrap.models['model1'];
+    it('tenant1 and model 1 ', function (done) {
+        var model = loopback.getModel('model1', bootstrap.defaultContext);
         var ds = model.getDataSource(tenant1Scope);
         expect(ds).not.to.be.null;
         expect(ds.settings.database).to.equal('tenant1a');
         done();
     });
 
-    it('tenant2 and model 1 ', function(done) {
-        var model = bootstrap.models['model1'];
+    it('tenant2 and model 1 ', function (done) {
+        var model = loopback.getModel('model1', bootstrap.defaultContext);
         var ds = model.getDataSource(tenant2Scope);
         expect(ds).not.to.be.null;
         expect(ds.settings.database).to.equal('tenant2a');
@@ -384,36 +385,36 @@ describe(chalk.blue('switch-data-source-test'), function() {
         done();
     });
 
-    it('model2 tenant1 commondb ', function(done) {
-        var model = bootstrap.models['model2'];
+    it('model2 tenant1 commondb ', function (done) {
+        var model = loopback.getModel('model2', bootstrap.defaultContext);
         var ds = model.getDataSource(tenant1Scope);
         expect(ds.settings.database).to.equal('commondb');
 
         done();
     });
 
-    it('model2 tenant2 commondb ', function(done) {
-        var model = bootstrap.models['model2'];
+    it('model2 tenant2 commondb ', function (done) {
+        var model = loopback.getModel('model2', bootstrap.defaultContext);
         var ds = model.getDataSource(tenant2Scope);
         expect(ds.settings.database).to.equal('commondb');
 
         done();
     });
 
-    it('department for tenant 1 ', function(done) {
+    it('department for tenant 1 ', function (done) {
         var callContext = {};
         callContext.ctx = {
             tenantId: 'tenant1',
             department: 'fx'
         };
-        var model = bootstrap.models['model3'];
+        var model = loopback.getModel('model3', bootstrap.defaultContext);
         var ds = model.getDataSource(callContext);
         expect(ds.settings.database).to.equal('fxdb');
 
         done();
     });
 
-    it('superdb higher priority ', function(done) {
+    it('superdb higher priority ', function (done) {
         var callContext = {};
 
         callContext.ctx = {
@@ -422,15 +423,15 @@ describe(chalk.blue('switch-data-source-test'), function() {
             department: 'fx'
         };
 
-        var model = bootstrap.models['model1'];
+        var model = loopback.getModel('model1', bootstrap.defaultContext);
         var ds = model.getDataSource(callContext);
         expect(ds.settings.database).to.equal('superdb');
 
         done();
     });
 
-    after('after clean up', function(done) {
-        cleanup(function() {
+    after('after clean up', function (done) {
+        cleanup(function () {
             done();
         });
     });

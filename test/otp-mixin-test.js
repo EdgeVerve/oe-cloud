@@ -42,7 +42,7 @@ describe(chalk.blue('otp mixin test'), function () {
         }
         expect(err).to.be.not.ok;
         var ds = bootstrap.app.dataSources.db;
-        var model = bootstrap.app.models.OTPCountry;
+        var model = loopback.getModel(modelName, bootstrap.defaultContext);
         expect(model).not.to.be.undefined;
         model.attachTo(ds);
         done();
@@ -56,7 +56,7 @@ describe(chalk.blue('otp mixin test'), function () {
         console.log('Error - not able to delete modelDefinition entry for mysettings');
         return done();
       }
-      var model = loopback.getModel(modelName);
+      var model = loopback.getModel(modelName, bootstrap.defaultContext);
       model.destroyAll({}, bootstrap.defaultContext, function (err, d) {
         if (err) {
           console.log('Error - not able to delete ' + modelName + ' data');
@@ -75,16 +75,16 @@ describe(chalk.blue('otp mixin test'), function () {
     var postData = { 'username': 'test', 'password': 'test' };
     var loginUrl = bootstrap.basePath + '/BaseUsers/loginOTP';
     api.post(loginUrl)
-            .set('Accept', 'application/json')
-            .send(postData)
-            .expect(200).end(function (err, resp) {
-              if (err) {
-                return done(err);
-              }
-              var results = JSON.parse(resp.text);
-              expect(results).keys('response', 'username');
-              done();
-            });
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).keys('response', 'username');
+        done();
+      });
   });
 
   xit('t3 should verify otp and generate access token for user', function (done) {
@@ -103,16 +103,16 @@ describe(chalk.blue('otp mixin test'), function () {
         var postData = { 'username': 'test', 'otp': otp.token };
         var verifyOtpUrl = bootstrap.basePath + '/BaseUsers/validateOTP';
         api.post(verifyOtpUrl)
-                    .set('Accept', 'application/json')
-                    .send(postData)
-                    .expect(200).end(function (err, resp) {
-                      if (err) {
-                        return done(err);
-                      }
-                      var results = JSON.parse(resp.text);
-                      expect(results).keys('id', 'ttl', 'created', 'userId');
-                      done();
-                    });
+          .set('Accept', 'application/json')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              return done(err);
+            }
+            var results = JSON.parse(resp.text);
+            expect(results).keys('id', 'ttl', 'created', 'userId');
+            done();
+          });
       });
     });
   });
@@ -121,32 +121,32 @@ describe(chalk.blue('otp mixin test'), function () {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10000 };
     var apiUrl = url + '/OTPCountries';
     api.post(apiUrl)
-            .set('Accept', 'application/json')
-            .send(postData)
-            .expect(200).end(function (err, resp) {
-              if (err) {
-                return done(err);
-              }
-              var results = JSON.parse(resp.text);
-              expect(results).keys('status', 'otpId');
-              done();
-            });
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).keys('status', 'otpId');
+        done();
+      });
   });
 
   it('should not apply otp authentication if OtpWhen condition not passed', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10 };
     var Url = url + '/OTPCountries';
     api.post(Url)
-            .set('Accept', 'application/json')
-            .send(postData)
-            .expect(200).end(function (err, resp) {
-              if (err) {
-                return done(err);
-              }
-              var results = JSON.parse(resp.text);
-              expect(results).to.include.keys('name', 'capital', 'population', 'id', '_createdBy', '_createdOn', '_modifiedBy', '_modifiedOn', '_type', '_isDeleted');
-              done();
-            });
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).to.include.keys('name', 'capital', 'population', 'id', '_createdBy', '_createdOn', '_modifiedBy', '_modifiedOn', '_type', '_isDeleted');
+        done();
+      });
   });
 
   it('t5 should verify otp and send response to user if otp is provided and correct', function (done) {
@@ -154,92 +154,92 @@ describe(chalk.blue('otp mixin test'), function () {
 
     var Url = url + '/OTPCountries';
     api.post(Url)
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).keys('status', 'otpId');
+        var OTP = loopback.findModel('OTP');
+        var condition = { 'where': { 'id': results.otpId } };
+        OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
+          var otpData = { 'otp': otp.token, 'otpId': results.otpId };
+          var Url = url + '/OTPCountries';
+          api.post(Url)
             .set('Accept', 'application/json')
-            .send(postData)
+            .send(otpData)
             .expect(200).end(function (err, resp) {
               if (err) {
                 return done(err);
               }
               var results = JSON.parse(resp.text);
-              expect(results).keys('status', 'otpId');
-              var OTP = loopback.findModel('OTP');
-              var condition = { 'where': { 'id': results.otpId } };
-              OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
-                var otpData = { 'otp': otp.token, 'otpId': results.otpId };
-                var Url = url + '/OTPCountries';
-                api.post(Url)
-                            .set('Accept', 'application/json')
-                            .send(otpData)
-                            .expect(200).end(function (err, resp) {
-                              if (err) {
-                                return done(err);
-                              }
-                              var results = JSON.parse(resp.text);
-                              expect(results).to.include.keys('name', 'capital', 'population', 'id', '_createdBy', '_createdOn', '_modifiedBy', '_modifiedOn', '_type', '_isDeleted');
+              expect(results).to.include.keys('name', 'capital', 'population', 'id', '_createdBy', '_createdOn', '_modifiedBy', '_modifiedOn', '_type', '_isDeleted');
 
-                              done();
-                            });
-              });
+              done();
             });
+        });
+      });
   });
 
   it('t6 should check otp and send err response to user if otp is provided but not correct', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 13000 };
     var Url = url + '/OTPCountries';
     api.post(Url)
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).keys('status', 'otpId');
+        var OTP = loopback.findModel('OTP');
+        var condition = { 'where': { 'id': results.otpId } };
+        OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
+          otp.token = otp.token + 1;
+          var otpData = { 'otp': otp.token, 'otpId': results.otpId };
+          var Url = url + '/OTPCountries';
+          api.post(Url)
             .set('Accept', 'application/json')
-            .send(postData)
-            .expect(200).end(function (err, resp) {
+            .send(otpData)
+            .expect(422).end(function (err, resp) {
               if (err) {
                 return done(err);
               }
               var results = JSON.parse(resp.text);
-              expect(results).keys('status', 'otpId');
-              var OTP = loopback.findModel('OTP');
-              var condition = { 'where': { 'id': results.otpId } };
-              OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
-                otp.token = otp.token + 1;
-                var otpData = { 'otp': otp.token, 'otpId': results.otpId };
-                var Url = url + '/OTPCountries';
-                api.post(Url)
-                            .set('Accept', 'application/json')
-                            .send(otpData)
-                            .expect(422).end(function (err, resp) {
-                              if (err) {
-                                return done(err);
-                              }
-                              var results = JSON.parse(resp.text);
-                              expect(results.message).to.be.equal('otp auth failed');
-                              done();
-                            });
-              });
+              expect(results.message).to.be.equal('otp auth failed');
+              done();
             });
+        });
+      });
   });
 
   it('t7 resend otp test', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10000 };
     var apiUrl = url + '/OTPCountries';
     api.post(apiUrl)
-            .set('Accept', 'application/json')
-            .send(postData)
-            .expect(200).end(function (err, resp) {
-              if (err) {
-                return done(err);
-              }
-              var results = JSON.parse(resp.text);
-              expect(results).keys('status', 'otpId');
+      .set('Accept', 'application/json')
+      .send(postData)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          return done(err);
+        }
+        var results = JSON.parse(resp.text);
+        expect(results).keys('status', 'otpId');
 
-              var resendOtpUrl = url + '/OTPs/resendOtp';
-              var resendData = { 'otpId': results.otpId };
+        var resendOtpUrl = url + '/OTPs/resendOtp';
+        var resendData = { 'otpId': results.otpId };
 
-              api.post(resendOtpUrl)
-                        .set('Accept', 'application/json')
-                        .send(resendData)
-                        .expect(200).end(function (err, resp) {
-                          var results = JSON.parse(resp.text);
-                          expect(results).keys('status', 'otpId');
-                          done();
-                        });
-            });
+        api.post(resendOtpUrl)
+          .set('Accept', 'application/json')
+          .send(resendData)
+          .expect(200).end(function (err, resp) {
+            var results = JSON.parse(resp.text);
+            expect(results).keys('status', 'otpId');
+            done();
+          });
+      });
   });
 });

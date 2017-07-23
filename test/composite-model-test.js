@@ -22,22 +22,18 @@ var models = bootstrap.models;
 // 6. Implicit composite test - posting data to Customer along with CustomerAddress with relation
 // 7. Test to perform validations to see if duplicate record fails - create CustomerAddress duplicate
 
-describe(chalk.blue('Composite Model test'), function() {
+describe(chalk.blue('Composite Model test'), function () {
 
     this.timeout(15000);
-    
+
     var callContext = {
-        ctx : {
+        ctx: {
             tenantId: 'test-tenant',
             remoteUser: 'test-user'
         }
     };
 
-    before('setup test data', function(done) {
-        console.log('before....');
-        models.ModelDefinition.events.once('model-' + 'CompositeModel' + '-available', function() {
-                done();
-            });
+    before('setup test data', function (done) {
         models.ModelDefinition.create({
             'name': 'Customer',
             'idInjection': false,
@@ -60,7 +56,7 @@ describe(chalk.blue('Composite Model test'), function() {
                 }
             },
             'filebased': false
-        }, callContext, function(err, model) {
+        }, callContext, function (err, model) {
             expect(err).to.be.not.ok;
             models.ModelDefinition.create({
                 name: 'UpcomingEvent',
@@ -84,7 +80,7 @@ describe(chalk.blue('Composite Model test'), function() {
                 },
                 relations: {},
                 filebased: false
-            }, callContext, function(err, upcomingEventrcd) {
+            }, callContext, function (err, upcomingEventrcd) {
                 expect(err).to.be.null;
                 models.ModelDefinition.create({
                     name: 'CustomerAddress',
@@ -109,7 +105,7 @@ describe(chalk.blue('Composite Model test'), function() {
                         }
                     },
                     filebased: false
-                }, callContext, function(err2, model2) {
+                }, callContext, function (err2, model2) {
                     expect(err2).to.be.null;
 
                     models.ModelDefinition.create({
@@ -119,7 +115,7 @@ describe(chalk.blue('Composite Model test'), function() {
                             'VersionMixin': false,
                             'IdempotentMixin': false,
                         },
-                        strict : false,
+                        strict: false,
                         properties: {},
                         filebased: false,
                         CompositeTransaction: true,
@@ -127,36 +123,37 @@ describe(chalk.blue('Composite Model test'), function() {
                             'Customer': {},
                             'UpcomingEvent': {}
                         }
-                    }, callContext, function(err2, model2) {
-                        expect(err2).to.be.not.ok;
+                    }, callContext, function (err2, model2) {
+                      expect(err2).to.be.not.ok;
+                      return done(err2);
                     });
                 });
             });
         });
     });
 
-    after('destroy test models', function(done) {
+    after('destroy test models', function (done) {
         models.ModelDefinition.destroyAll({
             name: 'Customer'
-        }, callContext, function() {});
+        }, callContext, function () { });
         models.ModelDefinition.destroyAll({
             name: 'UpcomingEvent'
-        }, callContext, function() {});
+        }, callContext, function () { });
         models.ModelDefinition.destroyAll({
             name: 'CustomerAddress'
-        }, callContext, function() {});
-        models.Customer.destroyAll({}, callContext, function() {});
-        models.CustomerAddress.destroyAll({}, callContext, function() {});
-        models.UpcomingEvent.destroyAll({}, callContext, function() {});
+        }, callContext, function () { });
+        loopback.findModel("Customer", callContext).destroyAll({}, callContext, function() {});
+        loopback.findModel("CustomerAddress", callContext).destroyAll({}, callContext, function() {});
+        loopback.findModel("UpcomingEvent", callContext).destroyAll({}, callContext, function() {});
         models.ModelDefinition.destroyAll({
             name: 'CompositeModel'
-        }, callContext, function() {
+        }, callContext, function () {
             done();
         });
     });
 
-    it('Composite Model test - should create nested 1 record in customer & 2 record in address and 1 record in UpcomingEvent model ', function(done) {
-        var compositeModel = loopback.getModel('CompositeModel');
+    it('Composite Model test - should create nested 1 record in customer & 2 record in address and 1 record in UpcomingEvent model ', function (done) {
+        var compositeModel = loopback.getModel('CompositeModel', callContext);
         console.log('composit model customer create');
         compositeModel.create({
             'Customer': [{
@@ -174,14 +171,14 @@ describe(chalk.blue('Composite Model test'), function() {
                 }]
             }],
             'UpcomingEvent': [{
-                    'eventName': 'A.R. Raheman concert',
-                    'eventDescription': 'Concert is free for all Icici bank users',
-                    'activeFlag': true,
-                    '__row_status': 'added',
-                    'id': 1
-                }]
+                'eventName': 'A.R. Raheman concert',
+                'eventDescription': 'Concert is free for all Icici bank users',
+                'activeFlag': true,
+                '__row_status': 'added',
+                'id': 1
+            }]
 
-        }, callContext, function(err, results) {
+        }, callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -199,8 +196,8 @@ describe(chalk.blue('Composite Model test'), function() {
         });
     });
 
-    it('Composite Model test - should create nested 2 record in customer & 4 record in address ', function(done) {
-        var compositeModel = loopback.getModel('CompositeModel');
+    it('Composite Model test - should create nested 2 record in customer & 4 record in address ', function (done) {
+        var compositeModel = loopback.getModel('CompositeModel', callContext);
         compositeModel.create({
             'Customer': [{
                 'name': 'Williams',
@@ -236,15 +233,15 @@ describe(chalk.blue('Composite Model test'), function() {
                 '__row_status': 'added',
                 'id': 2
             },
-               {
+            {
                 'eventName': 'New year celebration',
                 'eventDescription': '50% discount for all Icici bank users',
                 'activeFlag': true,
                 '__row_status': 'added',
                 'id': 3
             }
-           ]
-        }, callContext, function(err, results) {
+            ]
+        }, callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -267,60 +264,60 @@ describe(chalk.blue('Composite Model test'), function() {
         });
     });
 
-    it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+    it('should get the customer based on where condition', function (done) {
+        var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Smith'
-                }
-            },
+            where: {
+                'name': 'Smith'
+            }
+        },
             callContext,
-            function(err, results) {
+            function (err, results) {
                 expect(results[0].name).to.equal('Smith');
                 done();
             });
 
     });
 
-    it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+    it('should get the customer based on where condition', function (done) {
+        var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Williams'
-                }
-            },
+            where: {
+                'name': 'Williams'
+            }
+        },
             callContext,
-            function(err, results) {
+            function (err, results) {
                 expect(results[0].name).to.equal('Williams');
                 done();
             });
 
     });
 
-    it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+    it('should get the customer based on where condition', function (done) {
+        var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'John'
-                }
-            },
+            where: {
+                'name': 'John'
+            }
+        },
             callContext,
-            function(err, results) {
+            function (err, results) {
                 expect(results[0].name).to.equal('John');
                 done();
             });
 
     });
 
-    it('should get the CustomerAddress based on where condition', function(done) {
-        var customerAddress = loopback.getModel('CustomerAddress');
+    it('should get the CustomerAddress based on where condition', function (done) {
+        var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
-                where: {
-                    'city': 'Delhi'
-                }
-            },
+            where: {
+                'city': 'Delhi'
+            }
+        },
             callContext,
-            function(err, results) {
+            function (err, results) {
                 expect(results[0].city).to.equal('Delhi');
                 expect(results[0].customerId === "1" || results[0].customerId === 1).to.be.ok;
                 done();
@@ -329,8 +326,8 @@ describe(chalk.blue('Composite Model test'), function() {
 
 
 
-    xit('Composite Model test - 1 customer record should be updated, 1 address recourd should be updated', function(done) {
-        var compositeModel = loopback.getModel('CompositeModel');
+    xit('Composite Model test - 1 customer record should be updated, 1 address recourd should be updated', function (done) {
+        var compositeModel = loopback.getModel('CompositeModel', callContext);
         compositeModel.create({
             'Customer': [{
                 'name': 'Smith_Changed',
@@ -343,19 +340,19 @@ describe(chalk.blue('Composite Model test'), function() {
                 }]
             }],
             'UpcomingEvent': [{
-                    'eventName': 'India vs Australia match - Expired' ,
-                    'activeFlag': false,
-                    '__row_status': 'modified',
-                    'id': 2
-                },
-                {
-                    'eventName': 'New year celebration',
-                    'eventDescription': '50% discount for all Icici bank users',
-                    'activeFlag': false,
-                    '__row_status': 'deleted',
-                    'id': 3
-                }]
-        }, callContext, function(err, results) {
+                'eventName': 'India vs Australia match - Expired',
+                'activeFlag': false,
+                '__row_status': 'modified',
+                'id': 2
+            },
+            {
+                'eventName': 'New year celebration',
+                'eventDescription': '50% discount for all Icici bank users',
+                'activeFlag': false,
+                '__row_status': 'deleted',
+                'id': 3
+            }]
+        }, callContext, function (err, results) {
             if (err) {
                 console.log(err);
                 return done(err);
@@ -372,51 +369,51 @@ describe(chalk.blue('Composite Model test'), function() {
         });
     });
 
-    xit('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+    xit('should get the customer based on where condition', function (done) {
+        var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Smith_Changed'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'name': 'Smith_Changed'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].name).to.equal('Smith_Changed');
                 done();
             });
 
     });
 
-    xit('should get the CustomerAddress based on where condition', function(done) {
-        var customerAddress = loopback.getModel('CustomerAddress');
+    xit('should get the CustomerAddress based on where condition', function (done) {
+        var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
-                where: {
-                    'city': 'DELHI_CAPITAL'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'city': 'DELHI_CAPITAL'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].city).to.equal('DELHI_CAPITAL');
                 expect(results[0].customerId === "1" || results[0].customerId === 1).to.be.ok;
                 done();
             });
     });
 
-    it('should not get the UpcomingEvent record as record is deleted', function(done) {
-        var upcomingEvent = loopback.getModel('UpcomingEvent');
+    it('should not get the UpcomingEvent record as record is deleted', function (done) {
+        var upcomingEvent = loopback.getModel('UpcomingEvent', callContext);
         upcomingEvent.find({
             where: {
                 'id': 3
             }
         }, callContext,
-            function(err, results) {
-            expect(results.length).to.equal(0);
-            done();
-        });
+            function (err, results) {
+                expect(results.length).to.equal(0);
+                done();
+            });
     });
 
 
 
     it('Implicit Composite Model test - 1 customer record should be created and 2 address records should be created', function(done) {
-        var customer = loopback.getModel('Customer');
+      var customer = loopback.getModel('Customer', callContext);
         customer.create({
             'name': 'Michael',
             'id': 4,
@@ -427,7 +424,7 @@ describe(chalk.blue('Composite Model test'), function() {
                 'id': 23,
                 'city': 'New York'
             }]
-        }, callContext, function(err, results) {
+        }, callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -443,26 +440,26 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+      var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Michael'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'name': 'Michael'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.name).to.equal('Michael');
                 done();
             });
     });
 
     it('should get the CustomerAddress based on where condition', function(done) {
-        var customerAddress = loopback.getModel('CustomerAddress');
+      var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
-                where: {
-                    'city': 'San Jose'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'city': 'San Jose'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.city).to.equal('San Jose');
                 expect(results[0].__data.customerId === "4" || results[0].__data.customerId === 4).to.be.ok;
                 done();
@@ -470,7 +467,7 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('Implicit Composite Model test - 1 customer record should be created and 2 address records should be created', function(done) {
-        var customer = loopback.getModel('Customer');
+      var customer = loopback.getModel('Customer', callContext);
         customer.create([{
             'name': 'Tom',
             'id': 5,
@@ -491,7 +488,7 @@ describe(chalk.blue('Composite Model test'), function() {
                 'id': 27,
                 'city': 'Paris'
             }]
-        }], callContext, function(err, results) {
+        }], callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -514,13 +511,13 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+      var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Tom'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'name': 'Tom'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.name).to.equal('Tom');
                 done();
             });
@@ -528,13 +525,13 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('should get the customer based on where condition', function(done) {
-        var customer = loopback.getModel('Customer');
+      var customer = loopback.getModel('Customer', callContext);
         customer.find({
-                where: {
-                    'name': 'Harry'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'name': 'Harry'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.name).to.equal('Harry');
                 done();
             });
@@ -543,13 +540,13 @@ describe(chalk.blue('Composite Model test'), function() {
 
 
     it('should get the CustomerAddress based on where condition', function(done) {
-        var customerAddress = loopback.getModel('CustomerAddress');
+      var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
-                where: {
-                    'city': 'Frankfort'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'city': 'Frankfort'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.city).to.equal('Frankfort');
                 expect(results[0].__data.customerId === "5" || results[0].__data.customerId === 5).to.be.ok;
                 done();
@@ -557,13 +554,13 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('should get the CustomerAddress based on where condition', function(done) {
-        var customerAddress = loopback.getModel('CustomerAddress');
+      var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
-                where: {
-                    'city': 'London'
-                }
-            }, callContext,
-            function(err, results) {
+            where: {
+                'city': 'London'
+            }
+        }, callContext,
+            function (err, results) {
                 expect(results[0].__data.city).to.equal('London');
                 expect(results[0].__data.customerId === "6" || results[0].__data.customerId === 6).to.be.ok;
                 done();
@@ -572,14 +569,14 @@ describe(chalk.blue('Composite Model test'), function() {
 
 
     it('Composite Model test - should create 1 record in customer without address ', function(done) {
-        var compositeModel = loopback.getModel('CompositeModel');
+      var compositeModel = loopback.getModel('CompositeModel', callContext);
         compositeModel.create({
             'Customer': [{
                 'name': 'Jim',
                 'id': 10,
                 '__row_status': 'added'
             }]
-        }, callContext, function(err, results) {
+        }, callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -591,19 +588,19 @@ describe(chalk.blue('Composite Model test'), function() {
     });
 
     it('Implicit Composite Model test - should create 1 record in customer even though customerId not present as belongs to is ignored in transaction ', function(done) {
-        var compositeModel = loopback.getModel('Customer');
+      var compositeModel = loopback.getModel('Customer', callContext);
         compositeModel.create({
-                    'name': 'Bala',
-                    'id': 11,
-                    '__row_status': 'added',
-                    'address': [{
-                        'city': 'Brisbon',
-                        'id': 31
-                    }, {
-                        'id': 32,
-                        'city': 'Vatican'
-                    }]
-                }, callContext, function(err, results) {
+            'name': 'Bala',
+            'id': 11,
+            '__row_status': 'added',
+            'address': [{
+                'city': 'Brisbon',
+                'id': 31
+            }, {
+                'id': 32,
+                'city': 'Vatican'
+            }]
+        }, callContext, function (err, results) {
             if (err) {
                 return done(err);
             }
@@ -618,20 +615,20 @@ describe(chalk.blue('Composite Model test'), function() {
         });
     });
 
-    it('Implicit Composite Model test - should fail to create 1 record in customer as one addressId not valid ', function(done) {
-        var compositeModel = loopback.getModel('Customer');
+    it('Implicit Composite Model test - should fail to create 1 record in customer as one addressId not valid ', function (done) {
+      var compositeModel = loopback.getModel('Customer', callContext);
         compositeModel.create({
             'name': 'Raj',
             'id': 12,
             '__row_status': 'added',
             'address': [{
-                    'city': 'Kolkata',
-                    'id': 31
-                }, {
-                    'id': 32,
-                    'city': 'Katak'
-                }]
-        }, callContext, function(err, results) {
+                'city': 'Kolkata',
+                'id': 31
+            }, {
+                'id': 32,
+                'city': 'Katak'
+            }]
+        }, callContext, function (err, results) {
             expect(err).not.null;
             done();
         });

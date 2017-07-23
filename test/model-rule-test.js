@@ -24,7 +24,7 @@ var chalk = require('chalk');
 var logger = require('oe-logger');
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
-
+var loopback = require('loopback');
 var bootstrap = require('./bootstrap');
 
 var app = bootstrap.app;
@@ -38,12 +38,15 @@ var testModelPlural = 'ModelRuleTests';
 // Model with base as PersistedModel
 var testModelAsBasePM = 'ModelWithBasePM';
 
+var testModel;
+var testModelWithBase;
+
 // Model id and _version required for doing upsert
 var modelRuleId, modelRuleVersion;
 chai.use(chaiThings);
 
 describe(chalk.blue('model-rule-test'), function () {
-    before('create the temporary model.', function(done) {
+    before('create the temporary model.', function (done) {
         // Forming model metadata
         var data = [{
             name: testModelName,
@@ -52,7 +55,7 @@ describe(chalk.blue('model-rule-test'), function () {
             properties: {
                 status: {
                     type: 'string',
-                    max : 8
+                    max: 8
                 },
                 age: {
                     type: 'number',
@@ -60,11 +63,11 @@ describe(chalk.blue('model-rule-test'), function () {
                 },
                 married: 'boolean',
                 sex: 'string',
-                husband_name:'string',
+                husband_name: 'string',
                 phone: 'number',
                 email: 'string'
             }
-        },{
+        }, {
             name: testModelAsBasePM,
             base: 'PersistedModel',
             properties: {
@@ -72,80 +75,82 @@ describe(chalk.blue('model-rule-test'), function () {
             }
         }];
         // Creating Model in Loopback.
-        models.ModelDefinition.create(data, bootstrap.defaultContext, function(err, models){
+        models.ModelDefinition.create(data, bootstrap.defaultContext, function (err, models) {
+            testModel = loopback.getModel(testModelName, bootstrap.defaultContext);
+            testModelWithBase = loopback.getModel(testModelAsBasePM, bootstrap.defaultContext);
             done(err);
         });
     });
 
-    before('create decision tables.', function(done) {
+    before('create decision tables.', function (done) {
         // Population Decision Table rules.
         var decisionTablesData = [];
-        async.each(decisionTableRules, function(rule, callback){
+        async.each(decisionTableRules, function (rule, callback) {
             var obj = {
                 name: rule,
                 document: {
                     documentName: rule + ".xlsx",
-                    documentData : "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,"
+                    documentData: "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,"
                 }
             };
-            fs.readFile(path.join(__dirname, 'model-rule-data', obj.document.documentName), function(err, data){
+            fs.readFile(path.join(__dirname, 'model-rule-data', obj.document.documentName), function (err, data) {
                 if (err) {
-                    log.error(log.defaultContext(), 'before->create decision tables for rule ', rule , ' error: ', err);
+                    log.error(log.defaultContext(), 'before->create decision tables for rule ', rule, ' error: ', err);
                     callback(err);
                 } else {
                     obj.document.documentData = obj.document.documentData + data.toString('base64');
                     decisionTablesData.push(obj);
                     callback();
                 }
-            });            
-        }, function(ruleErr){
+            });
+        }, function (ruleErr) {
             if (ruleErr) {
                 log.error(log.defaultContext(), 'async.each->decisionTableRules final callback. Error: ', ruleErr);
                 done(err);
             } else {
                 // TODO : POST the array once defect of POST with array is fixed.
                 // Creating Desicion Table rules.
-                async.each(decisionTablesData, function(decisionTable, callback){
-                    models.DecisionTable.create(decisionTable, bootstrap.defaultContext, function(err, res){
+                async.each(decisionTablesData, function (decisionTable, callback) {
+                    models.DecisionTable.create(decisionTable, bootstrap.defaultContext, function (err, res) {
                         if (err) log.error(log.defaultContext(), 'async.each->decisionTablesData->models.DecisionTable.create ',
-                        'decisionTable ', decisionTable.name ,' Error: ', err);
+                            'decisionTable ', decisionTable.name, ' Error: ', err);
                         callback(err);
                     });
-                }, function(decisionTableErr){
+                }, function (decisionTableErr) {
                     if (decisionTableErr) log.error(log.defaultContext(), 'async.each->decisionTablesData->final callback Error: ', decisionTableErr);
                     done(decisionTableErr);
                 });
             }
-        });        
+        });
     });
 
-    before('create model rules.', function(done) {
+    before('create model rules.', function (done) {
         var objs = [{
             modelName: testModelName,
             defaultRules: [decisionTableRules[0], decisionTableRules[1]],
             validationRules: [decisionTableRules[2]]
-        },{
-           modelName: testModelAsBasePM,
-           defaultRules: [],
-           validationRules: []
+        }, {
+            modelName: testModelAsBasePM,
+            defaultRules: [],
+            validationRules: []
         }]
-        models.ModelRule.create(objs, bootstrap.defaultContext, function(err, modelRules){
+        models.ModelRule.create(objs, bootstrap.defaultContext, function (err, modelRules) {
             modelRuleId = modelRules[0].id;
             modelRuleVersion = modelRules[0]._version;
             done(err);
         });
     });
 
-    describe('From Node API', function(){
-        it('creating ModelRule->modelName with non existent model should throw error.', function(done){
-            models.ModelRule.create({modelName: 'NonExistentModel'}, bootstrap.defaultContext, function(err, res){
+    describe('From Node API', function () {
+        it('creating ModelRule->modelName with non existent model should throw error.', function (done) {
+            models.ModelRule.create({ modelName: 'NonExistentModel' }, bootstrap.defaultContext, function (err, res) {
                 expect(err).not.to.be.null;
                 expect(err).not.to.be.undefined;
                 done();
             });
         });
 
-        it('create with valid data should be succesfull.', function(done){
+        it('create with valid data should be succesfull.', function (done) {
             //var model = loopback.findModel(testModelName);
             var data = {
                 status: 'entered',
@@ -153,8 +158,8 @@ describe(chalk.blue('model-rule-test'), function () {
                 husband_name: 'Robin'
             };
             // The default Rules enrich the data
-            models[testModelName].create(data, bootstrap.defaultContext, function(err, res){
-                if(err){
+            testModel.create(data, bootstrap.defaultContext, function (err, res) {
+                if (err) {
                     console.error("model-rule-test Error ", err);
                     done(err);
                 } else {
@@ -169,26 +174,26 @@ describe(chalk.blue('model-rule-test'), function () {
             });
         });
 
-        it('data without mandatory property value defined in rule throw validation error.', function(done){
+        it('data without mandatory property value defined in rule throw validation error.', function (done) {
             var data = {
                 status: 'entered',
                 age: 45
             };
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
-            models[testModelName].create(data, bootstrap.defaultContext, function(err, res){
+            testModel.create(data, bootstrap.defaultContext, function (err, res) {
                 expect(err.details.codes.DecisionTable[0]).to.be.equal('err-husband-name-presence');
                 done();
             });
         });
 
-        it('data without mandatory property value defined in rule and loopback validations throw combined validation errors.', function(done){
+        it('data without mandatory property value defined in rule and loopback validations throw combined validation errors.', function (done) {
             var data = {
                 status: 'entered', //morethan8chars
                 age: 60
             };
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
             // and age is out of range ModelDefinition
-            models[testModelName].create(data, bootstrap.defaultContext, function(err, res){
+            testModel.create(data, bootstrap.defaultContext, function (err, res) {
                 var errors = JSON.parse(JSON.stringify(err.details.codes));
                 var errCodes = [];
                 Object.keys(errors).forEach(function (v, k) {
@@ -208,38 +213,38 @@ describe(chalk.blue('model-rule-test'), function () {
 
     });
 
-    describe('From REST API', function(){
-       var accessToken;
-       var api = defaults(supertest(app));
-       var baseUrl = bootstrap.basePath;
-       
-       before('Getting Access Token', function(done) {
-            bootstrap.login(function(resAccessToken){
+    describe('From REST API', function () {
+        var accessToken;
+        var api = defaults(supertest(app));
+        var baseUrl = bootstrap.basePath;
+
+        before('Getting Access Token', function (done) {
+            bootstrap.login(function (resAccessToken) {
                 accessToken = resAccessToken;
                 done();
             });
-       });
-
-       it('creating ModelRule->modelName with non existent model should throw error.', function(done){
-           var url = baseUrl + '/ModelRules?access_token='+accessToken;
-           var postData = {modelName: 'NonExistentModel'};
-           api
-            .set('tenant_id', 'test-tenant')
-            .set('Accept', 'application/json')
-            .post(url)
-            .send(postData)
-            .expect(500)
-            .end(function(err, response){
-                if (err) {
-                    log.error(log.defaultContext(), 'create non existent model rest api Error: ', err);
-                }
-                expect(response.body.error.status).to.be.equal(500);
-                done();
-            });            
         });
 
-        it('create with valid data should be succesfull.', function(done){
-            var url = baseUrl + '/'+ testModelPlural +'?access_token='+accessToken;
+        it('creating ModelRule->modelName with non existent model should throw error.', function (done) {
+            var url = baseUrl + '/ModelRules?access_token=' + accessToken;
+            var postData = { modelName: 'NonExistentModel' };
+            api
+                .set('tenant_id', 'test-tenant')
+                .set('Accept', 'application/json')
+                .post(url)
+                .send(postData)
+                .expect(500)
+                .end(function (err, response) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'create non existent model rest api Error: ', err);
+                    }
+                    expect(response.body.error.status).to.be.equal(500);
+                    done();
+                });
+        });
+
+        it('create with valid data should be succesfull.', function (done) {
+            var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
             var postData = {
                 status: 'entered',
                 age: 50,
@@ -247,61 +252,61 @@ describe(chalk.blue('model-rule-test'), function () {
             };
 
             api
-            .set('tenant_id', 'test-tenant')
-            .set('Accept', 'application/json')
-            .post(url)
-            .send(postData)
-            .expect(200)
-            .end(function(err, response){
-                if (err) {
-                    log.error(log.defaultContext(), 'create with valid data should be succesfull model rest api Error: ', err);
-                }
-                expect(response).not.to.be.null;
-                expect(response).not.to.be.undefined;
-                expect(response.body).not.to.be.null;
-                expect(response.body).not.to.be.undefined;
-                expect(response.body.sex).to.be.equal('F');
-                expect(response.body.married).to.be.equal(true);
-                expect(response.body.phone).to.be.equal(1234);
-                expect(response.body.email).to.be.equal('abc');
-                done();
-            });
+                .set('tenant_id', 'test-tenant')
+                .set('Accept', 'application/json')
+                .post(url)
+                .send(postData)
+                .expect(200)
+                .end(function (err, response) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'create with valid data should be succesfull model rest api Error: ', err);
+                    }
+                    expect(response).not.to.be.null;
+                    expect(response).not.to.be.undefined;
+                    expect(response.body).not.to.be.null;
+                    expect(response.body).not.to.be.undefined;
+                    expect(response.body.sex).to.be.equal('F');
+                    expect(response.body.married).to.be.equal(true);
+                    expect(response.body.phone).to.be.equal(1234);
+                    expect(response.body.email).to.be.equal('abc');
+                    done();
+                });
         });
 
-        it('data without mandatory property value defined in rule throw validation error.', function(done){
-            var url = baseUrl + '/'+ testModelPlural +'?access_token='+accessToken;
+        it('data without mandatory property value defined in rule throw validation error.', function (done) {
+            var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
             var postData = {
                 status: 'entered',
                 age: 45
             };
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
             api
-            .set('tenant_id', 'test-tenant')
-            .set('Accept', 'application/json')
-            .post(url)
-            .send(postData)
-            .expect(422)
-            .end(function(err, response){
-                if (err) {
-                    log.error(log.defaultContext(), 'data without mandatory property value defined in rule throw validation error - rest api Error: ', err);
-                }
-                expect(response).not.to.be.null;
-                expect(response).not.to.be.undefined;
-                expect(response.body).not.to.be.null;
-                expect(response.body).not.to.be.undefined;
-                expect(response.body.error).not.to.be.undefined;
-                expect(response.body.error).not.to.be.null;
-                expect(response.body.error.details).not.to.be.undefined;
-                expect(response.body.error.details).not.to.be.null;
-                expect(response.body.error.details.codes).not.to.be.undefined;
-                expect(response.body.error.details.codes).not.to.be.null;
-                expect(response.body.error.details.codes.DecisionTable[0]).to.be.equal('err-husband-name-presence');
-                done();
-            });
+                .set('tenant_id', 'test-tenant')
+                .set('Accept', 'application/json')
+                .post(url)
+                .send(postData)
+                .expect(422)
+                .end(function (err, response) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'data without mandatory property value defined in rule throw validation error - rest api Error: ', err);
+                    }
+                    expect(response).not.to.be.null;
+                    expect(response).not.to.be.undefined;
+                    expect(response.body).not.to.be.null;
+                    expect(response.body).not.to.be.undefined;
+                    expect(response.body.error).not.to.be.undefined;
+                    expect(response.body.error).not.to.be.null;
+                    expect(response.body.error.details).not.to.be.undefined;
+                    expect(response.body.error.details).not.to.be.null;
+                    expect(response.body.error.details.codes).not.to.be.undefined;
+                    expect(response.body.error.details.codes).not.to.be.null;
+                    expect(response.body.error.details.codes.DecisionTable[0]).to.be.equal('err-husband-name-presence');
+                    done();
+                });
         });
 
-        it('data without mandatory property value defined in rule and loopback validations throw combined validation errors.', function(done){
-            var url = baseUrl + '/'+ testModelPlural +'?access_token='+accessToken;
+        it('data without mandatory property value defined in rule and loopback validations throw combined validation errors.', function (done) {
+            var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
             var postData = {
                 status: 'entered', //morethan8chars
                 age: 60
@@ -309,39 +314,39 @@ describe(chalk.blue('model-rule-test'), function () {
             // There is a validation rule saying husband_name is mandatory in validation.xlsx
             // and age is out of range ModelDefinition
             api
-            .set('tenant_id', 'test-tenant')
-            .set('Accept', 'application/json')
-            .post(url)
-            .send(postData)
-            .expect(422)
-            .end(function(err, response){
-                if (err) {
-                    log.error(log.defaultContext(), 'data without mandatory property value defined in rule and '+
-                        'loopback validations throw combined validation errors - rest api Error: ', err);
-                }
-                expect(response).not.to.be.null;
-                expect(response).not.to.be.undefined;
-                expect(response.body).not.to.be.null;
-                expect(response.body).not.to.be.undefined;
-                expect(response.body.error).not.to.be.undefined;
-                expect(response.body.error).not.to.be.null;
-                expect(response.body.error.details).not.to.be.undefined;
-                expect(response.body.error.details).not.to.be.null;
-                expect(response.body.error.details.codes).not.to.be.undefined;
-                expect(response.body.error.details.codes).not.to.be.null;
-                var errors = response.body.error.details.codes;
-                var errCodes = [];
-                Object.keys(response.body.error.details.codes).forEach(function (v, k){
-                    errCodes = errCodes.concat(errors[v]);
+                .set('tenant_id', 'test-tenant')
+                .set('Accept', 'application/json')
+                .post(url)
+                .send(postData)
+                .expect(422)
+                .end(function (err, response) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'data without mandatory property value defined in rule and ' +
+                            'loopback validations throw combined validation errors - rest api Error: ', err);
+                    }
+                    expect(response).not.to.be.null;
+                    expect(response).not.to.be.undefined;
+                    expect(response.body).not.to.be.null;
+                    expect(response.body).not.to.be.undefined;
+                    expect(response.body.error).not.to.be.undefined;
+                    expect(response.body.error).not.to.be.null;
+                    expect(response.body.error.details).not.to.be.undefined;
+                    expect(response.body.error.details).not.to.be.null;
+                    expect(response.body.error.details.codes).not.to.be.undefined;
+                    expect(response.body.error.details.codes).not.to.be.null;
+                    var errors = response.body.error.details.codes;
+                    var errCodes = [];
+                    Object.keys(response.body.error.details.codes).forEach(function (v, k) {
+                        errCodes = errCodes.concat(errors[v]);
+                    });
+                    expect(errCodes.indexOf('validation-err-002')).not.to.be.equal(-1);
+                    expect(errCodes.indexOf('err-husband-name-presence')).not.to.be.equal(-1);
+                    done();
                 });
-                expect(errCodes.indexOf('validation-err-002')).not.to.be.equal(-1);
-                expect(errCodes.indexOf('err-husband-name-presence')).not.to.be.equal(-1);
-                done();
-            });
         });
 
         // This test case has to be executed in the before delete modelRule test.
-        it('update model rule and POST data should work.', function(done){
+        it('update model rule and POST data should work.', function (done) {
             var obj = {
                 modelName: testModelName,
                 id: modelRuleId,
@@ -349,7 +354,7 @@ describe(chalk.blue('model-rule-test'), function () {
                 defaultRules: [],
                 validationRules: []
             };
-            models.ModelRule.upsert(obj, bootstrap.defaultContext, function(err, res){
+            models.ModelRule.upsert(obj, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     log.error(log.defaultContext(), 'update model rule and POST data should work. Error: ', err);
                     done(err);
@@ -358,29 +363,29 @@ describe(chalk.blue('model-rule-test'), function () {
                         status: 'reborn',
                         age: 45
                     };
-                    var url = baseUrl + '/'+ testModelPlural +'?access_token='+accessToken;
+                    var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
                     api
-                    .set('tenant_id', 'test-tenant')
-                    .set('Accept', 'application/json')
-                    .post(url)
-                    .send(postData)
-                    .expect(200)
-                    .end(function(err, response){
-                        expect(response).not.to.be.null;
-                        expect(response).not.to.be.undefined;
-                        expect(response.body).not.to.be.null;
-                        expect(response.body).not.to.be.undefined;
-                        expect(response.body.status).to.be.equal('reborn');
-                        expect(response.body.age).to.be.equal(45);
-                        done();
-                    });
+                        .set('tenant_id', 'test-tenant')
+                        .set('Accept', 'application/json')
+                        .post(url)
+                        .send(postData)
+                        .expect(200)
+                        .end(function (err, response) {
+                            expect(response).not.to.be.null;
+                            expect(response).not.to.be.undefined;
+                            expect(response.body).not.to.be.null;
+                            expect(response.body).not.to.be.undefined;
+                            expect(response.body.status).to.be.equal('reborn');
+                            expect(response.body.age).to.be.equal(45);
+                            done();
+                        });
                 }
             });
         });
 
         // This test case has to be executed in the end since we are deleting the one of modelRule
-        it('delete model rule and POST data should work.', function(done){
-            models.ModelRule.destroyById(modelRuleId, bootstrap.defaultContext, function(err){
+        it('delete model rule and POST data should work.', function (done) {
+            models.ModelRule.destroyById(modelRuleId, bootstrap.defaultContext, function (err) {
                 if (err) {
                     log.error(log.defaultContext(), 'delete model rule and POST data should work. Error: ', err);
                     done(err);
@@ -389,65 +394,65 @@ describe(chalk.blue('model-rule-test'), function () {
                         status: 'energized',
                         age: 45
                     };
-                    var url = baseUrl + '/'+ testModelPlural +'?access_token='+accessToken;
+                    var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
                     api
-                    .set('tenant_id', 'test-tenant')
-                    .set('Accept', 'application/json')
-                    .post(url)
-                    .send(postData)
-                    .expect(200)
-                    .end(function(err, response){
-                        expect(response).not.to.be.null;
-                        expect(response).not.to.be.undefined;
-                        expect(response.body).not.to.be.null;
-                        expect(response.body).not.to.be.undefined;
-                        expect(response.body.error).not.to.be.undefined;
-                        expect(response.body.error).not.to.be.null;
-                        expect(response.body.error.details).not.to.be.undefined;
-                        expect(response.body.error.details).not.to.be.null;
-                        expect(response.body.error.details.codes.status[0]).to.be.equal('validation-err-002');
-                        done();
-                    });
+                        .set('tenant_id', 'test-tenant')
+                        .set('Accept', 'application/json')
+                        .post(url)
+                        .send(postData)
+                        .expect(200)
+                        .end(function (err, response) {
+                            expect(response).not.to.be.null;
+                            expect(response).not.to.be.undefined;
+                            expect(response.body).not.to.be.null;
+                            expect(response.body).not.to.be.undefined;
+                            expect(response.body.error).not.to.be.undefined;
+                            expect(response.body.error).not.to.be.null;
+                            expect(response.body.error.details).not.to.be.undefined;
+                            expect(response.body.error.details).not.to.be.null;
+                            expect(response.body.error.details.codes.status[0]).to.be.equal('validation-err-002');
+                            done();
+                        });
                 }
             });
         });
     });
 
-    after('cleanup data ModelDefinition', function(done){
+    after('cleanup data ModelDefinition', function (done) {
         var query = {
             name: {
                 inq: [testModelName, testModelAsBasePM]
             }
         };
-        models.ModelDefinition.destroyAll(query, bootstrap.defaultContext, function(err, count){
+        models.ModelDefinition.destroyAll(query, bootstrap.defaultContext, function (err, count) {
             done(err);
         });
     });
 
-    after('cleanup data Decision Tables', function(done){
+    after('cleanup data Decision Tables', function (done) {
         var query = {
             name: {
                 inq: decisionTableRules
             }
         };
-        models.DecisionTable.destroyAll(query, bootstrap.defaultContext, function(err, count){
+        models.DecisionTable.destroyAll(query, bootstrap.defaultContext, function (err, count) {
             done(err);
         });
     });
 
-    after('cleanup data ModelRule', function(done){
+    after('cleanup data ModelRule', function (done) {
         var query = {
             modelName: {
                 inq: [testModelName, testModelAsBasePM]
             }
         };
-        models.ModelRule.destroyAll(query, bootstrap.defaultContext, function(err, count){
+        models.ModelRule.destroyAll(query, bootstrap.defaultContext, function (err, count) {
             done(err);
         });
     });
 
-    after('cleanup test model data', function(done){
-        models[testModelName].destroyAll({}, bootstrap.defaultContext, function(err, count){
+    after('cleanup test model data', function (done) {
+        testModel.destroyAll({}, bootstrap.defaultContext, function (err, count) {
             done(err);
         });
     });

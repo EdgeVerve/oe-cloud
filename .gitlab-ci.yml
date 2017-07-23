@@ -16,7 +16,7 @@ before_script:
   - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
-  - export DOMAIN_NAME=oecloud.ad.infosys.com
+  - export DOMAIN_NAME=oecloud.local
   - export REGISTRY=registry.${DOMAIN_NAME}
   - export NETWORK_NAME=${APP_IMAGE_NAME}
 
