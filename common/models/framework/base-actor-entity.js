@@ -544,7 +544,18 @@ module.exports = function (BaseActorEntity) {
       log.debug(ctx.options, 'calling memory pool destroy on:', ctx.Model.modelName, ctx.id);
       actorPool.destroy(ctx.Model.modelName, ctx.id);
     }
-    next();
+    if (ctx.instance && ctx.instance.stateId) {
+      var stateModel = getStateModel();
+      stateModel.destroyById(ctx.instance.stateId, ctx.options, function (err, res) {
+        if (err) {
+          next(err);
+        } else {
+          next();
+        }
+      });
+    } else {
+      next();
+    }
   });
 
   function getStateModel() {
