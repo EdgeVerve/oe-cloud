@@ -16,29 +16,29 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 
-describe(chalk.blue('unauthorised-post'), function() {
+describe(chalk.blue('unauthorised-post'), function () {
 
-    it('unauthorised-post', function(done) {
-        var data =  {
-            'key': 'BASE_ENTITY1',
-            'value': 'Base Entity'
-        };
+  it('unauthorised-post', function (done) {
+    var data = {
+      'key': 'BASE_ENTITY1',
+      'value': 'Base Entity'
+    };
 
-        var api = defaults(supertest(bootstrap.app));
+    var api = defaults(supertest(bootstrap.app));
 
-        var postUrl = baseUrl + '/Literals';
+    var postUrl = baseUrl + '/Literals';
 
-        api.set('Accept', 'application/json')
-        .post(postUrl)
-        .send(data)
-        .expect(401)
-        .end(function(err, resp) {
-            if (err) {
-                done(err);
-            } else {
-                done();
-            }
-        });
-    });
+    api.set('Accept', 'application/json')
+      .post(postUrl)
+      .send(data)
+      .expect(401)
+      .end(function (err, resp) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
+  });
 
 });

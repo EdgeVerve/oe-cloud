@@ -19,23 +19,23 @@ var api = bootstrap.api;
 var url = bootstrap.basePath;
 var accessToken;
 
-describe(chalk.blue('Business Rule Mixin test'), function() {
+describe(chalk.blue('Business Rule Mixin test'), function () {
 
     this.timeout(20000);
 
-    before('setup test data', function(done) {
+    before('setup test data', function (done) {
         bootstrap.createAccessToken(bootstrap.defaultContext.ctx.remoteUser.username,
             function fnAccessToken(err, token) {
                 accessToken = token;
-                models.ModelDefinition.events.once('model-' + modelName + '-available', function() {
-                    var myModel = loopback.getModel(bussinessRuleModel);
+                models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
+                    var myModel = loopback.getModel(bussinessRuleModel, bootstrap.defaultContext);
                     var data = [
                         {
                             'modelName': modelName,
                             'expression': 'if(@i.AccountDetails.salary <= 20){return @i.loanAmount <= @i.AccountDetails.salary * 2}',
                             'verb': [
-                            'post'
-                        ],
+                                'post'
+                            ],
                             'category': 'LoanEligibility',
                             'code': 'err-salary-01',
                             'description': 'if salary is less than 20lacs, maximum loan amount allowed is twice of salary'
@@ -44,15 +44,15 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
                             'modelName': modelName,
                             'expression': 'if(@i.AccountDetails.salary > 20){return @i.loanAmount <= @i.AccountDetails.salary * 3}',
                             'verb': [
-                            'post'
-                        ],
+                                'post'
+                            ],
                             'category': 'LoanEligibility',
                             'code': 'err-salary-02',
                             'description': 'if salary is greater than 20lacs, maximum loan amount allowed is thrice of salary'
                         }
-                ];
+                    ];
 
-                    var loanModel = loopback.getModel(modelName);
+                    var loanModel = loopback.getModel(modelName, bootstrap.defaultContext);
                     loanModel.remoteMethod(
                         'getLoanEligibility', {
                             description: 'Check the  eligibility of the loan application.',
@@ -72,7 +72,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
                                         source: 'body'
                                     }
                                 }
-                        ],
+                            ],
                             returns: {
                                 arg: 'result',
                                 type: 'object',
@@ -84,11 +84,11 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
                         }
                     );
 
-                    loanModel.getLoanEligibility = function(data, req, options, fn) {
+                    loanModel.getLoanEligibility = function (data, req, options, fn) {
 
 
-                        var loanModel = loopback.getModel(modelName);
-                        var businessModel = loopback.getModel(bussinessRuleModel);
+                        var loanModel = loopback.getModel(modelName, bootstrap.defaultContext);
+                        var businessModel = loopback.getModel(bussinessRuleModel, bootstrap.defaultContext);
 
                         if (fn === undefined && typeof options === 'function') {
                             fn = options;
@@ -103,11 +103,11 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
 
                         var inst = req;
 
-                        businessModel.find(filter, options, function(err, rules) {
+                        businessModel.find(filter, options, function (err, rules) {
                             if (err) {
                                 fn(null, null);
                             } else {
-                                loanModel.prototype.processBusinessRules(rules, inst, options, function(errCode) {
+                                loanModel.prototype.processBusinessRules(rules, inst, options, function (errCode) {
                                     var response = null;
 
                                     if (errCode && errCode.length > 0) {
@@ -124,7 +124,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
                     };
 
 
-                    myModel.create(data, bootstrap.defaultContext, function(err, results) {
+                    myModel.create(data, bootstrap.defaultContext, function (err, results) {
                         expect(err).to.be.null;
                         done();
                     });
@@ -186,7 +186,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
                     'validations': [],
                     'acls': [],
                     'methods': {}
-                }, bootstrap.defaultContext, function(err, model) {
+                }, bootstrap.defaultContext, function (err, model) {
                     if (err) {
                         console.log(err);
                     }
@@ -195,22 +195,22 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
             });
     });
 
-    after('destroy test models', function(done) {
+    after('destroy test models', function (done) {
         models.ModelDefinition.destroyAll({
             name: modelName
-        }, bootstrap.defaultContext, function(err, d) {
+        }, bootstrap.defaultContext, function (err, d) {
             if (err) {
                 console.log('Error - not able to delete modelDefinition entry for mysettings');
                 return done();
             }
-            var model = loopback.getModel(modelName);
-            model.destroyAll({}, bootstrap.defaultContext, function() {
+            var model = loopback.getModel(modelName, bootstrap.defaultContext);
+            model.destroyAll({}, bootstrap.defaultContext, function () {
                 done();
             });
         });
     });
 
-    it('Validation Test - Should fail to insert data', function(done) {
+    it('Validation Test - Should fail to insert data', function (done) {
         var URL = url + '/LoanApplications/getLoanEligibility?accessToken=' + accessToken;
 
         var postData = {
@@ -224,7 +224,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
             .set('Accept', 'application/json')
             .set('TENANT_ID', bootstrap.defaultContext.ctx.tenantId)
             .send(postData)
-            .expect(200).end(function(err, resp) {
+            .expect(200).end(function (err, resp) {
                 if (err) {
                     throw new Error(err);
                 } else {
@@ -235,7 +235,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
             });
     });
 
-    it('Validation Test - Should sucessfully insert data', function(done) {
+    it('Validation Test - Should sucessfully insert data', function (done) {
         var URL = url + '/LoanApplications/getLoanEligibility?accessToken=' + accessToken;
 
         var postData = {
@@ -248,7 +248,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
         api.post(URL)
             .set('Accept', 'application/json')
             .send(postData)
-            .expect(200).end(function(err, resp) {
+            .expect(200).end(function (err, resp) {
                 if (err) {
                     throw new Error(err);
                 } else {
@@ -259,7 +259,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
 
     });
 
-    it('Validation Test - Should fail to insert data', function(done) {
+    it('Validation Test - Should fail to insert data', function (done) {
         var URL = url + '/LoanApplications/getLoanEligibility?accessToken=' + accessToken;
 
         var postData = {
@@ -272,7 +272,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
         api.post(URL)
             .set('Accept', 'application/json')
             .send(postData)
-            .expect(200).end(function(err, resp) {
+            .expect(200).end(function (err, resp) {
                 if (err) {
                     throw new Error(err);
                 } else {
@@ -284,7 +284,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
 
     });
 
-    it('Validation Test - Should sucessfully insert data', function(done) {
+    it('Validation Test - Should sucessfully insert data', function (done) {
         var URL = url + '/LoanApplications/getLoanEligibility?accessToken=' + accessToken;
         var postData = {
             'AccountDetails': {
@@ -296,7 +296,7 @@ describe(chalk.blue('Business Rule Mixin test'), function() {
         api.post(URL)
             .set('Accept', 'application/json')
             .send(postData)
-            .expect(200).end(function(err, resp) {
+            .expect(200).end(function (err, resp) {
                 if (err) {
                     throw new Error(err);
                 } else {

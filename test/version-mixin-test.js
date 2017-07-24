@@ -23,10 +23,12 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var debug = require('debug')('version-mixin-test');
 var chalk = require('chalk');
+var loopback = require('loopback');
 
 describe(chalk.blue('version-mixin test -Programmatically'), function () {
 
   this.timeout(300000);
+  var model;
   var modelName = 'VersionMixinTest';
   var modelDetails = {
     name: modelName,
@@ -50,6 +52,7 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
         debug('unable to create VersionMixinTest model');
         done(err);
       } else {
+        model = loopback.getModel(modelName, bootstrap.defaultContext);
         done();
       }
     });
@@ -57,7 +60,7 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
 
   after('clean up : database', function (done) {
     // clearing data from VersionMixinTest model
-    models[modelName].destroyAll({}, bootstrap.defaultContext, function (err, info) {
+    model.destroyAll({}, bootstrap.defaultContext, function (err, info) {
       if (err) {
         console.log(err);
       } else {
@@ -74,7 +77,7 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record1'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
@@ -88,12 +91,12 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record2'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         res.name = 'updatedRecord2';
-        models[modelName].upsert(res, bootstrap.defaultContext, function (err, res1) {
+        model.upsert(res, bootstrap.defaultContext, function (err, res1) {
           if (err) {
             done(err);
           } else {
@@ -114,14 +117,14 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record3'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         postData.name = 'updatedRecord3';
         postData._version = 'wrongNumber';
         postData.id = res.id;
-        models[modelName].upsert(postData, bootstrap.defaultContext, function (err1, res1) {
+        model.upsert(postData, bootstrap.defaultContext, function (err1, res1) {
           if (err1) {
             expect(err1.message).not.to.be.empty;
             done();
@@ -137,14 +140,14 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record3'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         postData.name = 'updatedRecord3';
         postData.id = res.id;
         postData._version = undefined;
-        models[modelName].upsert(postData, bootstrap.defaultContext, function (err1, res1) {
+        model.upsert(postData, bootstrap.defaultContext, function (err1, res1) {
           if (err1) {
             expect(err1.message).not.to.be.empty;
             done();
@@ -160,11 +163,11 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record4'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
-        models[modelName].findOne({
+        model.findOne({
           where: {
             id: res.id
           }
@@ -193,11 +196,11 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record5'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
-        models[modelName].findOne({
+        model.findOne({
           where: {
             id: res.id
           }
@@ -225,11 +228,11 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record6'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
-        models[modelName].findOne({
+        model.findOne({
           where: {
             id: res.id
           }
@@ -251,14 +254,14 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record7'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         postData.name = 'updatedRecord7';
         postData._version = res._version;
         postData.id = res.id;
-        models[modelName].upsert(postData, bootstrap.defaultContext, function (err2, res1) {
+        model.upsert(postData, bootstrap.defaultContext, function (err2, res1) {
           if (err2) {
             done(err2);
           } else {
@@ -274,11 +277,11 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     var postData = {
       'name': 'record11'
     };
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
-        models[modelName].deleteById(res.id, res._version, bootstrap.defaultContext, function (err2, res1) {
+        model.deleteById(res.id, res._version, bootstrap.defaultContext, function (err2, res1) {
           if (err2) {
             done(new Error('record not deleted without version number'));
           } else {
@@ -296,14 +299,14 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
     };
     var flag = false;
     var flag2 = false;
-    models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+    model.create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
         done(err);
       } else {
         postData.name = 'updatedRecord121';
         postData._version = res._version;
         postData.id = res.id;
-        models[modelName].upsert(postData, bootstrap.defaultContext, function (err2, res1) {
+        model.upsert(postData, bootstrap.defaultContext, function (err2, res1) {
           if (err2) {
             flag = true;
           } else if (res1) {
@@ -316,7 +319,7 @@ describe(chalk.blue('version-mixin test -Programmatically'), function () {
         postData2.name = 'updatedRecord22222';
         postData2._version = res._version;
         postData2.id = res.id;
-        models[modelName].upsert(postData2, bootstrap.defaultContext, function (err2, res1) {
+        model.upsert(postData2, bootstrap.defaultContext, function (err2, res1) {
           if (err2) {
             flag2 = true;
           } else if (res1) {

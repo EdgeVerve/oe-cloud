@@ -68,8 +68,7 @@ module.exports = function DBTransactionFn(BaseACL) {
     var roleModel = registry.getModelByType('BaseRole');
     this.find({
       where: {
-        model: modelName,
-        property: propertyQuery,
+        model: model.clientModelName, property: propertyQuery,
         accessType: accessTypeQuery
       }
     }, context.remotingContext.req.callContext, function modelFindCb(err, acls) {
@@ -148,10 +147,10 @@ module.exports = function DBTransactionFn(BaseACL) {
         'permission': ctx.instance.permission,
         'property': ctx.instance.property
       };
-      var model = loopback.findModel(ctx.instance.model);
+      var model = loopback.findModel(ctx.instance.model, ctx.options);
       if (model) {
         model.settings.acls.push(acl);
-        log.debug(ctx.options, 'Added new ACL ', JSON.stringify(acl), ' to application');
+        log.debug(ctx.options, 'Added new ACL ', acl, ' to application');
       }
     } else {
       log.debug(ctx.options, 'Updated %s matching %j', ctx.Model.pluralModelName, ctx.where);
@@ -175,7 +174,7 @@ module.exports = function DBTransactionFn(BaseACL) {
       var modelNameInACL = acl.model;
 
       // obtain the model corresponding to the modelname in the acl
-      var model = loopback.findModel(modelNameInACL);
+      var model = loopback.findModel(modelNameInACL, options);
 
       // Delete the ACL from the database
       BaseACL.destroyById(id);

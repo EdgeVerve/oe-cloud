@@ -7,7 +7,6 @@
             "../common/models",
             "../common/models/ui",
             "../common/models/framework",
-            "../common/models/test",
             "./models",
             "loopback-component-passport/lib/models"
         ],

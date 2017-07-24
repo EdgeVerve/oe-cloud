@@ -9,9 +9,13 @@ var chai = bootstrap.chai;
 var expect = chai.expect;
 var models = bootstrap.models;
 var chalk = require('chalk');
-
+var loopback = require('loopback');
 describe(chalk.blue('Delete functionality test - Programmatically'), function () {
     this.timeout(90000);
+    var testModel;
+    var testModel2;
+    var testModel3;
+    var testModel4;
 
     var modelName = 'TestDeleteModel';
     var TestModel = {
@@ -89,6 +93,10 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
             if (err) {
                 done(err);
             } else {
+                testModel = loopback.getModel(modelName, bootstrap.defaultContext);
+                testModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
+                testModel3 = loopback.getModel(modelName3, bootstrap.defaultContext);
+                testModel4 = loopback.getModel(modelName4, bootstrap.defaultContext);
                 done();
             }
 
@@ -104,29 +112,29 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
 
     it('Should create TestModel with SoftDeleteMixins SET ', function (done) {
         // with both version and soft delete
-        expect(models[modelName]).not.to.be.null;
-        expect(models[modelName].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(Object.keys(TestModel.properties));
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(['_isDeleted']);
-        expect(Object.keys(models[modelName].definition.properties)).to.include.members(['_version']);
+        expect(testModel).not.to.be.null;
+        expect(testModel.definition.properties).not.to.be.undefined;
+        expect(Object.keys(testModel.definition.properties)).to.include.members(Object.keys(TestModel.properties));
+        expect(Object.keys(testModel.definition.properties)).to.include.members(['_isDeleted']);
+        expect(Object.keys(testModel.definition.properties)).to.include.members(['_version']);
         //with version
-        expect(models[modelName2]).not.to.be.null;
-        expect(models[modelName2].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName2].definition.properties)).to.include.members(Object.keys(TestModel2.properties));
-        expect(Object.keys(models[modelName2].definition.properties)).to.not.have.members(['_isDeleted']);
-        expect(Object.keys(models[modelName2].definition.properties)).to.include.members(['_version']);
+        expect(testModel2).not.to.be.null;
+        expect(testModel2.definition.properties).not.to.be.undefined;
+        expect(Object.keys(testModel2.definition.properties)).to.include.members(Object.keys(TestModel2.properties));
+        expect(Object.keys(testModel2.definition.properties)).to.not.have.members(['_isDeleted']);
+        expect(Object.keys(testModel2.definition.properties)).to.include.members(['_version']);
         //with softDelete
-        expect(models[modelName3]).not.to.be.null;
-        expect(models[modelName3].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName3].definition.properties)).to.include.members(Object.keys(TestModel3.properties));
-        expect(Object.keys(models[modelName3].definition.properties)).to.include.members(['_isDeleted']);
-        expect(Object.keys(models[modelName3].definition.properties)).to.not.have.members(['_version']);
+        expect(testModel3).not.to.be.null;
+        expect(testModel3.definition.properties).not.to.be.undefined;
+        expect(Object.keys(testModel3.definition.properties)).to.include.members(Object.keys(TestModel3.properties));
+        expect(Object.keys(testModel3.definition.properties)).to.include.members(['_isDeleted']);
+        expect(Object.keys(testModel3.definition.properties)).to.not.have.members(['_version']);
         //without both
-        expect(models[modelName3]).not.to.be.null;
-        expect(models[modelName3].definition.properties).not.to.be.undefined;
-        expect(Object.keys(models[modelName3].definition.properties)).to.include.members(Object.keys(TestModel4.properties));
-        expect(Object.keys(models[modelName3].definition.properties)).to.not.have.members(['_isDeleted']);
-        expect(Object.keys(models[modelName3].definition.properties)).to.not.have.members(['_version']);
+        expect(testModel4).not.to.be.null;
+        expect(testModel4.definition.properties).not.to.be.undefined;
+        expect(Object.keys(testModel4.definition.properties)).to.include.members(Object.keys(TestModel4.properties));
+        expect(Object.keys(testModel4.definition.properties)).to.not.have.members(['_isDeleted']);
+        expect(Object.keys(testModel4.definition.properties)).to.not.have.members(['_version']);
 
         done();
     });
@@ -135,13 +143,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseOne'
         };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -156,13 +164,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseTwo'
         };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -177,13 +185,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseThree'
         };
-        models[modelName2].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel2.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName2].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel2.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -198,13 +206,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseFour'
         };
-        models[modelName2].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel2.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName2].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel2.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -218,13 +226,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseFour2'
         };
-        models[modelName2].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel2.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName2].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel2.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -238,13 +246,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseFive'
         };
-        models[modelName3].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel3.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName3].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel3.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -259,13 +267,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseFive2'
         };
-        models[modelName3].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel3.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName3].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel3.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -281,13 +289,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseSix'
         };
-        models[modelName4].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel4.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName4].destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
+                testModel4.destroyById(res.id, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -302,18 +310,18 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseSeven'
         };
-        models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName].destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
+                testModel.destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
                         expect(res2.count).to.be.equal(1);
-                        models[modelName].findById(res.id, bootstrap.defaultContext, function (err3, res3) {
+                        testModel.findById(res.id, bootstrap.defaultContext, function (err3, res3) {
                             if (err3) {
                                 done(err3);
                             } else if (res3) {
@@ -331,13 +339,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseEight'
         };
-        models[modelName2].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel2.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName2].destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
+                testModel2.destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -352,13 +360,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseNine'
         };
-        models[modelName3].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel3.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.false;
-                models[modelName3].destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
+                testModel3.destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {
@@ -374,13 +382,13 @@ describe(chalk.blue('Delete functionality test - Programmatically'), function ()
         var postData = {
             'name': 'TestCaseTen'
         };
-        models[modelName4].create(postData, bootstrap.defaultContext, function (err, res) {
+        testModel4.create(postData, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             } else {
                 expect(res.name).to.be.equal(postData.name);
                 expect(res['_isDeleted']).to.be.undefined;
-                models[modelName4].destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
+                testModel4.destroyAll({ id: res.id }, bootstrap.defaultContext, function (err2, res2) {
                     if (err2) {
                         done(err2);
                     } else {

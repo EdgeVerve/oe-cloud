@@ -331,7 +331,7 @@ module.exports = function BaseUser(BaseUser) {
       });
     }],
     function finalCallBack(err, results) {
-      if ( err) {
+      if (err) {
         cb(err);
       }
       accessToken.roles = results[0];

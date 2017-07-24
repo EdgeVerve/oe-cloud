@@ -18,7 +18,7 @@ chai.use(require('chai-things'));
 var events = require('events');
 var eventEmitter = new events.EventEmitter();
 var mongoHost = process.env.MONGO_HOST || 'localhost';
-
+var loopback = require('loopback');
 describe(chalk.blue('data-source-personalization-test'), function () {
 
     this.timeout(60000);
@@ -77,7 +77,7 @@ describe(chalk.blue('data-source-personalization-test'), function () {
             'description': 'tenant2a',
             'connectionTimeout': 50000
         }
-   ];
+    ];
 
     var tenant1Scope = {
         ignoreAutoScope: false,
@@ -104,7 +104,9 @@ describe(chalk.blue('data-source-personalization-test'), function () {
         }
     ];
 
-
+    var callContext = bootstrap.defaultContext;
+    callContext.ignoreAutoScope = true;
+    callContext.tenantId = 'default';
 
     var ModelDefinition = bootstrap.models.ModelDefinition;
     var DataSourceDefinition = bootstrap.models.DataSourceDefinition;
@@ -127,11 +129,11 @@ describe(chalk.blue('data-source-personalization-test'), function () {
             }
         }, function (cb) {
             var model = bootstrap.models['DataSourceMapping'];
-             var options = {
-                    ctx: {}
-                };
-                options.ignoreAutoScope = true;
-                options.fetchAllScopes = true;
+            var options = {
+                ctx: {}
+            };
+            options.ignoreAutoScope = true;
+            options.fetchAllScopes = true;
             if (model) {
                 model.destroyAll({}, options, function () {
                     cb();
@@ -139,7 +141,7 @@ describe(chalk.blue('data-source-personalization-test'), function () {
             } else {
                 cb();
             }
-        }, 
+        },
         function (cb) {
             var options = {
                 ctx: {}
@@ -162,91 +164,86 @@ describe(chalk.blue('data-source-personalization-test'), function () {
     before('setup datasources', function (done) {
 
         eventEmitter.setMaxListeners(100);
-
-        var callContext = bootstrap.defaultContext;
-        callContext.ignoreAutoScope = true;
-        callContext.tenantId = 'default';
-
         var ds;
         async.series([function (cb) {
-                cleanup(cb);
-                },
-        		function (cb) {
-                ds = datasources[0];
-                DataSourceDefinition.findById(ds.id, tenant1Scope, function (err, res) {
-                    if (err) {
-                        log.error(callContext, 'error in datasource find', err);
-                        return cb(err);
-                    }
-                    if (!res) {
-                        DataSourceDefinition.create(ds, tenant1Scope, function (err, res) {
-                            if (err) {
-                                log.error(callContext, 'error in datasource find', err);
-                                return cb(err);
-                            }
-                            cb();
-                        });
-                    } else {
-                        log.debug(callContext, 'data source exists ', ds.name, ds.database);
+            cleanup(cb);
+        },
+        function (cb) {
+            ds = datasources[0];
+            DataSourceDefinition.findById(ds.id, tenant1Scope, function (err, res) {
+                if (err) {
+                    log.error(callContext, 'error in datasource find', err);
+                    return cb(err);
+                }
+                if (!res) {
+                    DataSourceDefinition.create(ds, tenant1Scope, function (err, res) {
+                        if (err) {
+                            log.error(callContext, 'error in datasource find', err);
+                            return cb(err);
+                        }
                         cb();
-                    }
-                });
-                },
-        		function (cb) {
-                ds = datasources[1];
-                DataSourceDefinition.findById(ds.id, tenant2Scope, function (err, res) {
-                    if (err) {
-                        log.error(callContext, 'error in datasource find', err);
-                        return cb(err);
-                    }
-                    if (!res) {
-                        DataSourceDefinition.create(ds, tenant2Scope, function (err, res) {
-                            if (err) {
-                                log.error(callContext, 'error in datasource find', err);
-                                return cb(err);
-                            }
-                            cb();
-                        });
-                    } else {
-                        log.debug(callContext, 'data source exists ', ds.name, ds.database);
+                    });
+                } else {
+                    log.debug(callContext, 'data source exists ', ds.name, ds.database);
+                    cb();
+                }
+            });
+        },
+        function (cb) {
+            ds = datasources[1];
+            DataSourceDefinition.findById(ds.id, tenant2Scope, function (err, res) {
+                if (err) {
+                    log.error(callContext, 'error in datasource find', err);
+                    return cb(err);
+                }
+                if (!res) {
+                    DataSourceDefinition.create(ds, tenant2Scope, function (err, res) {
+                        if (err) {
+                            log.error(callContext, 'error in datasource find', err);
+                            return cb(err);
+                        }
                         cb();
-                    }
-                });
+                    });
+                } else {
+                    log.debug(callContext, 'data source exists ', ds.name, ds.database);
+                    cb();
+                }
+            });
 
-                },
-            function (cb) {
-                ModelDefinition.create(models, callContext, function (err, res) {
-                    if (err) {
-                        log.debug(callContext, 'unable to create model');
-                        cb();
-                    } else {
-                        cb();
-                    }
-                });
-                },
+        },
         function (cb) {
-                DataSourceMapping.create(mappings, callContext, function (err, res) {
-                    if (err) {
-                        cb(err);
-                    } else {
-                        cb();
-                    }
-                });
-                },
+            ModelDefinition.create(models, callContext, function (err, res) {
+                if (err) {
+                    log.debug(callContext, 'unable to create model');
+                    cb();
+                } else {
+                    cb();
+                }
+            });
+        },
         function (cb) {
-                Object.keys(bootstrap.app.datasources).forEach(function iter(id) {
-                    log.debug(callContext, id, bootstrap.app.datasources[id].settings);
-                });
-                cb();
-                },
+            DataSourceMapping.create(mappings, callContext, function (err, res) {
+                if (err) {
+                    cb(err);
+                } else {
+                    cb();
+                }
+            });
+        },
+        function (cb) {
+            Object.keys(bootstrap.app.datasources).forEach(function iter(id) {
+                log.debug(callContext, id, bootstrap.app.datasources[id].settings);
+            });
+            cb();
+        },
         function () {
-                done();
-                }]);
+            done();
+        }]);
     });
 
-    
+
     it('tenant1 and model 1 ', function (done) {
-        var model = bootstrap.models['md1'];
+        var model = loopback.getModel('md1', callContext);
         var ds = model.getDataSource(tenant1Scope);
         expect(ds).not.to.be.null;
         expect(ds.settings.database).to.equal('tenant1a');
@@ -254,7 +251,7 @@ describe(chalk.blue('data-source-personalization-test'), function () {
     });
 
     it('tenant2 and model 1 ', function (done) {
-        var model = bootstrap.models['md2'];
+        var model = loopback.getModel('md2', callContext);
         var ds = model.getDataSource(tenant2Scope);
         expect(ds).not.to.be.null;
         expect(ds.settings.database).to.equal('tenant2a');

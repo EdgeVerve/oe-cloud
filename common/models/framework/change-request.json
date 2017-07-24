@@ -20,7 +20,7 @@
         "originalEntityType": {
             "type": "string",
             "required": true,
-            "max": 30
+            "max": 200
         },
         "changedEntity": {
             "type": "object",
