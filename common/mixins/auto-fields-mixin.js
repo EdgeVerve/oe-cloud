@@ -16,16 +16,15 @@ var autofields = require('../../lib/auto-fields');
 var async = require('async');
 
 module.exports = function AutoFieldsMixin(Model) {
-    if (Model.modelName === 'BaseEntity') {
-        return;
-    }
+  if (Model.modelName === 'BaseEntity') {
+    return;
+  }
 
-    if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.AutoFieldsMixin) || !Model.settings.mixins.AutoFieldsMixin) {
-        Model.evRemoveObserver('before save', autoFieldMixinBeforeSave);
-    } else {
-        Model.observe('before save', autoFieldMixinBeforeSave);
-    }
-
+  if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.AutoFieldsMixin) || !Model.settings.mixins.AutoFieldsMixin) {
+    Model.evRemoveObserver('before save', autoFieldMixinBeforeSave);
+  } else {
+    Model.observe('before save', autoFieldMixinBeforeSave);
+  }
 };
 
 /**
@@ -48,27 +47,27 @@ module.exports = function AutoFieldsMixin(Model) {
  * Ajith
  */
 function autoFieldMixinBeforeSave(ctx, next) {
-    var data = ctx.instance || ctx.currentInstance || ctx.data;
-    var props = ctx.Model.definition.properties;
-    log.debug(ctx.options, 'BaseEntity before save called for auto-population: ModelName =', ctx.Model.modelName);
+  var data = ctx.instance || ctx.currentInstance || ctx.data;
+  var props = ctx.Model.definition.properties;
+  log.debug(ctx.options, 'BaseEntity before save called for auto-population: ModelName =', ctx.Model.modelName);
 
-    async.forEachOf(props, function baseEntityObserveBeforeSaveSetValAsyncForEachPropsCb(value, key, callback) {
-        var propprops = ctx.Model.definition.properties[key];
-        if (propprops.setval) {
-            log.debug(ctx.options, 'To be set:', key, propprops.setval);
-            autofields({
-                'pattern': propprops.setval
-            }, ctx.options, function baseEntityObserveBeforeSaveSetValAsyncForEachPropsAutoFieldsCb(val) {
-                data[key] = val;
-                callback();
-            });
-        } else {
-            callback();
-        }
-    }, function baseEntityObserveBeforeSaveSetValAsyncForEachCb(err) {
-        if (err) {
-            log.error(ctx.options, err.message);
-        }
-        next();
-    });
-};
+  async.forEachOf(props, function baseEntityObserveBeforeSaveSetValAsyncForEachPropsCb(value, key, callback) {
+    var propprops = ctx.Model.definition.properties[key];
+    if (propprops.setval) {
+      log.debug(ctx.options, 'To be set:', key, propprops.setval);
+      autofields({
+        'pattern': propprops.setval
+      }, ctx.options, function baseEntityObserveBeforeSaveSetValAsyncForEachPropsAutoFieldsCb(val) {
+        data[key] = val;
+        callback();
+      });
+    } else {
+      callback();
+    }
+  }, function baseEntityObserveBeforeSaveSetValAsyncForEachCb(err) {
+    if (err) {
+      log.error(ctx.options, err.message);
+    }
+    next();
+  });
+}

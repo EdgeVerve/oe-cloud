@@ -37,49 +37,48 @@
  * @author Ajith Vasudevan
  */
 
-var autofields = require('../../../lib/auto-fields');
-var async = require('async');
 var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('baseentity');
 
 module.exports = function BaseEntityFn(BaseEntity) {
-    BaseEntity.setup = function setupBaseEntity() {
-        BaseEntity.base.setup.call(this, arguments);
-        var Model = this;
+  BaseEntity.setup = function setupBaseEntity() {
+    BaseEntity.base.setup.call(this, arguments);
+    var Model = this;
 
 
-        Model.beforeRemote('**', function modelBeforeRemote(ctx, model, next) {
-            var method = ctx.method;
-            var Model = method.ctor;
-            // for now taking care of only scope
-            // so a different tenant will still be able to access
-            // but still with same scope
-            if (Model && Model._ownDefinition && Model._ownDefinition.scope) {
-                var ModelDefinition = loopback.getModel('ModelDefinition');
-                ModelDefinition.findOne({ where: { name: Model.modelName } },
-                    ctx.req.callContext,
-                    function reqCallContext(err, instance) {
-                        if (err) {
-                            return next(err);
-                        }
-                        if (!instance) {
-                            var msg = 'Unknown model or not authorised';
-                            var error = new Error(msg);
-                            error.statusCode = error.status = 404;
-                            error.code = 'MODEL_NOT_FOUND';
-                            error.name = 'Data Error';
-                            error.message = msg;
-                            error.code = 'DATA_ERROR_070';
-                            error.type = 'noModelExists';
-                            error.retriable = false;
-                            return next(error, null);
-                        }
-                        return next();
-                    });
-            } else {
-                return next();
+    Model.beforeRemote('**', function modelBeforeRemote(ctx, model, next) {
+      var method = ctx.method;
+      var Model = method.ctor;
+      // for now taking care of only scope
+      // so a different tenant will still be able to access
+      // but still with same scope
+      if (Model && Model._ownDefinition && Model._ownDefinition.scope) {
+        var ModelDefinition = loopback.getModel('ModelDefinition');
+        ModelDefinition.findOne({ where: { name: Model.modelName } },
+          ctx.req.callContext,
+          function reqCallContext(err, instance) {
+            if (err) {
+              log.error(ctx, err.message);
+              return next(err);
             }
-        });
-    };
+            if (!instance) {
+              var msg = 'Unknown model or not authorised';
+              var error = new Error(msg);
+              error.statusCode = error.status = 404;
+              error.code = 'MODEL_NOT_FOUND';
+              error.name = 'Data Error';
+              error.message = msg;
+              error.code = 'DATA_ERROR_070';
+              error.type = 'noModelExists';
+              error.retriable = false;
+              return next(error, null);
+            }
+            return next();
+          });
+      } else {
+        return next();
+      }
+    });
+  };
 };
