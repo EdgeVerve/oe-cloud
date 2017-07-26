@@ -27,7 +27,8 @@
         "RetrySupportMixin": false,
         "IdempotentMixin": true,
         "FailsafeObserverMixin": true,
-        "DataHierarchyMixin": false
+        "DataHierarchyMixin": false,
+        "CryptoMixin": true
     },
     "hidden": [
         "_tenantId",

@@ -136,12 +136,15 @@ postgrestest:
 swarm:
   stage: test
   script: 
+    - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
     - docker stack rm ${APP_IMAGE_NAME}
     - node test/actor-tests/prepareIntegrationTest.js
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
+    - mv -f qqq2.yml qqq.yml
+    - sed 's/\$ROUTER/'"$ROUTER"'/g' qqq.yml > qqq2.yml
     - mv -f qqq2.yml qqq.yml
     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
     - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
