@@ -46,8 +46,14 @@ module.exports = function failsafeObserverMixin(Model) {
   };
 
   var FailSafeObserver = function (fn) {
+    function generateId(fn) {
+      if (fn.getId && typeof fn.getId === 'function') {
+        return fn.getId();
+      }
+      return UUID.v4();
+    }
     var _fn = fn;
-    var _id = UUID.v4();
+    var _id = generateId(_fn);
     var _name = fn.name;
 
     this.execute = function (modelName, version, operation, ctx, next) {
