@@ -9,17 +9,21 @@ var log = require('oe-logger')('markascacheable');
 var messaging = require('../../lib/common/global-messaging');
 var loopback = require('loopback');
 
-messaging.subscribe('evictQueryCache', function (modelName) {
+messaging.subscribe('evictQueryCache', function (msg) {
+  var modelName = msg.modelName;
+  var evictCtx = msg.evictCtx;
   var model = loopback.findModel(modelName);
   if (model) {
-    model.evictCache(false);
+    model.evictCache(false, evictCtx);
   }
 });
 
-messaging.subscribe('evictCache', function (modelName) {
+messaging.subscribe('evictCache', function (msg) {
+  var modelName = msg.modelName;
+  var evictCtx = msg.evictCtx;
   var model = loopback.findModel(modelName);
   if (model) {
-    model.evictCache(true);
+    model.evictCache(true, evictCtx);
   }
 });
 /**

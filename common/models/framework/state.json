@@ -26,6 +26,7 @@
         "SoftDeleteMixin": true,
         "AuditFieldsMixin": true,
         "ExpressionAstPopulatorMixin": false,
+        "CryptoMixin": false,
         "PropertyExpressionMixin": false
     },
     "options": {
