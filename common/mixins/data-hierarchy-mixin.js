@@ -348,7 +348,8 @@ function createQuery(ctx, context, hierarchy) {
  * @function
  */
 function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) {
-  if (ctx.Model.modelName.toLowerCase().concat('Hierarchy') === key) {
+  var modelName = ctx.Model.clientModelName || ctx.Model.modelName;
+  if (modelName.toLowerCase().concat('Hierarchy') === key) {
     if (ctx.isNewInstance && data.id !== 'root') {
       if (!data.id) {
         data.id = uuid.v4();

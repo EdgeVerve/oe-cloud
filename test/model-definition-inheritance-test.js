@@ -14,7 +14,7 @@ var bootstrap = require('./bootstrap');
 var expect = bootstrap.chai.expect;
 var models = bootstrap.models;
 var modelDefitnionUrl = bootstrap.basePath + '/ModelDefinitions';
-
+var loopback = require('loopback');
 var chai = require('chai');
 chai.use(require('chai-things'));
 
@@ -44,23 +44,11 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
             function (done) {
 
                 var modelName = 'NoProps';
-
-                models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].settings.acls).to.have.length(1);
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).to.include.
-                    members(Object.keys(models.BaseEntity.definition.properties));
-                    debug('model ' + modelName + ' is available now, test case passed.');
-                    done();
-                });
-
                 var postData = {
                     name: modelName,
                     base: 'BaseEntity',
                     properties: {}
                 };
-
                 api
                     .set('Accept', 'application/json')
                     .post(modelDefitnionUrl + "?access_token=" + accessToken)
@@ -70,6 +58,13 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                         if (err || res.body.error) {
                             done(err || (new Error(res.body.error.details.messages.name[0])));
                         }
+                        var modelCreated = loopback.findModel(modelName, bootstrap.defaultContext);
+                        expect(modelCreated).not.to.be.null;
+                        expect(modelCreated.settings.acls).to.have.length(1);
+                        expect(modelCreated.definition.properties).not.to.be.undefined;
+                        expect(Object.keys(modelCreated.definition.properties)).to.include.
+                          members(Object.keys(models.BaseEntity.definition.properties));
+                        return done();
                     });
 
             });
@@ -92,9 +87,9 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                         done(err || (new Error(res.body.error.details.messages.name[0])));
                     } else {
 
-                        var dataId = res.body.id;
-
-                        models[modelName].find({
+                      var dataId = res.body.id;
+                      var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                      model.find({
                             where: {
                                 ID: dataId
                             }
@@ -118,8 +113,9 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                     name: modelName
                 }
             }, bootstrap.defaultContext, function (err, modeldefinition) {
-                var modelId = modeldefinition[0].id;
-                models[modelName].destroyAll({}, bootstrap.defaultContext, function () {});
+              var modelId = modeldefinition[0].id;
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+              model.destroyAll({}, bootstrap.defaultContext, function () {});
 
                 api
                     .del(modelDefitnionUrl + '/' + modelId + "?access_token=" + accessToken)
@@ -169,12 +165,13 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
             };
 
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                debug('model ' + modelName + ' is available now, test case passed.');
-                expect(models[modelName].definition.properties).not.to.be.null;
-                expect(models[modelName].definition.properties).not.to.be.undefined;
-                expect(Object.keys(models[modelName].definition.properties)).to.include.
+              debug('model ' + modelName + ' is available now, test case passed.');
+              var modelCreated = loopback.findModel(modelName, bootstrap.defaultContext);
+              expect(modelCreated.definition.properties).not.to.be.null;
+              expect(modelCreated.definition.properties).not.to.be.undefined;
+              expect(Object.keys(modelCreated.definition.properties)).to.include.
                 members(Object.keys(models.BaseEntity.definition.properties));
-                expect(Object.keys(models[modelName].definition.properties)).to.include.
+              expect(Object.keys(modelCreated.definition.properties)).to.include.
                 members(Object.keys(postData.properties));
                 done();
             });
@@ -214,12 +211,13 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                 };
 
                 models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                    debug('model ' + modelName + ' is available now, test case passed.');
-                    expect(models[modelName].definition.properties).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
-                    to.include.members(Object.keys(models[baseModel].definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  debug('model ' + modelName + ' is available now, test case passed.');
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model.definition.properties).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
+                    to.include.members(Object.keys(model.definition.properties));
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
 
                     done();
@@ -337,12 +335,13 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
             };
 
             models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                debug('model ' + modelName + ' is available now, test case passed.');
-                expect(models[modelName].definition.properties).not.to.be.null;
-                expect(models[modelName].definition.properties).not.to.be.undefined;
-                expect(Object.keys(models[modelName].definition.properties)).
+              debug('model ' + modelName + ' is available now, test case passed.');
+              var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                expect(model.definition.properties).not.to.be.null;
+                expect(model.definition.properties).not.to.be.undefined;
+                expect(Object.keys(model.definition.properties)).
                 to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                expect(Object.keys(models[modelName].definition.properties)).
+                expect(Object.keys(model.definition.properties)).
                 to.include.members(Object.keys(postData.properties));
                 done();
             });
@@ -383,12 +382,13 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                 };
 
                 models.ModelDefinition.events.once('model-' + modelName + '-available', function () {
-                    debug('model ' + modelName + ' is available now, test case passed.');
-                    expect(models[modelName].definition.properties).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
-                    to.include.members(Object.keys(models[baseModel].definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  debug('model ' + modelName + ' is available now, test case passed.');
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model.definition.properties).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
+                    to.include.members(Object.keys(model.definition.properties));
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
 
                     done();
@@ -542,10 +542,11 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                     if (err) {
                         done(err);
                     } else {
-                        modelDetails = res;
-                        expect(models[modelName]).not.to.be.null;
-                        expect(models[modelName].definition.properties).not.to.be.undefined;
-                        expect(Object.keys(models[modelName].definition.properties)).
+                      modelDetails = res;
+                      var modelCreated = loopback.findModel(modelName, bootstrap.defaultContext);
+                      expect(modelCreated).not.to.be.null;
+                      expect(modelCreated.definition.properties).not.to.be.undefined;
+                      expect(Object.keys(modelCreated.definition.properties)).
                         to.include.members(Object.keys(models.BaseEntity.definition.properties));
                         done();
                     }
@@ -554,14 +555,14 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
 
         it('add empty data to newly created Model with no properties and get the same.', function (done) {
 
-            var postData = {};
-
-            models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
+          var postData = {};
+          var model = loopback.findModel(modelName, bootstrap.defaultContext);
+            model.create(postData, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     done(err);
                 } else {
                     var dataId = res.id;
-                    models[modelName].findById(dataId, bootstrap.defaultContext, function (err, data) {
+                    model.findById(dataId, bootstrap.defaultContext, function (err, data) {
                         if (data && data.id === dataId) {
                             done();
                         } else {
@@ -584,7 +585,8 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                 } else {
                     modelId = modeldefinition[0].id;
                     var version = modeldefinition[0]._version;
-                    models[modelName].destroyAll({}, bootstrap.defaultContext, function (err, res) {});
+                    var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    model.destroyAll({}, bootstrap.defaultContext, function (err, res) {});
 
                     models.ModelDefinition.destroyById(modelId, bootstrap.defaultContext, function (err, modeldefinition) {
                         if (err) {
@@ -623,12 +625,13 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                 if (err) {
                     done(err);
                 } else {
-                    modelDetails = res;
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  modelDetails = res;
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
                     done();
                 }
@@ -653,12 +656,14 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                     if (err) {
                         done(err);
                     } else {
-                        modelDetails = res;
-                        expect(models[modelName]).not.to.be.null;
-                        expect(models[modelName].definition.properties).not.to.be.undefined;
-                        expect(Object.keys(models[modelName1].definition.properties)).
-                        to.include.members(Object.keys(models[modelName].definition.properties));
-                        expect(Object.keys(models[modelName1].definition.properties)).
+                      modelDetails = res;
+                      var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                      var model1 = loopback.findModel(modelName1, bootstrap.defaultContext);
+                        expect(model).not.to.be.null;
+                        expect(model.definition.properties).not.to.be.undefined;
+                        expect(Object.keys(model1.definition.properties)).
+                        to.include.members(Object.keys(model.definition.properties));
+                        expect(Object.keys(model1.definition.properties)).
                         to.include.members(Object.keys(postData1.properties));
                         done();
                     }
@@ -678,7 +683,8 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                 } else {
                     modelId = modeldefinition[0].id;
                     var version = modeldefinition[0]._version;
-                    models[modelName].destroyAll({}, bootstrap.defaultContext, function (err, res) {});
+                    var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    model.destroyAll({}, bootstrap.defaultContext, function (err, res) {});
 
                     models.ModelDefinition.destroyById(modelId, bootstrap.defaultContext, function (err, modeldefinition) {
                         if (err) {
@@ -717,12 +723,13 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                     console.log(err);
                     done(err);
                 } else {
-                    modelDetails = res;
-                    expect(models[modelName]).not.to.be.null;
-                    expect(models[modelName].definition.properties).not.to.be.undefined;
-                    expect(Object.keys(models[modelName].definition.properties)).
+                  modelDetails = res;
+                  var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                    expect(model).not.to.be.null;
+                    expect(model.definition.properties).not.to.be.undefined;
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(models.BaseEntity.definition.properties));
-                    expect(Object.keys(models[modelName].definition.properties)).
+                    expect(Object.keys(model.definition.properties)).
                     to.include.members(Object.keys(postData.properties));
                     done();
                 }
@@ -748,12 +755,14 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                         console.log('xxx', JSON.stringify(err));
                         done(err);
                     } else {
-                        modelDetails = res;
-                        expect(models[modelName]).not.to.be.null;
-                        expect(models[modelName].definition.properties).not.to.be.undefined;
-                        expect(Object.keys(models[modelName1].definition.properties)).
-                        to.include.members(Object.keys(models[modelName].definition.properties));
-                        expect(Object.keys(models[modelName1].definition.properties)).
+                      modelDetails = res;
+                      var model = loopback.findModel(modelName, bootstrap.defaultContext);
+                      var model1 = loopback.findModel(modelName1, bootstrap.defaultContext);
+                        expect(model).not.to.be.null;
+                        expect(model.definition.properties).not.to.be.undefined;
+                        expect(Object.keys(model1.definition.properties)).
+                        to.include.members(Object.keys(model.definition.properties));
+                        expect(Object.keys(model1.definition.properties)).
                         to.include.members(Object.keys(postData1.properties));
                         done();
                     }
@@ -774,7 +783,8 @@ describe(chalk.blue('model-definition-Inheritance  Programmatically'), function 
                 } else {
                     modelId = modeldefinition[0].id;
                     var version = modeldefinition[0]._version;
-                    models[modelName1].destroyAll({}, bootstrap.defaultContext, function (err, res) {});
+                    var model1 = loopback.findModel(modelName1, bootstrap.defaultContext);
+                    model1.destroyAll({}, bootstrap.defaultContext, function (err, res) {});
 
                     models.ModelDefinition.destroyById(modelId, bootstrap.defaultContext, function (err, modeldefinition) {
                         if (err) {

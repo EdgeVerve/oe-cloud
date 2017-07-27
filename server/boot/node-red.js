@@ -13,6 +13,8 @@ var uuid = require('node-uuid');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
+var _log = require('oe-logger')('node-red');
+
 
 // Atul : this function returns value of autoscope fields as concatination string.
 // This should been made as utility function and should not tied to node-red in general.
@@ -26,6 +28,55 @@ function getAutoscopeField(model, callContext) {
     }
   }
   return field;
+}
+
+var levelNames = {
+  10: 'fatal',
+  20: 'error',
+  30: 'warn',
+  40: 'info',
+  50: 'debug',
+  60: 'trace',
+  98: 'audit',
+  99: 'metric'
+};
+
+function initLogger(settings) {
+  return logger;
+}
+
+function logger(msg) {
+  var level = levelNames[msg.level];
+  delete msg.level;
+  delete msg.timestamp;
+  switch (level) {
+    case 'metric':
+      _log.trace(_log.defaultContext(), msg);
+      break;
+    case 'audit':
+      _log.trace(_log.defaultContext(), msg);
+      break;
+    case 'trace':
+      _log.trace(_log.defaultContext(), msg);
+      break;
+    case 'debug':
+      _log.debug(_log.defaultContext(), msg);
+      break;
+    case 'info':
+      _log.info(_log.defaultContext(), msg);
+      break;
+    case 'warn':
+      _log.warn(_log.defaultContext(), msg);
+      break;
+    case 'error':
+      _log.error(_log.defaultContext(), msg);
+      break;
+    case 'fatal':
+      _log.fatal(_log.defaultContext(), msg);
+      break;
+    default:
+      break;
+  }
 }
 
 module.exports = function startNodeRed(server, callback) {
@@ -42,12 +93,22 @@ module.exports = function startNodeRed(server, callback) {
   if (!nodeRedUserDir) {
     nodeRedUserDir = 'nodered/';
   }
+  var nodeRedMetrics = server.get('nodeRedMetrics') || false;
+  var nodeRedAudit = server.get('nodeRedAudit') || false;
   var settings = {
     httpAdminRoot: '/red',
     httpNodeRoot: '/redapi',
     userDir: nodeRedUserDir,
     nodesDir: '../nodes',
     flowFile: 'node-red-flows.json',
+    logging: {
+      'oe-logger': {
+        handler: initLogger,
+        level: 'metric',
+        metrics: nodeRedMetrics,
+        audit: nodeRedAudit
+      }
+    },
     server: server,
     flowFilePretty: true,
     functionGlobalContext: {

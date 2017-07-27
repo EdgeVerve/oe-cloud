@@ -114,7 +114,7 @@ function evaluateExpressions(ctx, callback) {
   var data = self.toObject(true);
   self.constructor.propertyUtils.forEach(function propExpressionsForEach(obj) {
     if (obj.propExpression) {
-      log.debug(options, 'check---', JSON.stringify(exprLang.traverseAST(ast[obj.propExpression]), '---data', JSON.stringify(data)));
+      log.debug(options, 'check---', JSON.stringify(exprLang.traverseAST(ast[obj.propExpression], self.toObject(true), options), '---data', JSON.stringify(data)));
       propertyExpressionPromises.push(exprLang.traverseAST(ast[obj.propExpression], self.toObject(true), options));
       count++;
       propMapper[count] = obj.name;

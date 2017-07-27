@@ -17,58 +17,17 @@ chai.use(require('chai-things'));
 var parentModelName = 'CustomerModel';
 var childModelName = 'AccountModel';
 var addressModelName = 'Address';
-describe(chalk.blue('Validation validateWhen test'), function() {
+describe(chalk.blue('Validation validateWhen test'), function () {
 
     this.timeout(50000);
+    var parentModel;
+    var childModel;
+    var addressModel;
 
-    before('setup test data', function(done) {
-        models.ModelDefinition.events.once('model-' + childModelName + '-available', function() {
-            var parentModel = loopback.getModel(parentModelName);
-            var cust1 = {
-                'id': 101,
-                'name': 'Mike',
-                'dob': '1936-06-10',
-                'cityType': 'Urban',
-                'age': 80,
-                'accNo': 1001
-            };
-            var cust2 = {
-                'id': 102,
-                'name': 'John',
-                'dob': '1998-05-05',
-                'cityType': 'Urban',
-                'age': 18,
-                'accNo': 1002
-            };
-            var cust3 = {
-                'id': 103,
-                'name': 'Jack',
-                'dob': '1951-02-01',
-                'cityType': 'Semi-Urban',
-                'age': 65,
-                'accNo': 1003
-            };
-            var cust4 = {
-                'id': 104,
-                'name': 'Jill',
-                'dob': '1961-03-03',
-                'cityType': 'Rural',
-                'age': 55,
-                'accNo': 1004
-            };
-            parentModel.create(cust1, bootstrap.defaultContext, function(err, results) {
-                expect(err).to.be.null;
-                parentModel.create(cust2, bootstrap.defaultContext, function(err, results) {
-                    expect(err).to.be.null;
-                    parentModel.create(cust3, bootstrap.defaultContext,  function(err, results) {
-                        expect(err).to.be.null;
-                        parentModel.create(cust4, bootstrap.defaultContext,  function(err, results) {
-                            expect(err).to.be.null;
-                            done();
-                        });
-                    });
-                });
-            });
+    before('setup test data', function (done) {
+        models.ModelDefinition.events.once('model-' + childModelName + '-available', function () {
+          return;
+
         });
 
         models.ModelDefinition.create({
@@ -98,14 +57,14 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'relations': {},
             'acls': [],
             'methods': {}
-        }, bootstrap.defaultContext, function(err, result) {
+        }, bootstrap.defaultContext, function (err, result) {
             if (err) {
                 console.log(err);
             } else {
                 models.ModelDefinition.create({
                     'name': parentModelName,
                     'base': 'BaseEntity',
-                    'plural': parentModelName+'s',
+                    'plural': parentModelName + 's',
                     'strict': false,
                     'idInjection': true,
                     'options': {
@@ -155,7 +114,7 @@ describe(chalk.blue('Validation validateWhen test'), function() {
                     'relations': {},
                     'acls': [],
                     'methods': {}
-                }, bootstrap.defaultContext, function(err, model) {
+                }, bootstrap.defaultContext, function (err, model) {
                     if (err) {
                         console.log(err);
                     } else {
@@ -208,11 +167,59 @@ describe(chalk.blue('Validation validateWhen test'), function() {
                             },
                             'acls': [],
                             'methods': {}
-                        }, bootstrap.defaultContext, function(err, model) {
+                        }, bootstrap.defaultContext, function (err, model) {
                             if (err) {
                                 console.log(err);
                             }
+                            parentModel = loopback.getModel(parentModelName, bootstrap.defaultContext);
+                            childModel = loopback.getModel(childModelName, bootstrap.defaultContext)
+                            addressModel = loopback.getModel(addressModelName, bootstrap.defaultContext)
                             expect(err).to.be.not.ok;
+                            var cust1 = {
+                              'id': 101,
+                              'name': 'Mike',
+                              'dob': '1936-06-10',
+                              'cityType': 'Urban',
+                              'age': 80,
+                              'accNo': 1001
+                            };
+                            var cust2 = {
+                              'id': 102,
+                              'name': 'John',
+                              'dob': '1998-05-05',
+                              'cityType': 'Urban',
+                              'age': 18,
+                              'accNo': 1002
+                            };
+                            var cust3 = {
+                              'id': 103,
+                              'name': 'Jack',
+                              'dob': '1951-02-01',
+                              'cityType': 'Semi-Urban',
+                              'age': 65,
+                              'accNo': 1003
+                            };
+                            var cust4 = {
+                              'id': 104,
+                              'name': 'Jill',
+                              'dob': '1961-03-03',
+                              'cityType': 'Rural',
+                              'age': 55,
+                              'accNo': 1004
+                            };
+                            parentModel.create(cust1, bootstrap.defaultContext, function (err, results) {
+                              expect(err).to.be.null;
+                              parentModel.create(cust2, bootstrap.defaultContext, function (err, results) {
+                                expect(err).to.be.null;
+                                parentModel.create(cust3, bootstrap.defaultContext, function (err, results) {
+                                  expect(err).to.be.null;
+                                  parentModel.create(cust4, bootstrap.defaultContext, function (err, results) {
+                                    expect(err).to.be.null;
+                                    done();
+                                  });
+                                });
+                              });
+                            });
                         });
                     }
                     expect(err).to.be.not.ok;
@@ -222,46 +229,41 @@ describe(chalk.blue('Validation validateWhen test'), function() {
         });
     });
 
-    after('destroy test models', function(done) {
+    after('destroy test models', function (done) {
         models.ModelDefinition.destroyAll({
-                name: parentModelName
-            }, bootstrap.defaultContext, function(err, d) {
-                if (err) {
-                    console.log('Error - not able to delete modelDefinition entry for parent Model Hotel');
-                    return done();
-                }
-                var model = loopback.getModel(parentModelName);
-                model.destroyAll({}, bootstrap.defaultContext, function() {
-                    models.ModelDefinition.destroyAll({
-                        name: childModelName
-                    }, bootstrap.defaultContext, function(err, d) {
-                        if (err) {
-                            console.log('Error - not able to delete modelDefinition entry for child Model Room');
-                            return done();
-                        }
-                        var model = loopback.getModel(childModelName);
-                        model.destroyAll({}, bootstrap.defaultContext, function() {
-                            models.ModelDefinition.destroyAll({
-                                name: addressModelName
-                            }, bootstrap.defaultContext, function(err, d) {
-                                if (err) {
-                                    console.log('Error - not able to delete modelDefinition entry for Address Model');
-                                    return done();
-                                }
-                                var model = loopback.getModel(addressModelName);
-                                model.destroyAll({}, bootstrap.defaultContext, function() {
-                                    done();
-                                });
+            name: parentModelName
+        }, bootstrap.defaultContext, function (err, d) {
+            if (err) {
+                console.log('Error - not able to delete modelDefinition entry for parent Model Hotel');
+                return done();
+            }
+            parentModel.destroyAll({}, bootstrap.defaultContext, function () {
+                models.ModelDefinition.destroyAll({
+                    name: childModelName
+                }, bootstrap.defaultContext, function (err, d) {
+                    if (err) {
+                        console.log('Error - not able to delete modelDefinition entry for child Model Room');
+                        return done();
+                    }
+                    childModel.destroyAll({}, bootstrap.defaultContext, function () {
+                        models.ModelDefinition.destroyAll({
+                            name: addressModelName
+                        }, bootstrap.defaultContext, function (err, d) {
+                            if (err) {
+                                console.log('Error - not able to delete modelDefinition entry for Address Model');
+                                return done();
+                            }
+                            addressModel.destroyAll({}, bootstrap.defaultContext, function () {
+                                done();
                             });
                         });
                     });
                 });
             });
+        });
     });
 
-    it('Validation Test - Should insert data successfully despite balance set to 100', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should insert data successfully despite balance set to 100', function (done) {
 
         var data = {
             'accountNumber': 1001,
@@ -269,15 +271,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'accountType': 'privilage',
             'custId': 101
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should fail to insert data successfully', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should fail to insert data successfully', function (done) {
 
         var data = {
             'accountNumber': 1002,
@@ -286,15 +286,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 100,
             'custId': 102
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).not.to.be.undefined;
             done();
         });
     });
 
-    it('Validation Test - Should insert data successfully (t198)', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should insert data successfully (t198)', function (done) {
 
         var data = {
             'accountNumber': 1002,
@@ -303,15 +301,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 5000,
             'custId': 102
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should fail to insert data successfully - The customer needs to give identification as the dob is later than 1988', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should fail to insert data successfully - The customer needs to give identification as the dob is later than 1988', function (done) {
 
         var data = {
             'accountNumber': 1002,
@@ -319,15 +315,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 5000,
             'custId': 102
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).not.to.be.undefined;
             done();
         });
     });
 
-    it('Validation Test - Should insert data successfully for urban customer as the accountType is privilage', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should insert data successfully for urban customer as the accountType is privilage', function (done) {
 
         var data = {
             'accountNumber': 1003,
@@ -335,15 +329,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 5000,
             'custId': 103
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should fail to insert data for urban customer as the accountType is not privilage or non-privilage', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should fail to insert data for urban customer as the accountType is not privilage or non-privilage', function (done) {
 
         var data = {
             'accountNumber': 1003,
@@ -351,15 +343,13 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 5000,
             'custId': 103
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).not.to.be.undefined;
             done();
         });
     });
 
-    it('Validation Test - Should insert data for rural customer as the accountType need not be privilage or non-privilage', function(done) {
-
-        var childModel = loopback.getModel(childModelName);
+    it('Validation Test - Should insert data for rural customer as the accountType need not be privilage or non-privilage', function (done) {
 
         var data = {
             'accountNumber': 1004,
@@ -367,15 +357,14 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'balance': 5000,
             'custId': 104
         };
-        childModel.create(data, bootstrap.defaultContext, function(err, results) {
+        childModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should insert data successfully as validateWhen condition is false and the reference validation is not applied', function(done) { //sambit
+    it('Validation Test - Should insert data successfully as validateWhen condition is false and the reference validation is not applied', function (done) { //sambit
 
-        var parentModel = loopback.getModel(parentModelName);
         var cust = {
             'id': 105,
             'name': 'George',
@@ -385,16 +374,15 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'accNo': 2001
         };
 
-        parentModel.create(cust, bootstrap.defaultContext, function(err, results) {
+        parentModel.create(cust, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
 
     });
 
-    it('Validation Test - Should fail to insert data as validateWhen condition is true and the reference validation is applied', function(done) { //sambit
+    it('Validation Test - Should fail to insert data as validateWhen condition is true and the reference validation is applied', function (done) { //sambit
 
-        var parentModel = loopback.getModel(parentModelName);
         var cust = {
             'id': 106,
             'name': 'Bill',
@@ -405,46 +393,40 @@ describe(chalk.blue('Validation validateWhen test'), function() {
             'state': 'CALIFORNIA'
         };
 
-        parentModel.create(cust, bootstrap.defaultContext, function(err, results) {
+        parentModel.create(cust, bootstrap.defaultContext, function (err, results) {
             expect(err).not.to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should insert data successfully', function(done) {
-
-        var addressModel = loopback.getModel(addressModelName);
+    it('Validation Test - Should insert data successfully', function (done) {
 
         var data = {
             'state': 'WASHINGTON',
             'zipcode': '123456'
         };
-        addressModel.create(data, bootstrap.defaultContext, function(err, results) {
+        addressModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });
     });
 
-    it('Validation Test - Should fail to insert data successfully', function(done) {
-
-        var addressModel = loopback.getModel(addressModelName);
+    it('Validation Test - Should fail to insert data successfully', function (done) {
 
         var data = {
             'state': 'WASHINGTON'
         };
-        addressModel.create(data, bootstrap.defaultContext, function(err, results) {
+        addressModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).not.to.be.undefined;
             done();
         });
     });
-    it('Validation Test - Should insert data successfully', function(done) {
-
-        var addressModel = loopback.getModel(addressModelName);
+    it('Validation Test - Should insert data successfully', function (done) {
 
         var data = {
             'state': 'CALIFORNIA'
         };
-        addressModel.create(data, bootstrap.defaultContext, function(err, results) {
+        addressModel.create(data, bootstrap.defaultContext, function (err, results) {
             expect(err).to.be.null;
             done();
         });

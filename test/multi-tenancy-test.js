@@ -101,9 +101,9 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     cleandb(done);
   });
 
-    //    after('cleanup', function(done) {
-    //        cleandb(done);
-    //    });
+  //    after('cleanup', function(done) {
+  //        cleandb(done);
+  //    });
 
   it('login as admin', function (done) {
     var postData = {
@@ -113,28 +113,28 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/BaseUsers/login';
     var api = defaults(supertest(bootstrap.app));
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(postData)
-            .expect(200).end(function (err, response) {
-              accessTokens.admin = response.body.id;
-              done();
-            });
+      .post(postUrl)
+      .send(postData)
+      .expect(200).end(function (err, response) {
+        accessTokens.admin = response.body.id;
+        done();
+      });
   });
 
   it('Create Tenants', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/Tenants?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(tenants)
-            .expect(200)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(tenants)
+      .expect(200)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('Create Common Product Model for Both Tenants', function (done) {
@@ -162,34 +162,34 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/ModelDefinitions?access_token=' + accessTokens.admin;
 
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(modelDefinitionData)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                if (response.statusCode !== 200) {
-                  console.log(response.body);
-                }
-                expect(response.statusCode).to.be.equal(200);
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(modelDefinitionData)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          if (response.statusCode !== 200) {
+            console.log(response.body);
+          }
+          expect(response.statusCode).to.be.equal(200);
+          done();
+        }
+      });
   });
 
   it('Create DataSources', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/DataSourceDefinitions?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(datasources)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(datasources)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('switch tenant 1', function (done) {
@@ -199,48 +199,48 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/BaseUsers/switch-tenant?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(data)
-            .expect(200)
-            .end(function (err, result) {
-              if (err) {
-                done(err);
-              } else {
-                expect(result.body).not.to.be.undefined;
-                expect(result.body.tenantId).to.be.equal(tenants[0].tenantId);
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(data)
+      .expect(200)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).not.to.be.undefined;
+          expect(result.body.tenantId).to.be.equal(tenants[0].tenantId);
+          done();
+        }
+      });
   });
 
   it('Create DataSource Mappings for tenant1', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/DataSourceMappings?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(mappings1)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(mappings1)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('Create User1 in tenant1', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/BaseUsers?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(user1)
-            .expect(200).end(function (err, resp) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(user1)
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('login as user1 in tenant1', function (done) {
@@ -251,15 +251,15 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/BaseUsers/login';
     var api = defaults(supertest(bootstrap.app));
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .set('tenant_id', tenants[0].tenantId)
-            .send(postData)
-            .expect(200).end(function (err, response) {
-              expect(response.body).not.to.be.undefined;
-              expect(response.body.id).not.to.be.undefined;
-              accessTokens.user1 = response.body.id;
-              done();
-            });
+      .post(postUrl)
+      .set('tenant_id', tenants[0].tenantId)
+      .send(postData)
+      .expect(200).end(function (err, response) {
+        expect(response.body).not.to.be.undefined;
+        expect(response.body.id).not.to.be.undefined;
+        accessTokens.user1 = response.body.id;
+        done();
+      });
   });
 
   xit('Post Data to Product in tenant1 ', function (done) {
@@ -272,27 +272,27 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/' + productModelName + '?access_token=' + accessTokens.user1;
 
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(postData)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                if (response.statusCode !== 200) {
-                  console.log(response.body);
-                }
-                expect(response.statusCode).to.be.equal(200);
-                var callContext = {
-                  ctx: {}
-                };
-                callContext.ctx.tenantId = tenants[0].tenantId;
-                var model = bootstrap.models[productModelName];
-                model.find(function (err, list) {
-                  expect(list[0]._autoScope.tenantId).to.be.equal(tenants[0].tenantId);
-                  done();
-                });
-              }
-            });
+      .post(postUrl)
+      .send(postData)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          if (response.statusCode !== 200) {
+            console.log(response.body);
+          }
+          expect(response.statusCode).to.be.equal(200);
+          var callContext = {
+            ctx: {}
+          };
+          callContext.ctx.tenantId = tenants[0].tenantId;
+          var model = bootstrap.models[productModelName];
+          model.find(function (err, list) {
+            expect(list[0]._autoScope.tenantId).to.be.equal(tenants[0].tenantId);
+            done();
+          });
+        }
+      });
   });
 
   it('switch tenant to tenant2', function (done) {
@@ -302,49 +302,49 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/BaseUsers/switch-tenant?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(data)
-            .expect(200)
-            .end(function (err, result) {
-              if (err) {
-                done(err);
-              } else {
-                expect(result.body).not.to.be.undefined;
-                expect(result.body.tenantId).to.be.equal(tenants[1].tenantId);
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(data)
+      .expect(200)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).not.to.be.undefined;
+          expect(result.body.tenantId).to.be.equal(tenants[1].tenantId);
+          done();
+        }
+      });
   });
 
   it('Create DataSource Mappings for tenant2', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/DataSourceMappings?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(mappings2)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(mappings2)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('Create User2 in tenant2', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = baseUrl + '/BaseUsers?access_token=' + accessTokens.admin;
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(user2)
-            .expect(200)
-            .end(function (err, resp) {
-              if (err) {
-                done(err);
-              } else {
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(user2)
+      .expect(200)
+      .end(function (err, resp) {
+        if (err) {
+          done(err);
+        } else {
+          done();
+        }
+      });
   });
 
   it('login as user2 in tenant2', function (done) {
@@ -355,15 +355,15 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/BaseUsers/login';
     var api = defaults(supertest(bootstrap.app));
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .set('tenant_id', tenants[1].tenantId)
-            .send(postData)
-            .expect(200).end(function (err, response) {
-              expect(response.body).not.to.be.undefined;
-              expect(response.body.id).not.to.be.undefined;
-              accessTokens.user2 = response.body.id;
-              done();
-            });
+      .post(postUrl)
+      .set('tenant_id', tenants[1].tenantId)
+      .send(postData)
+      .expect(200).end(function (err, response) {
+        expect(response.body).not.to.be.undefined;
+        expect(response.body.id).not.to.be.undefined;
+        accessTokens.user2 = response.body.id;
+        done();
+      });
   });
 
   it('Create Variant Model', function (done) {
@@ -392,19 +392,19 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/ModelDefinitions?access_token=' + accessTokens.user2;
 
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(modelDefinitionData)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                if (response.statusCode !== 200) {
-                  console.log(response.body);
-                }
-                expect(response.statusCode).to.be.equal(200);
-                done();
-              }
-            });
+      .post(postUrl)
+      .send(modelDefinitionData)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          if (response.statusCode !== 200) {
+            console.log(response.body);
+          }
+          expect(response.statusCode).to.be.equal(200);
+          done();
+        }
+      });
   });
 
   xit('Post Data to Product in tenant2', function (done) {
@@ -416,27 +416,27 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     var postUrl = baseUrl + '/' + productModelName + '?access_token=' + accessTokens.user2;
 
     api.set('Accept', 'application/json')
-            .post(postUrl)
-            .send(postData)
-            .end(function (err, response) {
-              if (err) {
-                done(err);
-              } else {
-                if (response.statusCode !== 200) {
-                  console.log(response.body);
-                }
-                expect(response.statusCode).to.be.equal(200);
-                var callContext = {
-                  ctx: {}
-                };
-                callContext.ctx.tenantId = tenants[1].tenantId;
-                var model = bootstrap.models[productModelName];
-                model.find(function (err, list) {
-                  expect(list[0]._autoScope.tenantId).to.be.equal(tenants[1].tenantId);
-                  expect(list[0].Tenant2Field).to.be.equal('default value');
-                  done();
-                });
-              }
-            });
+      .post(postUrl)
+      .send(postData)
+      .end(function (err, response) {
+        if (err) {
+          done(err);
+        } else {
+          if (response.statusCode !== 200) {
+            console.log(response.body);
+          }
+          expect(response.statusCode).to.be.equal(200);
+          var callContext = {
+            ctx: {}
+          };
+          callContext.ctx.tenantId = tenants[1].tenantId;
+          var model = bootstrap.models[productModelName];
+          model.find(function (err, list) {
+            expect(list[0]._autoScope.tenantId).to.be.equal(tenants[1].tenantId);
+            expect(list[0].Tenant2Field).to.be.equal('default value');
+            done();
+          });
+        }
+      });
   });
 });

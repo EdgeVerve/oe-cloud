@@ -246,12 +246,13 @@ module.exports = function uiComponent(UIComponent) {
         log.error(options, 'Error ', err);
         return callback(err, null);
       }
-      var component = results ? results[0] : undefined;
+      var component = results ? results[0] : null;
       if (!component) {
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
           var modelAndType = componentName.split('-');
           var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
+          modelName = loopback.findModel(modelName, options).modelName;
           var templateType = modelAndType[1];
           if (modelName && templateType) {
             var model = UIComponent.app.models[modelName];
@@ -310,8 +311,7 @@ module.exports = function uiComponent(UIComponent) {
       callback = options;
       options = {};
     }
-
-    var modelName = UIComponent.app.locals.modelNames[name] || name;
+    var modelName = loopback.findModel(name, options).modelName || name;
     metaoptions = metaoptions || {};
     var app = this.app;
     var response = {};
@@ -521,7 +521,8 @@ module.exports = function uiComponent(UIComponent) {
 
     var tasks = [];
     modelList.forEach(function defaultUICreator(modelName) {
-      modelName = UIComponent.app.locals.modelNames[modelName] || modelName;
+      modelName = UIComponent.app.locals.modelNames[modelName];
+      modelName = loopback.findModel(modelName, options).modelName || modelName;
       var model = UIComponent.app.models[modelName];
       if (model && model.shared) {
         var templates = ['form', 'list'];

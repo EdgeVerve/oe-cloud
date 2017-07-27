@@ -15,8 +15,6 @@
 module.exports = function RetrySupportMixin(Model) {
   // Add a remote methods.
   exposeAsRemote(Model);
-
-  addObservers(Model);
 };
 
 /**
@@ -27,16 +25,6 @@ module.exports = function RetrySupportMixin(Model) {
  */
 function exposeAsRemote(Model) {
   Model.isRetryable = function modelIsRetryable(filter, options, cb) {
-    if (!(cb && typeof cb === 'function')) {
-      if (options && typeof options === 'function') {
-        cb = options;
-        options = {};
-      } else {
-        var err = new Error(' callBack function is not defined');
-        err.retriable = false;
-        throw err;
-      }
-    }
     return cb(null, 'true');
   };
 
@@ -57,20 +45,9 @@ function exposeAsRemote(Model) {
     }
   });
 
-  var pkField = {};
-  pkField.name = Model.dataSource.idName(Model.modelName);
-
   Model.primaryKeyField = function pKeyField(filter, options, cb) {
-    if (!(cb && typeof cb === 'function')) {
-      if (options && typeof options === 'function') {
-        cb = options;
-        options = {};
-      } else {
-        var err = new Error(' callBack function is not defined');
-        err.retriable = false;
-        throw err;
-      }
-    }
+    var pkField = {};
+    pkField.name = Model.dataSource.idName(Model.modelName);
     return cb(null, pkField);
   };
 
@@ -90,7 +67,4 @@ function exposeAsRemote(Model) {
       root: true
     }
   });
-}
-
-function addObservers(Model) {
 }

@@ -11,7 +11,6 @@
     * @Author Atul
     */
 
-var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('switch-datasource-mixin');
 var appinstance = require('../../server/server.js').app;
@@ -38,7 +37,7 @@ function getScopeMatchedDS(model, list, scope) {
       }
     }
 
-    dsScope.modelName = model.modelName;
+    dsScope.modelName = model.clientModelName || model.modelName;
 
     for (var dsScopeVar in dsScope) {
       if (!dsScope.hasOwnProperty(dsScopeVar)) {
@@ -160,40 +159,6 @@ function getDataSourceForName(app, model, dsname, scope) {
 }
 
 module.exports = function SwitchDatasourceMixin(model) {
-  /**
-  *
-  *
-  * This function returns overriden model or in other words personalized model
-  * As of now this function is written in switch-datasource-mixin.js file because logic to find overriden model can be easily reused.
-  * As of now this function is async and requires callback. When logic of data source personalization is reused, it can be made with sync call
-  * this will be changed in future till all scenarios are tested. there could be some overhead as of now.
-  * @param {object} options - options
-  * @param {callback} cb - callback to be called
-  * @return {void} it returns none. however upon finding overriden model- callback is called along with overriden model
-  * @function
-  */
-  model.getOverridenModel = function getOverridenModelFn(options, cb) {
-    if (typeof cb === 'undefined') {
-      if (typeof options === 'function') {
-        cb = options;
-        options = {};
-      }
-    }
-    var modelDefinition = loopback.findModel('ModelDefinition');
-    var savethis = this;
-    modelDefinition.findOne({
-      where: {
-        variantOf: this.modelName
-      }
-    }, options, function modelDiscoveryFilterModelDefinitionFindOneCb(err, instance) {
-      if (err || !instance) {
-        return cb(null, savethis);
-      }
-      var overridenModel = loopback.findModel(instance.name);
-      return cb(null, overridenModel);
-    });
-  };
-
   var originalDataSource = {};
 
   model.getDataSource = function switchDatasource(options) {
@@ -224,7 +189,7 @@ module.exports = function SwitchDatasourceMixin(model) {
     //        }
     //    }
 
-    var modelName = model.settings.variantOf || model.modelName;
+    var modelName = model.settings.variantOf || model.clientModelName;
 
     originalDataSource[modelName] = originalDataSource[modelName] || model.dataSource;
 
@@ -263,8 +228,8 @@ module.exports = function SwitchDatasourceMixin(model) {
           return ds;
         }
       }
-    } else if (originalDataSource[model.modelName]) {
-      var dsName = originalDataSource[model.modelName].settings.name;
+    } else if (originalDataSource[model.clientModelName]) {
+      var dsName = originalDataSource[model.clientModelName].settings.name;
       var ds2 = getDataSourceForName(app, model, dsName, scope);
       if (ds2) {
         model.attachTo(ds2);
@@ -272,9 +237,9 @@ module.exports = function SwitchDatasourceMixin(model) {
       }
     }
 
-    if (originalDataSource[model.modelName]) {
+    if (originalDataSource[model.clientModelName]) {
       model.attachTo(originalDataSource[modelName]);
-      return originalDataSource[model.modelName];
+      return originalDataSource[model.clientModelName];
     }
 
     var dsname = model.dataSource.settings.name ? model.dataSource.settings.name : 'db';

@@ -13,6 +13,7 @@ var expect = bootstrap.chai.expect;
 var models = bootstrap.models;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
+var loopback = require('loopback');
 var _version;
 var defaultContext = {
     ctx: {
@@ -38,7 +39,7 @@ var defaultContext = {
 describe(chalk.blue('Node-red test'), function () {
 
     var accessToken;
-
+    var adminAccessToken;
 
     before('Logint to framework', function (done) {
         var options = {};
@@ -91,7 +92,7 @@ describe(chalk.blue('Node-red test'), function () {
                 expect(resp.status).to.be.equal(200);
                 expect(resp.body.flows.length).to.be.equal(4);
                 _version = resp.body.rev; //resp.req.res.headers['set-cookie'];
-                console.log('cookie ', _version);
+                console.log('version ', _version);
                 expect(resp.body.flows[0].label).to.be.equal('node-red-test-tenant');
                 expect(resp.body.flows[3].name).to.be.equal('node-red-test-tenant');
                 return done();
@@ -116,6 +117,8 @@ describe(chalk.blue('Node-red test'), function () {
           .send({ flows: flows, rev: _version })
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
+                _version = resp.body.rev;
+                console.log('version2 : ', _version);
                 done(err);
             });
     });
@@ -128,7 +131,6 @@ describe(chalk.blue('Node-red test'), function () {
                 return;
             }
             flag = false;
-            console.log("notifyLiteral");
             expect(payload).not.to.be.undefined;
             expect(payload.ctx).not.to.be.undefined;
             expect(payload.ctx.tenantId).to.be.equal("test-tenant");
@@ -145,7 +147,7 @@ describe(chalk.blue('Node-red test'), function () {
     it('Node-Red Test - Login with admin user', function (done) {
 
         bootstrap.login({ 'username': 'admin', 'password': 'admin' }, function (token) {
-            accessToken = token;
+            adminAccessToken = token;
             return done();
         });
 
@@ -154,10 +156,10 @@ describe(chalk.blue('Node-red test'), function () {
     it('Node-Red Test - admin user should not see flow for test-tenant user', function (done) {
         var api = defaults(supertest(bootstrap.app));
         //console.log(accessToken);
-        var url = '/red' + '/flows?access_token=' + accessToken;
+        var url = '/red' + '/flows?access_token=' + adminAccessToken;
 
         api.set('Accept', 'application/json')
-            .set('accessToken', accessToken)
+            .set('accessToken', adminAccessToken)
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
@@ -176,11 +178,11 @@ describe(chalk.blue('Node-red test'), function () {
 
         var api = defaults(supertest(bootstrap.app));
         //console.log(accessToken);
-        var postUrl = '/red' + '/flows?access_token=' + accessToken;
+        var postUrl = '/red' + '/flows?access_token=' + adminAccessToken;
 
         api.set('Accept', 'application/json')
             .post(postUrl)
-            .set('accessToken', accessToken)
+            .set('accessToken', adminAccessToken)
           .send({ flows: flows })
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
@@ -192,10 +194,10 @@ describe(chalk.blue('Node-red test'), function () {
     it('Node-Red Test - Admin user Should able to retrieve node red flow same we posted earlier', function (done) {
         var api = defaults(supertest(bootstrap.app));
         //console.log(accessToken);
-        var url = '/red' + '/flows?access_token=' + accessToken;
+        var url = '/red' + '/flows?access_token=' + adminAccessToken;
 
         api.set('Accept', 'application/json')
-            .set('accessToken', accessToken)
+            .set('accessToken', adminAccessToken)
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
@@ -207,32 +209,132 @@ describe(chalk.blue('Node-red test'), function () {
     });
 
 
-    it('Node-Red Test - Should able to execute flow when accessing Literal model - will wait for event emitted from node-red flow for ADMIN user', function (done) {
+    it('Node-Red Test - Should able to execute flow when accessing Literal model by tenant user - this will cause both the flows to execute - one set by user and one set by admin', function (done) {
         var flag = true;
+        var flag2 = true;
+        function cb() {
+            var cnt = 0;
+            return function () {
+                ++cnt;
+                if (cnt >= 2)
+                    return done();
+            }
+        }
+        var done2 = cb();
         // Listen to event first before firing .find which will trigger the access hook.
         models["Literal"].on("notifyLiteral2", function (payload) {
             if (!flag)
-                return;
+              return;
             flag = false;
-            console.log("notifyLiteral2");
             expect(payload).not.to.be.undefined;
             expect(payload.ctx).not.to.be.undefined;
             expect(payload.ctx.tenantId).to.be.equal("default");
-            done();
+            return done2();
+
+        });
+        
+        models["Literal"].on("notifyLiteral", function (payload) {
+            if (!flag2)
+                return;
+            flag2 = false;
+            expect(payload).not.to.be.undefined;
+            expect(payload.ctx).not.to.be.undefined;
+            expect(payload.ctx.tenantId).to.be.equal("test-tenant");
+            return done2();
 
         });
         //this should trigger node red flow for admin flow only
-        models["Literal"].find({}, {
-            ctx: {
-                tenantId: 'default',
-                remoteUser: 'admin'
-            }
-        }, function (err, results) {
+        models["Literal"].find({}, defaultContext, function (err, results) {
             // do nothing..
             // node-red flow should trigger and it should raise the event. 
             // below that event is captured for this test case.
         });
     });
+    it('Node-Red Test - switch tenant to post the flow', function (done) {
+        var data = {
+            tenantId: 'test-tenant'
+        };
+        var api = defaults(supertest(bootstrap.app));
+        var postUrl = bootstrap.basePath + '/BaseUsers/switch-tenant?access_token=' + adminAccessToken;
+        api.set('Accept', 'application/json')
+            .post(postUrl)
+            .send(data)
+            .expect(200)
+            .end(function (err, result) {
+                if (err) {
+                    done(err);
+                } else {
+                    expect(result.body).not.to.be.undefined;
+                    expect(result.body.tenantId).to.be.equal('test-tenant');
+                    done();
+                }
+            });
+    });
+
+    it('Node-Red Test - should able to create flow for dynamically created model', function (done) {
+        var modelName = 'NodeRedTestModel';
+        var postData = {
+            name: modelName,
+            base: 'BaseEntity',
+            plural: modelName + 's',
+            properties: {}
+        };
+
+        models.ModelDefinition.create(postData, defaultContext, function (err, res) {
+            if (err)
+                return done(err);
+
+            expect(res).not.to.be.undefined;
+            var model = loopback.findModel(modelName, defaultContext);
+            expect(model).not.to.be.null;
+
+            var flows = [{ "id": "5b4e055c.3134aa", "type": "tab", "label": "node-red-test-tenant2" },
+                { "id": "f2978c55.016aa", "type": "async-observer", "z": "5b4e055c.3134aa", "name": "node-red-test-tenant2", "modelname": "NodeRedTestModel", "method": "access", "x": 162, "y": 191, "wires": [["f5c48f2.d0e0aa"]] },
+                { "id": "f5c48f2.d0e0aa", "type": "function", "z": "5b4e055c.3134aa", "name": "node-red-test-tenant", "func": "console.log('******* test-tenant ********');\nvar loopback = global.get('loopback');\nvar literalModel = loopback.findModel('" + "NodeRedTestModel" + "', msg.callContext);\n  console.log('**********************--->', literalModel.modelName); literalModel.emit(\"notifyNodeRedTestModel\", msg.callContext);\n\nreturn msg;", "outputs": 1, "noerr": 0, "x": 439, "y": 165, "wires": [["9a0d6af6.7e8eaa"]] },
+                { "id": "9a0d6af6.7e8eaa", "type": "debug", "z": "5b4e055c.3134aa", "name": "node-red-test-tenant", "active": true, "console": "false", "complete": "true", "x": 661, "y": 147, "wires": [] }];
+
+            var api = defaults(supertest(bootstrap.app));
+            //console.log(accessToken);
+            var postUrl = '/red' + '/flows?access_token=' + adminAccessToken;
+            console.log('cookie ', _version);
+            api.set('Accept', 'application/json')
+                .post(postUrl)
+                .set('accessToken', adminAccessToken)
+                .send({ flows: flows, rev: _version  })
+                .end(function (err, resp) {
+                    if (err) {
+                        console.log(resp); 
+                        return done(err);
+                    };
+                    expect(resp.status).to.be.equal(200);
+                    return done(err);
+                });
+        });
+    });
+
+    it('Node-Red Test - should able execute create flow for dynamically created model', function (done) {
+        var flag = true;
+        // Listen to event first before firing .find which will trigger the access hook.
+        var model = loopback.findModel('NodeRedTestModel', defaultContext);
+        model.on("notifyNodeRedTestModel", function (payload) {
+            console.log('notifyNodeRedTestModel');
+            if (!flag)
+                return;
+            flag = false;
+            expect(payload).not.to.be.undefined;
+            expect(payload.ctx).not.to.be.undefined;
+            expect(payload.ctx.tenantId).to.be.equal("test-tenant");
+            return done();
+
+        });
+        //this should trigger node red flow for admin flow only
+        model.find({}, defaultContext, function (err, results) {
+            // do nothing..
+            // node-red flow should trigger and it should raise the event. 
+            // below that event is captured for this test case.
+        });
+    });
+
 });
 
 describe(chalk.blue('Access control to node-red test'), function () {
@@ -305,11 +407,11 @@ describe(chalk.blue('Access control to node-red test'), function () {
 
         var api = defaults(supertest(bootstrap.app));
         var postUrl = '/red' + '/flows?access_token=' + accessToken_developer;
-
+        
         api.set('Accept', 'application/json')
             .post(postUrl)
             .set('accessToken', accessToken_developer)
-            .send({ flows: flows } )
+            .send({ flows: flows })
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(401);
                 done(err);

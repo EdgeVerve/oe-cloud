@@ -17,7 +17,8 @@
     "SoftDeleteMixin": false,
     "PropertyExpressionMixin": false,
     "FailsafeObserverMixin": false,
-    "IdempotentMixin": false
+    "IdempotentMixin": false,
+    "CryptoMixin": false
   },
   "options": {
     "validateUpsert": false,

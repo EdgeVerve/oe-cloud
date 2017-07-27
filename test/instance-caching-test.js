@@ -33,14 +33,14 @@ var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
 var defaultContext = {
-    ctx: {
-        tenantId: 'limits'
-    }
+  ctx: {
+    tenantId: 'limits'
+  }
 };;
 var altContext = {
-    ctx: {
-        tenantId: 'gravity'
-    }
+  ctx: {
+    tenantId: 'gravity'
+  }
 };;
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
@@ -49,58 +49,58 @@ var dataSource;
 var accessToken = null;
 
 function apiPostRequest(url, postData, callback, done) {
-    var version = uuid.v4();
-    postData._version = version;
-    api
-        .set('Accept', 'application/json')
-        .set('x-evproxy-db-lock', '1')
-        .post(bootstrap.basePath + url + '?access_token=' + accessToken)
-        .send(postData)
-        .end(function(err, res) {
-            if (err || res.body.error) {
-                //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
-                return done(err || (new Error(JSON.stringify(res.body.error))));
-            } else {
-                return callback(res);
-            }
-        });
+  var version = uuid.v4();
+  postData._version = version;
+  api
+    .set('Accept', 'application/json')
+    .set('x-evproxy-db-lock', '1')
+    .post(bootstrap.basePath + url + '?access_token=' + accessToken)
+    .send(postData)
+    .end(function (err, res) {
+      if (err || res.body.error) {
+        //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
+        return done(err || (new Error(JSON.stringify(res.body.error))));
+      } else {
+        return callback(res);
+      }
+    });
 }
 
 function apiGetRequest(url, callback, done) {
-    var version = uuid.v4();
-    api
-        .set('Accept', 'application/json')
-        .set('x-evproxy-db-lock', '1')
-        .get(bootstrap.basePath + url + '?access_token=' + accessToken)
-        .send()
-        .end(function(err, res) {
-            if (err || res.body.error) {
-                //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
-                return done(err || (new Error(JSON.stringify(res.body.error))));
-            } else {
-                return callback(res);
-            }
-        });
+  var version = uuid.v4();
+  api
+    .set('Accept', 'application/json')
+    .set('x-evproxy-db-lock', '1')
+    .get(bootstrap.basePath + url + '?access_token=' + accessToken)
+    .send()
+    .end(function (err, res) {
+      if (err || res.body.error) {
+        //log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
+        return done(err || (new Error(JSON.stringify(res.body.error))));
+      } else {
+        return callback(res);
+      }
+    });
 }
 
-function mongoDeleteById(id, cb) {
-    if (dataSource.name === 'mongodb') {
-          var url = 'mongodb://'+mongoHost+':27017/' + dbname;
-          MongoClient.connect(url, function (err, db) {
-                if (err) {
-                    return cb(err);
-                } else {
-                    db.collection(modelName).deleteOne({_id: id}, function (err, numberRemoved) {
-                        if (err) {
-                            return cb(err);
-                        }
-                        debug("Number of records removed " + numberRemoved);
-                        cb();
-                    });
-                }
-        });
+function mongoDeleteById(id, newModelName, cb) {
+ if (dataSource.name === 'mongodb') {
+  var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
+  MongoClient.connect(url, function (err, db) {
+    if (err) {
+      return cb(err);
     } else {
-        var loopbackModelNoCache = loopback.getModel(modelName);
+      db.collection(newModelName).deleteOne({ _id: id }, function (err, numberRemoved) {
+        if (err) {
+          return cb(err);
+        }
+        debug("Number of records removed " + numberRemoved);
+        cb();
+      });
+    }
+  });
+} else {
+        var loopbackModelNoCache = loopback.getModel(modelName,bootstrap.defaultContext);
         var idFieldName =  loopbackModelNoCache.definition.idName();
         var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
         var client = new pg.Client(connectionString);
@@ -108,9 +108,9 @@ function mongoDeleteById(id, cb) {
             if (err) 
                 cb(err); 
             else {
-                var query = client.query("DELETE from " + modelName.toLowerCase() + "  WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                var query = client.query("DELETE from \"" + loopbackModelNoCache.modelName.toLowerCase() + "\"  WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
                 if (err)  {
-                    return done(err);
+                    return cb(err);
                 }
                 debug("Number of records removed " + result.rowCount);
                 cb();
@@ -118,212 +118,212 @@ function mongoDeleteById(id, cb) {
         }
     });
     }   
-    
+
 }
 
 describe('Instance Caching Test', function () {
-   // return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
-    var TestModel = null;
-    var TestModelNoInstanceCache = null;    
+  // return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
+  var TestModel = null;
+  var TestModelNoInstanceCache = null;
 
-     before('login using admin', function fnLogin(done) {
-        dataSource = app.datasources[dbname];
-        var sendData = {
-            'username': 'admin',
-            'password': 'admin'
-        };
+  before('login using admin', function fnLogin(done) {
+    dataSource = app.datasources[dbname];
+    var sendData = {
+      'username': 'admin',
+      'password': 'admin'
+    };
 
-        api
-            .set('x-evproxy-db-lock', '1')
-            .post(bootstrap.basePath + '/BaseUsers/login')
-            .send(sendData)
-            .expect(200).end(function(err, res) {
-                if (err) {
-                    log.error(log.defaultContext(), err);
-                    return done(err);
-                } else {
-                    accessToken = res.body.id;
-                    return done();
-                }
-            });
+    api
+      .set('x-evproxy-db-lock', '1')
+      .post(bootstrap.basePath + '/BaseUsers/login')
+      .send(sendData)
+      .expect(200).end(function (err, res) {
+        if (err) {
+          log.error(log.defaultContext(), err);
+          return done(err);
+        } else {
+          accessToken = res.body.id;
+          return done();
+        }
+      });
+  });
+
+  before('Create Test Model', function (done) {
+    var modelDefinition = loopback.findModel('ModelDefinition');
+    dataSource = app.datasources[dbname];
+    var data = {
+      'name': modelName,
+      'base': 'BaseEntity',
+      'idInjection': true,
+      'options': {
+        instanceCacheSize: 2000,
+        instanceCacheExpiration: 100000,
+        queryCacheSize: 2000,
+        queryCacheExpiration: 5000,
+        disableManualPersonalization: true
+      },
+      'properties': {
+        'name': {
+          'type': 'string'
+        }
+      }
+    };
+
+    modelDefinition.create(data, bootstrap.defaultContext, function (err, model) {
+      if (err) {
+        return done(err);
+      } else {
+        // Delete all records in the table associated with this TestModel
+        TestModel = loopback.getModel(modelName, bootstrap.defaultContext);
+        TestModel.destroyAll({}, defaultContext, function (err, info) {
+          if (err) {
+            return done(err);
+          } else {
+            done();
+          }
+        });
+      }
     });
+  });
 
-    before('Create Test Model', function (done) {
-        var modelDefinition = loopback.findModel('ModelDefinition');
-        dataSource = app.datasources[dbname];
-        var data = {
-            'name': modelName,
-            'base': 'BaseEntity',
-            'idInjection': true,
-            'options': {
-                instanceCacheSize: 2000,
-                instanceCacheExpiration: 100000,
-                queryCacheSize: 2000,
-                queryCacheExpiration: 5000,
-                disableManualPersonalization: true
-            },
-            'properties': {
-                'name': {
-                    'type': 'string'
-                }
-            }
-        };
+  before('Create Test Model with No InstanceCache', function (done) {
+    var modelDefinition = loopback.findModel('ModelDefinition');
+    dataSource = app.datasources[dbname];
+    var data = {
+      'name': modelNameNoInstanceCache,
+      'base': 'BaseEntity',
+      'idInjection': true,
+      'options': {
+        instanceCacheSize: 2000,
+        instanceCacheExpiration: 100000,
+        queryCacheSize: 2000,
+        queryCacheExpiration: 5000,
+        disableManualPersonalization: true,
+        disableInstanceCache: true
+      },
+      'properties': {
+        'name': {
+          'type': 'string'
+        }
+      }
+    };
 
-        modelDefinition.create(data, bootstrap.defaultContext, function(err, model) {
+    modelDefinition.create(data, bootstrap.defaultContext, function (err, model) {
+      if (err) {
+        return done(err);
+      } else {
+        // Delete all records in the table associated with this TestModel
+        TestModelNoInstanceCache = loopback.getModel(modelNameNoInstanceCache, bootstrap.defaultContext);
+        TestModelNoInstanceCache.destroyAll({}, defaultContext, function (err, info) {
+          if (err) {
+            return done(err);
+          } else {
+            done();
+          }
+        });
+      }
+    });
+  });
+
+  describe('CRUD tests', function () {
+    dataSource = app.datasources[dbname];
+    it('Should NOT cache the Test instance after create', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: "Lior",
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          result1 = Object.assign({}, data.toObject());
+          mongoDeleteById(id, TestModel.modelName, function (err) {
             if (err) {
-                return done(err);
-            } else {
-                // Delete all records in the table associated with this TestModel
-                TestModel = loopback.getModel(modelName);
-                TestModel.destroyAll({}, defaultContext, function (err, info) {
-                    if (err) {
-                        return done(err);
-                    } else {
-                        done();
-                    }
-                });
+              return done(err);
             }
-        });
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+              if (err) {
+                return done(err);
+              } else if (data2.length === 0) {
+                return done();
+              }
+              return done(new Error('should not cache instance'));
+            })
+          });
+        }
+      });
     });
 
-before('Create Test Model with No InstanceCache', function (done) {
-        var modelDefinition = loopback.findModel('ModelDefinition');
-        dataSource = app.datasources[dbname];
-        var data = {
-            'name': modelNameNoInstanceCache,
-            'base': 'BaseEntity',
-            'idInjection': true,
-            'options': {
-                instanceCacheSize: 2000,
-                instanceCacheExpiration: 100000,
-                queryCacheSize: 2000,
-                queryCacheExpiration: 5000,
-                disableManualPersonalization: true,
-                disableInstanceCache: true
-            },
-            'properties': {
-                'name': {
-                    'type': 'string'
-                }
+    it('Should cache the Test instance after findById', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: "Lior",
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          // update with query will delete instance array
+          TestModel.update({ name: "Lior" }, { name: "David" }, defaultContext, function (err, info) {
+            if (info.count !== 1) {
+              return done('too many instance with name lior');
             }
-        };
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+              if (err) {
+                return done(err);
+              } else if (data.length !== 1) {
+                return done('find should return one instance');
+              }
+              result1 = Object.assign({}, data[0].toObject());
+              mongoDeleteById(id, TestModel.modelName, function (err) {
+                if (err) {
+                  return done(err);
+                }
+                TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+                  if (err) {
+                    return done(err);
+                  } else if (data2.length === 0) {
+                    return done('instance not cached')
+                  }
+                  result2 = Object.assign({}, data2[0].toObject());
+                  expect(models[modelName]).not.to.be.null;
+                  expect(result1).not.to.be.null;
+                  expect(result2).not.to.be.null;
+                  expect(result1).to.deep.equal(result2);
+                  expect(result1.__data === result2.__data).to.be.true;
+                  return done();
+                });
+              });
+            });
+          });
+        }
+      });
+    });
 
-        modelDefinition.create(data, bootstrap.defaultContext, function(err, model) {
+    it('Should cache the Test instance after upsert', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Lior',
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          data.name = 'karin';
+          TestModel.upsert(data, defaultContext, function (err, data) {
             if (err) {
-                return done(err);
-            } else {
-                // Delete all records in the table associated with this TestModel
-                TestModelNoInstanceCache = loopback.getModel(modelNameNoInstanceCache);
-                TestModelNoInstanceCache.destroyAll({}, defaultContext, function (err, info) {
-                    if (err) {
-                        return done(err);
-                    } else {
-                        done();
-                    }
-                });
+              console.log(err);
+              return done(err);
             }
-        });
-    });
-
-    describe('CRUD tests', function () {
-        dataSource = app.datasources[dbname];
-        it('Should NOT cache the Test instance after create', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: "Lior",
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    result1 = Object.assign({},data.toObject());
-                    mongoDeleteById(id, function(err) {
-                        if(err) {
-                            return done(err);
-                        }
-                        TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                            if (err) {
-                                return done(err);
-                            } else if(data2.length === 0) {
-                                return done();
-                            }
-                            return done(new Error('should not cache instance'));
-                        })
-                    });
-                }
-            });
-        });
-
-        it('Should cache the Test instance after findById', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: "Lior",
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    // update with query will delete instance array
-                    TestModel.update({name:"Lior"}, {name:"David"}, defaultContext, function(err, info) {
-                        if(info.count !== 1){
-                            return done('too many instance with name lior');
-                        }
-                        TestModel.find({"where": {"id": id}}, defaultContext, function (err, data) {
-                            if (err) {
-                                return done(err);
-                            } else if(data.length !== 1) {
-                                return done('find should return one instance');
-                            }
-                            result1 = Object.assign({},data[0].toObject());
-                            mongoDeleteById(id, function(err) {
-                                if(err) {
-                                    return done(err);
-                                }
-                                TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                                    if (err) {
-                                        return done(err);
-                                    } else if(data2.length === 0) {
-                                        return done('instance not cached')
-                                    }
-                                    result2 = Object.assign({},data2[0].toObject());
-                                    expect(models[modelName]).not.to.be.null;
-                                    expect(result1).not.to.be.null;
-                                    expect(result2).not.to.be.null;
-                                    expect(result1).to.deep.equal(result2);
-                                    expect(result1.__data === result2.__data).to.be.true;
-                                    return done();
-                                });
-                            });
-                        });
-                    });
-                }
-            });
-        });
-
-        it('Should cache the Test instance after upsert', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Lior',
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    data.name = 'karin';
-                    TestModel.upsert(data, defaultContext, function(err, data) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        result1 = Object.assign({},data.toObject());
-                        mongoDeleteById(id, function(err) {
-                            if(err) {
+            result1 = Object.assign({}, data.toObject());
+            mongoDeleteById(id, TestModel.modelName, function (err) {
+	           if(err) {
                                 return done(err);
                             }
                             TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
@@ -364,219 +364,268 @@ before('Create Test Model with No InstanceCache', function (done) {
                             return done(err);
                         }
                         result1 = Object.assign({},data.toObject());
-                        mongoDeleteById(id, function(err) {
-                            if(err) {
-                                return done(err);
-                            }
-                            TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                                if (err) {
-                                    return done(err);
-                                } else if(data2.length === 0) {
-                                    return done('instance not cached')
-                                }
-                                result2 = Object.assign({},data2[0].toObject());
-                                expect(models[modelName]).not.to.be.null;
-                                expect(result1).not.to.be.null;
-                                expect(result2).not.to.be.null;
-                                expect(result1).to.deep.equal(result2);
-                                expect(result1.__data === result2.__data).to.be.true;
-                                return done();
-                            })
-                        });
-                    });
+                        mongoDeleteById(id, TestModel.modelName,function(err) {
+              if (err) {
+                return done(err);
+              }
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+                if (err) {
+                  return done(err);
+                } else if (data2.length === 0) {
+                  return done('instance not cached')
                 }
+                result2 = Object.assign({}, data2[0].toObject());
+                expect(models[modelName]).not.to.be.null;
+                expect(result1).not.to.be.null;
+                expect(result2).not.to.be.null;
+                expect(result1).to.deep.equal(result2);
+                expect(result1.__data === result2.__data).to.be.true;
+                return done();
+              })
             });
-        });
+          });
+        }
+      });
+    });
 
-        it('Should cache the Test instance after updateAttributes', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Lior',
-                assign: {
+    it('Should cache the Test instance after updateAttributes', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Lior',
+ assign: {
                     change: 'this field should be deleted'
                 },
-                id: id
-            }, defaultContext, function (err, data) {
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          data.updateAttributes({name: 'Eduardo', assign:{new: 'should only see this field'}}, defaultContext, function(err, data) {
+            if (err) {
+              console.log(err);
+              return done(err);
+            }
+            result1 = Object.assign({}, data.toObject(), {name: 'Eduardo', assign:{new: 'should only see this field'}});
+            mongoDeleteById(id, TestModel.modelName, function (err) {
+              if (err) {
+                return done(err);
+              }
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                 if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    data.updateAttributes({name: 'Eduardo', assign:{new: 'should only see this field'}}, defaultContext, function(err, data) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        result1 = Object.assign({}, data.toObject(), {name: 'Eduardo', assign:{new: 'should only see this field'}});
-                        mongoDeleteById(id, function(err) {
-                            if(err) {
-                                return done(err);
-                            }
-                            TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                                if (err) {
-                                    return done(err);
-                                } else if(data2.length === 0) {
-                                    return done('instance not cached')
-                                }
-                                result2 = Object.assign({},data2[0].toObject());
-                                expect(models[modelName]).not.to.be.null;
-                                expect(result1).not.to.be.null;
-                                expect(result2).not.to.be.null;
-                                expect(result1).to.deep.equal(result2);
-                                expect(result1.__data === result2.__data).to.be.true;
-                                return done();
-                            })
-                        });
-                    });
+                  return done(err);
+                } else if (data2.length === 0) {
+                  return done('instance not cached')
                 }
+                result2 = Object.assign({}, data2[0].toObject());
+                expect(models[modelName]).not.to.be.null;
+                expect(result1).not.to.be.null;
+                expect(result2).not.to.be.null;
+                expect(result1).to.deep.equal(result2);
+                expect(result1.__data === result2.__data).to.be.true;
+                return done();
+              })
             });
-        });
+          });
+        }
+      });
+    });
 
-        it('Should clear instance cache after destroyAll', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Ori',
-                id: id
-            }, defaultContext, function (err, data) {
+it('Should clear instance cache after destroyAll', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Ori',
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          TestModel.destroyAll({}, defaultContext, function (err) {
+            if (err) {
+              console.log(err);
+              return done(err);
+            }
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+              if (err) {
+                return done(err);
+              }
+              expect(data2.length).to.be.equal(0);
+              return done();
+            });
+          });
+        }
+      });
+    });
+
+    it('Should delete the Test instance from cache after deleteByid', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Tamar',
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          TestModel.destroyById(id, defaultContext, function (err) {
+            if (err) {
+              console.log(err);
+              return done(err);
+            }
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+              if (err) {
+                return done(err);
+              }
+              expect(data2.length).to.be.equal(0);
+              return done();
+            });
+          });
+        }
+      });
+    });
+
+    it('Should delete the Test instance from cache after deleteByid and version', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Tamar',
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          TestModel.destroyById(id, data._version, defaultContext, function (err) {
+            if (err) {
+              console.log(err);
+              return done(err);
+            }
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+              if (err) {
+                return done(err);
+              }
+              expect(data2.length).to.be.equal(0);
+              return done();
+            });
+          });
+        }
+      });
+    });
+
+    it('Should clear cache after update', function (done) {
+      var id = uuid.v4();
+      TestModel.create({
+        name: "Praveen",
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          // update with query should delete instance cache
+          TestModel.update({ name: "Praveen" }, { name: "Ramesh" }, defaultContext, function (err, info) {
+            if (info.count !== 1) {
+              return done('too many instance with name Praveen');
+            }
+            mongoDeleteById(id, TestModel.modelName, function (err) {
+              if (err) {
+                return done(err);
+              }
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                 if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    TestModel.destroyAll({}, defaultContext, function(err) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                            if (err) {
-                                return done(err);
-                            }
-                            expect(data2.length).to.be.equal(0);
-                            return done();
-                        });
-                    });
+                  return done(err);
                 }
+                expect(data2.length).to.be.equal(0);
+                return done();
+              });
             });
-        });
+          });
+        }
+      });
+    });
 
-        it('Should delete the Test instance from cache after deleteByid', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Tamar',
-                id: id
-            }, defaultContext, function (err, data) {
+    it('Should delete empty instance in cache after create', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+        if (err) {
+          return done(err);
+        } else if (data.length !== 0) {
+          return done('There should not be an instance yet');
+        }
+        TestModel.create({
+          name: "Lior",
+          id: id
+        }, defaultContext, function (err, data) {
+          if (err) {
+            console.log(err);
+            return done(err);
+          } else {
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
                 if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    TestModel.destroyById(id, defaultContext, function(err) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                            if (err) {
-                                return done(err);
-                            }
-                            expect(data2.length).to.be.equal(0);
-                            return done();
-                        });
-                    });
+                  return done(err);
+                } else if (data.length !== 1) {
+                  return done('find should return one instance');
                 }
-            });
-        });
-
-        it('Should delete the Test instance from cache after deleteByid and version', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Tamar',
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    console.log(err);
+                result1 = Object.assign({}, data[0].toObject());
+                mongoDeleteById(id, TestModel.modelName, function (err) {
+                  if (err) {
                     return done(err);
-                } else {
-                    TestModel.destroyById(id, data._version, defaultContext, function(err) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                            if (err) {
-                                return done(err);
-                            }
-                            expect(data2.length).to.be.equal(0);
-                            return done();
-                        });
-                    });
-                }
-            });
+                  }
+                  TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+                    if (err) {
+                      return done(err);
+                    } else if (data2.length === 0) {
+                      return done('instance not cached')
+                    }
+                    result2 = Object.assign({}, data2[0].toObject());
+                    expect(models[modelName]).not.to.be.null;
+                    expect(result1).not.to.be.null;
+                    expect(result2).not.to.be.null;
+                    expect(result1).to.deep.equal(result2);
+                    expect(result1.__data === result2.__data).to.be.true;
+                    return done();
+                  });
+                });
+              });
+          }
         });
+      });
+    });
 
-        it('Should clear cache after update', function (done) {
-            var id = uuid.v4();
-            TestModel.create({
-                name: "Praveen",
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    // update with query should delete instance cache
-                    TestModel.update({name:"Praveen"}, {name:"Ramesh"}, defaultContext, function(err, info) {
-                        if(info.count !== 1){
-                            return done('too many instance with name Praveen');
-                        }
-                        mongoDeleteById(id, function(err) {
-                            if(err) {
-                                return done(err);
-                            }
-                            TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                                if (err) {
-                                    return done(err);
-                                }
-                                expect(data2.length).to.be.equal(0);
-                                return done();
-                            });
-                        });
-                    });
-                }
+    it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
+      /**
+       * 1. create new modle instance 
+       * 2. run a find query 
+       * 3. at this point, in a normal case, the instance should be cached
+       * 4. change the db directly in the DB.
+       * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
+       */
+      var id = uuid.v4();
+
+      apiPostRequest('/' + modelNameNoInstanceCache + 's/', { "name": "value1", "id": id }, apiRequest_find, done);
+
+      function apiRequest_find(result, callback) {
+        apiGetRequest('/' + modelNameNoInstanceCache + 's/' + id, callback ? callback : dbQuery_update, done);
+      };
+
+      function dbQuery_update(result) {
+        var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
+      if (dataSource.name === 'mongodb') {
+        MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
+          if (err) return done(err);
+          else {
+            db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
+              if (err) return done(err);
+              else apiRequest_find(result, comperCacheToDb);
             });
+          }
         });
-
-        it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function(done) {
-            /**
-             * 1. create new modle instance 
-             * 2. run a find query 
-             * 3. at this point, in a normal case, the instance should be cached
-             * 4. change the db directly in the DB.
-             * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
-             */
-            var id = uuid.v4();
-
-            apiPostRequest('/'+modelNameNoInstanceCache +'s/', {"name": "value1", "id": id}, apiRequest_find, done);
- 
-             function apiRequest_find(result, callback) {
-                 apiGetRequest('/'+modelNameNoInstanceCache +'s/'+id, callback ? callback : dbQuery_update, done);
-             };
-
-            function dbQuery_update (result) {
-                if (dataSource.name === 'mongodb') {
-                    MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
-                        if (err) return done(err);
-                        else {
-                            db.collection(modelNameNoInstanceCache).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
-                                if (err) return done(err);
-                                else apiRequest_find(result, comperCacheToDb);
-                            });
-                        }
-                    });
                 } else {
-                     var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache);
                      var idFieldName =  loopbackModelNoCache.definition.idName();
                      var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
                      var client = new pg.Client(connectionString);
@@ -584,7 +633,7 @@ before('Create Test Model with No InstanceCache', function (done) {
                             if (err) 
                                 done(err); 
                             else {
-                                var query = client.query("UPDATE " + modelNameNoInstanceCache.toLowerCase() + " SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
+                                var query = client.query("UPDATE \"" + loopbackModelNoCache.modelName.toLowerCase() + "\" SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
                                 if (err)  {
                                     return done(err);
                                 }
@@ -597,80 +646,80 @@ before('Create Test Model with No InstanceCache', function (done) {
             } 
         }
 
-       function comperCacheToDb(result){
-                if (result.body.name === "value2")  return done();
-                else return done(new Error("Model cached to instance cache, although disableInstanceCache flag is on"));
+      function comperCacheToDb(result) {
+        if (result.body.name === "value2") return done();
+        else return done(new Error("Model cached to instance cache, although disableInstanceCache flag is on"));
+      }
+    });
+
+    it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
+      var id = uuid.v4();
+      TestModelNoInstanceCache.create({ "name": modelNameNoInstanceCache, "id": id }, defaultContext, function (err, result) {
+        if (err) {
+          return done(err);
+        } else {
+          result.name = 'karin';
+          TestModelNoInstanceCache.upsert(result, defaultContext, function (err, data) {
+            if (err) {
+              return done(err);
+            } else {
+              if (global.evDisableInstanceCache[modelNameNoInstanceCache]
+                && !global.instanceCache[modelNameNoInstanceCache]
+                && !global.queryCache[modelNameNoInstanceCache]) {
+                return done();
+              } else {
+                return done(err);
+              }
             }
+          });
+        }
+      });
+    });
+  });
+
+  describe('Personalization tests', function () {
+    xit('Should create two instances with the same id and diffrenet scope, find from cache should still work', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: "limits",
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          return done(err);
+        }
+        result1 = Object.assign({}, data.toObject());
+        TestModel.create({
+          name: "gravity",
+          id: id
+        }, altContext, function (err, data) {
+          if (err) {
+            return done(err);
+          }
+          TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+            if (err) {
+              return done(err);
+            }
+            result2 = Object.assign({}, data2.toObject());
+            expect(result1).not.to.be.null;
+            expect(result2).not.to.be.null;
+            expect(result1).to.deep.equal(result2);
+            expect(result1.__data === result2.__data).to.be.true;
+          });
         });
 
-        it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function(done) {
-            var id = uuid.v4();
-            TestModelNoInstanceCache.create({"name": modelNameNoInstanceCache, "id": id}, defaultContext, function(err, result) {
-                if (err) {
-                    return done(err);
-                } else {
-                    result.name = 'karin';
-                    TestModelNoInstanceCache.upsert(result, defaultContext, function(err, data) {
-                        if (err) {
-                            return done(err);
-                        } else {
-                            if (global.evDisableInstanceCache[modelNameNoInstanceCache] 
-                                && !global.instanceCache[modelNameNoInstanceCache]
-                                && !global.queryCache[modelNameNoInstanceCache]){
-                                return done();
-                            } else {
-                                return done(err);
-                            }
-                        }
-                    });
-                }
-            });
-        });
+      });
     });
 
-    describe('Personalization tests', function () {
-        xit('Should create two instances with the same id and diffrenet scope, find from cache should still work', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: "limits",
-                id: id
-            }, defaultContext, function (err, data) {
-                if (err) {
-                    return done(err);
-                }
-                result1 = Object.assign({}, data.toObject());
-                TestModel.create({
-                    name: "gravity",
-                    id: id
-                }, altContext, function (err, data) {
-                    if (err) {
-                        return done(err);
-                    }
-                    TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                        if (err) {
-                            return done(err);
-                        }
-                        result2 = Object.assign({}, data2.toObject());
-                        expect(result1).not.to.be.null;
-                        expect(result2).not.to.be.null;
-                        expect(result1).to.deep.equal(result2);
-                        expect(result1.__data === result2.__data).to.be.true;
-                    });
-                });
-
-            });
-        });
-
-    });
+  });
 
 
-//    after('Cleanup', function (done) {
-//        TestModel.destroyAll({}, defaultContext, function (err, info) {
-//            if (err) {
-//                console.log(err, info);
-//            }
-//            done();
-//        });
-//    });
+  //    after('Cleanup', function (done) {
+  //        TestModel.destroyAll({}, defaultContext, function (err, info) {
+  //            if (err) {
+  //                console.log(err, info);
+  //            }
+  //            done();
+  //        });
+  //    });
 });

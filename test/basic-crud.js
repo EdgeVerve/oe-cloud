@@ -13,24 +13,22 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var uuid = require('node-uuid');
+var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('basic-crud');
-
 
 describe('basic-crud', function () {
 
     this.timeout(3000000);
 
     var app = bootstrap.app;
-    var options = {};
-    var Note = app.models.Note;
     var baseurl = app.get('restApiRoot');
-    var options = {};
     var data = {
         title: 'my note',
         content: 'Hello word',
         id: uuid.v4()
     };
+    var Note;
 
     before('Create Test Model and do cache test', function (done) {
         var modelDetails = {
@@ -51,7 +49,7 @@ describe('basic-crud', function () {
                 log.debug(bootstrap.defaultContext, 'unable to create Note model');
                 done(err);
             } else {
-                Note = app.models.Note;
+                Note = loopback.getModel('Note', bootstrap.defaultContext);
                 done();
             }
         });

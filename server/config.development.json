@@ -40,6 +40,8 @@
   "tenantkey": "tenant_id",
   "disableNodered": true,
   "nodeRedUserDir": "nodered/",
+  "nodeRedMetrics": false,
+  "nodeRedAudit": false,
   "app": "oecloud.io",
   "realm": "oecloud",
   "enableQuickBootTest":true,

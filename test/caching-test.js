@@ -149,6 +149,8 @@ describe('Caching Test', function () {
 
         // Create a TestModel and attache it to the dataSource
         TestModel = loopback.createModel(modelName, TestModelSchema, opts);
+        TestModel.clientModelName=modelName;
+        TestModel.clientPlural=modelName+'s';
         app.model(TestModel, {dataSource: dsname});
         TestModel.attachTo(dataSource);
 
