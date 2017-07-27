@@ -53,47 +53,37 @@ module.exports = function DBModels(app, cb) {
     if (key !== model.modelName) {
       return callback();
     }
-    var ds = model.getDataSource(util.bootContext());
-    ds.autoupdate(model.modelName, function (err, result) {
+    var modelDefinitionObject = JSON.parse(JSON.stringify(model.definition.settings));
+    // add the 'name' member
+    modelDefinitionObject.name = key;
+    modelDefinitionObject.filebased = true;
+    // store actual default datasource name and not getDataSource or using datasource switch
+    // at this stage model.dataSource should be as per model-config.json file
+
+    // modelDefinitionObject.dataSourceName = app.models[key].dataSource.settings.name;
+    var ownDefinition = model._ownDefinition || {};
+    // _ownDefinition is set in juggler
+    modelDefinitionObject.properties = ownDefinition.properties || {};
+
+    // to avoid crash due to max event listener check
+    DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
+    modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
       if (err) {
-        log.error(util.bootContext(), 'ds.autoupdate for model="', model.modelName, '" Error: ', err);
+        log.error(util.bootContext(), 'modelDefinition.findOne name="', key, '" Error: ', err);
         return callback(err);
       }
-      return findOrCreateModelDefinition();
-    });
-    function findOrCreateModelDefinition() {
-      var modelDefinitionObject = JSON.parse(JSON.stringify(model.definition.settings));
-      // add the 'name' member
-      modelDefinitionObject.name = key;
-      modelDefinitionObject.filebased = true;
-      // store actual default datasource name and not getDataSource or using datasource switch
-      // at this stage model.dataSource should be as per model-config.json file
-
-      // modelDefinitionObject.dataSourceName = app.models[key].dataSource.settings.name;
-      var ownDefinition = model._ownDefinition || {};
-      // _ownDefinition is set in juggler
-      modelDefinitionObject.properties = ownDefinition.properties || {};
-
-      // to avoid crash due to max event listener check
-      DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
-      modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
-        if (err) {
-          log.error(util.bootContext(), 'modelDefinition.findOne name="', key, '" Error: ', err);
-          return callback(err);
-        }
-        if (!res) {
-          modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
-            if (err) {
-              log.error(util.bootContext(), 'modelDefinition.create obj=', modelDefinitionObject, ' Error: ', err);
-              return callback(err);
-            }
-            callback();
-          });
-        } else {
+      if (!res) {
+        modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
+          if (err) {
+            log.error(util.bootContext(), 'modelDefinition.create obj=', modelDefinitionObject, ' Error: ', err);
+            return callback(err);
+          }
           callback();
-        }
-      });
-    }
+        });
+      } else {
+        callback();
+      }
+    });
   }, function dbModels() {
     var options = {};
     options.ignoreAutoScope = true;
