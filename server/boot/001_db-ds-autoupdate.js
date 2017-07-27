@@ -15,8 +15,13 @@ var log = require('oe-logger')('boot-db-models');
 var util = require('../../lib/common/util');
 module.exports = function DbDsAutoupdate(app, cb) {
   if (app.get('enableMigration')) {
-    log.debug(util.bootContext(), 'DB Migration is enabled, setting the environment "ENABLE_DS_AUTOUPDATE" variable to false');
-    process.env.ENABLE_DS_AUTOUPDATE = false;
+    if (util.checkForMigrationSwitch('ON') === 'ON') {
+      log.debug(util.bootContext(), 'DB Migration is enabled, but the migration switch also provided, setting the environment "ENABLE_DS_AUTOUPDATE" variable to true');
+      process.env.ENABLE_DS_AUTOUPDATE = true;
+    } else {
+      log.debug(util.bootContext(), 'DB Migration is enabled, but the migration switch not provided, setting the environment "ENABLE_DS_AUTOUPDATE" variable to false');
+      process.env.ENABLE_DS_AUTOUPDATE = false;
+    }
   } else {
     log.debug(util.bootContext(), 'DB Migration is disabled, setting the environment "ENABLE_DS_AUTOUPDATE" variable to true');
     process.env.ENABLE_DS_AUTOUPDATE = true;
