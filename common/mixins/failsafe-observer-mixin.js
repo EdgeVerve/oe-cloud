@@ -6,11 +6,11 @@ var os = require('os');
 var process = require('process');
 var currHostName = process.env.HOSTNAME || os.hostname();
 var eventHistroyManager;
-var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
+var enableEventHistoryManager = process.env.ENABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
 
 module.exports = function failsafeObserverMixin(Model) {
-  if (disableEventHistoryManager) {
+  if (!enableEventHistoryManager || enableEventHistoryManager !== 'true') {
     return;
   }
   eventHistroyManager = require('./../../lib/event-history-manager.js');
