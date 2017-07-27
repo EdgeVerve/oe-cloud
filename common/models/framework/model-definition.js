@@ -336,11 +336,11 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   };
 
   function doAutoUpdate(app, modeldefinition, options) {
-    var model = app.models[modeldefinition.name];
+    var model = loopback.findModel(modeldefinition.name, options);
     var ds = model.getDataSource(options);
     log.debug(options, 'Performing autoupdate on model "', modeldefinition.name, '"');
     if (ds) {
-      ds.autoupdate(modeldefinition.name, function (err, result) {
+      ds.autoupdate(model.modelName, function (err, result) {
         if (err) {
           log.error(options, 'ds.autoupdate for model="', modeldefinition.name, '" Error: ', err);
         }
