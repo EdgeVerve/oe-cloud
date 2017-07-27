@@ -44,7 +44,10 @@ module.exports = function AutoFieldsMixin(Model) {
  *  value will overwrite the value supplied by the client in the API (POST, for e.g.,)
  *
  *
- * Ajith
+ * @memberof Auto Field Mixin
+ * @param  {Object} ctx - call context
+ * @param  {function} next - callback function
+ * @function
  */
 function autoFieldMixinBeforeSave(ctx, next) {
   var data = ctx.instance || ctx.currentInstance || ctx.data;

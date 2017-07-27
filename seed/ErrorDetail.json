@@ -1,5 +1,4 @@
-[
-    {
+[{
         "code": "validation-err-001",
         "message": " minimum value criteria for this field is not met",
         "moreInformation": "Minimum value/length rule violated, please check the rule and provide proper value",
@@ -184,6 +183,12 @@
         "message": "duplicate value exist - a given value of case insensitive data already exists",
         "moreInformation": "Given value is not unique case insensitive, please check the rule and provide proper value",
         "type": "uniquecaseinsensitive"
+    },
+    {
+        "code": "validation-err-032",
+        "message": "Cross model property reference should be valid, please check the cross model property value and provide proper value",
+        "moreInformation": "Given value is not valid cross model property, please check the rule and provide proper value",
+        "type": "invalidxmodelvalue"
     },
     {
         "code": "data-acl-err-001",

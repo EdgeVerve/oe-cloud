@@ -29,8 +29,7 @@
         "FailsafeObserverMixin": true,
         "DataHierarchyMixin": false,
         "CryptoMixin": false,
-        "AutoFieldsMixin": false,
-        "XModelValidateMixin": true
+        "AutoFieldsMixin": false
     },
     "hidden": [
         "_tenantId",
