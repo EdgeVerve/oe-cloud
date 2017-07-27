@@ -18,18 +18,21 @@ var chai = require('chai');
 chai.use(require('chai-things'));
 
 
-describe('Auto Fields Test', function () {
+describe('Auto Fields Test', function() {
 
     this.timeout(30000);
 
     var model = null;
     var modelId = null;
 
-    before('create models', function (done) {
+    before('create models', function(done) {
         models.ModelDefinition.create({
             name: 'AutoFieldTestModel',
             base: 'BaseEntity',
             plural: 'AutoFieldTestModels',
+            mixins: {
+                "AutoFieldsMixin": true,
+            },
             properties: {
                 'user': {
                     'type': 'string',
@@ -40,7 +43,7 @@ describe('Auto Fields Test', function () {
                     'setval': "CTX"
                 }
             }
-        }, bootstrap.defaultContext, function (err, afModel) {
+        }, bootstrap.defaultContext, function(err, afModel) {
             if (err) {
                 done(err);
             } else {
@@ -51,18 +54,18 @@ describe('Auto Fields Test', function () {
         });
     });
 
-    after('cleanup', function (done) {
-        models.ModelDefinition.destroyAll({ "id": modelId }, bootstrap.defaultContext, function (err, data) {
+    after('cleanup', function(done) {
+        models.ModelDefinition.destroyAll({ "id": modelId }, bootstrap.defaultContext, function(err, data) {
             done();
         });
     });
 
 
-    it('should create a model instance with auto-populated values', function (done) {
+    it('should create a model instance with auto-populated values', function(done) {
         model = loopback.findModel('AutoFieldTestModel', bootstrap.defaultContext);
         expect(model).not.to.be.null;
         expect(model).not.to.be.undefined;
-        model.create({}, bootstrap.defaultContext, function (err, data) {
+        model.create({}, bootstrap.defaultContext, function(err, data) {
             expect(err).to.be.null;
             expect(data).not.to.be.null;
             expect(data.user).not.to.be.null;
