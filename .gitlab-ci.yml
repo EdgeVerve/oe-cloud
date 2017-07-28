@@ -60,7 +60,7 @@ mongotest:
   script:
     - export NODE_ENV=docker
     - export DB=mongo
-    - export STARTUP_CMD="grunt test-with-coverage"
+    - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
@@ -105,7 +105,7 @@ postgrestest:
   script:
     - export NODE_ENV=postgres
     - export DB=postgres
-    - export STARTUP_CMD="grunt test-with-coverage"
+    - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
