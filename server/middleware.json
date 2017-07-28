@@ -35,9 +35,6 @@
                     "tenant-id"
                 ]
             }
-        },
-        "./middleware/context-populator-filter": {
-            "enabled": true
         }
     },
     "session": {},
@@ -53,7 +50,6 @@
     },
     "parse": {},
     "routes:before": {
-        "./middleware/context-populator-filter": {"enabled": true},
         "./middleware/http-method-overriding-filter": {},
         "./middleware/req-logging-filter": {},
         "./middleware/useragent-populator-filter": {},
