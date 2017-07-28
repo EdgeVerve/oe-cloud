@@ -5,9 +5,6 @@
  *
  */
 var util = require('../../../lib/common/util');
-var loopbackDatasource = require('loopback-datasource-juggler').DataSource;
-var logger = require('oe-logger');
-var log = logger('data-source-definition');
 
 /**
  * @classdesc This model is to hold DataSourceDefinition, actual data sources created of application
@@ -19,7 +16,7 @@ var log = logger('data-source-definition');
  */
 
 module.exports = function dataSourceDefinitionModelFn(dataSourceDefinitionModel) {
- /*
+  /*
    * 'after save' - hook is used to create actual data source in loopback
    * User posts the data to DataSourceDefinition model and then this hoook is executed
    * when data is saved. After that this hook uses utility function to create data source
