@@ -344,6 +344,20 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         if (err) {
           log.error(options, 'ds.autoupdate for model="', modeldefinition.name, '" Error: ', err);
         }
+        // Checking for history model
+        if (model.definition.settings.mixins && model.definition.settings.mixins.HistoryMixin && model._historyModel) {
+          var historyModel = model._historyModel;
+          var histDs = historyModel.getDataSource(options);
+          if (histDs) {
+            histDs.autoupdate(historyModel.modelName, function (err, result) {
+              if (err) {
+                log.error(options, 'ds.autoupdate for history model="', historyModel.modelName, '" Error: ', err);
+              }
+            });
+          } else {
+            log.warn(options, 'Unable to get datasource for history model - ', historyModel.name);
+          }
+        }
       });
     } else {
       log.warn(options, 'Unable to get datasource for model - ', modeldefinition.name);

@@ -110,21 +110,29 @@ if (config && config.disableWorkflow === true) {
 }
 
 if (config) {
-    config.enableDesigner = true;
+  config.enableDesigner = true;
+  config.designer.assetPath = ['client/bower_components/images'];
 }
 
-/* When tests are run in git-lab, the designer is not installed and 
- * none of the designer routes are setup. We create dummy directory before boot
+/* When tests are run in git-lab, the oe-studio is not installed and 
+ * none of the oe-studio routes are setup. We create dummy directory before boot
  */
 !fs.existsSync('client') && fs.mkdirSync('client');
 !fs.existsSync('client/bower_components') && fs.mkdirSync('client/bower_components');
-!fs.existsSync('client/bower_components/designer') && fs.mkdirSync('client/bower_components/designer');
-!fs.existsSync('client/bower_components/designer/templates') && fs.mkdirSync('client/bower_components/designer/templates');
-!fs.existsSync('client/bower_components/designer/styles') && fs.mkdirSync('client/bower_components/designer/styles');
-!fs.existsSync('client/bower_components/designer/index.html') && fs.writeFileSync('client/bower_components/designer/index.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/templates/default-form.html') && fs.writeFileSync('client/bower_components/designer/templates/default-form.html', '<dom-module id="my-form"><style></style><template id="my-form"><div>oeCloud.io Form</div></template><script>Polymer({is:"my-form"});</script></dom-module>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/templates/default-page.html') && fs.writeFileSync('client/bower_components/designer/templates/default-page.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/styles/default-theme.css') && fs.writeFileSync('client/bower_components/designer/styles/default-theme.css', 'some css stuff', 'utf-8');
+!fs.existsSync('client/bower_components/sample-element') && fs.mkdirSync('client/bower_components/sample-element');
+!fs.existsSync('client/bower_components/images') && fs.mkdirSync('client/bower_components/images');
+!fs.existsSync('client/bower_components/oe-studio') && fs.mkdirSync('client/bower_components/oe-studio');
+!fs.existsSync('client/bower_components/oe-studio/templates') && fs.mkdirSync('client/bower_components/oe-studio/templates');
+!fs.existsSync('client/bower_components/oe-studio/styles') && fs.mkdirSync('client/bower_components/oe-studio/styles');
+!fs.existsSync('client/bower_components/oe-studio/index.html') && fs.writeFileSync('client/bower_components/oe-studio/index.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-form.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-form.html', '<dom-module id="my-form"><style></style><template id="my-form"><div>oeCloud.io Form</div></template><script>Polymer({is:"my-form", properties:{ :modelAlias : {type: Object}});</script></dom-module>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-list.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-form.html', '<dom-module id="my-form"><style></style><template id="my-list"><div>oeCloud.io List</div></template><script>Polymer({is:"my-list"});</script></dom-module>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-page.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-page.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/styles/default-theme.css') && fs.writeFileSync('client/bower_components/oe-studio/styles/default-theme.css', 'some css stuff', 'utf-8');
+!fs.existsSync('client/bower_components/images/background.jpg') && fs.writeFileSync('client/bower_components/images/background.jpg', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/images/audio.mp3') && fs.writeFileSync('client/bower_components/images/audio.mp3', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/images/video.mp4') && fs.writeFileSync('client/bower_components/images/video.mp4', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/sample-element/sample-element.html') && fs.writeFileSync('client/bower_components/sample-element/sample-element.html', '<dom-module id="sample-element"><style></style><template id="sample-element"><div>Sample Element</div></template><script>Polymer({is:"sample-element"});</script></dom-module>', 'utf-8');
 
 var createTestUser = function(user, rolename, cb) {
     var User = loopback.getModelByType('BaseUser');
