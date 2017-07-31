@@ -8,7 +8,7 @@
  * This test is for unit-testing the query result caching feature in the framework.
  * The test involves creating a test model, inserting a record into it, fetching the 
  * record (so that it caches), deleting the record from the database by directly accessing
- * the DB (bypassing the framework, so that cache is not ecicted), fetching the 
+ * the DB (bypassing the framework, so that cache is not evicted), fetching the 
  * record again to see that the records are still fetched (from cache).
  * 
  *  Author: Ajith Vasudevan
