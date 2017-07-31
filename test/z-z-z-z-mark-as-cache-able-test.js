@@ -34,6 +34,8 @@ describe('Mark As Cache Able Test', function () {
     var disablecachingOld = config.disablecaching;
     config.disablecaching = false;
     var modelstocacheOld = config.modelstocache;
+    var evcachablesOld = global.evcacheables;
+    delete global.evcacheables;
     config.modelstocache = ['modelToCache'];
 
     it('should add cachable model name to globals', function (done) {
@@ -76,7 +78,7 @@ describe('Mark As Cache Able Test', function () {
     after('mark disablecaching flag in config to true and set modelstocache to original', function (done) {
         config.disablecaching = disablecachingOld;
         config.modelstocache = modelstocacheOld;
-        delete global.evcacheables['modelToCache'];
+        global.evcacheables = evcachablesOld;
         return done();
     });
 });
