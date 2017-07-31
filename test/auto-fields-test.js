@@ -15,7 +15,10 @@ var expect = bootstrap.chai.expect;
 var loopback = require('loopback');
 var models = bootstrap.models;
 var chai = require('chai');
+var api = bootstrap.api;
 chai.use(require('chai-things'));
+
+var accessToken;
 
 
 describe('Auto Fields Test', function() {
@@ -25,33 +28,48 @@ describe('Auto Fields Test', function() {
     var model = null;
     var modelId = null;
 
-    before('create models', function(done) {
+    before('create models', function (done) {
+      bootstrap.login(function (token) {
+        accessToken = token;
+        //return done();
+
         models.ModelDefinition.create({
-            name: 'AutoFieldTestModel',
-            base: 'BaseEntity',
-            plural: 'AutoFieldTestModels',
-            mixins: {
-                "AutoFieldsMixin": true,
+          name: 'AutoFieldTestModel',
+          base: 'BaseEntity',
+          plural: 'AutoFieldTestModels',
+          mixins: {
+            "AutoFieldsMixin": true,
+          },
+          properties: {
+            'user': {
+              'type': 'string',
+              'setval': "CALLCONTEXT.ctx.remoteUser"
             },
-            properties: {
-                'user': {
-                    'type': 'string',
-                    'setval': "CALLCONTEXT.ctx.remoteUser"
-                },
-                'ctxObj': {
-                    'type': 'object',
-                    'setval': "CTX"
-                }
+            'headerValue': {
+              'type': 'string',
+              'setval': "CTX.somekey"
+            },
+            'email': {
+              'type': 'string',
+              'setval': "USER.email"
+            },
+            'ctxObj': {
+              'type': 'object',
+              'setval': "CTX"
             }
-        }, bootstrap.defaultContext, function(err, afModel) {
-            if (err) {
-                done(err);
-            } else {
-                expect(err).to.be.null;
-                modelId = afModel.id;
-                done();
-            }
+          }
+        }, bootstrap.defaultContext, function (err, afModel) {
+          if (err) {
+            done(err);
+          } else {
+            expect(err).to.be.null;
+            modelId = afModel.id;
+            done();
+          }
         });
+      });
+
+
     });
 
     after('cleanup', function(done) {
@@ -65,13 +83,20 @@ describe('Auto Fields Test', function() {
         model = loopback.findModel('AutoFieldTestModel', bootstrap.defaultContext);
         expect(model).not.to.be.null;
         expect(model).not.to.be.undefined;
-        model.create({}, bootstrap.defaultContext, function(err, data) {
-            expect(err).to.be.null;
-            expect(data).not.to.be.null;
-            expect(data.user).not.to.be.null;
-            expect(data.ctxObj).not.to.be.null;
-            expect(data.user).to.equal('test-user');
-            done();
-        });
+        var data = {
+        };
+        api.set('Accept', 'application/json')
+          .post(bootstrap.basePath + '/AutoFieldTestModels')
+          .set('accessToken', accessToken)
+          .set('somekey', 'k')
+          //.set('Cookie', [_version])
+          .send(data)
+          .end(function (err, resp) {
+            expect(resp.status).to.be.equal(200);
+            expect(resp.body.headerValue).to.equal('k');
+            expect(resp.body.user).to.equal('testuser');
+            expect(resp.body.email).to.equal('testuser@mycompany.com');
+            done(err);
+          });
     });
 });
