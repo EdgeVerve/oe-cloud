@@ -139,7 +139,8 @@ function createHistoryModel(model) {
   // Note that original model should not have a modelId property
 
   properties._modelId = {
-    type: 'string'
+    type: 'string',
+    index: true
   };
 
   // to remove any validation or so in properties for history table.
