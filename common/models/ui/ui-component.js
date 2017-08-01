@@ -591,16 +591,16 @@ module.exports = function uiComponent(UIComponent) {
       path: '/simulate'
     },
     returns: [{
-        arg: 'body',
-        type: 'string',
-        root: true
+      arg: 'body',
+      type: 'string',
+      root: true
     },
-      {
-        arg: 'Content-Type',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
+    {
+      arg: 'Content-Type',
+      type: 'string',
+      http: {
+        target: 'header'
+      }
     }
     ]
   });
@@ -645,16 +645,16 @@ module.exports = function uiComponent(UIComponent) {
       path: '/component/:name'
     },
     returns: [{
-        arg: 'body',
-        type: 'string',
-        root: true
+      arg: 'body',
+      type: 'string',
+      root: true
     },
-      {
-        arg: 'Content-Type',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
+    {
+      arg: 'Content-Type',
+      type: 'string',
+      http: {
+        target: 'header'
+      }
     }
     ]
   });
