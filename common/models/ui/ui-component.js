@@ -33,7 +33,7 @@ module.exports = function uiComponent(UIComponent) {
       var templatePath = path.join(app.locals.apphome, templatesDir, template);
       fs.readFile(templatePath, function read(err, data) {
         if (err) {
-          templatesDir = '../client/bower_components/designer/templates';
+          templatesDir = '../client/bower_components/oe-studio/templates';
           templatePath = path.join(app.locals.apphome, templatesDir, template);
           fs.readFile(templatePath, function read(err1, data1) {
             if (err1) {
@@ -98,12 +98,11 @@ module.exports = function uiComponent(UIComponent) {
     });
   }
 
-  function defaultComponent(model, templateType) {
+  function defaultComponent(modelName, model, templateType) {
     var templateName = 'default-' + templateType + '.html';
-    var name = model.modelName.toLowerCase() + '-' + templateType;
     var rec = {
-      name: name,
-      modelName: model.modelName,
+      name: modelName.toLowerCase() + '-' + templateType,
+      modelName: modelName,
       templateName: templateName
     };
     if (templateType === 'list') {
@@ -111,7 +110,7 @@ module.exports = function uiComponent(UIComponent) {
       rec.gridConfig = {};
       rec.gridConfig.modelGrid = [];
       Object.keys(model.definition.rawProperties).forEach(function configFetch(key) {
-        if (key.required) {
+        if (!(key.startsWith('_') || key === 'scope' || key === 'id') && model.definition.rawProperties[key].required) {
           rec.gridConfig.modelGrid.push(key);
         }
       });
@@ -126,8 +125,11 @@ module.exports = function uiComponent(UIComponent) {
           }
         });
       }
+    } else if (templateType === 'form') {
+      // add autoInjectFields = true to render the form if templateType is form.
+      rec.autoInjectFields = true;
     }
-    return rec;
+    return new UIComponent(rec);
   }
 
   UIComponent.prototype.generateComponent = function generateComponent(fetchAsHtml, options, callback) {
@@ -248,23 +250,17 @@ module.exports = function uiComponent(UIComponent) {
       }
       var component = results ? results[0] : null;
       if (!component) {
+        var modelAndType = componentName.split('-');
+        var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
+        var model = loopback.findModel(modelName, options);
+        var templateType = modelAndType[1];
         if (fetchAsHtml) {
           // ex: literal-form   Model = modelAndType[0] Type = modelAndType[1]
-          var modelAndType = componentName.split('-');
-          var modelName = UIComponent.app.locals.modelNames[modelAndType[0]];
-          modelName = loopback.findModel(modelName, options).modelName;
-          var templateType = modelAndType[1];
-          if (modelName && templateType) {
-            var model = UIComponent.app.models[modelName];
-            component = defaultComponent(model, templateType);
-            // add autoInjectFields = true to render the form if templateType is form.
-            if (templateType === 'form' && component && !component.autoInjectFields) {
-              component.autoInjectFields = true;
-            }
-            component = new UIComponent(component);
+          if (model && templateType) {
+            component = defaultComponent(modelName, model, templateType);
           } else {
             var error = new Error();
-            if (!modelName) {
+            if (!model) {
               error.message = 'Model Not Found';
               error.code = 'MODEL_NOT_FOUND';
               error.statusCode = 404;
@@ -283,12 +279,13 @@ module.exports = function uiComponent(UIComponent) {
         } else {
           var response = {
             componentName: componentName,
+            modelName: modelName,
             elements: {},
             fields: {}
           };
           _getElements(componentName, response, options, function getElementsCb(err, elements) {
             if (err) {
-              callback(err);
+              return callback(err);
             }
             response.elements = elements;
             callback(null, response);
@@ -296,13 +293,12 @@ module.exports = function uiComponent(UIComponent) {
           return;
         }
       }
-
       component.generateComponent(fetchAsHtml, options, callback);
     });
   };
 
   // name can be in model name in lower case also
-  UIComponent._modelmeta = function meta(name, metaoptions, options, callback) {
+  UIComponent._modelmeta = function meta(modelName, metaoptions, options, callback) {
     if (typeof callback === 'undefined' && typeof options === 'undefined' && typeof metaoptions === 'function') {
       callback = metaoptions;
       options = {};
@@ -311,7 +307,6 @@ module.exports = function uiComponent(UIComponent) {
       callback = options;
       options = {};
     }
-    var modelName = loopback.findModel(name, options).modelName || name;
     metaoptions = metaoptions || {};
     var app = this.app;
     var response = {};
@@ -375,7 +370,7 @@ module.exports = function uiComponent(UIComponent) {
         }
         if (field.refcodetype) {
           subtasks.push(function subTaskPushCb(fetched) {
-            var refCodeModel = UIComponent.app.models[field.refcodetype];
+            var refCodeModel = loopback.findModel(field.refcodetype, options);
             refCodeModel.find({}, options, function findCb(err, resp) {
               if (!err) {
                 field.listdata = resp;
@@ -484,12 +479,12 @@ module.exports = function uiComponent(UIComponent) {
       });
     }
 
-    var createComponent = function createComponent(model, templateType, options, callback) {
+    var createComponent = function createComponent(modelName, model, templateType, options, callback) {
       var templateName = 'default-' + templateType + '.html';
-      var name = model.modelName.toLowerCase() + '-' + templateType;
+      var name = modelName.toLowerCase() + '-' + templateType;
       var rec = {
         name: name,
-        modelName: model.modelName,
+        modelName: modelName,
         templateName: templateName
       };
       if (templateType === 'list') {
@@ -497,7 +492,7 @@ module.exports = function uiComponent(UIComponent) {
         rec.gridConfig = {};
         rec.gridConfig.modelGrid = [];
         Object.keys(model.definition.rawProperties).forEach(function extractGridMeta(key) {
-          if (key.required) {
+          if (!(key.startsWith('_') || key === 'scope' || key === 'id') && model.definition.rawProperties[key].required) {
             rec.gridConfig.modelGrid.push(key);
           }
         });
@@ -522,8 +517,7 @@ module.exports = function uiComponent(UIComponent) {
     var tasks = [];
     modelList.forEach(function defaultUICreator(modelName) {
       modelName = UIComponent.app.locals.modelNames[modelName];
-      modelName = loopback.findModel(modelName, options).modelName || modelName;
-      var model = UIComponent.app.models[modelName];
+      var model = loopback.findModel(modelName, options);
       if (model && model.shared) {
         var templates = ['form', 'list'];
         templates.forEach(function templateBasedComponentCreator(templateType) {
@@ -543,7 +537,7 @@ module.exports = function uiComponent(UIComponent) {
               if (results && results[0]) {
                 done(null, results[0]);
               } else {
-                createComponent(model, templateType, options, done);
+                createComponent(modelName, model, templateType, options, done);
               }
             });
           });
@@ -597,16 +591,16 @@ module.exports = function uiComponent(UIComponent) {
       path: '/simulate'
     },
     returns: [{
-      arg: 'body',
-      type: 'string',
-      root: true
+        arg: 'body',
+        type: 'string',
+        root: true
     },
-    {
-      arg: 'Content-Type',
-      type: 'string',
-      http: {
-        target: 'header'
-      }
+      {
+        arg: 'Content-Type',
+        type: 'string',
+        http: {
+          target: 'header'
+        }
     }
     ]
   });
@@ -651,16 +645,16 @@ module.exports = function uiComponent(UIComponent) {
       path: '/component/:name'
     },
     returns: [{
-      arg: 'body',
-      type: 'string',
-      root: true
+        arg: 'body',
+        type: 'string',
+        root: true
     },
-    {
-      arg: 'Content-Type',
-      type: 'string',
-      http: {
-        target: 'header'
-      }
+      {
+        arg: 'Content-Type',
+        type: 'string',
+        http: {
+          target: 'header'
+        }
     }
     ]
   });
