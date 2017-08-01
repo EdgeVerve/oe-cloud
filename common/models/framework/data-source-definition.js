@@ -5,9 +5,6 @@
  *
  */
 var util = require('../../../lib/common/util');
-var loopbackDatasource = require('loopback-datasource-juggler').DataSource;
-var logger = require('oe-logger');
-var log = logger('data-source-definition');
 
 /**
  * @classdesc This model is to hold DataSourceDefinition, actual data sources created of application
@@ -19,23 +16,6 @@ var log = logger('data-source-definition');
  */
 
 module.exports = function dataSourceDefinitionModelFn(dataSourceDefinitionModel) {
-  dataSourceDefinitionModel.observe('before save', function dataSourceDefinitionBeforeSave(ctx, next) {
-    if (ctx.instance && ctx.instance.connector) {
-      var name = ctx.instance.connector;
-      var obj = loopbackDatasource._resolveConnector(name);
-      if (!obj.connector && obj.error !== null) {
-        log.error(ctx.options, obj.error);
-        return next(new Error(obj.error));
-      }
-      next();
-    } else {
-      var error = new Error();
-      error.statusCode = 422;
-      error.message = 'connector is undefined';
-      log.error(ctx.options, error);
-      next(error);
-    }
-  });
   /*
    * 'after save' - hook is used to create actual data source in loopback
    * User posts the data to DataSourceDefinition model and then this hoook is executed
