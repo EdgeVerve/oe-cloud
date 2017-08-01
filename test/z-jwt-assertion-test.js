@@ -69,6 +69,14 @@ var demouser2 = {
     'id': 100
 };
 
+var demouser3 = {
+    'username': 'demouser3@gmail.com',
+    'password': 'password++',
+    'email': 'demouser3@gmail.com',
+    'tenantId': 'test-tenant',
+    'id': 1000
+}
+
 var createToken = function(user, key, algo) {
     var secret = key || 'secret';
     var token = jwt.sign(user, secret);
@@ -83,7 +91,7 @@ describe(chalk.blue('JWT assertion test'), function() {
 
     before('Adding user to BaseUser', function(done) {
         var User = loopback.getModelByType('User');
-        User.create(demouser1, bootstrap.defaultContext, function(err, user) {
+        User.create([demouser1, demouser3], bootstrap.defaultContext, function(err, users) {
             if (err) {
                 done(err);
             } else {
@@ -128,6 +136,35 @@ describe(chalk.blue('JWT assertion test'), function() {
 
         var api = defaults(supertest(app));
         api.get(endPointUrl + '/10')
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .set('x-jwt-assertion', jwt)
+            .set('tenant_id', 'test-tenant')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+    it('Test - Authorized User - Should give User access even if app details not present but jwt username matches', function(done) {
+        // JWT
+        var jwtOptions = {
+            'iss': 'mycompany.com',
+            'iat': 1489992854,
+            'exp': 1837148054,
+            'aud': 'mycompany.net',
+            'client_id': 'abc456',
+            'sub': 'demouser3@gmail.com',
+            'username': 'demouser3@gmail.com',
+            'email': 'demouser3@gmail.com'
+        };
+        var jwt = createToken(jwtOptions);
+
+        var api = defaults(supertest(app));
+        api.get(endPointUrl + '/1000')
             .set('Content-Type', 'application/json')
             .set('Accept', 'application/json')
             .set('x-jwt-assertion', jwt)
@@ -444,35 +481,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized User - Should give User access even if app details not present but jwt username matches', function(done) {
-        // JWT
-        var jwtOptions = {
-            'iss': 'mycompany.com',
-            'iat': 1489992854,
-            'exp': 1837148054,
-            'aud': 'mycompany.net',
-            'client_id': 'abc456',
-            'sub': 'demouser1@gmail.com',
-            'username': 'demouser1@gmail.com',
-            'email': 'demouser1@gmail.com'
-        };
-        var jwt = createToken(jwtOptions);
 
-        var api = defaults(supertest(app));
-        api.get(endPointUrl + '/10')
-            .set('Content-Type', 'application/json')
-            .set('Accept', 'application/json')
-            .set('x-jwt-assertion', jwt)
-            .set('tenant_id', 'test-tenant')
-            .expect(200)
-            .end(function(err, res) {
-                if (err) {
-                    done(err);
-                } else {
-                    done();
-                }
-            });
-    });
     it('Test - Authorized User - Should not give model access if app details not present but jwt username matches just by role passed in header', function(done) {
         // JWT
         var jwtOptions = {

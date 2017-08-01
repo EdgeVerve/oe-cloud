@@ -91,7 +91,6 @@ module.exports = function JWTAssertionFn(options) {
               username = req.headers.username;
               var email = req.headers.email;
               // verify supported Roles
-
               if (req.headers.roles && trusted.supportedRoles) {
                 JSON.parse(req.headers.roles).forEach(function (element) {
                   if (trusted.supportedRoles.some(x => x === element)) {
@@ -111,44 +110,14 @@ module.exports = function JWTAssertionFn(options) {
                     }
                     return next();
                   }
-                  u.createAccessToken(userObj.DEFAULT_TTL, req.callContext, (err, token) => {
-                    if (err) {
-                      return next();
-                    }
-                    if (token) {
-                      req.accessToken = token;
-                      cachedTokens[username] = token;
-                      if (rolesToAdd && rolesToAdd.length > 0) {
-                        req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
-                      }
-                      next();
-                    } else {
-                      log.error(req.callContext, 'could not create access token!!!!');
-                      next();
-                    }
-                  });
+                  createAccessTokenAndNext(u, req, rolesToAdd, next);
                 } else {
                   userObj.create({ username: username, email: email, password: uuid.v4() }, req.callContext, (err, newUser) => {
                     if (err) {
                       return next();
                     }
                     if (newUser) {
-                      newUser.createAccessToken(userObj.DEFAULT_TTL, req.callContext, (err, token) => {
-                        if (err) {
-                          return next();
-                        }
-                        if (token) {
-                          req.accessToken = token;
-                          cachedTokens[username] = token;
-                          if (rolesToAdd && rolesToAdd.length > 0) {
-                            req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
-                          }
-                          next();
-                        } else {
-                          log.error(req.callContext, 'could not create access token!!!!');
-                          next();
-                        }
-                      });
+                      createAccessTokenAndNext(newUser, req, rolesToAdd, next);
                     } else {
                       next();
                     }
@@ -169,19 +138,7 @@ module.exports = function JWTAssertionFn(options) {
                     return next();
                   }
                   if (u) {
-                    u.createAccessToken(userObj.DEFAULT_TTL, req.callContext, (err, token) => {
-                      if (err) {
-                        next();
-                      }
-                      if (token) {
-                        req.accessToken = token;
-                        cachedTokens[username] = token;
-                        next();
-                      } else {
-                        log.error(req.callContext, 'could not create access token!!!!');
-                        next();
-                      }
-                    });
+                    createAccessTokenAndNext(u, req, null, next);
                   } else {
                     log.error(req.callContext, 'User not found!!!');
                     next();
@@ -215,19 +172,7 @@ module.exports = function JWTAssertionFn(options) {
                 req.accessToken = cachedTokens[username];
                 return next();
               }
-              u.createAccessToken(userObj.DEFAULT_TTL, req.callContext, (err, token) => {
-                if (err) {
-                  next(err);
-                }
-                if (token) {
-                  req.accessToken = token;
-                  cachedTokens[username] = token;
-                  next();
-                } else {
-                  log.error(req.callContext, 'could not create access token!!!!');
-                  next();
-                }
-              });
+              createAccessTokenAndNext(u, req, null, next);
             } else {
               log.error(req.callContext, 'User not found!!!');
               return next();
@@ -237,4 +182,23 @@ module.exports = function JWTAssertionFn(options) {
       }
     })(req, res, next);
   };
+
+  function createAccessTokenAndNext(user, req, rolesToAdd, next) {
+    user.createAccessToken(user.constructor.DEFAULT_TTL, req.callContext, (err, token) => {
+      if (err) {
+        next(err);
+      }
+      if (token) {
+        req.accessToken = token;
+        cachedTokens[user.username] = token;
+        if (rolesToAdd && rolesToAdd.length > 0) {
+          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+        }
+        next();
+      } else {
+        log.error(req.callContext, 'could not create access token!!!!');
+        next();
+      }
+    });
+  }
 };
