@@ -1,6 +1,6 @@
 {
   "name": "oe-cloud",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "main": "server/server.js",
   "engines": {
     "node": ">=6.9.0"
@@ -37,7 +37,7 @@
     "gelf-stream": "^1.1.1",
     "helmet": "^2.1.1",
     "inflection": "^1.10.0",
-    "js-feel": "git+http://evgit/oecloud.io/feel.git",
+    "js-feel": "git+http://evgit/oecloud.io/feel.git#v0.9.0",
     "locks": "^0.2.2",
     "lodash": "3.10.1",
     "loopback": "2.25.0",
@@ -47,7 +47,7 @@
     "loopback-component-storage": "git+http://evgit/oecloud.io/loopback-component-storage.git#v0.9.0",
     "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#v0.9.0",
     "loopback-connector-nodes-for-Node-RED": "git+http://evgit/oecloud.io/loopback-connector-nodes-for-Node-RED.git#v0.9.0",
-    "loopback-datasource-juggler": "git+http://evgit/oecloud.io/loopback-datasource-juggler.git#v0.9.0",
+    "loopback-datasource-juggler": "git+http://evgit/oecloud.io/loopback-datasource-juggler.git#v0.9.1",
     "loopback-filters": "0.1.2",
     "lru-cache": "^4.0.1",
     "mail": "^0.2.3",
@@ -58,7 +58,7 @@
     "node-red": "0.16.2",
     "node-uuid": "1.4.7",
     "oe-explorer": "git+http://evgit/oecloud.io/oe-explorer.git#v0.9.0",
-    "oe-logger": "^0.9.1",
+    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#v0.9.0",
     "oe-swagger-ui": "git+http://evgit/oecloud.io/oe-swagger-ui.git#v0.9.0",
     "passport-google-oauth": "0.1.5",
     "passport-jwt": "^2.0.0",
@@ -89,7 +89,7 @@
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.2",
     "istanbul": "0.4.1",
-    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#v0.9.0",
+    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#v0.9.1",
     "mocha": "^3.4.2",
     "nock": "^7.2.2",
     "sinon": "^1.17.7",
