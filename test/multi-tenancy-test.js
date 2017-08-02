@@ -17,7 +17,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
-
+var dbName = process.env.DB_NAME || 'db';
 // function GenerateModelName(model) {
 //    return model + Math.floor(Math.random() * (999));
 // }
@@ -38,7 +38,7 @@ describe(chalk.blue('multi-tenancy-test'), function () {
   var datasources = [{
     'host': mongoHost,
     'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/db1',
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
     'database': 'db1',
     'password': 'admin',
     'name': 'db1',
@@ -48,7 +48,7 @@ describe(chalk.blue('multi-tenancy-test'), function () {
   }, {
     'host': mongoHost,
     'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/db2',
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
     'database': 'db2',
     'password': 'admin',
     'name': 'db2',

@@ -44,7 +44,7 @@ var altContext = {
 };;
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
-var dbname = 'db';
+var dbname = process.env.DB_NAME || 'db';
 var dataSource;
 var accessToken = null;
 

@@ -11,24 +11,26 @@ var Server = require('mongodb').Server;
 
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+var dbName = process.env.DB_NAME || 'db';
+var postgresDBName = process.env.DB_NAME || 'postgres';
 
 describe('ZZ Final Cleanup', function() {
 	this.timeout(120001);
 
     before('Delete collections', function(done) {
-		var db = new Db('db', new Server(mongoHost, 27017));
+		var db = new Db(dbName, new Server(mongoHost, 27017));
 		db.open(function(err, db) {
 			if (err) {
 				console.log(err);
 			}
 			db.dropDatabase();
-			var db1 = new Db('db1', new Server(mongoHost, 27017));
+			var db1 = new Db(dbName + '1', new Server(mongoHost, 27017));
 			db1.open(function(err, db1) {
 				if (err) {
 					console.log(err);
 				}
 				db1.dropDatabase();
-				var db2 = new Db('db2', new Server(mongoHost, 27017));
+				var db2 = new Db(dbName + '2', new Server(mongoHost, 27017));
 				db2.open(function(err, db2) {
 					if (err) {
 						console.log(err);
@@ -52,7 +54,7 @@ describe('ZZ Final Cleanup', function() {
 				"user": "postgres",
 				"password": "postgres",
 				"host": postgresHost,
-				"database": "postgres"
+				"database": postgresDBName
 			});
 			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'TARGET_DB' AND pid <> pg_backend_pid()", function(err, result){
 				if(err) {
