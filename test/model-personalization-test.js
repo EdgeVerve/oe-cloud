@@ -525,7 +525,7 @@ describe(chalk.blue('Model Personalization test'), function () {
       'name': 'Employee',
       'variantOf': 'Employee',
       'idInjection': false,
-      'mongodb': true,
+      'mongodb': {},
       properties: {
         'firstName': {
           'type': 'string'

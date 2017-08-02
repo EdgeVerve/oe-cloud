@@ -24,7 +24,7 @@ var mongoHost = process.env.MONGO_HOST || 'localhost';
 
 describe(chalk.blue('multi-tenancy-test'), function () {
   var accessTokens = {};
-
+  this.timeout(20000);
   var productModelName = 'MyProducts';
 
   var tenants = [{

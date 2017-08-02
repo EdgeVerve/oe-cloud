@@ -599,8 +599,11 @@ describe(chalk.blue('service-personalization'), function () {
             expect(results).to.be.instanceof(Array);
             expect(results.length).to.equal(6);
             expect(results[0].category).to.be.equal('electronics');
-            expect(results[0].name).to.be.equal('refrigerator');
-
+            expect(results[1].category).to.be.equal('electronics');
+            expect(results[2].category).to.be.equal('electronics');
+            expect(results[3].category).to.be.equal('furniture');
+            expect(results[4].category).to.be.equal('furniture');
+            expect(results[5].category).to.be.equal('furniture');
             done();
           });
       });
