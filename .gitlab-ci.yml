@@ -29,8 +29,6 @@ pre-build:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
-    - git submodule sync --recursive
-    - git submodule update --init --recursive
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
@@ -41,7 +39,7 @@ pre-build:
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-    #- time npm install --no-optional
+    - time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
     - mocha test/consistenthash/server.js 3100 &
