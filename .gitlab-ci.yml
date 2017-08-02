@@ -71,16 +71,16 @@ buildjob:
 mongotest:
   stage: post-build-test
   before_script:
-    - export NODE_ENV=docker
-    - export DB=mongo
-    - export DB_NAME=${APP_IMAGE_NAME}
-    - export STARTUP_CMD="npm run grunt-cover"
-    - export FILE_NAME=docker-compose.test.env.yml
-    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${STACK_NAME}
-    - export exit_status=0
-    - export nameWebService=${STACK_NAME}"_web"
-    - export nameDBService=${STACK_NAME}"_"${DB}
+    NODE_ENV: docker
+    DB: mongo
+    DB_NAME: ${APP_IMAGE_NAME}
+    STARTUP_CMD: "npm run grunt-cover"
+    FILE_NAME: docker-compose.test.env.yml
+    STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
+    NETWORK_NAME: ${STACK_NAME}
+    exit_status: 0
+    nameWebService: ${STACK_NAME}"_web"
+    nameDBService: ${STACK_NAME}"_"${DB}
   script:
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
@@ -105,16 +105,16 @@ mongotest:
 postgrestest:
   stage: post-build-test
   before_script:
-    - export NODE_ENV=postgres
-    - export DB=postgres
-    - export DB_NAME=${APP_IMAGE_NAME}
-    - export STARTUP_CMD="npm run grunt-cover"
-    - export FILE_NAME=docker-compose.test.env.yml
-    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${STACK_NAME}
-    - export exit_status=0
-    - export nameWebService=${STACK_NAME}"_web"
-    - export nameDBService=${STACK_NAME}"_"${DB}
+    NODE_ENV: postgres
+    DB: postgres
+    DB_NAME: ${APP_IMAGE_NAME}
+    STARTUP_CMD: "npm run grunt-cover"
+    FILE_NAME: docker-compose.test.env.yml
+    STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
+    NETWORK_NAME: ${STACK_NAME}
+    exit_status: 0
+    nameWebService: ${STACK_NAME}"_web"
+    nameDBService: ${STACK_NAME}"_"${DB}
   script:
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
@@ -139,14 +139,14 @@ postgrestest:
 swarm:
   stage: post-build-test
   before_script:
-    - export STARTUP_CMD="npm run grunt-cover"
-    - export FILE_NAME=docker-compose.test.env.yml
-    - export DB_NAME="db"
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${APP_IMAGE_NAME}
-    - export exit_status=0
-    - export nameWebService=${STACK_NAME}"_web"
-    - export nameDBService=${STACK_NAME}"_"${DB}
+    - export STARTUP_CMD: "npm run grunt-cover"
+    - export FILE_NAME: docker-compose.test.env.yml
+    - export DB_NAME: "db"
+    - export STACK_NAME: ${APP_IMAGE_NAME}
+    - export NETWORK_NAME: ${APP_IMAGE_NAME}
+    - export exit_status: 0
+    - export nameWebService: ${STACK_NAME}"_web"
+    - export nameDBService: ${STACK_NAME}"_"${DB}
   script: 
     - export HAPROXY=10.73.96.214
     - node test/actor-tests/prepareIntegrationTest.js
