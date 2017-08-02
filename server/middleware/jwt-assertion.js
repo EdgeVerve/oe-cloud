@@ -66,11 +66,11 @@ module.exports = function JWTAssertionFn(options) {
 
   return function jwtAssertionPassportAuthenticateCb(req, res, next) {
     var proxyKey = app.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
-    if (req.headers && proxyKey) {
-      if (req.headers['x-evproxy-internal-key'] === proxyKey) {
-        return next();
-      }
-    }
+    if (req.headers && proxyKey) {
+      if (req.headers['x-evproxy-internal-key'] === proxyKey) {
+        return next();
+      }
+    }
     Passport.authenticate('jwt', (err, user, info) => {
       if (err) {
         return next(err);
