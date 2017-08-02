@@ -19,7 +19,7 @@ before_script:
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
-  - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+  - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
 
@@ -74,7 +74,7 @@ mongotest:
     - export NODE_ENV=docker
     - export DB=mongo
     - export DB_NAME=${APP_IMAGE_NAME}
-    - export STARTUP_CMD=npm run grunt-cover
+    - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
@@ -97,6 +97,7 @@ mongotest:
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
   after_script:
+    - env
     - docker stack rm ${STACK_NAME}
   tags:
     - CEP_RUNNER
