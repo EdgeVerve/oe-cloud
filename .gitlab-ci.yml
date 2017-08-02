@@ -1,14 +1,20 @@
 stages:
+  - pre-build-test
   - build
-  - test
+  - post-build-test
 
 cache:
   untracked: true
   paths: 
     - node_modules/
-
+    
+variables:
+  USER_BROADCASTER: "false"
+  DOMAIN_NAME: oecloud.local
+  REGISTRY: registry.${DOMAIN_NAME}
+  NETWORK_NAME: ${APP_IMAGE_NAME}
+  
 before_script:
-  - export USER_BROADCASTER=false
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
@@ -16,35 +22,44 @@ before_script:
   - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
-  - export DOMAIN_NAME=oecloud.local
-  - export REGISTRY=registry.${DOMAIN_NAME}
-  - export NETWORK_NAME=${APP_IMAGE_NAME}
 
-buildjob:
-  stage: build
+pre-build:
+  stage: pre-build-test
   script:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
+    - git submodule sync --recursive
+    - git submodule update --init --recursive
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
-    - echo "Building oe-cloud image..."
-    - time npm install --no-optional
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
     - mkdir -p /data/db
     - mongod --dbpath /data/db &
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    #- time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
     - mocha test/consistenthash/server.js 3100 &
     - sleep 60
     - mocha test/consistenthash/client.js 3200
-    - wait ${BUILD_PID}
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - node_modules/
+  tags:
+    - CEP_RUNNER
+
+buildjob:
+  stage: build
+  script:
+    - echo "Building oe-cloud image..."
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
   artifacts:
@@ -56,19 +71,19 @@ buildjob:
     - CEP_RUNNER
 
 mongotest:
-  stage: test
-  script:
+  stage: post-build-test
+  before_script:
     - export NODE_ENV=docker
     - export DB=mongo
-    - export STARTUP_CMD="npm run grunt-cover"
+    - export DB_NAME=${APP_IMAGE_NAME}
+    - export STARTUP_CMD=npm run grunt-cover
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
     - export exit_status=0
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
-    - docker stack rm ${STACK_NAME}
-    - sleep 10
+  script:
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -82,29 +97,18 @@ mongotest:
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    
-    # - if echo $CI_BUILD_REPO | grep "oecloud.io/oe-cloud.git"; then export MAIN_BRANCH=1; else export MAIN_BRANCH=0; fi
-    # - if [ $MAIN_BRANCH -eq 0 ]; then echo "Not the main project, hence not sending coverage report to 10.73.53.167..."; docker-compose -H $SWARM_HOST -f $FILE_NAME -p $PROJECT_NAME down; exit $exit_status; fi
-    # - docker --tls -H $SWARM_HOST cp $WEB_CONTAINER_NAME:/home/src/coverage/ .
-    # - echo "Sending coverage reports to 10.73.53.167..."
-    # - tar -cf oe-cloud.tar -C ./coverage/lcov-report/ .
-    # - ssh root@10.73.53.167 'rm -rf /data/documentation-portal/coverage/oe-cloud'
-    # - scp oe-cloud.tar root@10.73.53.167:/data/documentation-portal/coverage/
-    # - ssh root@10.73.53.167 'mkdir -p /data/documentation-portal/coverage/oe-cloud'
-    # - ssh root@10.73.53.167 'tar -xf /data/documentation-portal/coverage/oe-cloud.tar -C /data/documentation-portal/coverage/oe-cloud'
-    # - ssh root@10.73.53.167 'rm -rf /data/documentation-portal/coverage/oe-cloud.tar'
-    # - echo "Coverage report updated"
-
-    - docker stack rm ${STACK_NAME}
     - exit $exit_status
+  after_script:
+    - docker stack rm ${STACK_NAME}
   tags:
     - CEP_RUNNER
 
 postgrestest:
-  stage: test
-  script:
+  stage: post-build-test
+  before_script:
     - export NODE_ENV=postgres
     - export DB=postgres
+    - export DB_NAME=${APP_IMAGE_NAME}
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
@@ -112,8 +116,7 @@ postgrestest:
     - export exit_status=0
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
-    - docker stack rm ${STACK_NAME}
-    - sleep 10
+  script:
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -127,24 +130,28 @@ postgrestest:
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - docker stack rm ${STACK_NAME}
     - exit $exit_status
+  after_script:
+    - docker stack rm ${STACK_NAME}
   tags:
     - CEP_RUNNER
 
 
 swarm:
-  stage: test
+  stage: post-build-test
+  before_script:
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export DB_NAME="db"
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${APP_IMAGE_NAME}
+    - export exit_status=0
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
   script: 
-    - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
-    - docker stack rm ${APP_IMAGE_NAME}
     - node test/actor-tests/prepareIntegrationTest.js
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
-    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
-    - mv -f qqq2.yml qqq.yml
-    - sed 's/\$ROUTER/'"$ROUTER"'/g' qqq.yml > qqq2.yml
     - mv -f qqq2.yml qqq.yml
     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
     - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
@@ -157,6 +164,7 @@ swarm:
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
     - mocha test/actor-tests/actorIntegrationTest.js
     - node test/actor-tests/cleanupIntegrationTest.js
-    - docker stack rm ${APP_IMAGE_NAME}
+  after_script:
+    - docker stack rm ${STACK_NAME} 
   tags:
     - CEP_RUNNER
