@@ -12,7 +12,6 @@ variables:
   USER_BROADCASTER: "false"
   DOMAIN_NAME: oecloud.local
   REGISTRY: registry.${DOMAIN_NAME}
-  NETWORK_NAME: ${APP_IMAGE_NAME}
   
 before_script:
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
@@ -70,18 +69,17 @@ buildjob:
 
 mongotest:
   stage: post-build-test
-  variables:
-    NODE_ENV: docker
-    DB: mongo
-    DB_NAME: ${APP_IMAGE_NAME}
-    STARTUP_CMD: "npm run grunt-cover"
-    FILE_NAME: docker-compose.test.env.yml
-    STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
-    NETWORK_NAME: ${STACK_NAME}
-    exit_status: "0"
-    nameWebService: ${STACK_NAME}"_web"
-    nameDBService: ${STACK_NAME}"_"${DB}
   script:
+    - export NODE_ENV=docker
+    - export DB=mongo
+    - export DB_NAME=${APP_IMAGE_NAME}
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -95,27 +93,24 @@ mongotest:
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - exit $exit_status
-  after_script:
-    - env
     - docker stack rm ${STACK_NAME}
+    - exit $exit_status
   tags:
     - CEP_RUNNER
 
 postgrestest:
   stage: post-build-test
-  variables:
-    NODE_ENV: postgres
-    DB: postgres
-    DB_NAME: ${APP_IMAGE_NAME}
-    STARTUP_CMD: "npm run grunt-cover"
-    FILE_NAME: docker-compose.test.env.yml
-    STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
-    NETWORK_NAME: ${STACK_NAME}
-    exit_status: "0"
-    nameWebService: ${STACK_NAME}"_web"
-    nameDBService: ${STACK_NAME}"_"${DB}
   script:
+    - export NODE_ENV=postgres
+    - export DB=postgres
+    - export DB_NAME=${APP_IMAGE_NAME}
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -129,25 +124,23 @@ postgrestest:
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - exit $exit_status
-  after_script:
     - docker stack rm ${STACK_NAME}
+    - exit $exit_status
   tags:
     - CEP_RUNNER
 
 
 swarm:
   stage: post-build-test
-  variables:
-    STARTUP_CMD: "npm run grunt-cover"
-    FILE_NAME: docker-compose.test.env.yml
-    DB_NAME: "db"
-    STACK_NAME: ${APP_IMAGE_NAME}
-    NETWORK_NAME: ${APP_IMAGE_NAME}
-    exit_status: "0"
-    nameWebService: ${STACK_NAME}"_web"
-    nameDBService: ${STACK_NAME}"_"${DB}
-  script: 
+  script:
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export DB_NAME="db"
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${APP_IMAGE_NAME}
+    - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
     - export HAPROXY=10.73.96.214
     - node test/actor-tests/prepareIntegrationTest.js
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
@@ -163,7 +156,6 @@ swarm:
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
     - mocha test/actor-tests/actorIntegrationTest.js
     - node test/actor-tests/cleanupIntegrationTest.js
-  after_script:
-    - docker stack rm ${STACK_NAME} 
+    - docker stack rm ${STACK_NAME}
   tags:
     - CEP_RUNNER
