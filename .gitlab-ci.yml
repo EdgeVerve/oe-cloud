@@ -78,7 +78,7 @@ mongotest:
     FILE_NAME: docker-compose.test.env.yml
     STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
     NETWORK_NAME: ${STACK_NAME}
-    exit_status: 0
+    exit_status: "0"
     nameWebService: ${STACK_NAME}"_web"
     nameDBService: ${STACK_NAME}"_"${DB}
   script:
@@ -112,7 +112,7 @@ postgrestest:
     FILE_NAME: docker-compose.test.env.yml
     STACK_NAME: test-${DB}-${APP_IMAGE_NAME}
     NETWORK_NAME: ${STACK_NAME}
-    exit_status: 0
+    exit_status: "0"
     nameWebService: ${STACK_NAME}"_web"
     nameDBService: ${STACK_NAME}"_"${DB}
   script:
@@ -144,7 +144,7 @@ swarm:
     DB_NAME: "db"
     STACK_NAME: ${APP_IMAGE_NAME}
     NETWORK_NAME: ${APP_IMAGE_NAME}
-    exit_status: 0
+    exit_status: "0"
     nameWebService: ${STACK_NAME}"_web"
     nameDBService: ${STACK_NAME}"_"${DB}
   script: 
