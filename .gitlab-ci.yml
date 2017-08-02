@@ -70,7 +70,7 @@ buildjob:
 
 mongotest:
   stage: post-build-test
-  before_script:
+  variables:
     NODE_ENV: docker
     DB: mongo
     DB_NAME: ${APP_IMAGE_NAME}
@@ -104,7 +104,7 @@ mongotest:
 
 postgrestest:
   stage: post-build-test
-  before_script:
+  variables:
     NODE_ENV: postgres
     DB: postgres
     DB_NAME: ${APP_IMAGE_NAME}
@@ -138,15 +138,15 @@ postgrestest:
 
 swarm:
   stage: post-build-test
-  before_script:
-    - export STARTUP_CMD: "npm run grunt-cover"
-    - export FILE_NAME: docker-compose.test.env.yml
-    - export DB_NAME: "db"
-    - export STACK_NAME: ${APP_IMAGE_NAME}
-    - export NETWORK_NAME: ${APP_IMAGE_NAME}
-    - export exit_status: 0
-    - export nameWebService: ${STACK_NAME}"_web"
-    - export nameDBService: ${STACK_NAME}"_"${DB}
+  variables:
+    STARTUP_CMD: "npm run grunt-cover"
+    FILE_NAME: docker-compose.test.env.yml
+    DB_NAME: "db"
+    STACK_NAME: ${APP_IMAGE_NAME}
+    NETWORK_NAME: ${APP_IMAGE_NAME}
+    exit_status: 0
+    nameWebService: ${STACK_NAME}"_web"
+    nameDBService: ${STACK_NAME}"_"${DB}
   script: 
     - export HAPROXY=10.73.96.214
     - node test/actor-tests/prepareIntegrationTest.js
