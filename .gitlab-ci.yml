@@ -137,7 +137,7 @@ swarm:
   stage: test
   script: 
     - export ROUTER="cep_router"
-    - export HAPROXY=10.73.96.214
+    - export HAPROXY=10.0.2.15
     - docker stack rm ${APP_IMAGE_NAME}
     - node test/actor-tests/prepareIntegrationTest.js
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
