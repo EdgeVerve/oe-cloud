@@ -88,7 +88,7 @@ describe('Caching Test', function () {
     function stage3_updateDB (result, done) {
         result1 = result;
         if (dataSource.name === 'mongodb') {
-            MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
+            MongoClient.connect('mongodb://'+mongoHost+':27017/' + dbName, function (err, db) {
                 if (err) return done(err);
                 else {
                     db.collection(modelName).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
