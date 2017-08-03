@@ -35,6 +35,7 @@ var oraclePort = process.env.ORACLE_PORT || '1522';
 var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
 var oracleUser = process.env.ORACLE_USER || 'ramesh';
 var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
+oracledb.autoCommit = true;
 
 describe('Caching Test', function () {
 this.timeout(20000);
@@ -120,7 +121,7 @@ this.timeout(20000);
                         if (error) {
                             return done(error);
                         }
-                        debug("Number of records removed " + result.rowCount);
+                        debug("Number of records removed " + result.rowsAffected);
                         stage4_find(result, done);
                     });
             });
