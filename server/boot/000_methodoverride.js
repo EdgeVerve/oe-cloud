@@ -1,3 +1,19 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+/**
+ * This boot script override the existing loopback findModel, getModel and getMOdelById.
+ * The new implementation take the options as second argument and
+ *  gives personalized model based on options.
+ *
+ * @memberof Boot Scripts
+ * @author Ramesh Choudhary
+ * @name MethodOverride
+ */
+
 const loopback = require('loopback');
 const util = require('../../lib/common/util');
 
