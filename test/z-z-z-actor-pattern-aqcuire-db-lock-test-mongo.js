@@ -201,6 +201,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
       });
     }
   });
+  
 
   after('check state is updated against DB', function (done) {
     var stateModel = loopback.getModel('State');
