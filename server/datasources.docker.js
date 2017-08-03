@@ -5,7 +5,7 @@
  *
  */
 var mongoHost = process.env.MONGO_HOST || 'localhost';
-var dbName = process.env.DB_NAME; || 'db';
+var dbName = process.env.DB_NAME || 'db';
 module.exports = {
   'nullsrc': {
     'name': 'nullsrc',
