@@ -1,4 +1,5 @@
 stages:
+  - pre-build
   - pre-build-test
   - build
   - post-build-test
@@ -23,7 +24,7 @@ before_script:
   - npm config set fetch-retries 0
 
 pre-build:
-  stage: pre-build-test
+  stage: pre-build
   script:
     - echo "Performing code style check..."
     - status_eslint=0
