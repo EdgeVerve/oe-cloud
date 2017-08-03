@@ -80,6 +80,8 @@ mongotest:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
+    - export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
+    - if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -111,6 +113,8 @@ postgrestest:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
+    - export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
+    - if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
