@@ -34,8 +34,8 @@ describe('Caching Test', function () {
 
     var modelName = 'CachingTest';
     var TestModel = null;
-    var dsname = process.env.DB_NAME || 'db';
-    var dbname = dsname;
+    var dsname = 'db';
+    var dbname = process.env.DB_NAME || dsname;
     
     var result1, result2 = null;
     var id, dataSource; 
