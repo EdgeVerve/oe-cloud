@@ -6,7 +6,7 @@
  */
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 // var mongoHost = process.env.MONGO_HOST || 'localhost';
-var dbName = process.env.DB_NAME;
+var dbName = process.env.DB_NAME || 'db';
 module.exports = {
   'nullsrc': {
     'name': 'nullsrc',

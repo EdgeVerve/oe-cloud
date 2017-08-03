@@ -82,7 +82,7 @@ mongotest:
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
     #- export DB=mongo
-    - export DB_NAME=${APP_IMAGE_NAME}
+    - export DB_NAME=${APP_IMAGE_NAME}_mongo
     #- export STARTUP_CMD="npm run grunt-cover"
     #- export FILE_NAME=docker-compose.test.env.yml
     #- export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
@@ -118,7 +118,7 @@ postgrestest:
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
     #- export DB=postgres
-    - export DB_NAME=${APP_IMAGE_NAME}
+    - export DB_NAME=${APP_IMAGE_NAME}_pg
     #- export STARTUP_CMD="npm run grunt-cover"
     #- export FILE_NAME=docker-compose.test.env.yml
     #- export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
