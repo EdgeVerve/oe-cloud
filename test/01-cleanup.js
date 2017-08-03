@@ -48,30 +48,31 @@ describe('ZZ Final Cleanup', function() {
     });
 
 	it('Should delete postgres db', function(done) {
-		if (process.env.POSTGRES_HOST) {
+		if (process.env.NODE_ENV == 'postgres') {
 			var Pool = require('pg').Pool;
 			var pool = new Pool({
 				"user": "postgres",
 				"password": "postgres",
 				"host": postgresHost,
-				"database": postgresDBName
+				"database": "postgres"
 			});
-			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'TARGET_DB' AND pid <> pg_backend_pid()", function(err, result){
+			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '" + postgresDBName + "' AND pid <> pg_backend_pid()", function(err, result){
 				if(err) {
 					console.log("Failed to disconnect open connections to Postgres DB");
 					console.log(err);
-					done(err);
+					return done(err);
 				}
-				pool.query("DROP DATABASE IF EXISTS db", function(err, result){
+				pool.query("DROP DATABASE IF EXISTS " + postgresDBName, function(err, result){
 					if(err) {
 						console.log("Failed to clean Postgres DB");
 						console.log(err);
-						done(err);
+						return done(err);
 					}
 					done();
 				});
 			});
 		} else {
+			console.log("hello");
 			done();
 		}
     });
