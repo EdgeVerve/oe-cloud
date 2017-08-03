@@ -29,9 +29,16 @@ var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var pg = require('pg');
+var oracledb = require('oracledb');
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
+var oracleHost = process.env.ORACLE_HOST || '10.73.44.60';
+var oraclePort = process.env.ORACLE_PORT || '1522';
+var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
+var oracleUser = process.env.ORACLE_USER || 'ramesh';
+var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
+
 var defaultContext = {
   ctx: {
     tenantId: 'limits'
@@ -84,40 +91,61 @@ function apiGetRequest(url, callback, done) {
 }
 
 function mongoDeleteById(id, newModelName, cb) {
- if (dataSource.name === 'mongodb') {
-  var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
-  MongoClient.connect(url, function (err, db) {
-    if (err) {
-      return cb(err);
-    } else {
-      db.collection(newModelName).deleteOne({ _id: id }, function (err, numberRemoved) {
-        if (err) {
-          return cb(err);
-        }
-        debug("Number of records removed " + numberRemoved);
-        cb();
-      });
-    }
-  });
-} else {
-        var loopbackModelNoCache = loopback.getModel(modelName,bootstrap.defaultContext);
-        var idFieldName =  loopbackModelNoCache.definition.idName();
-        var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
-        var client = new pg.Client(connectionString);
-        client.connect(function (err) {
-            if (err) 
-                cb(err); 
-            else {
-                var query = client.query("DELETE from \"" + loopbackModelNoCache.modelName.toLowerCase() + "\"  WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
-                if (err)  {
-                    return cb(err);
-                }
-                debug("Number of records removed " + result.rowCount);
-                cb();
-            });
-        }
+  if (dataSource.name === 'mongodb') {
+    var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
+    MongoClient.connect(url, function (err, db) {
+      if (err) {
+        return cb(err);
+      } else {
+        db.collection(newModelName).deleteOne({ _id: id }, function (err, numberRemoved) {
+          if (err) {
+            return cb(err);
+          }
+          debug("Number of records removed " + numberRemoved);
+          cb();
+        });
+      }
     });
-    }   
+  } else if (dataSource.name === 'oracle') {
+    var loopbackModelNoCache = loopback.getModel(modelName, bootstrap.defaultContext);
+    var idFieldName = loopbackModelNoCache.definition.idName();
+    oracledb.getConnection({
+      "password": oraclePassword,
+      "user": oracleUser,
+      "connectString": oracleHost + ":" + oraclePort + "/" + oracleService
+    }, function (err, connection) {
+      if (err) {
+        return done(err);
+      }
+      connection.execute(
+        "DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'",
+        function (error, result) {
+          if (err) {
+            return cb(err);
+          }
+          debug("Number of records removed " + result.rowsAffected);
+          cb();
+        });
+    });
+  } else {
+    var loopbackModelNoCache = loopback.getModel(modelName, bootstrap.defaultContext);
+    var idFieldName = loopbackModelNoCache.definition.idName();
+    var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+    var client = new pg.Client(connectionString);
+    client.connect(function (err) {
+      if (err)
+        cb(err);
+      else {
+        var query = client.query("DELETE from \"" + loopbackModelNoCache.modelName.toLowerCase() + "\"  WHERE " + idFieldName + " = '" + id + "'", function (err, result) {
+          if (err) {
+            return cb(err);
+          }
+          debug("Number of records removed " + result.rowCount);
+          cb();
+        });
+      }
+    });
+  }
 
 }
 
@@ -125,7 +153,7 @@ describe('Instance Caching Test', function () {
   // return; // Disabling this test case because it is not working in PostgreSQL. This will be fixed by Lior.
   var TestModel = null;
   var TestModelNoInstanceCache = null;
-
+  this.timeout(20000);
   before('login using admin', function fnLogin(done) {
     dataSource = app.datasources[dbname];
     var sendData = {
@@ -323,48 +351,48 @@ describe('Instance Caching Test', function () {
             }
             result1 = Object.assign({}, data.toObject());
             mongoDeleteById(id, TestModel.modelName, function (err) {
-	           if(err) {
-                                return done(err);
-                            }
-                            TestModel.find({"where": {"id": id}}, defaultContext, function (err, data2) {
-                                if (err) {
-                                    return done(err);
-                                } else if(data2.length === 0) {
-                                    return done('instance not cached')
-                                }
-                                result2 = Object.assign({},data2[0].toObject());
-                                expect(models[modelName]).not.to.be.null;
-                                expect(result1).not.to.be.null;
-                                expect(result2).not.to.be.null;
-                                //expect(result1).to.deep.equal(result2);
-                                expect(result1.__data === result2.__data).to.be.true;
-                                return done();
-                            })
-                        });
-                    });
-                }
-            });
-        });
-
-        it('Should cache the Test instance after save', function (done) {
-            var id = uuid.v4();
-            var result1, result2;
-            TestModel.create({
-                name: 'Lior',
-                id: id
-            }, defaultContext, function (err, data) {
+              if (err) {
+                return done(err);
+              }
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                 if (err) {
-                    console.log(err);
-                    return done(err);
-                } else {
-                    data.name = 'Tamar';
-                    data.save(defaultContext, function(err, data) {
-                        if (err) {
-                            console.log(err);
-                            return done(err);
-                        }
-                        result1 = Object.assign({},data.toObject());
-                        mongoDeleteById(id, TestModel.modelName,function(err) {
+                  return done(err);
+                } else if (data2.length === 0) {
+                  return done('instance not cached')
+                }
+                result2 = Object.assign({}, data2[0].toObject());
+                expect(models[modelName]).not.to.be.null;
+                expect(result1).not.to.be.null;
+                expect(result2).not.to.be.null;
+                //expect(result1).to.deep.equal(result2);
+                expect(result1.__data === result2.__data).to.be.true;
+                return done();
+              })
+            });
+          });
+        }
+      });
+    });
+
+    it('Should cache the Test instance after save', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: 'Lior',
+        id: id
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          data.name = 'Tamar';
+          data.save(defaultContext, function (err, data) {
+            if (err) {
+              console.log(err);
+              return done(err);
+            }
+            result1 = Object.assign({}, data.toObject());
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
               }
@@ -393,21 +421,21 @@ describe('Instance Caching Test', function () {
       var result1, result2;
       TestModel.create({
         name: 'Lior',
- assign: {
-                    change: 'this field should be deleted'
-                },
+        assign: {
+          change: 'this field should be deleted'
+        },
         id: id
       }, defaultContext, function (err, data) {
         if (err) {
           console.log(err);
           return done(err);
         } else {
-          data.updateAttributes({name: 'Eduardo', assign:{new: 'should only see this field'}}, defaultContext, function(err, data) {
+          data.updateAttributes({ name: 'Eduardo', assign: { new: 'should only see this field' } }, defaultContext, function (err, data) {
             if (err) {
               console.log(err);
               return done(err);
             }
-            result1 = Object.assign({}, data.toObject(), {name: 'Eduardo', assign:{new: 'should only see this field'}});
+            result1 = Object.assign({}, data.toObject(), { name: 'Eduardo', assign: { new: 'should only see this field' } });
             mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
@@ -432,7 +460,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-it('Should clear instance cache after destroyAll', function (done) {
+    it('Should clear instance cache after destroyAll', function (done) {
       var id = uuid.v4();
       var result1, result2;
       TestModel.create({
@@ -565,33 +593,33 @@ it('Should clear instance cache after destroyAll', function (done) {
             console.log(err);
             return done(err);
           } else {
-              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+              if (err) {
+                return done(err);
+              } else if (data.length !== 1) {
+                return done('find should return one instance');
+              }
+              result1 = Object.assign({}, data[0].toObject());
+              mongoDeleteById(id, TestModel.modelName, function (err) {
                 if (err) {
                   return done(err);
-                } else if (data.length !== 1) {
-                  return done('find should return one instance');
                 }
-                result1 = Object.assign({}, data[0].toObject());
-                mongoDeleteById(id, TestModel.modelName, function (err) {
+                TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                   if (err) {
                     return done(err);
+                  } else if (data2.length === 0) {
+                    return done('instance not cached')
                   }
-                  TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-                    if (err) {
-                      return done(err);
-                    } else if (data2.length === 0) {
-                      return done('instance not cached')
-                    }
-                    result2 = Object.assign({}, data2[0].toObject());
-                    expect(models[modelName]).not.to.be.null;
-                    expect(result1).not.to.be.null;
-                    expect(result2).not.to.be.null;
-                    expect(result1).to.deep.equal(result2);
-                    expect(result1.__data === result2.__data).to.be.true;
-                    return done();
-                  });
+                  result2 = Object.assign({}, data2[0].toObject());
+                  expect(models[modelName]).not.to.be.null;
+                  expect(result1).not.to.be.null;
+                  expect(result2).not.to.be.null;
+                  expect(result1).to.deep.equal(result2);
+                  expect(result1.__data === result2.__data).to.be.true;
+                  return done();
                 });
               });
+            });
           }
         });
       });
@@ -614,37 +642,57 @@ it('Should clear instance cache after destroyAll', function (done) {
       };
 
       function dbQuery_update(result) {
-        var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
-      if (dataSource.name === 'mongodb') {
-        MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
-          if (err) return done(err);
-          else {
-            db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
-              if (err) return done(err);
-              else apiRequest_find(result, comperCacheToDb);
-            });
-          }
-        });
+        var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache, bootstrap.defaultContext);
+        if (dataSource.name === 'mongodb') {
+          MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
+            if (err) return done(err);
+            else {
+              db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
+                if (err) return done(err);
+                else apiRequest_find(result, comperCacheToDb);
+              });
+            }
+          });
+        } else if (dataSource.name === 'oracle') {
+          var idFieldName = loopbackModelNoCache.definition.idName();
+          oracledb.getConnection({
+            "password": oraclePassword,
+            "user": oracleUser,
+            "connectString": oracleHost + ":" + oraclePort + "/" + oracleService
+          }, function (err, connection) {
+            if (err) {
+              return done(err);
+            }
+            connection.execute(
+              "UPDATE \"" + loopbackModelNoCache.modelName.toUpperCase() + "\" SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'",
+              function (error, result) {
+                if (err) {
+                  return done(err);
                 } else {
-                     var idFieldName =  loopbackModelNoCache.definition.idName();
-                     var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
-                     var client = new pg.Client(connectionString);
-                     client.connect(function (err) {
-                            if (err) 
-                                done(err); 
-                            else {
-                                var query = client.query("UPDATE \"" + loopbackModelNoCache.modelName.toLowerCase() + "\" SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'" ,function(err,result){
-                                if (err)  {
-                                    return done(err);
-                                }
-                                else {
-                                    apiRequest_find(result, comperCacheToDb);
-                                }
-                        });
-                    }
-                 });
-            } 
+                  apiRequest_find(result, comperCacheToDb);
+                }
+              });
+          });
+        } else {
+          var idFieldName = loopbackModelNoCache.definition.idName();
+          var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+          var client = new pg.Client(connectionString);
+          client.connect(function (err) {
+            if (err)
+              done(err);
+            else {
+              var query = client.query("UPDATE \"" + loopbackModelNoCache.modelName.toLowerCase() + "\" SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'", function (err, result) {
+                if (err) {
+                  return done(err);
+                }
+                else {
+                  apiRequest_find(result, comperCacheToDb);
+                }
+              });
+            }
+          });
         }
+      }
 
       function comperCacheToDb(result) {
         if (result.body.name === "value2") return done();
