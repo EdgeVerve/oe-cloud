@@ -38,7 +38,7 @@ var oraclePort = process.env.ORACLE_PORT || '1522';
 var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
 var oracleUser = process.env.ORACLE_USER || 'ramesh';
 var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
-
+oracledb.autoCommit = true;
 var defaultContext = {
   ctx: {
     tenantId: 'limits'
@@ -117,6 +117,7 @@ function mongoDeleteById(id, newModelName, cb) {
       if (err) {
         return done(err);
       }
+      console.log('Query -------->> ',"DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'");
       connection.execute(
         "DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'",
         function (error, result) {
