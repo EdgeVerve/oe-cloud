@@ -33,6 +33,7 @@
     "errorhandler": "^1.4.3",
     "express-flash": "0.0.2",
     "express-session": "1.12.1",
+    "fast-memoize": "^2.2.7",
     "fs-extra": "^3.0.1",
     "gelf-stream": "^1.1.1",
     "helmet": "^2.1.1",
