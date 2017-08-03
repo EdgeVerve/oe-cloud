@@ -616,7 +616,7 @@ it('Should clear instance cache after destroyAll', function (done) {
       function dbQuery_update(result) {
         var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
       if (dataSource.name === 'mongodb') {
-        MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
+        MongoClient.connect('mongodb://' + mongoHost + ':27017/' + dbname, function (err, db) {
           if (err) return done(err);
           else {
             db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
