@@ -35,7 +35,7 @@ describe('Caching Test', function () {
     var modelName = 'CachingTest';
     var TestModel = null;
     var dsname = 'db';
-    var dbname = process.env.DB_NAME || dsname;
+    var dbName = process.env.DB_NAME || dsname;
     
     var result1, result2 = null;
     var id, dataSource; 
@@ -100,7 +100,7 @@ describe('Caching Test', function () {
         } else {
             var loopbackModelNoCache = loopback.getModel(modelName);
             var idFieldName =  loopbackModelNoCache.definition.idName();
-            var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+            var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbName;
             var pg = require('pg');
             var client = new pg.Client(connectionString);
             client.connect(function (err) {
