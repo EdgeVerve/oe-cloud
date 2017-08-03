@@ -13,8 +13,6 @@
 var loopback = require('loopback');
 var fs = require('fs');
 var path = require('path');
-var logger = require('oe-logger');
-var log = logger('designer');
 var _ = require('lodash');
 var util = require('../../lib/common/util');
 var appconfig = require('../config');
@@ -166,7 +164,7 @@ function setDesignerPath(DesignerPath, server) {
   });
 
 
-  server.get('/designerRoutes/:model', function designerRoutes(req, res) {
+  server.get(appconfig.designer.mountPath + '/routes/:model', function designerRoutes(req, res) {
     var model = req.params.model;
     var remotes = server.remotes();
     var adapter = remotes.handler('rest').adapter;
@@ -229,7 +227,7 @@ function setDesignerPath(DesignerPath, server) {
     var baseModel = util.checkModelWithPlural(req.app, model);
     var actualModel = loopback.findModel(baseModel, req.callContext);
     var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
-    res.send(JSON.stringify(result));
+    res.send(result);
   });
   server.get('/designer.html', function sendDesignerHomePage(req, res) {
     res.redirect(appconfig.designer.mountPath);
@@ -356,49 +354,5 @@ module.exports = function Designer(server) {
         console.warn('Designer not installed at [' + appconfig.designer.installationPath + '/' + designerName + ']');
       }
     });
-
-    var designerUIMetadata = {
-      'code': 'BaseUser',
-      'modeltype': 'BaseUser',
-      'title': 'Create User',
-      'resturl': 'api/BaseUsers',
-      'skipMissingProperties': true,
-      'controls': [{
-        'fieldid': 'username',
-        'label': 'User Name',
-        'required': true,
-        'container': 'main'
-      }, {
-        'label': 'Email',
-        'fieldid': 'email',
-        'container': 'main',
-        'autocomplete': 'off'
-      }, {
-        'label': 'Password',
-        'fieldid': 'password',
-        'required': true,
-        'container': 'main',
-        'uitype': 'text',
-        'type': 'password',
-        'autocomplete': 'off'
-      }, {
-        'fieldid': 'tenantId',
-        'label': 'Tenant Id',
-        'required': true,
-        'container': 'main'
-      }],
-      id: '69f5a862-1434-402d-8ea9-b6b3406340cc'
-    };
-
-    var uiMetadataModel = loopback.findModel('UIMetadata');
-
-    if (uiMetadataModel) {
-      uiMetadataModel.create(designerUIMetadata, util.bootContext(), function results(err, result) {
-        if (err) {
-          log.debug(util.bootContext(), 'Unable to create UIMetadata record for BaseUser. Record may have already exist.', err);
-          return;
-        }
-      });
-    }
   }
 };

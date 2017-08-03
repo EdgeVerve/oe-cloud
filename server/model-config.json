@@ -186,19 +186,11 @@
         "public": true,
         "dataSource": "db"
     },
-    "DesignerPage": {
-        "public": true,
-        "dataSource": "db"
-    },
     "ModelView": {
         "public": true,
         "dataSource": "db"
     },
     "UIManager": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "DesignerRule": {
         "public": true,
         "dataSource": "db"
     },

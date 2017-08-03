@@ -248,7 +248,10 @@ function finalBoot(appinstance, options, cb) {
                                                 finalError.requestId = req.callContext ? req.callContext.requestId : '';
                                                 finalError.errors = errors;
                                                 log.error(options, 'error :', JSON.stringify(finalError));*/
-            log.error(options, 'error :', JSON.stringify(err));
+            var error = {};
+            error.message = err.message;
+            error.stack = err.stack;
+            log.error(options, 'error :', JSON.stringify(error));
             defaultHandler(err);
           }
         };
