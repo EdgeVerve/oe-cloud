@@ -34,17 +34,8 @@ pre-build:
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
-    - mkdir -p /data/db
-    - mongod --dbpath /data/db &
-    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-    - export APP_URL=http://localhost:8080/api
-    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
     - time npm install --no-optional
-    - mocha test/consistenthash/server.js &
-    - sleep 60
-    - mocha test/consistenthash/server.js 3100 &
-    - sleep 60
-    - mocha test/consistenthash/client.js 3200
+    - echo "node modules installed"
   artifacts:
     untracked: true
     expire_in: 2h
@@ -65,6 +56,22 @@ buildjob:
     expire_in: 2h
     paths:
       - node_modules/
+  tags:
+    - CEP_RUNNER
+
+consistenthashtest:
+  stage: pre-build-test
+  script:
+    - mkdir -p /data/db
+    - mongod --dbpath /data/db &
+    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
+    - export APP_URL=http://localhost:8080/api
+    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - mocha test/consistenthash/server.js &
+    - sleep 60
+    - mocha test/consistenthash/server.js 3100 &
+    - sleep 60
+    - mocha test/consistenthash/client.js 3200
   tags:
     - CEP_RUNNER
 
