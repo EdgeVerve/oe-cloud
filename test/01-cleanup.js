@@ -80,7 +80,6 @@ describe('ZZ Final Cleanup', function() {
 				});
 			});
 		} else {
-			console.log("hello");
 			done();
 		}
     });
