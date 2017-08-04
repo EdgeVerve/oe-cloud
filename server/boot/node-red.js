@@ -272,13 +272,16 @@ module.exports = function startNodeRed(server, callback) {
 
     if (server.get('nodeRedSplitToFiles')) {
       getFlowsFromFiles(function (err, allFlowsFromFiles) {
+        if (err) {
+          return res.status(500).json({ error: 'internal server error', message: 'no nodered flows found' + err });
+        }
         res.json(allFlowsFromFiles);
       });
     } else {
       var autoscopeField = getAutoscopeField(flowModel, req.callContext);
       flowModel.find({ where: { name: autoscopeField } }, req.callContext, function flowModelFind(err, results) {
         if (err) {
-          return res.status(500).json({ error: 'Internal server error', message: 'No nodered flows found' + err });
+          return res.status(500).json({ error: 'internal server error', message: 'no nodered flows found' + err });
         }
         results.forEach(function resultsForEach(r) {
           r.flow.forEach(function prepareFlowsArray(f) {
