@@ -1,6 +1,4 @@
 stages:
-  - pre-build
-  - pre-build-test
   - build
   - post-build-test
 
@@ -23,9 +21,9 @@ before_script:
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
 
-pre-build:
-  stage: pre-build
-  script:
+buildjob:
+  stage: build
+  script:    
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
@@ -36,32 +34,6 @@ pre-build:
     - echo "Code style check done successfully"
     - time npm install --no-optional
     - echo "node modules installed"
-  artifacts:
-    untracked: true
-    expire_in: 2h
-    paths:
-      - node_modules/
-  tags:
-    - CEP_NM_RUNNER
-
-buildjob:
-  stage: build
-  script:
-    - echo "Building oe-cloud image..."
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
-    - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
-    - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
-  artifacts:
-    untracked: true
-    expire_in: 2h
-    paths:
-      - node_modules/
-  tags:
-    - CEP_RUNNER
-
-consistenthashtest:
-  stage: pre-build-test
-  script:
     - mkdir -p /data/db
     - mongod --dbpath /data/db &
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
@@ -72,8 +44,17 @@ consistenthashtest:
     - mocha test/consistenthash/server.js 3100 &
     - sleep 60
     - mocha test/consistenthash/client.js 3200
+    - echo "Building oe-cloud image..."
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
+    - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_NM_RUNNER
 
 mongotest:
   stage: post-build-test
