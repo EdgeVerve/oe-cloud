@@ -34,6 +34,8 @@ buildjob:
     - echo "Code style check done successfully"
     - time npm install --no-optional
     - echo "node modules installed"
+    - echo "Building image..."
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
     - mkdir -p /data/db
     - mongod --dbpath /data/db &
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
@@ -44,8 +46,7 @@ buildjob:
     - mocha test/consistenthash/server.js 3100 &
     - sleep 60
     - mocha test/consistenthash/client.js 3200
-    - echo "Building oe-cloud image..."
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
+    - wait ${BUILD_PID}
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
   artifacts:
