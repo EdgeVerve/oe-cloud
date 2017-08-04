@@ -76,74 +76,74 @@ consistenthashtest:
     - CEP_RUNNER
 
 mongotest:
-  stage: pre-build-test
+  stage: post-build-test
   script:
     - export NODE_ENV=docker
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
-    #- export DB=mongo
+    - export DB=mongo
     - export DB_NAME=${APP_IMAGE_NAME}_mongo
-    #- export STARTUP_CMD="npm run grunt-cover"
-    #- export FILE_NAME=docker-compose.test.env.yml
-    #- export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     #- export NETWORK_NAME=${STACK_NAME}
-    #- export exit_status="0"
+    - export exit_status="0"
     - npm run grunt-cover
-    #- export nameWebService=${STACK_NAME}"_web"
+    - export nameWebService=${STACK_NAME}"_web"
     #- export nameDBService=${STACK_NAME}"_"${DB}
-    #- export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
-    #- if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
-    #- docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-    #- docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-    #- export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-    #- while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-    #- export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-    #- if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
+    - if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
     #- export DB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameDBService} | wc -l)
-    #- export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-    #- export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-    #- export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-    #- docker stack ps --no-trunc ${STACK_NAME}
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
     #- if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
-    #- if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    #- docker stack rm ${STACK_NAME}
-    #- exit $exit_status
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - docker stack rm ${STACK_NAME}
+    - exit $exit_status
   tags:
     - CEP_RUNNER
 
 postgrestest:
-  stage: pre-build-test
+  stage: post-build-test
   script:
     - export NODE_ENV=postgres
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
-    #- export DB=postgres
+    - export DB=postgres
     - export DB_NAME=${APP_IMAGE_NAME}_pg
-    #- export STARTUP_CMD="npm run grunt-cover"
-    #- export FILE_NAME=docker-compose.test.env.yml
-    #- export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     #- export NETWORK_NAME=${STACK_NAME}
-    #- export exit_status="0"
+    - export exit_status="0"
     - npm run grunt-cover
-    #- export nameWebService=${STACK_NAME}"_web"
+    - export nameWebService=${STACK_NAME}"_web"
     #- export nameDBService=${STACK_NAME}"_"${DB}
-    #- export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
-    #- if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
-    #- docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-    #- docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-    #- export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-    #- while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-    #- export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-    #- if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export networkAvailable = $(docker network ls | grep oecloud_ci_test | wc -l)
+    - if [$networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
     #- export DB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameDBService} | wc -l)
-    #- export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-    #- export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-    #- export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-    #- docker stack ps --no-trunc ${STACK_NAME}
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
     #- if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
-    #- if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    #- docker stack rm ${STACK_NAME}
-    #- exit $exit_status
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - docker stack rm ${STACK_NAME}
+    - exit $exit_status
   tags:
     - CEP_RUNNER
 

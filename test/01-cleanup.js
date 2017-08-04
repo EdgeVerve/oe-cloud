@@ -62,15 +62,15 @@ describe('ZZ Final Cleanup', function() {
 					console.log(err);
 					return done(err);
 				}
-				pool.query("DROP DATABASE IF EXISTS " + postgresDBName, function (err, result) {
+				pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "\"", function (err, result) {
 					if (err) {
 						console.log(err);
 					}
-					pool.query("DROP DATABASE IF EXISTS " + postgresDBName + "1", function (err, result) {
+					pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "1\"", function (err, result) {
 						if (err) {
 							console.log(err);
 						}
-						pool.query("DROP DATABASE IF EXISTS " + postgresDBName + "2", function (err, result) {
+						pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "2\"", function (err, result) {
 							if (err) {
 								console.log(err);
 							}
