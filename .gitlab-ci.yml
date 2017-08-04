@@ -35,18 +35,19 @@ buildjob:
     - time npm install --no-optional
     - echo "node modules installed"
     - echo "Building image..."
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
-    - mkdir -p /data/db
-    - mongod --dbpath /data/db &
-    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-    - export APP_URL=http://localhost:8080/api
-    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-    - mocha test/consistenthash/server.js &
-    - sleep 60
-    - mocha test/consistenthash/server.js 3100 &
-    - sleep 60
-    - mocha test/consistenthash/client.js 3200
-    - wait ${BUILD_PID}
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . 
+    #& BUILD_PID=$!
+    #- mkdir -p /data/db
+    #- mongod --dbpath /data/db &
+    #- haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
+    #- export APP_URL=http://localhost:8080/api
+    #- NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    #- mocha test/consistenthash/server.js &
+    #- sleep 60
+    #- mocha test/consistenthash/server.js 3100 &
+    #- sleep 60
+    #- mocha test/consistenthash/client.js 3200
+    #- wait ${BUILD_PID}
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
   artifacts:
