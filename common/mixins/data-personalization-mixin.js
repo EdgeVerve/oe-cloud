@@ -403,14 +403,14 @@ function dataPersonalizationAccess(ctx, next) {
   let finalQuery = {};
   if (ctx.Model.dataSource.connector.name === 'mongodb' || ctx.Model.dataSource.connector.name === 'postgresql') {
     let exeContextArray = convertToKeyValueString(scopeVars);
-    const autoscopeArray = [];
+    let autoscopeArray = [];
     autoscope.forEach((element) => {
       if (context && Array.isArray(context[element])) {
         const valueArray = [];
         context[element].forEach((item) => {
           valueArray.push(`${element}:${item}`);
         });
-        autoscopeArray.concat(valueArray);
+        autoscopeArray=autoscopeArray.concat(valueArray);
         exeContextArray.push(`${element}:${defaultValue}`);
         exeContextArray.concat(valueArray);
       } else {
