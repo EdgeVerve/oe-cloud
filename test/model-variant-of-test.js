@@ -22,7 +22,7 @@ function GenerateModelName(model) {
 }
 
 describe(chalk.blue('model-variant-of'), function () {
-
+  this.timeout(20000);
   var accessTokens = {};
 
   var tenantId = GenerateModelName('tenant');
