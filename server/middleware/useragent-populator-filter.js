@@ -4,7 +4,11 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
+var memoize = require('fast-memoize');
 var parser = require('ua-parser-js');
+
+var memoizedParser = memoize(parser);
+
 
 /**
  * This middleware is used to get user related detils like device , os , browser, cpu etc .
@@ -16,7 +20,7 @@ var parser = require('ua-parser-js');
 
 module.exports = function UserAgentPopulationFilter(options) {
   return function UserAgentPopulationFilterFn(req, res, next) {
-    req.callContext['user-agent'] = parser(req.headers['user-agent']);
+    req.callContext['user-agent'] = memoizedParser(req.headers['user-agent']);
     next();
   };
 };

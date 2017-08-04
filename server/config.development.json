@@ -38,7 +38,7 @@
   "frameworkMetadataModels"  : ["ModelDefinition", "BaseUser", "BaseACL", "DataACL", "DataSourceDefinition", "DataSourceMapping", "EnumBase", "ErrorDetail", "JobScheduler", "PersonalizationRule", "Error", "Literal", "Field", "GridColumnDefinition", "GridMetaData", "UIResource", "UIRoute", "UIMetadata", "NavigationLink"],
   "tenantsource": "HEADER",
   "tenantkey": "tenant_id",
-  "disableNodered": true,
+  "disableNodered": false,
   "nodeRedUserDir": "nodered/",
   "nodeRedMetrics": false,
   "nodeRedAudit": false,
