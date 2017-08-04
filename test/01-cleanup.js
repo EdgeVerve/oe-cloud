@@ -56,19 +56,27 @@ describe('ZZ Final Cleanup', function() {
 				"host": postgresHost,
 				"database": "postgres"
 			});
-			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '" + postgresDBName + "' AND pid <> pg_backend_pid()", function(err, result){
-				if(err) {
+			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE (pg_stat_activity.datname = '" + postgresDBName + "' OR pg_stat_activity.datname = '" + postgresDBName + '1' + "' OR pg_stat_activity.datname = '" + postgresDBName + '2' + "') AND pid <> pg_backend_pid()", function (err, result) {
+				if (err) {
 					console.log("Failed to disconnect open connections to Postgres DB");
 					console.log(err);
 					return done(err);
 				}
-				pool.query("DROP DATABASE IF EXISTS " + postgresDBName, function(err, result){
-					if(err) {
-						console.log("Failed to clean Postgres DB");
+				pool.query("DROP DATABASE IF EXISTS " + postgresDBName, function (err, result) {
+					if (err) {
 						console.log(err);
-						return done(err);
 					}
-					done();
+					pool.query("DROP DATABASE IF EXISTS " + postgresDBName + "1", function (err, result) {
+						if (err) {
+							console.log(err);
+						}
+						pool.query("DROP DATABASE IF EXISTS " + postgresDBName + "2", function (err, result) {
+							if (err) {
+								console.log(err);
+							}
+							done();
+						});
+					});
 				});
 			});
 		} else {

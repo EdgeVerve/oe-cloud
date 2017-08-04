@@ -18,6 +18,7 @@ var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var dbName = process.env.DB_NAME || 'db';
+var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 // function GenerateModelName(model) {
 //    return model + Math.floor(Math.random() * (999));
 // }
@@ -34,28 +35,57 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     tenantId: 'tenant2',
     tenantName: 'tenant2'
   }];
+  var datasources;
+  if(process.env.NODE_ENV == 'postgres')
+  {
+    datasources = [{
+      'host': postgresHost,
+      'port': 27017,
+      'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/' + dbName + '1',
+      'database': dbName + '1',
+      'password': 'postgres',
+      'name': 'db1',
+      'connector': 'loopback-connector-postgresql',
+      'user': 'postgres',
+      'max': 50,
+      'connectionTimeout': 50000
+    }, {
+        'host': postgresHost,
+        'port': 27017,
+        'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/' + dbName + '2',
+        'database': dbName + '2',
+        'password': 'postgres',
+        'name': 'db2',
+        'connector': 'loopback-connector-postgresql',
+        'user': 'postgres',
+        'max': 50,
+        'connectionTimeout': 50000
+      }];
+  } else {
+    datasources = [{
+      'host': mongoHost,
+      'port': 27017,
+      'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
+      'database': dbName + '1',
+      'password': 'admin',
+      'name': 'db1',
+      'connector': 'mongodb',
+      'user': 'admin',
+      'connectionTimeout': 50000
+    }, {
+        'host': mongoHost,
+        'port': 27017,
+        'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
+        'database': dbName + '2',
+        'password': 'admin',
+        'name': 'db2',
+        'connector': 'mongodb',
+        'user': 'admin',
+        'connectionTimeout': 50000
+      }];
 
-  var datasources = [{
-    'host': mongoHost,
-    'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
-    'database': 'db1',
-    'password': 'admin',
-    'name': 'db1',
-    'connector': 'mongodb',
-    'user': 'admin',
-    'connectionTimeout': 50000
-  }, {
-    'host': mongoHost,
-    'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
-    'database': 'db2',
-    'password': 'admin',
-    'name': 'db2',
-    'connector': 'mongodb',
-    'user': 'admin',
-    'connectionTimeout': 50000
-  }];
+  }
+
 
   var user1 = {
     'username': 'user1',
