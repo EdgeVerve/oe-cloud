@@ -166,7 +166,6 @@ module.exports = function startNodeRed(server, callback) {
     // Need to fix duplicate reloading when a 'deploy' is done from Node-Red UI
 
     messaging.publish('reloadNodeRedFlows', uuid.v4());
-    reload(redNodes, function reloadNodes() { });
 
     next();
   });
