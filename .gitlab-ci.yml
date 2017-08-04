@@ -55,7 +55,7 @@ buildjob:
     paths:
       - node_modules/
   tags:
-    - CEP_NM_RUNNER
+    - CEP_RUNNER
 
 mongotest:
   stage: post-build-test
