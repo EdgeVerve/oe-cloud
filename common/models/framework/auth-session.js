@@ -11,44 +11,34 @@ module.exports = function AuthSessionFn(AuthSession) {
       cb = options;
       options = {};
     }
+    var id = tokenIdForRequest(req, options);
 
-    var proxyKey = options.model.app.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
-    if (req.headers && proxyKey) {
-      if (req.headers['x-evproxy-internal-key'] === proxyKey) {
-        process.nextTick(function tokenForRequestFn() {
+    if (id) {
+      this.findById(id, req.callContext, function authSessionFindById(err, token) {
+        if (err) {
+          cb(err);
+        } else if (token) {
+          token.validate(function tokenValidate(err, isValid) {
+            if (err) {
+              cb(err);
+            } else if (isValid) {
+              cb(null, token);
+            } else {
+              var e = new Error('Invalid Access Token');
+              e.status = e.statusCode = 401;
+              e.code = 'INVALID_TOKEN';
+              e.retriable = false;
+              cb(e);
+            }
+          });
+        } else {
           cb();
-        });
-      }
+        }
+      });
     } else {
-      var id = tokenIdForRequest(req, options);
-
-      if (id) {
-        this.findById(id, req.callContext, function authSessionFindById(err, token) {
-          if (err) {
-            cb(err);
-          } else if (token) {
-            token.validate(function tokenValidate(err, isValid) {
-              if (err) {
-                cb(err);
-              } else if (isValid) {
-                cb(null, token);
-              } else {
-                var e = new Error('Invalid Access Token');
-                e.status = e.statusCode = 401;
-                e.code = 'INVALID_TOKEN';
-                e.retriable = false;
-                cb(e);
-              }
-            });
-          } else {
-            cb();
-          }
-        });
-      } else {
-        process.nextTick(function tokenForRequestFn() {
-          cb();
-        });
-      }
+      process.nextTick(function tokenForRequestFn() {
+        cb();
+      });
     }
   };
 
