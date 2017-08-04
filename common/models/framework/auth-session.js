@@ -15,10 +15,9 @@ module.exports = function AuthSessionFn(AuthSession) {
     var proxyKey = options.model.app.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
     if (req.headers && proxyKey) {
       if (req.headers['x-evproxy-internal-key'] === proxyKey) {
-          return cb();
+        return cb();
       }
     } else {
-
       var id = tokenIdForRequest(req, options);
 
       if (id) {
