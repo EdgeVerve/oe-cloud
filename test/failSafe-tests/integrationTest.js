@@ -100,7 +100,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         // Wait 
           setTimeout(function() {
               callback(null, 2);
-          }, 5*60*1000);
+          }, 1500); //5*60*1000
       }, 
       four: function (callback){
         // check container size 
