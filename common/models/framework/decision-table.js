@@ -11,7 +11,9 @@ var request = require('request');
 var utils = require('../../../lib/common/util');
 var assert = require('assert');
 var loopback = require('loopback');
-const delimiter = '&SP';
+var logger = require('oe-logger');
+var log = logger('decision-table');
+var delimiter = '&SP';
 
 module.exports = function decisionTableFn(decisionTable) {
   function droolsUrl() {
@@ -62,6 +64,9 @@ module.exports = function decisionTableFn(decisionTable) {
         } else {
           try {
             // Code to handle files for jsFEEL
+            if (typeof document.documentData !== 'string' || document.documentData.indexOf('base64') < 0) {
+              return next(new Error('Decision table data provided is not a base64 encoded string'));
+            }
             var base64String = document.documentData.split(',')[1];
             // var base64String = ctx.instance.documentData.replace('data:' + ctx.instance.fileType + ';base64,', '');
             // The following usage of new Buffer() is deprecated from node v6.0
@@ -77,8 +82,9 @@ module.exports = function decisionTableFn(decisionTable) {
             data.decisionRules = JSON.stringify(decisionRules);
             next();
           } catch (err) {
-            // console.log(err);
-            return next(err);
+            log.error(ctx.options, 'Error - Unable to process decision table data -', err);
+            var error = new Error('Decision table data provided could not be parsed, please provide proper data');
+            return next(error);
           }
         }
       });
