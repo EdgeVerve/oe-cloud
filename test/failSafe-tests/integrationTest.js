@@ -69,10 +69,11 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         headers: {},
         method: 'POST'
       }, function (error, r, body) {
-          done(error);
+          
       });
 
     }
+    done();
   });
 
   it('Recover - Default sceanrio', function (done) {
