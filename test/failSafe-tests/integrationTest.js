@@ -59,10 +59,9 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
 
   });
 
-
-  it('Recover - Default sceanrio', function (done) {
-    //create 50 note records 
-    for (var i=0; i<50; i++){
+  before('create 50 note records', function fnLogin(done) {
+    console.log('Base Url is ', baseurl);
+        for (var i=0; i<50; i++){
       var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
       request.post({
         url: createUrl,
@@ -70,11 +69,13 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         headers: {},
         method: 'POST'
       }, function (error, r, body) {
-          done(error, body.id);
+          done(error);
       });
 
     }
-   
+  });
+
+  it('Recover - Default sceanrio', function (done) {
     async.series({
       one : function(callback){
             docker.container.list()
