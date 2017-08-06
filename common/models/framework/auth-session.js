@@ -17,8 +17,8 @@ module.exports = function AuthSessionFn(AuthSession) {
       if (req.headers['x-evproxy-internal-key'] === proxyKey) {
         var data = req.callContext.evproxyContext.ctx.accessTokenData;
         var token = new AuthSession(data, {
-            applySetters: false,
-            persisted: true
+          applySetters: false,
+          persisted: true
         });
         return cb(null, token);
       }
