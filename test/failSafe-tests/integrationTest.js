@@ -8,7 +8,8 @@ var chalk = require('chalk');
 const Docker = require('node-docker-api').Docker
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
-var baseurl = "https://$EVFURL/api/";
+//var baseurl = "https://$EVFURL/api/";
+ var baseurl = "https://$APP_IMAGE_NAME.$DOMAIN_NAME/api/";
 
 var modelPlural = 'Notes';
 
@@ -61,17 +62,14 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
 
   before('create 50 note records', function fnLogin(done) {
     console.log('create 50 note records');
-        for (var i=0; i<50; i++){
+    for (var i=0; i<50; i++){
       var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
       request.post({
         url: createUrl,
         json: {},
         headers: {},
         method: 'POST'
-      }, function (error, r, body) {
-          
-      });
-
+      }, function (error, r, body) { });
     }
     done();
   });
@@ -79,12 +77,12 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   it('Recover - Default sceanrio', function (done) {
     async.series({
       one : function(callback){
-            docker.container.list()
-                .then(function(containers) {
-                  var listSize = containers.length;
-                  console.log("Number of containers" + listSize);
-                  callback();
-                  });
+        docker.container.list()
+          .then(function(containers) {
+            var listSize = containers.length;
+            console.log("Number of containers" + listSize);
+            callback();
+          });
       },
       two: function(callback) {
           // Scale down one serevr
