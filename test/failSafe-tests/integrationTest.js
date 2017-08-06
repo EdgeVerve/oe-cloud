@@ -60,7 +60,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   });
 
   before('create 50 note records', function fnLogin(done) {
-    console.log('Base Url is ', baseurl);
+    console.log('create 50 note records');
         for (var i=0; i<50; i++){
       var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
       request.post({
