@@ -113,7 +113,8 @@ describe(chalk.blue('BaseUser Test'), function () {
                     expect(response.body).not.to.be.null;
                     expect(response.body).not.to.be.undefined;
                     expect(response.body.username).to.be.equal(credentials.username);
-                    expect(response.body.userid).to.be.equal(testUserId);
+                    // Parsing to integer, since in id is storing as string.
+                    expect(parseInt(response.body.userid)).to.be.equal(testUserId);
                     expect(response.body.tenantId).to.be.equal(testTenant);
                     expect(response.body.roles).to.be.an('array').that.includes(testRole);
                     done();
@@ -171,7 +172,8 @@ describe(chalk.blue('BaseUser Test'), function () {
                 expect(token).not.to.be.undefined;
                 expect(token.tenantId).to.be.equal(testTenant);
                 expect(token.username).to.be.equal(credentials.username);
-                expect(token.userId).to.be.equal(testUserId);
+                // Parsing to integer, since in id is storing as string.
+                expect(parseInt(token.userId)).to.be.equal(testUserId);
                 expect(token.roles).to.be.an('array').that.includes(testRole);
                 done();
             });

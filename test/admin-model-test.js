@@ -22,6 +22,7 @@ var path = require('path');
 var access_token;
 var testTenant = 'test-tenant';
 var fs = require('fs');
+var modelDefModel = loopback.findModel('ModelDefinition');
 describe(chalk.blue('Admin Model'), function() {
     describe(chalk.green('Upload'), function(){
         var orgAppHome;
@@ -45,10 +46,15 @@ describe(chalk.blue('Admin Model'), function() {
             .send({})
             .end(function(err, response) {
                 expect(err).to.be.null;
-                var model = loopback.findModel('AdminModelTest', {ctx: {tenantId: testTenant}});
-                expect(model).not.to.be.null;
-                expect(model).not.to.be.undefined;
-                done();
+                modelDefModel.find({where:{name: 'AdminModelTest'}}, {ctx: {tenantId: testTenant}}, function(dbErr, res) {
+                    expect(dbErr).to.be.null;
+                    expect(res).not.to.be.null;
+                    expect(res).not.to.be.undefined;
+                    expect(res).to.be.an('array');
+                    expect(res.length).not.to.be.equal(0);
+                    expect(res[0].name).to.be.equal('AdminModelTest');
+                    done();
+                });
             });
         });
         it('Upload Same Metadata models again', function(done) {
@@ -59,10 +65,15 @@ describe(chalk.blue('Admin Model'), function() {
             .send({})
             .end(function(err, response) {
                 expect(err).to.be.null;
-                var model = loopback.findModel('AdminModelTest', {ctx: {tenantId: testTenant}});
-                expect(model).not.to.be.null;
-                expect(model).not.to.be.undefined;
-                done();
+                modelDefModel.find({where:{name: 'AdminModelTest'}}, {ctx: {tenantId: testTenant}}, function(dbErr, res) {
+                    expect(dbErr).to.be.null;
+                    expect(res).not.to.be.null;
+                    expect(res).not.to.be.undefined;
+                    expect(res).to.be.an('array');
+                    expect(res.length).not.to.be.equal(0);
+                    expect(res[0].name).to.be.equal('AdminModelTest');
+                    done();
+                });
             });
         });
         // This is cover the code with the check of metadataModelList check.
