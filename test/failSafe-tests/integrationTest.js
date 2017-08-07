@@ -8,9 +8,13 @@ var chalk = require('chalk');
 const Docker = require('node-docker-api').Docker
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
+
+var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
+var  DOMAIN_NAME = process.env.DOMAIN_NAME;
+
 //var baseurl = "https://$EVFURL/api/";
-//var baseurl = "https://" + $APP_IMAGE_NAME + "." + $DOMAIN_NAME + "/api/";
-var baseurl = "https://mayademo.oecloud.local/api/";
+var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
+//var baseurl = "https://mayademo.oecloud.local/api/";
 
 var modelPlural = 'Notes';
 
@@ -79,12 +83,16 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     async.series({
       one : function(callback){
         var containers = docker.container.list();
-        containers.forEach(function(container) {
-          container.inspect(function (err, data) {
-            console.log();
-            console.log(data);
+        //containers.forEach(function(container) {
+          for (var i=0; i<containers.length; i++) {
+            var container = containers[i];
+            console.log(i + " container " + container);
+            container.inspect(function (err, data) {
+              console.log();
+              console.log(data);
           });
-        }, this);
+        };
+        callback();
           // .then(function(containers) {
           //   var listSize = containers.length;
           //   console.log("Number of containers" + listSize);
