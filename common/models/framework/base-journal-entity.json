@@ -27,6 +27,14 @@
 
     }
   },
+  "mixins": {
+        "ModelValidations": true,
+        "PropertyExpressionMixin": false,
+        "ExpressionAstPopulatorMixin": false,
+        "BusinessRuleMixin": false,
+        "SoftDeleteMixin": false,
+        "HistoryMixin": false
+  },
   "acls": [],
   "methods": {}
 }
