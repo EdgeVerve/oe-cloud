@@ -301,7 +301,7 @@ describe(chalk.blue('UIElement'), function () {
     done();
   });
 
-  it('default form cache loads element definitions', function (done) {
+  xit('default form cache loads element definitions', function (done) {
     var metadata = metadataCache['modelperson-form'];
     expect(metadata.elements).to.be.an('object');
     expect(metadata.elements.firstName).to.be.an('object').and.have.keys('minlength');
