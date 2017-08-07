@@ -11,6 +11,7 @@ module.exports = function AuthSessionFn(AuthSession) {
       cb = options;
       options = {};
     }
+    var id = tokenIdForRequest(req, options);
 
     var proxyKey = options.model.app.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
     if (req.headers && proxyKey) {
@@ -23,8 +24,6 @@ module.exports = function AuthSessionFn(AuthSession) {
         return cb(null, token);
       }
     }
-
-    var id = tokenIdForRequest(req, options);
 
     if (id) {
       this.findById(id, req.callContext, function authSessionFindById(err, token) {
