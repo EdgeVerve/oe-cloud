@@ -83,7 +83,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     async.series({
       one : function(callback){
         var containers = docker.container.list();
-        console.log("Number of containers " + containers.length);
+        console.log("Number of containers " + containers.size);
         //containers.forEach(function(container) {
           for (var i=0; i<containers.length; i++) {
             var container = containers[i];
