@@ -78,12 +78,18 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   it('Recover - Default sceanrio', function (done) {
     async.series({
       one : function(callback){
-        docker.container.list()
-          .then(function(containers) {
-            var listSize = containers.length;
-            console.log("Number of containers" + listSize);
-            callback();
+        var containers = docker.container.list();
+        containers.forEach(function(container) {
+          container.inspect(function (err, data) {
+            console.log();
+            console.log(data);
           });
+        }, this);
+          // .then(function(containers) {
+          //   var listSize = containers.length;
+          //   console.log("Number of containers" + listSize);
+          //   callback();
+          // });
       },
       two: function(callback) {
           // Scale down one serevr
@@ -98,8 +104,8 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       three: function(callback){
         // Wait 
           setTimeout(function() {
-              callback(null, 2);
-          }, 1500); //5*60*1000
+              callback;
+          }, 1000); //5*60*1000
       }, 
       four: function (callback){
         // check container size 
