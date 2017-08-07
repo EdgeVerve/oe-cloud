@@ -9,7 +9,7 @@ const Docker = require('node-docker-api').Docker
 const docker = new Docker({ socketPath: '/var/run/docker.sock' })
 
 //var baseurl = "https://$EVFURL/api/";
- var baseurl = "https://$APP_IMAGE_NAME.$DOMAIN_NAME/api/";
+ var baseurl = "https://" + $APP_IMAGE_NAME + "." + $DOMAIN_NAME + "/api/";
 
 var modelPlural = 'Notes';
 
