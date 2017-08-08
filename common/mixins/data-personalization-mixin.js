@@ -459,7 +459,6 @@ function dataPersonalizationAccess(ctx, next) {
       // loops through each value in autoscope and forms an 'and' condition between each value.
       const asvals = {};
       autoscope.forEach((key) => {
-
         if (callContext.ignoreAutoScope) {
           // When ignoreAutoScope is true then only query with autoscope deafult
           // is formed and only default records are sent.
