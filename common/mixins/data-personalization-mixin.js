@@ -454,7 +454,7 @@ function dataPersonalizationAccess(ctx, next) {
   } else {
     if (autoscope.length) {
       const autoAnd = [];
-      const autoscopeArray = [];
+      let autoscopeArray = [];
       // This forms the first part of the 'and' condition in the query.
       // loops through each value in autoscope and forms an 'and' condition between each value.
       const asvals = {};
