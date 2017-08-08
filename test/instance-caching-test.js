@@ -319,7 +319,7 @@ describe('Instance Caching Test', function () {
                     return done('instance not cached')
                   }
                   result2 = Object.assign({}, data2[0].toObject());
-                  expect(models[modelName]).not.to.be.null;
+                  expect(models[TestModel.modelName]).not.to.be.null;
                   expect(result1).not.to.be.null;
                   expect(result2).not.to.be.null;
                   expect(result1).to.deep.equal(result2);
@@ -362,7 +362,7 @@ describe('Instance Caching Test', function () {
                   return done('instance not cached')
                 }
                 result2 = Object.assign({}, data2[0].toObject());
-                expect(models[modelName]).not.to.be.null;
+                expect(models[TestModel.modelName]).not.to.be.null;
                 expect(result1).not.to.be.null;
                 expect(result2).not.to.be.null;
                 //expect(result1).to.deep.equal(result2);
@@ -404,7 +404,7 @@ describe('Instance Caching Test', function () {
                   return done('instance not cached')
                 }
                 result2 = Object.assign({}, data2[0].toObject());
-                expect(models[modelName]).not.to.be.null;
+                expect(models[TestModel.modelName]).not.to.be.null;
                 expect(result1).not.to.be.null;
                 expect(result2).not.to.be.null;
                 expect(result1).to.deep.equal(result2);
@@ -448,7 +448,7 @@ describe('Instance Caching Test', function () {
                   return done('instance not cached')
                 }
                 result2 = Object.assign({}, data2[0].toObject());
-                expect(models[modelName]).not.to.be.null;
+                expect(models[TestModel.modelName]).not.to.be.null;
                 expect(result1).not.to.be.null;
                 expect(result2).not.to.be.null;
                 expect(result1).to.deep.equal(result2);
@@ -612,7 +612,7 @@ describe('Instance Caching Test', function () {
                     return done('instance not cached')
                   }
                   result2 = Object.assign({}, data2[0].toObject());
-                  expect(models[modelName]).not.to.be.null;
+                  expect(models[TestModel.modelName]).not.to.be.null;
                   expect(result1).not.to.be.null;
                   expect(result2).not.to.be.null;
                   expect(result1).to.deep.equal(result2);
