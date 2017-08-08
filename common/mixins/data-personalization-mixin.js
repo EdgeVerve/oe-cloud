@@ -401,7 +401,9 @@ function dataPersonalizationAccess(ctx, next) {
   // If callContext.defaults is false then query is formwed with manual scope parameters.
   // If callContext.defaults is true then query will be not be formed with manual scope parameters.
   let finalQuery = {};
-  if (ctx.Model.dataSource.connector.name === 'mongodb' || ctx.Model.dataSource.connector.name === 'postgresql') {
+  const dataSourceName = ctx.Model.dataSource.connector.name;
+  const dataSourceTypes = ['mongodb', 'postgresql']
+  if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
     let exeContextArray = convertToKeyValueString(scopeVars);
     const autoscopeArray = [];
     autoscope.forEach((element) => {
@@ -412,7 +414,7 @@ function dataPersonalizationAccess(ctx, next) {
         });
         autoscopeArray = autoscopeArray.concat(valueArray);
         exeContextArray.push(`${element}:${defaultValue}`);
-        exeContextArray.concat(valueArray);
+        exeContextArray = exeContextArray.concat(valueArray);
       } else {
         exeContextArray.push(`${element}:${defaultValue}`);
         if (context) {
@@ -647,8 +649,9 @@ function dataPersonalizationAfterAccess(ctx, next) {
           weights[`${key}:${defaultValue}`] = weight.toString();
         });
       }
-
-      if (ctx.Model.dataSource.connector.name === 'mongodb' || ctx.Model.dataSource.connector.name === 'postgresql') {
+      const dataSourceName = ctx.Model.dataSource.connector.name;
+      const dataSourceTypes = ['mongodb', 'postgresql']
+      if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
         resultData = calculateScoreMongo(result, weights);
       } else {
         let scope = {};
