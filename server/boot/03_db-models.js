@@ -6,6 +6,7 @@
  */
 var async = require('async');
 var events = require('events');
+var _ = require('lodash');
 var loopback = require('loopback');
 var DataSource = require('loopback-datasource-juggler').DataSource;
 var log = require('oe-logger')('boot-db-models');
@@ -67,12 +68,12 @@ module.exports = function DBModels(app, cb) {
 
     // to avoid crash due to max event listener check
     DataSource.super_.defaultMaxListeners = DataSource.super_.defaultMaxListeners + 1;
-    modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, res) {
+    modelDefinition.findOne({ 'where': { 'name': key } }, util.bootContext(), function modelDefinitionFindOneFn(err, modelDef) {
       if (err) {
         log.error(util.bootContext(), 'modelDefinition.findOne name="', key, '" Error: ', err);
         return callback(err);
       }
-      if (!res) {
+      if (!modelDef) {
         modelDefinition.create(modelDefinitionObject, util.bootContext(), function modelDefinitionCreateFn(err, res) {
           if (err) {
             log.error(util.bootContext(), 'modelDefinition.create obj=', modelDefinitionObject, ' Error: ', err);
@@ -81,7 +82,29 @@ module.exports = function DBModels(app, cb) {
           callback();
         });
       } else {
-        callback();
+        // Check for if there is any difference between file model and DB data model instance.
+        var updatedData = {};
+        // Currently the implementation takes care of only differences, if there is any setting removed
+        // It will not get updated in the DB.
+        var fileModelKeys = Object.keys(modelDefinitionObject);
+        fileModelKeys.forEach(function fileModelKeysCb(field) {
+          if (modelDef[field] && !_.isEqual(modelDef[field], modelDefinitionObject[field])) {
+            updatedData[field] = modelDefinitionObject[field];
+          } else {
+            updatedData[field] = modelDefinitionObject[field];
+          }
+        });
+        if (!_.isEmpty(updatedData)) {
+          modelDef.updateAttributes(updatedData, util.bootContext(), function modelDefUpdateSettings(err) {
+            if (err) {
+              log.error(util.bootContext(), 'Error while updating settings for model ', modelDef.name, '. Error: ', err);
+              return callback(err);
+            }
+            callback();
+          });
+        } else {
+          callback();
+        }
       }
     });
   }, function dbModels() {
