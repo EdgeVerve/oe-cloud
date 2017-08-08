@@ -410,7 +410,7 @@ function dataPersonalizationAccess(ctx, next) {
         context[element].forEach((item) => {
           valueArray.push(`${element}:${item}`);
         });
-        exeContextArray=autoscopeArray.concat(valueArray);
+        autoscopeArray = autoscopeArray.concat(valueArray);
         exeContextArray.push(`${element}:${defaultValue}`);
         exeContextArray.concat(valueArray);
       } else {
@@ -428,22 +428,22 @@ function dataPersonalizationAccess(ctx, next) {
     if (ctx.Model.dataSource.connector.name === 'mongodb') {
       if (ctx.query.scope && Object.keys(ctx.query.scope).length === 0) {
         let autoscopeCondition = [];
-        autoscope.forEach(item=>{
+        autoscope.forEach(item => {
           if (Array.isArray(context[item])) {
             let itemsArr;
-            item.forEach(elem=>itemsArr.push(`${item}:${elem}`));
+            item.forEach(elem => itemsArr.push(`${item}:${elem}`));
             itemsArr.push(`${item}:${defaultValue}`);
-            autoscopeCondition.push({'_scope': {elemMatch: {$in: itemsArr}}});
+            autoscopeCondition.push({ '_scope': { elemMatch: { $in: itemsArr } } });
           } else {
-            autoscopeCondition.push({'_scope': {elemMatch: {$in: [`${item}:${context[item]}`, `${item}:${defaultValue}`]}}});
+            autoscopeCondition.push({ '_scope': { elemMatch: { $in: [`${item}:${context[item]}`, `${item}:${defaultValue}`] } } });
           }
         });
         finalQuery = {
-          'where': {'and': autoscopeCondition}
+          'where': { 'and': autoscopeCondition }
         };
       } else {
         finalQuery = {
-          'where': {'_scope': {'not': {'$elemMatch': {'$nin': exeContextArray}}}}
+          'where': { '_scope': { 'not': { '$elemMatch': { '$nin': exeContextArray } } } }
         };
       }
     } else {
@@ -454,11 +454,12 @@ function dataPersonalizationAccess(ctx, next) {
   } else {
     if (autoscope.length) {
       const autoAnd = [];
-
+      const autoscopeArray = [];
       // This forms the first part of the 'and' condition in the query.
       // loops through each value in autoscope and forms an 'and' condition between each value.
+      const asvals = {};
       autoscope.forEach((key) => {
-        const asvals = {};
+
         if (callContext.ignoreAutoScope) {
           // When ignoreAutoScope is true then only query with autoscope deafult
           // is formed and only default records are sent.
@@ -472,11 +473,13 @@ function dataPersonalizationAccess(ctx, next) {
             value.forEach((item) => {
               valueArray.push(`${key}:${item}`);
             });
+            autoscopeArray = autoscopeArray.concat(valueArray);
             valueArray.push(`${key}:${defaultValue}`);
             asvals._scope = {
               inq: valueArray
             };
           } else {
+            autoscopeArray.push(`${key}:${value}`);
             asvals._scope = {
               inq: [`${key}:${value}`, `${key}:${defaultValue}`]
             };
@@ -484,6 +487,7 @@ function dataPersonalizationAccess(ctx, next) {
         }
         autoAnd.push(asvals);
       });
+      ctx.hookState.autoscopeArray = autoscopeArray;
 
       // Push and condition formed with autoscopes into andParams array.
       andParams.push({
@@ -714,10 +718,10 @@ function dataPersonalizationAfterAccess(ctx, next) {
       return false;
     }
     var collection1 = settings1.mongodb.collection;
-    if (collection1) {collection1 = collection1.toLowerCase();}
+    if (collection1) { collection1 = collection1.toLowerCase(); }
     var collection2 = settings2.mongodb.collection;
-    if (collection2) {collection2 = collection2.toLowerCase();}
-    if (collection1 === collection2) {return true;}
+    if (collection2) { collection2 = collection2.toLowerCase(); }
+    if (collection1 === collection2) { return true; }
     return false;
   }
 
