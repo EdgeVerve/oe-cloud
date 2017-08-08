@@ -30,6 +30,7 @@ var credentials = {
     password:  'basetestuser123'
 };
 describe(chalk.blue('BaseUser Test'), function () {
+    this.timeout(100000);
     before('Create User', function(done) {
         var testUser = {
             username: credentials.username,
@@ -288,7 +289,9 @@ describe(chalk.blue('BaseUser Test'), function () {
         before('populate invalidLoginFns and set UNLOCK_USER_ACCOUNT_TIME', function(done) {
             var maxFailedLoginTries = app.get('maxFailedLoginTries') || 5;
             orgUserAccountTime = baseUserModel.app.get('UNLOCK_USER_ACCOUNT_TIME');
-            baseUserModel.app.set('UNLOCK_USER_ACCOUNT_TIME', 1000);
+            // Calling unlock after 2 seconds i.e. greater than 1 sec which 
+            // was set for updateAttributes which also enables by default for disabled user.
+            baseUserModel.app.set('UNLOCK_USER_ACCOUNT_TIME', 2000);
             maxFailedLoginTries += 1;
             for(var i=0; i < maxFailedLoginTries; i++) {
                 var fn = function(cb){
@@ -302,7 +305,10 @@ describe(chalk.blue('BaseUser Test'), function () {
                     .post(postUrl)
                     .send(invalidCredentials)
                     .end(function(err, response) {
-                        cb(null, response);
+                        // updateAttributes is not getting finishd in postgres as fast as thought of
+                        // So sending response with 1 sec gap, so that user.failedTries
+                        // gets updated with incremented value.
+                        setTimeout(cb, 1000, null, response);
                     });
                 };
                 invalidLoginFns.push(fn);
