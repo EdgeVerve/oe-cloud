@@ -117,7 +117,6 @@ function mongoDeleteById(id, newModelName, cb) {
       if (err) {
         return done(err);
       }
-      console.log('Query -------->> ',"DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'");
       connection.execute(
         "DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'",
         function (error, result) {
