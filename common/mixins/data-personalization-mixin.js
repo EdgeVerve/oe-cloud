@@ -402,7 +402,7 @@ function dataPersonalizationAccess(ctx, next) {
   // If callContext.defaults is true then query will be not be formed with manual scope parameters.
   let finalQuery = {};
   const dataSourceName = ctx.Model.dataSource.connector.name;
-  const dataSourceTypes = ['mongodb', 'postgresql','oracle'];
+  const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
   if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
     let exeContextArray = convertToKeyValueString(scopeVars);
     let autoscopeArray = [];
@@ -650,7 +650,7 @@ function dataPersonalizationAfterAccess(ctx, next) {
         });
       }
       const dataSourceName = ctx.Model.dataSource.connector.name;
-      const dataSourceTypes = ['mongodb', 'postgresql','oracle'];
+      const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
       if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
         resultData = calculateScoreMongo(result, weights);
       } else {
