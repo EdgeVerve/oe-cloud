@@ -86,14 +86,14 @@ module.exports = function AppUser(admin) {
               record.id = dbrec.id;
               amodel.upsert(record, options, function modelFind(err, updatedRecord) {
                 if (err) {
-                  done(err);
+                  return done(err);
                 }
                 done();
               });
             } else {
               amodel.create(record, options, function modelCreate(err, dbrec) {
                 if (err) {
-                  done(err);
+                  return done(err);
                 }
                 done();
               });
