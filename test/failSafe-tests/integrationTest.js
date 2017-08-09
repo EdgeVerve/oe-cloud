@@ -4,19 +4,17 @@ var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
 var chalk = require('chalk');
-
-const Docker = require('node-docker-api').Docker
-const docker = new Docker({ socketPath: '/var/run/docker.sock' })
-
+var exec = require('child_process').exec;
 
 var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
 var  DOMAIN_NAME = process.env.DOMAIN_NAME;
 
 //var baseurl = "https://$EVFURL/api/";
-var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
 //var baseurl = "https://mayademo.oecloud.local/api/";
+var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
 
 var modelPlural = 'Notes';
+var EventHistoryModel;
 
 var createLoginData = {"username":"admin","password":"admin","email":"ev_admin@edgeverve.com"};
 
@@ -26,104 +24,87 @@ process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var token;
 
-var ids = []; 
-
-ids.push("a");
-ids.push("b");
-ids.push("c");
-ids.push("d");
-ids.push("e");
-ids.push("f");
-ids.push("g");
-ids.push("h");
-ids.push("i");
-ids.push("j");
-
-var tempIds = [];
-
-var funcArray = [];
-
 describe(chalk.blue('Failsafe - integrationTest'), function() {
-    //this.timeout(180000);
-
+  
   before('login using admin', function fnLogin(done) {
     console.log('Base Url is ', baseurl);
     request.post(
-                  baseurl + "BaseUsers/login", {
-                    json: loginData
-                  },
-                  function(error, response, body) {
-                    if (error || body.error) {
-                      console.log("error:", error || body.error);
-                      done(error || body.error);
-                    } else {
-                      token = body.id;
-                      //setup(body.id);
-                      done();
-                    }
+      baseurl + "BaseUsers/login", {
+        json: loginData
+      },
+      function(error, response, body) {
+        if (error || body.error) {
+          console.log("error:", error || body.error);
+          done(error || body.error);
+        } else {
+          token = body.id;
+          done();
+        }
       });
-
   });
 
   before('create 50 note records', function fnLogin(done) {
-    console.log('create 50 note records');
-    for (var i=0; i<50; i++){
-      var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
-      request.post({
-        url: createUrl,
-        json: {},
-        headers: {},
-        method: 'POST'
-      }, function (error, r, body) { });
-    }
-    done();
+    
   });
 
+  var getServiceCount = () => {
+    exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
+      if (err) console.log("Error in getServiceCount: " + err);
+      return stdout;
+    } )
+  }
+
+  var checkServiceCount = (x, cb) => {
+    if (getServiceCount() != x){
+      setTimeout(checkServiceCount, 1000);
+    } else {
+      cb();
+    }
+  }
+
+  function getEventHistoryModel() {
+    if (!EventHistoryModel) {
+      EventHistoryModel = loopback.getModel('EventHistory');
+    }
+    return EventHistoryModel;
+  }
+
   it('Recover - Default sceanrio', function (done) {
+    const SERVICE_NAME = APP_IMAGE_NAME + "_web";
     async.series({
-      one : function(callback){
-        var containers = docker.container.list();
-        console.log("Number of containers " + containers.size);
-        //containers.forEach(function(container) {
-          for (var i=0; i<containers.length; i++) {
-            var container = containers[i];
-            console.log(i + " container " + container);
-            container.inspect(function (err, data) {
-              console.log();
-              console.log(data);
-          });
-        };
-        callback();
-          // .then(function(containers) {
-          //   var listSize = containers.length;
-          //   console.log("Number of containers" + listSize);
-          //   callback();
-          // });
+      scaleServiceCountUp: function(callback){
+        // load 5 node servers
+        exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
+          if (err) console.log("Error in func One: " + err);
+          checkServiceCount(5, callback);  
+        })
       },
-      two: function(callback) {
-          // Scale down one serevr
-          docker.container.name(APP_IMAGE_NAME)
-            .then(function (container){
-              var cId = container.id;
-              Console.log ("deleted conatiner id: " + cId);
-              container.delete({ force: true })
-              callback();
-            });
+      initiateNodes: function(callback) {
+        // create multipel nodes
+        console.log('create 50 note records');
+        for (var i=0; i<100; i++){
+          var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
+          request.post({
+            url: createUrl,
+            json: {},
+            headers: {},
+            method: 'POST'
+          }, function (error, r, body) { });
+        }
+        callback();    
       },
-      three: function(callback){
-        // Wait 
-          setTimeout(function() {
-              callback;
-          }, 1000); //5*60*1000
+      scaleServiceCountUp: function(callback){
+        //scale down 3 nodes 
+        exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
+          if (err) console.log("Error in func One: " + err);
+          checkServiceCount(3, callback);  
+        })
       }, 
-      four: function (callback){
-        // check container size 
-        docker.container.list()
-          .then(function(containers) {
-            var listSize = containers.length;
-            console.log("Number of containers" + listSize);
-            callback();
-      });
+      checkDeadNodesStatus: function (callback){
+        // query event history model to verify nodes where recovered 
+        eventHistoryModel = getEventHistoryModel();
+        //eventHistoryModel.find
+        callback();
       }
     }, function(err, results) {
         // results is now equal to: {one: 1, two: 2}
