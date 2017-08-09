@@ -48,6 +48,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   });
 
   var getServiceCount = () => {
+    console.log('getServiceCount');
     exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
       if (err) console.log("Error in getServiceCount: " + err);
       return stdout;
@@ -55,6 +56,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   }
 
   var checkServiceCount = (x, cb) => {
+    console.log('checkServiceCount ', x);
     if (getServiceCount() != x){
       setTimeout(checkServiceCount, 1000);
     } else {
@@ -63,6 +65,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   }
 
   function getEventHistoryModel() {
+    console.log('getEventHistoryModel');
     if (!EventHistoryModel) {
       EventHistoryModel = loopback.getModel('EventHistory');
     }
@@ -73,6 +76,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     const SERVICE_NAME = APP_IMAGE_NAME + "_web";
     async.series({
       scaleServiceCountUp: function(callback){
+        console.log('scaleServiceCountUp');
         // load 5 node servers
         exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
           if (err) console.log("Error in func One: " + err);
@@ -94,6 +98,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         callback();    
       },
       scaleServiceCountUp: function(callback){
+        console.log('scaleServiceCountUp');
         //scale down 3 nodes 
         exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
           if (err) console.log("Error in func One: " + err);
@@ -101,6 +106,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         })
       }, 
       checkDeadNodesStatus: function (callback){
+        console.log('checkDeadNodesStatus');
         // query event history model to verify nodes where recovered 
         eventHistoryModel = getEventHistoryModel();
         //eventHistoryModel.find
