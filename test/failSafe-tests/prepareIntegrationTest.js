@@ -22,7 +22,7 @@ fs.readFile('server/model-config.json', 'utf8', function(oErr, sText) {
     //console.log(sText);
     var r1 = sText.substr(sText.length - 4, sText.length - 1);
     var re = new RegExp(r1,"g");
-     var result = sText.replace(r1, '},"NOte": {"public": true,"dataSource": "db"}}');
+     var result = sText.replace(r1, '},"Note": {"public": true,"dataSource": "db"}}');
      fs.writeFile('server/model-config.json', result, function (err) {
         if(err) {
             return process.exit(-1);
