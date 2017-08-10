@@ -38,7 +38,7 @@
   "frameworkMetadataModels"  : ["ModelDefinition", "BaseUser", "BaseACL", "DataACL", "DataSourceDefinition", "DataSourceMapping", "EnumBase", "ErrorDetail", "JobScheduler", "PersonalizationRule", "Error", "Literal", "Field", "GridColumnDefinition", "GridMetaData", "UIResource", "UIRoute", "UIMetadata", "NavigationLink"],
   "tenantsource": "HEADER",
   "tenantkey": "tenant_id",
-  "disableNodered": true,
+  "disableNodered": false,
   "nodeRedUserDir": "nodered/",
   "nodeRedMetrics": false,
   "nodeRedAudit": false,
@@ -63,5 +63,13 @@
     "userName":"admin",
     "password":"admin",
     "email":"admin@mycompany.com"
+  },
+  "passwordComplexity": {
+    "regex": "",
+    "errMsg": "Password complexity not met. Password length should be minimum 8 and maximum 20.Password should contain atleast one capital, one small letter, one numaric and one special character(+$@$!%*#?&)."
+  },
+  "maxFailedLoginTries": 5,
+  "metadataModelList": {
+    "ModelDefinition": true
   }
 }
