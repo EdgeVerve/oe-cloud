@@ -140,7 +140,7 @@ swarm:
     - export HAPROXY=10.73.96.214
     - docker stack rm ${APP_IMAGE_NAME}
     - cd test/actor-tests/test-files
-    - time docker build  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:testing
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - mv -f qqq2.yml qqq.yml
