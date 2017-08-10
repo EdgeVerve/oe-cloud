@@ -1,10 +1,11 @@
 var request = require('request');
 var async = require('async');
-var uuid = require('node-uuid');
-var chai = require('chai');
-var expect = chai.expect;
+//var uuid = require('node-uuid');
+// var chai = require('chai');
+// var expect = chai.expect;
 var chalk = require('chalk');
 var exec = require('child_process').exec;
+var loopback = require('loopback');
 
 var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
 var  DOMAIN_NAME = process.env.DOMAIN_NAME;
@@ -75,8 +76,18 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   }
 
   it('Recover - Default sceanrio', function (done) {
+    var eventHistoryStatus = {};
+    eventHistoryStatus.undefined = 0;
+    eventHistoryStatus.RecoveryFinished = 0;
+    eventHistoryStatus.ToBeRecovered = 0;
+    eventHistoryStatus.InRecovery = 0;
     
     async.series({
+      clearHistory: (callback) => {
+        eventHistoryModel.destroyAll({}, ignoreScopeOptions, function (err, info) {
+          callback();
+        });
+      },
       scaleServiceCountUp: function(callback){
         console.log('scaleServiceCountUp');
         // load 5 node servers
@@ -111,11 +122,18 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         console.log('checkDeadNodesStatus');
         // query event history model to verify nodes where recovered 
         eventHistoryModel = getEventHistoryModel();
-        //eventHistoryModel.find
-        callback();
+        eventHistoryModel.find({}, ignoreScopeOptions, function (err, results) {
+          
+          results.array.forEach(function(eventHistoryRecord) {
+            var sttaus  = eventHistoryRecord.status;
+            eventHistoryStatus[status]++;
+          }, this);
+          callback();
+        });
       }
     }, function(err, results) {
         // results is now equal to: {one: 1, two: 2}
+        console.log(eventHistoryStatus);
         done();
     });
   });
