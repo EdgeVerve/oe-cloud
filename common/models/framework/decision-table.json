@@ -13,7 +13,7 @@
       "unique": true
     },
     "decisionRules": {
-      "type": "String",
+      "type": "Text",
       "hidden": true
     }
   },
@@ -28,5 +28,8 @@
   },
   "cacheable": true,
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "mixins":{
+    "CacheMixin": false
+  }
 }
