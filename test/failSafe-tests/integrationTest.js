@@ -85,6 +85,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     async.series({
       clearHistory: (callback) => {
         eventHistoryModel = getEventHistoryModel();
+        console.log("eventHistoryModel: " + eventHistoryModel);
         eventHistoryModel.destroyAll({}, ignoreScopeOptions, function (err, info) {
           callback();
         });
