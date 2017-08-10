@@ -1,0 +1,11 @@
+{
+    "name": "InventoryTransaction",
+    "base": "BaseJournalEntity",
+    "idInjection": true,
+    "properties": { 
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+}
