@@ -62,7 +62,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     if (countStatus != x){
       console.log('checkServiceCount : waiting ');
       console.log("Status: " + countStatus + ", expected: " + x );
-      setTimeout(checkServiceCount, x, cb, 100);
+      setTimeout(checkServiceCount, 100, x, cb);
     } else {
       console.log('checkServiceCount finished');
       cb();
