@@ -24,7 +24,6 @@ var app = bootstrap.app;
 var models = bootstrap.models;
 var loopback = require('loopback');
 var MongoClient = require('mongodb').MongoClient;
-var oracledb = require('oracledb');
 var debug = require('debug')('crypto-test');
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
@@ -135,6 +134,7 @@ describe('crypto Test', function () {
                 }
             });
         } else if (dataSourceName === 'oracle') {
+            var oracledb = require('oracledb');
             oracledb.getConnection({
                 "password": oraclePassword,
                 "user": oracleUser,
