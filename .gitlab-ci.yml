@@ -182,7 +182,7 @@ oracletest:
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     #- docker push ${REGISTRY}/${APP_IMAGE_NAME}:oracle
     #- docker service create --name test-${APP_IMAGE_NAME}:oracle --env NODE_ENV=oracle ${REGISTRY}/${APP_IMAGE_NAME}-oracle npm run oracle
-    - docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run oracle
+    - docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run grunt-cover
     - node server/oracle-utility.js
   tags:
     - CEP_RUNNER
