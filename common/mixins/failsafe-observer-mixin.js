@@ -102,7 +102,7 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   Model.defineProperty('_fsCtx', {
-    type: String
+    type: "Text"
   });
 
   if (Model.definition.settings.hidden) {

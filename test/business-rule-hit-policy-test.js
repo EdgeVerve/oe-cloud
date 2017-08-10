@@ -21,7 +21,7 @@ describe(chalk.blue('Decision table evaluation'), function () {
     before('Create DecisionTables', function (done) {
         var datatext = fs.readFile(path.join(__dirname, 'business-rule-data', 'DecisionTable.json'), function (err, data){
             DTData = JSON.parse(data);
-            async.each(DTData, function (decisionTable, callback) {
+            async.eachSeries(DTData, function (decisionTable, callback) {
                 models.DecisionTable.create(decisionTable, bootstrap.defaultContext, function (err, data) {
                     if (err) {
 					    console.log(err);

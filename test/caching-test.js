@@ -26,7 +26,6 @@ var loopback = require('loopback');
 var debug = require('debug')('caching-test');
 var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
-var oracledb = require('oracledb');
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var accessToken = null;
@@ -35,7 +34,7 @@ var oraclePort = process.env.ORACLE_PORT || '1522';
 var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
 var oracleUser = process.env.ORACLE_USER || 'ramesh';
 var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
-oracledb.autoCommit = true;
+
 
 describe('Caching Test', function () {
 this.timeout(20000);
@@ -105,6 +104,8 @@ this.timeout(20000);
                 }
             });
         } else if (dataSource.name === 'oracle') {
+            var oracledb = require('oracledb');
+            oracledb.autoCommit = true;
             let loopbackModelNoCache = loopback.getModel(modelName);
             let idFieldName = loopbackModelNoCache.definition.idName();
             oracledb.getConnection({

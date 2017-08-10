@@ -29,7 +29,6 @@ var config = require('../server/config');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var pg = require('pg');
-var oracledb = require('oracledb');
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
@@ -38,7 +37,7 @@ var oraclePort = process.env.ORACLE_PORT || '1522';
 var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
 var oracleUser = process.env.ORACLE_USER || 'ramesh';
 var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
-oracledb.autoCommit = true;
+
 var defaultContext = {
   ctx: {
     tenantId: 'limits'
@@ -107,6 +106,8 @@ function mongoDeleteById(id, newModelName, cb) {
       }
     });
   } else if (dataSource.name === 'oracle') {
+    var oracledb = require('oracledb');
+    oracledb.autoCommit = true;
     var loopbackModelNoCache = loopback.getModel(modelName, bootstrap.defaultContext);
     var idFieldName = loopbackModelNoCache.definition.idName();
     oracledb.getConnection({
@@ -654,6 +655,8 @@ describe('Instance Caching Test', function () {
             }
           });
         } else if (dataSource.name === 'oracle') {
+          var oracledb = require('oracledb');
+          oracledb.autoCommit = true;
           var idFieldName = loopbackModelNoCache.definition.idName();
           oracledb.getConnection({
             "password": oraclePassword,
