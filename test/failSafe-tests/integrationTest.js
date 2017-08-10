@@ -18,7 +18,7 @@ var EventHistoryModel;
 
 var createLoginData = {"username":"admin","password":"admin","email":"ev_admin@edgeverve.com"};
 
-var loginData = {"username":"admin","password":"admin"};
+
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -27,45 +27,30 @@ var token;
 describe(chalk.blue('Failsafe - integrationTest'), function() {
   
   before('login using admin', function fnLogin(done) {
-    // console.log('Base Url is ', baseurl);
-    // request.post(
-    //   baseurl + "BaseUsers/login", {
-    //     json: loginData
-    //   },
-    //   function(error, response, body) {
-    //     if (error || body.error) {
-    //       console.log("error:", error || body.error);
-    //       done(error || body.error);
-    //     } else {
-    //       token = body.id;
-    //       done();
-    //     }
-    //   });
-
-
-    var sendData = {
-        'username': 'admin',
-        'password': 'admin'
-    };
-    api
-    .set('x-evproxy-db-lock', '1')
-    .post(bootstrap.basePath + '/BaseUsers/login')
-    .send(sendData)
-    .expect(200).end(function(err, res) {
-      if (err) {
-          log.error(log.defaultContext(), err);
-          return done(err);
-      } else {
-          token = res.body.id;
-          return done();
-      }
-    });
+    var loginData = {"username":"admin","password":"admin"};
+    console.log('Base Url is ', baseurl);
+    
+    request.post(
+      baseurl + "BaseUsers/login", {
+        json: loginData
+      },
+      function(error, response, body) {
+        if (error || body.error) {
+          console.log("error:", error || body.error);
+          done(error || body.error);
+        } else {
+          console.log("success");
+          token = body.id;
+          done();
+        }
+      });
   });
 
   var getServiceCount = () => {
     console.log('getServiceCount');
     exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
-      if (err) console.log("Error in getServiceCount: " + err);
+      if (err) console.log("Error in getServiceCount: " + err)
+      else console.log("docker service ps " + SERVICE_NAME + " : " + stdout);;
       return stdout;
     } )
   }
@@ -73,8 +58,10 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   var checkServiceCount = (x, cb) => {
     console.log('checkServiceCount ', x);
     if (getServiceCount() != x){
-      setTimeout(checkServiceCount, 1000);
+      console.log('checkServiceCount : waiting ');
+      setTimeout(checkServiceCount, 100);
     } else {
+      console.log('checkServiceCount finished');
       cb();
     }
   }
