@@ -12,6 +12,7 @@
     "precoverage": "npm install --no-optional",
     "coverage": "./node_modules/.bin/istanbul cover ./node_modules/mocha/bin/_mocha -- -R spec",
     "grunt-cover": "./node_modules/.bin/grunt test-with-coverage",
+    "oracle": "grunt mochaTest:oracle",
     "lint": "./node_modules/.bin/eslint .",
     "fix-lint": "./node_modules/.bin/eslint --fix .",
     "validate": "npm ls"
