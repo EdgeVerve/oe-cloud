@@ -50,8 +50,11 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   var getServiceCount = () => {
     console.log('getServiceCount');
     exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
-      if (err) console.log("Error in getServiceCount: " + err)
-      else console.log("docker service ps " + SERVICE_NAME + " : " + stdout);;
+      if (err) {
+        console.log("Error in getServiceCount: " + err)
+      } else {
+        console.log("docker service ps " + SERVICE_NAME + " : " + stdout);
+      }
       return stdout;
     } )
   }
