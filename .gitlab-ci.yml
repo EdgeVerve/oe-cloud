@@ -22,104 +22,104 @@ before_script:
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
 
-# buildjob:
-#   stage: build
-#   script:    
-#     - echo "Performing code style check..."
-#     - status_eslint=0
-#     - exit_status=0
-#     - time npm install eslint babel-eslint --no-optional
-#     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
-#     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-#     - if [ $exit_status == 1 ]; then exit $exit_status; fi
-#     - echo "Code style check done successfully"
-#     - time npm install --no-optional
-#     - echo "node modules installed"
-#     - echo "Building image..."
-#     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
-#     - mkdir -p /data/db
-#     - mongod --dbpath /data/db &
-#     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-#     - export APP_URL=http://localhost:8080/api
-#     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-#     - mocha test/consistenthash/server.js &
-#     - sleep 60
-#     - mocha test/consistenthash/server.js 3100 &
-#     - sleep 60
-#     - mocha test/consistenthash/client.js 3200
-#     - wait ${BUILD_PID}
-#     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
-#     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
+buildjob:
+  stage: build
+  script:    
+    - echo "Performing code style check..."
+    - status_eslint=0
+    - exit_status=0
+    - time npm install eslint babel-eslint --no-optional
+    - if npm run lint; then status_eslint=0; else status_eslint=1; fi
+    - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - echo "Code style check done successfully"
+    - time npm install --no-optional
+    - echo "node modules installed"
+    - echo "Building image..."
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
+    - mkdir -p /data/db
+    - mongod --dbpath /data/db &
+    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
+    - export APP_URL=http://localhost:8080/api
+    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - mocha test/consistenthash/server.js &
+    - sleep 60
+    - mocha test/consistenthash/server.js 3100 &
+    - sleep 60
+    - mocha test/consistenthash/client.js 3200
+    - wait ${BUILD_PID}
+    - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
 
-#   artifacts:
-#     untracked: true
-#     expire_in: 2h
-#     paths:
-#       - node_modules/
-#   tags:
-#     - CEP_RUNNER
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - node_modules/
+  tags:
+    - CEP_RUNNER
 
-# mongotest:
-#   stage: post-build-test
-#   script:
-#     - export NODE_ENV=docker
-#     - export POSTGRES_HOST="10.73.53.144"
-#     - export MONGO_HOST="10.73.53.144"
-#     - export DB=mongo
-#     - export DB_NAME=${APP_IMAGE_NAME}_mongo
-#     - export STARTUP_CMD="npm run grunt-cover"
-#     - export FILE_NAME=docker-compose.test.env.yml
-#     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-#     - export exit_status=0
-#     - export nameWebService=${STACK_NAME}"_web"
-#     - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
-#     - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
-#     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-#     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-#     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-#     - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-#     - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-#     - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
-#     - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-#     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-#     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-#     - docker stack ps --no-trunc ${STACK_NAME}
-#     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-#     - docker stack rm ${STACK_NAME}
-#     - exit $exit_status
-#   tags:
-#     - CEP_RUNNER
+mongotest:
+  stage: post-build-test
+  script:
+    - export NODE_ENV=docker
+    - export POSTGRES_HOST="10.73.53.144"
+    - export MONGO_HOST="10.73.53.144"
+    - export DB=mongo
+    - export DB_NAME=${APP_IMAGE_NAME}_mongo
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export exit_status=0
+    - export nameWebService=${STACK_NAME}"_web"
+    - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
+    - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - docker stack rm ${STACK_NAME}
+    - exit $exit_status
+  tags:
+    - CEP_RUNNER
 
-# postgrestest:
-#   stage: post-build-test
-#   script:
-#     - export NODE_ENV=postgres
-#     - export POSTGRES_HOST="10.73.53.144"
-#     - export MONGO_HOST="10.73.53.144"
-#     - export DB=postgres
-#     - export DB_NAME=${APP_IMAGE_NAME}_pg
-#     - export STARTUP_CMD="npm run grunt-cover"
-#     - export FILE_NAME=docker-compose.test.env.yml
-#     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-#     - export exit_status="0"
-#     - export nameWebService=${STACK_NAME}"_web"
-#     - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
-#     - if [ $networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
-#     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-#     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-#     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-#     - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-#     - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-#     - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
-#     - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-#     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-#     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-#     - docker stack ps --no-trunc ${STACK_NAME}
-#     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-#     - docker stack rm ${STACK_NAME}
-#     - exit $exit_status
-#   tags:
-#     - CEP_RUNNER
+postgrestest:
+  stage: post-build-test
+  script:
+    - export NODE_ENV=postgres
+    - export POSTGRES_HOST="10.73.53.144"
+    - export MONGO_HOST="10.73.53.144"
+    - export DB=postgres
+    - export DB_NAME=${APP_IMAGE_NAME}_pg
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
+    - if [ $networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - docker stack rm ${STACK_NAME}
+    - exit $exit_status
+  tags:
+    - CEP_RUNNER
 
 swarm:
   stage: post-build-test
