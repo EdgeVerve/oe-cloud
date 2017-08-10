@@ -49,6 +49,7 @@ buildjob:
     - wait ${BUILD_PID}
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
+    
   artifacts:
     untracked: true
     expire_in: 2h
