@@ -146,8 +146,8 @@ swarm:
     - mv -f qqq2.yml qqq.yml
     - sed 's/\$ROUTER/'"$ROUTER"'/g' qqq.yml > qqq2.yml
     - mv -f qqq2.yml qqq.yml
-    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
-    - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' ../actorIntegrationTest.js > ../actorIntegrationTest2.js
+    - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
@@ -155,7 +155,7 @@ swarm:
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - time mocha test/actor-tests/actorIntegrationTest.js
+    - time mocha ../actorIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
     - CEP_RUNNER
