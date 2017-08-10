@@ -103,8 +103,8 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         }
         callback();    
       },
-      scaleServiceCountUp: function(callback){
-        console.log('scaleServiceCountUp');
+      scaleServiceCountDown: function(callback){
+        console.log('scaleServiceCountDown');
         //scale down 3 nodes 
         exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
           if (err) console.log("Error in func One: " + err);
