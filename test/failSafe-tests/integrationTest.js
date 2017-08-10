@@ -8,6 +8,7 @@ var exec = require('child_process').exec;
 
 var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
 var  DOMAIN_NAME = process.env.DOMAIN_NAME;
+const SERVICE_NAME = APP_IMAGE_NAME + "_web";
 
 //var baseurl = "https://$EVFURL/api/";
 //var baseurl = "https://mayademo.oecloud.local/api/";
@@ -75,7 +76,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
   }
 
   it('Recover - Default sceanrio', function (done) {
-    const SERVICE_NAME = APP_IMAGE_NAME + "_web";
+    
     async.series({
       scaleServiceCountUp: function(callback){
         console.log('scaleServiceCountUp');
