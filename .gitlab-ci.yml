@@ -18,6 +18,7 @@ before_script:
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+  - export ROUTER=cep_router
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
 
@@ -49,7 +50,7 @@ buildjob:
     - wait ${BUILD_PID}
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
-    
+
   artifacts:
     untracked: true
     expire_in: 2h
