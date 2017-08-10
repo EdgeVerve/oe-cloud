@@ -13,6 +13,7 @@ var path = require('path');
 var app = bootstrap.app;
 var expect = bootstrap.chai.expect;
 var dbm = require('../lib/db-migrate-helper');
+var modelDefModel = app.models.ModelDefinition;
 describe(chalk.blue('Database Migration'), function() {
   // To test this test case individually from mocha enable the below timeout
   //this.timeout(1000000);
@@ -32,6 +33,9 @@ describe(chalk.blue('Database Migration'), function() {
 
       it('Run only Autoupdate', function(done) {
         dbm(app, bootstrap.options, true, function(err, data){
+          // The validation check for autoupdate is index(es) creation, schema change, or ModelDefinition table updates 
+          expect(err).to.be.undefined;
+          expect(data).to.be.undefined;
           done();
         });
       });
@@ -59,13 +63,46 @@ describe(chalk.blue('Database Migration'), function() {
       it('Run Migration', function(done){
         // This will run autoupdate also again
         dbm(app, bootstrap.options, true, function(err, data){
-          done();
+          expect(err).to.be.null;
+          expect(data).not.to.be.null;
+          expect(data).not.to.be.undefined;
+          expect(data.key).to.be.equal('version');
+          expect(data._type).to.be.equal('SystemConfig');
+          expect(data.value).not.to.be.null;
+          expect(data.value).not.to.be.undefined;
+          expect(data.value).to.deep.equal({'oe-cloud':'0.9.0'});
+          var filter = {
+            where: {
+              or: [
+                {
+                  name: 'DBMigrationTestModel0'
+                },
+                {
+                  name: 'DBMigrationTestModel1'
+                }
+              ]
+            }
+          };
+          modelDefModel.find(filter, {ctx: {tenantId: 'default'}}, function(modelDefErr, modelDefdata){
+            expect(modelDefErr).to.be.null;
+            expect(modelDefdata).not.to.be.null;
+            expect(modelDefdata).not.to.be.undefined;
+            expect(modelDefdata).to.be.an('array');
+            // Data should contain both DBMigrationTestModel0, DBMigrationTestModel1
+            // ModelDefinition instances which are uploaded from version 0.8.10, 0.9.0
+            expect(modelDefdata.length).to.be.equal(2);
+            done();
+          });
         });
       });
 
       it('Run Migration Again', function(done){
         // This will run autoupdate also again
         dbm(app, bootstrap.options, true, function(err, data){
+          expect(err).to.be.undefined;
+          // Data will also be empty since there is nothing to migrate
+          // Since migration completed in previous test case.
+          expect(data).to.be.undefined;
           done();
         });
       });
@@ -87,6 +124,9 @@ describe(chalk.blue('Database Migration'), function() {
 
         it('Check for WAIT mode', function(done) {
           dbm(app, bootstrap.options, true, function(err, data){
+            expect(err).to.be.undefined;
+            // Data will also be empty since this is just to Cover the WAIT mode.
+            expect(data).to.be.undefined;
             done();
           });
         });
@@ -116,7 +156,49 @@ describe(chalk.blue('Database Migration'), function() {
       it('Run Migration with next version', function(done){
         // This will run autoupdate also again
         dbm(app, bootstrap.options, true, function(err, data){
-          done();
+          expect(err).to.be.null;
+          expect(data).not.to.be.null;
+          expect(data).not.to.be.undefined;
+          expect(data.key).to.be.equal('version');
+          expect(data._type).to.be.equal('SystemConfig');
+          expect(data.value).not.to.be.null;
+          expect(data.value).not.to.be.undefined;
+          expect(data.value).to.deep.equal({'oe-cloud':'0.9.1', 'oe-component-sample-test': '0.1.0'});
+          var filter = {
+            where: {
+              or: [
+                {
+                  name: 'DBMigrationTestModel1'
+                },
+                {
+                  name: 'DBMigrationTestModel2'
+                },
+                {
+                  name: 'DBMigrationTestModel3'
+                }
+              ]
+            }
+          };
+          modelDefModel.find(filter, {ctx: {tenantId: 'default'}}, function(modelDefErr, modelDefdata){
+            expect(modelDefErr).to.be.null;
+            expect(modelDefdata).not.to.be.null;
+            expect(modelDefdata).not.to.be.undefined;
+            expect(modelDefdata).to.be.an('array');
+            // Data should contain all DBMigrationTestModel1, DBMigrationTestModel2, DBMigrationTestModel3
+            // ModelDefinition instances which are uploaded from version 0.9.1
+            // via test2/app and test2/node_modules/oe-component-sample-test
+            expect(modelDefdata.length).to.be.equal(3);
+            var modelDefDataJson = JSON.parse(JSON.stringify(modelDefdata));
+            expect(modelDefDataJson).not.to.be.null;
+            expect(modelDefDataJson).not.to.be.undefined;
+            var updatedModel = modelDefDataJson.find(function(model){
+              return model.name === 'DBMigrationTestModel1'
+            });
+            expect(updatedModel).not.to.be.null;
+            expect(updatedModel).not.to.be.undefined;
+            expect(updatedModel.properties).to.deep.equal({'name':'string', 'type': 'string'});;
+            done();
+          });
         });
       });
 
