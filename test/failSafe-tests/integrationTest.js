@@ -27,24 +27,39 @@ var token;
 describe(chalk.blue('Failsafe - integrationTest'), function() {
   
   before('login using admin', function fnLogin(done) {
-    console.log('Base Url is ', baseurl);
-    request.post(
-      baseurl + "BaseUsers/login", {
-        json: loginData
-      },
-      function(error, response, body) {
-        if (error || body.error) {
-          console.log("error:", error || body.error);
-          done(error || body.error);
-        } else {
-          token = body.id;
-          done();
-        }
-      });
-  });
+    // console.log('Base Url is ', baseurl);
+    // request.post(
+    //   baseurl + "BaseUsers/login", {
+    //     json: loginData
+    //   },
+    //   function(error, response, body) {
+    //     if (error || body.error) {
+    //       console.log("error:", error || body.error);
+    //       done(error || body.error);
+    //     } else {
+    //       token = body.id;
+    //       done();
+    //     }
+    //   });
 
-  before('create 50 note records', function fnLogin(done) {
-    
+
+    var sendData = {
+        'username': 'admin',
+        'password': 'admin'
+    };
+    api
+    .set('x-evproxy-db-lock', '1')
+    .post(bootstrap.basePath + '/BaseUsers/login')
+    .send(sendData)
+    .expect(200).end(function(err, res) {
+      if (err) {
+          log.error(log.defaultContext(), err);
+          return done(err);
+      } else {
+          token = res.body.id;
+          return done();
+      }
+    });
   });
 
   var getServiceCount = () => {
