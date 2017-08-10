@@ -61,7 +61,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     if (getServiceCount() != x){
       console.log('checkServiceCount : waiting ');
       console.log("Callback is " + typeof cb  );
-      setTimeout(checkServiceCount, 100);
+      setTimeout(checkServiceCount, x, cb, 100);
     } else {
       console.log("Callback is " + typeof cb);
       console.log('checkServiceCount finished');
