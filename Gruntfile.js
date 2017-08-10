@@ -79,7 +79,7 @@ module.exports = function GruntConfig(grunt) {
           clearRequireCache: true,
           timeout: 100000
         },
-        src: ['test/audit-field-mixin-test.js','test/auto-fields-test.js','test/basic-api-test.js','test/basic-crud.js','test/basic-test.js','test/bootstrap.js','test/business-rule-mixin-test.js','test/composite-model-test.js','test/concurrency-test.js','test/config-merge-test.js','test/cr-model-test.js','test/data-hierarchy-test.js']
+        src: ['test/audit-field-mixin-test.js', 'test/auto-fields-test.js', 'test/basic-api-test.js', 'test/basic-crud.js', 'test/basic-test.js', 'test/bootstrap.js', 'test/business-rule-mixin-test.js', 'test/composite-model-test.js', 'test/concurrency-test.js', 'test/config-merge-test.js', 'test/cr-model-test.js', 'test/data-hierarchy-test.js']
       }
     },
 

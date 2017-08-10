@@ -5,6 +5,8 @@
  *
  */
 
+/* eslint-disable */
+
 // Atul : Oracle utility to create users with all the required permissions.
 // This file should be run before CI/CD is started 
 // This will create user based on CI_PROJECT_NAMESPACE (which is user name) and CI_PROJECT_NAME
@@ -56,7 +58,7 @@ function createUser(connection, cb) {
       }
       console.log(sql, ' ......... ok');
       async.each(grants, function (g, callback) {
-        var sql = "GRANT " + g + ' to "' + userName + '"';
+        var sql = 'GRANT ' + g + ' to "' + userName + '"';
 
         connection.execute(sql, function (err2, result2) {
           if (err2) {
