@@ -154,3 +154,4 @@ swarm:
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
     - CEP_RUNNER
+    
