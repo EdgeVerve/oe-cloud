@@ -58,12 +58,12 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
 
   var checkServiceCount = (x, cb) => {
     console.log('checkServiceCount ', x);
-    if (getServiceCount() != x){
+    var countStatus = getServiceCount();
+    if (countStatus != x){
       console.log('checkServiceCount : waiting ');
-      console.log("Callback is " + typeof cb  );
+      console.log("Status: " + countStatus + ", expected: " + x );
       setTimeout(checkServiceCount, x, cb, 100);
     } else {
-      console.log("Callback is " + typeof cb);
       console.log('checkServiceCount finished');
       cb();
     }
@@ -85,7 +85,6 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
         // load 5 node servers
         exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
           if (err) console.log("Error in func One: " + err);
-          console.log("Callback is " + typeof callback);
           checkServiceCount(5, callback);  
         })
       },
