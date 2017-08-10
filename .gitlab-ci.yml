@@ -138,6 +138,7 @@ swarm:
   script: 
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
+    - export nameWebService=${APP_IMAGE_NAME}"_web"
     - docker stack rm ${APP_IMAGE_NAME}
     - cd test/actor-tests/test-files
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
@@ -150,7 +151,8 @@ swarm:
     - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - isStarted=$(curl -k --write-out %{http_code} -v https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - export countElapsed=0
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
