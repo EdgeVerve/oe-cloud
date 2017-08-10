@@ -47,29 +47,23 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       });
   });
 
-  var getServiceCount = () => {
-    console.log('getServiceCount');
+  var checkServiceCount = (x, cb) => {
+    console.log('checkServiceCount ', x);
     exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
       if (err) {
         console.log("Error in getServiceCount: " + err)
       } else {
-        console.log("docker service ps " + SERVICE_NAME + " : " + stdout);
+        var countStatus = stdout;
+        if (countStatus != x){
+          console.log('checkServiceCount - waiting ');
+          console.log("checkServiceCount - Status: " + countStatus + ", expected: " + x );
+          setTimeout(checkServiceCount, 100, x, cb);
+        } else {
+          console.log('checkServiceCount - finished');
+          cb();
+        }
       }
-      return stdout;
-    } )
-  }
-
-  var checkServiceCount = (x, cb) => {
-    console.log('checkServiceCount ', x);
-    var countStatus = getServiceCount();
-    if (countStatus != x){
-      console.log('checkServiceCount : waiting ');
-      console.log("Status: " + countStatus + ", expected: " + x );
-      setTimeout(checkServiceCount, 100, x, cb);
-    } else {
-      console.log('checkServiceCount finished');
-      cb();
-    }
+    });
   }
 
   function getEventHistoryModel() {
