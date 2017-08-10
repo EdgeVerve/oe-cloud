@@ -170,14 +170,16 @@ oracletest:
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
-    - npm install oracledb --no-optional
+    - mv /oracledb node_modules/
+    - npm install nan --no-optional
     - npm install git+http://10.73.97.24/atul/loopback-connector-oracle.git --no-optional
     - node server/oracle-utility.js
-    - docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:oracle --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
+    - docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:oracle --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
     - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
     - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
     - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')
+    - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     #- docker push ${REGISTRY}/${APP_IMAGE_NAME}:oracle
     #- docker service create --name test-${APP_IMAGE_NAME}:oracle --env NODE_ENV=oracle ${REGISTRY}/${APP_IMAGE_NAME}-oracle npm run oracle
     - docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run oracle
