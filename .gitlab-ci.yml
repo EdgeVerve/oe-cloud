@@ -13,7 +13,7 @@ before_script:
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
-  - APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+  - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
   - export DOMAIN_NAME=oecloud.local
@@ -158,5 +158,31 @@ swarm:
     - time mocha test/actor-tests/actorIntegrationTest.js
     - node test/actor-tests/cleanupIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
+  tags:
+    - CEP_RUNNER
+
+oracletest:
+  image: registry.oecloud.local/debian-node-oracle-docker
+  stage: test
+  script:
+    - export NODE_ENV=oracle
+    - export ORACLE_HOST=10.73.53.144
+    - export ORACLE_SYSUSER=oeadmin
+    - export ORACLE_SYSPASSWORD=oeadmin
+    - export ORACLE_SID=ORCLCDB
+    - mv /oracledb node_modules/
+    - npm install nan --no-optional
+    - npm install git+http://10.73.97.24/atul/loopback-connector-oracle.git --no-optional
+    - node server/oracle-utility.js
+    - docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:oracle --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
+    - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+    - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
+    - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
+    - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')
+    - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
+    #- docker push ${REGISTRY}/${APP_IMAGE_NAME}:oracle
+    #- docker service create --name test-${APP_IMAGE_NAME}:oracle --env NODE_ENV=oracle ${REGISTRY}/${APP_IMAGE_NAME}-oracle npm run oracle
+    - docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run grunt-cover
+    - node server/oracle-utility.js
   tags:
     - CEP_RUNNER
