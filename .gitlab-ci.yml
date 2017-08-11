@@ -60,7 +60,7 @@ mongotest:
   script:
     - export NODE_ENV=docker
     - export DB=mongo
-    - export STARTUP_CMD="grunt test-with-coverage"
+    - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
@@ -105,7 +105,7 @@ postgrestest:
   script:
     - export NODE_ENV=postgres
     - export DB=postgres
-    - export STARTUP_CMD="grunt test-with-coverage"
+    - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
@@ -155,7 +155,7 @@ swarm:
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - mocha test/actor-tests/actorIntegrationTest.js
+    - time mocha test/actor-tests/actorIntegrationTest.js
     - node test/actor-tests/cleanupIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
