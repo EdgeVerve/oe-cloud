@@ -52,7 +52,6 @@ buildjob:
     - wait ${BUILD_PID}
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
-
   artifacts:
     untracked: true
     expire_in: 2h
@@ -75,6 +74,7 @@ mongotest:
     - export nameWebService=${STACK_NAME}"_web"
     - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
     - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -86,8 +86,9 @@ mongotest:
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - docker stack rm ${STACK_NAME}
     - exit $exit_status
+  after_script:
+    - sh /removeStack.sh
   tags:
     - CEP_RUNNER
 
@@ -105,7 +106,10 @@ postgrestest:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - if [ $networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - export stackAvailable=$(docker service ls -q --filter name={STACK_NAME} | wc -l)
+    - if[ $stackAvailable -eq 1 ]; then docker stack rm ${STACK_NAME}; fi
     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
@@ -117,8 +121,9 @@ postgrestest:
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - docker stack rm ${STACK_NAME}
     - exit $exit_status
+  after_script:
+    - sh /removeStack.sh
   tags:
     - CEP_RUNNER
 
