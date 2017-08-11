@@ -16,9 +16,7 @@
 .project
 .strong-pm
 coverage
-node_modules
 **/bower_components
-**/node_modules
 **/*.zip
 npm-debug.log
 .vscode/
