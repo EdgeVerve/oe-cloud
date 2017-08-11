@@ -85,6 +85,7 @@ buildjob:
 #     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
 #     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
 #     - docker stack ps --no-trunc ${STACK_NAME}
+#     - mocha test/01-cleanup.js
 #     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
 #     - exit $exit_status
 #   after_script:
@@ -118,6 +119,7 @@ postgrestest:
     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
+    - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
   after_script:
