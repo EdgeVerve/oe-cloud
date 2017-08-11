@@ -17,6 +17,9 @@ var postgresDBName = process.env.DB_NAME || 'postgres';
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
 	before('Delete collections', function (done) {
+		if (process.env.NODE_ENV == 'postgres') {
+			return done();
+		}
 		var db = new Db(dbName, new Server(mongoHost, 27017));
 		db.open(function (err, db) {
 			if (err) {
@@ -75,6 +78,7 @@ describe('ZZ Final Cleanup', function () {
 						done();
 					})
 					.catch(function (err) {
+						console.log("some error");
 						console.log(err);
 						return done(err);
 					});
