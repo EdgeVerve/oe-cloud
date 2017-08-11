@@ -18,7 +18,6 @@ describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
 	before('Delete collections', function (done) {
 		var db = new Db(dbName, new Server(mongoHost, 27017));
-		console.log("mongo delete collection ", db);
 		db.open(function (err, db) {
 			if (err) {
 				console.log("Error - ", err);
