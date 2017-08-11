@@ -32,11 +32,11 @@ var pg = require('pg');
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var logger = require('oe-logger');
 var log = logger('instance-caching-test');
-var oracleHost = process.env.ORACLE_HOST || '10.73.44.60';
-var oraclePort = process.env.ORACLE_PORT || '1522';
-var oracleService = process.env.ORACLE_SERVICE || 'orclpdb.ad.infosys.com';
-var oracleUser = process.env.ORACLE_USER || 'ramesh';
-var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
+var oracleHost = process.env.ORACLE_HOST || 'localhost';
+var oraclePort = process.env.ORACLE_PORT || 1521;
+var oracleService = process.env.ORACLE_SID || 'orclpdb.ad.infosys.com';
+var oracleUser = process.env.ORACLE_USERNAME || 'oeadmin';
+var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
 
 var defaultContext = {
   ctx: {
