@@ -91,6 +91,9 @@ module.exports = function BaseUser(BaseUser) {
 
   BaseUser.login = function BaseUserLogin(credentials, include, options, fn) {
     var self = this;
+    // The first if clause is difficult to cover from test cases
+    // if we dont pass options and include both, options get initialized with {}
+    // which raises Trace: options is not being passed in datasource-juggler
     if (typeof options === 'undefined' && typeof fn === 'undefined') {
       if (typeof include === 'function') {
         fn = include;
@@ -232,6 +235,11 @@ module.exports = function BaseUser(BaseUser) {
    */
 
   BaseUser.logout = function baseUserLogout(tokenId, options, fn) {
+    // The if clause may not be covered in test cases
+    // if we manually call BaseUser.logout('accessToken', function(err) { });
+    // the test cases are getting crashed with
+    // Trace: options is not being passed
+    // at Function.findById loopback-datasource-juggler/lib/dao.js:1787:17
     if (typeof options === 'function' && typeof fn === 'undefined') {
       fn = options;
       options = {};
@@ -515,6 +523,11 @@ module.exports = function BaseUser(BaseUser) {
     * @param {function} cb -continuation callback function handle
     */
   BaseUser.switchTenant = function SwitchTenantFn(ctx, tenantId, options, cb) {
+    // The if clause may not be covered in test cases
+    // if we manually call BaseUser.switchTenant(ctx, switchTenantId, function(err, res) { });
+    // the test cases are getting crashed with
+    // Trace: options is not being passed
+    // at Function.findById loopback-datasource-juggler/lib/dao.js:1787:17
     if (!cb && typeof options === 'function') {
       cb = options;
       options = {};
@@ -543,6 +556,11 @@ module.exports = function BaseUser(BaseUser) {
         }
       });
     } else {
+      // This else case cannot covered from test cases
+      // To cover this ctx.req.accessToken to be not set(null or undefined), for that we
+      // should not pass access_token from query params and since /switch-tenant api is enabled
+      // for logged in users, it is returning authorization required, the control flow
+      // not even coming to this method itself.
       var err = new Error('not logged in');
       err.retriable = false;
       cb(err, data);
@@ -551,6 +569,9 @@ module.exports = function BaseUser(BaseUser) {
 
   BaseUser.session = function session(ctx, options, cb) {
     var data = {};
+    // Cannot cover below code with coverage without passing options
+    // since the next below if clause accesses options.ctx object which is undefined.
+    // Test cases crash with TypeError: Cannot read property 'userId' of undefined
     if (!cb && typeof options === 'function') {
       cb = options;
       options = {};

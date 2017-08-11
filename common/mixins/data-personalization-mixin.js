@@ -410,7 +410,7 @@ function dataPersonalizationAccess(ctx, next) {
         context[element].forEach((item) => {
           valueArray.push(`${element}:${item}`);
         });
-        autoscopeArray.concat(valueArray);
+        exeContextArray = autoscopeArray.concat(valueArray);
         exeContextArray.push(`${element}:${defaultValue}`);
         exeContextArray.concat(valueArray);
       } else {
