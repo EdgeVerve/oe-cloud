@@ -7,7 +7,7 @@
 var chai = require('chai');
 var expect = chai.expect;
 var Server = require('mongodb').Server;
-var mongoClient = require('mongodb').MongoClient;
+var Db = require('mongodb').Db;
 
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
@@ -17,24 +17,29 @@ var postgresDBName = process.env.DB_NAME || 'postgres';
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
 	before('Delete collections', function (done) {
-		console.log(mongoHost);
-		console.log(dbName);
-		mongoClient.connect("mongodb://" + mongoHost + ":27017/" + dbName)
-			.then(function (db) {
-				db.dropDatabase();
-				return mongoClient.connect("mongodb://" + mongoHost + ":27017/" + dbName + "1")
-			})
-			.then(function (db) {
-				db.dropDatabase();
-				return mongoClient.connect("mongodb://" + mongoHost + ":27017/" + dbName + "2")
-			})
-			.then(function (db) {
-				db.dropDatabase();
-				done();
-			})
-			.catch(function (err) {
-				return done(err);
-			})
+		var db = new Db(dbName, new Server(mongoHost, 27017));
+		console.log("mongo delete collection ", db);
+		db.open(function (err, db) {
+			if (err) {
+				console.log("Error - ", err);
+			}
+			db.dropDatabase();
+			var db1 = new Db(dbName + '1', new Server(mongoHost, 27017));
+			db1.open(function (err, db1) {
+				if (err) {
+					console.log("Error - ", err);
+				}
+				db1.dropDatabase();
+				var db2 = new Db(dbName + '2', new Server(mongoHost, 27017));
+				db2.open(function (err, db2) {
+					if (err) {
+						console.log("Error - ", err);
+					}
+					db2.dropDatabase();
+					done();
+				});
+			});
+		});
 	});
 
 	it('Should delete collections', function (done) {
