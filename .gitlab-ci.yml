@@ -125,6 +125,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
+
 # swarm:
 #   stage: post-build-test
 #   script:
