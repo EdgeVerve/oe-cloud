@@ -8,6 +8,7 @@ var chai = require('chai');
 var expect = chai.expect;
 var Db = require('mongodb').Db;
 var Server = require('mongodb').Server;
+var async = require('async');
 
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
@@ -17,6 +18,21 @@ var postgresDBName = process.env.DB_NAME || 'postgres';
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
 	before('Delete collections', function (done) {
+		// function dropCollection(host, port, dbName) {
+		// 	var db = new Db(dbName, new Server(host, port));
+		// 	db.open()
+		// 		.then(function (res) {
+		// 			res.dropDatabase();
+		// 		})
+		// 		.catch(function (err) {
+		// 			console.log(err);
+		// 		})
+		// }
+
+		// async.each(function () {
+
+		// })
+
 		var db = new Db(dbName, new Server(mongoHost, 27017));
 		db.open(function (err, db) {
 			if (err) {
@@ -39,6 +55,8 @@ describe('ZZ Final Cleanup', function () {
 				});
 			});
 		});
+
+
 	});
 
 	it('Should delete collections', function (done) {
