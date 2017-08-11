@@ -16,7 +16,6 @@ var postgresDBName = process.env.DB_NAME || 'postgres';
 
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
-
 	before('Delete collections', function (done) {
 		var db = new Db(dbName, new Server(mongoHost, 27017));
 		db.open(function (err, db) {
@@ -48,6 +47,7 @@ describe('ZZ Final Cleanup', function () {
 	});
 
 	it('Should delete postgres db', function (done) {
+		console.log("Node_ENV " + process.env.NODE_ENV);
 		if (process.env.NODE_ENV == 'postgres') {
 			var Pool = require('pg').Pool;
 			var pool = new Pool({
@@ -56,28 +56,28 @@ describe('ZZ Final Cleanup', function () {
 				"host": postgresHost,
 				"database": "postgres"
 			});
+			console.log("postgresHost " + postgresHost);
 			pool.query("SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE (pg_stat_activity.datname = '" + postgresDBName + "' OR pg_stat_activity.datname = '" + postgresDBName + '1' + "' OR pg_stat_activity.datname = '" + postgresDBName + '2' + "') AND pid <> pg_backend_pid()", function (err, result) {
 				if (err) {
 					console.log("Failed to disconnect open connections to Postgres DB");
 					console.log(err);
 					return done(err);
 				}
-				pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "\"", function (err, result) {
-					if (err) {
+				console.log("postgresDBName " + postgresDBName);
+				pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "\"")
+					.then(function (result) {
+						return pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "1\"");
+					})
+					.then(function (result) {
+						return pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "2\"");
+					})
+					.then(function (result) {
+						done();
+					})
+					.catch(function (err) {
 						console.log(err);
-					}
-					pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "1\"", function (err, result) {
-						if (err) {
-							console.log(err);
-						}
-						pool.query("DROP DATABASE IF EXISTS \"" + postgresDBName + "2\"", function (err, result) {
-							if (err) {
-								console.log(err);
-							}
-							done();
-						});
+						return done(err);
 					});
-				});
 			});
 		} else {
 			done();
