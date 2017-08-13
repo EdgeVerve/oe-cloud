@@ -41,7 +41,8 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
           console.log("error:", error || body.error);
           done(error || body.error);
         } else {
-          console.log("success");
+          console.log("success " + body.id);
+          console.log(body);
           token = body.id;
           done();
         }
