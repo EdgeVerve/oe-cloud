@@ -5,7 +5,6 @@ var async = require('async');
 // var expect = chai.expect;
 var chalk = require('chalk');
 var exec = require('child_process').exec;
-var loopback = require('loopback');
 
 var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
 var  DOMAIN_NAME = process.env.DOMAIN_NAME;
@@ -16,6 +15,7 @@ const SERVICE_NAME = APP_IMAGE_NAME + "_web";
 var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
 
 var modelPlural = 'Notes';
+var eventHistoryPlural = 'EventsHistroy/';
 var EventHistoryModel;
 
 var createLoginData = {"username":"admin","password":"admin","email":"ev_admin@edgeverve.com"};
@@ -67,14 +67,6 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     });
   }
 
-  function getEventHistoryModel() {
-    console.log('getEventHistoryModel');
-    if (!EventHistoryModel) {
-      EventHistoryModel = loopback.getModel('EventHistory');
-    }
-    return EventHistoryModel;
-  }
-
   it('Recover - Default sceanrio', function (done) {
     var eventHistoryStatus = {};
     eventHistoryStatus.undefined = 0;
@@ -84,10 +76,37 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     
     async.series({
       clearHistory: (callback) => {
-        eventHistoryModel = getEventHistoryModel();
-        console.log("eventHistoryModel: " + eventHistoryModel);
-        eventHistoryModel.destroyAll({}, ignoreScopeOptions, function (err, info) {
-          callback();
+
+        console.log("At clear history");
+        request.get({
+            url: baseurl + eventHistoryPlural + '?access_token=' + token,
+            strictSSL : false,
+            json: true,
+            headers: {
+                'tenantId': 'default',
+                'Accept': 'application/json'
+            }
+          }, 
+          function(error, response, body) {
+            if (err) console.log("error in fetching event-history records:", error || body.error);
+            console.log("Recived event history records");
+            console.log(body);
+            var eventHistoryRecords = body;
+
+            eventHistoryRecords.forEach((eventHistoryRecord) => {
+              console.log("Tring to delete " + eventHistoryRecord.id);
+              request.delete(
+                baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
+                function(error, response, body) {
+                  if (error || body.error) {
+                    console.log("error in deleting event-history record:", error || body.error);
+                  } 
+                  console.log("Delete success" );                  
+                }
+              );
+            }, (err)=> {
+              callback();
+            })
         });
       },
       scaleServiceCountUp: function(callback){
