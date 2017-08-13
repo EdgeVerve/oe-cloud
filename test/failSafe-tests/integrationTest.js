@@ -78,8 +78,10 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       clearHistory: (callback) => {
 
         console.log("At clear history");
+        var url = baseurl + eventHistoryPlural + '?access_token=' + token;
+        console.log("url: " + url);
         request.get({
-            url: baseurl + eventHistoryPlural + '?access_token=' + token,
+            url: url,//baseurl + eventHistoryPlural + '?access_token=' + token,
             strictSSL : false,
             json: true,
             headers: {
