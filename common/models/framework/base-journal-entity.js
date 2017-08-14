@@ -72,11 +72,10 @@ module.exports = function (BaseJournalEntity) {
         } else if (actor.length > 1) {
           return callback(new Error('Something went wrong. Too many ctors with id ' + activity.entityId));
         }
-        operationContext.activity = activity;
         operationContext.journalEntityId = instance.id;
         operationContext.journalEntityVersion = instance._version;
         operationContext.journalEntityType = ctx.Model.definition.name;
-        operationContext.activity = activity;
+        operationContext.activity = activity.toObject();
         operationContext.actorEntity = actor[0];
         if (!options.actorInstancesMap) {
           options.actorInstancesMap = {};
