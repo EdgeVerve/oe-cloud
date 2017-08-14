@@ -1,5 +1,4 @@
 stages:
-  - build
   - test
 
 cache:
@@ -152,6 +151,7 @@ swarm:
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - docker stack ps ${APP_IMAGE_NAME}
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - export countElapsed=0
     - export app_exit_status=0
