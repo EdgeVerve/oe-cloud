@@ -5,7 +5,7 @@
             "loopback/server/models",
             "../server/models",
             "../common/models",
-			"../common/test",
+			"../common/models/test",
             "../common/models/ui",
             "../common/models/ui",
             "../common/models/framework",
