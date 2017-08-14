@@ -11,7 +11,7 @@ variables:
   USER_BROADCASTER: "false"
   DOMAIN_NAME: oecloud.local
   REGISTRY: registry.${DOMAIN_NAME}
-  
+
 before_script:
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
