@@ -13,6 +13,8 @@ module.exports = function (BaseJournalEntity) {
 
     async.eachSeries(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
+      var modelActivity = operationContext.activity;
+      operationContext.activity = modelActivity.toObject();
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
         if (err) {
           return callback(err);
@@ -21,7 +23,7 @@ module.exports = function (BaseJournalEntity) {
           error2.retriable = false;
           return callback(error2);
         }
-        operationContext.activity.seqNum = validationObj.seqNum;
+        modelActivity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
         return callback();
       });
@@ -39,6 +41,8 @@ module.exports = function (BaseJournalEntity) {
     delete operationContext.actorEntity;
     var options = operationContext.options;
     delete operationContext.options;
+    var modelActivity = operationContext.activity;
+    operationContext.activity = modelActivity.toObject();
     return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
@@ -47,7 +51,7 @@ module.exports = function (BaseJournalEntity) {
         error.retriable = false;
         return next(error);
       }
-      operationContext.activity.seqNum = validationObj.seqNum;
+      modelActivity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
