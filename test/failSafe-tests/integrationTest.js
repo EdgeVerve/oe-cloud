@@ -11,14 +11,13 @@ var  DOMAIN_NAME = process.env.DOMAIN_NAME;
 const SERVICE_NAME = APP_IMAGE_NAME + "_web";
 
 //var baseurl = "https://$EVFURL/api/";
-//var baseurl = "https://mayademo.oecloud.local/api/";
 var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
 
-var modelPlural = 'Notes';
+var modelPlural = 'Notes/';
 var eventHistoryPlural = 'EventsHistroy/';
-var EventHistoryModel;
-
-var createLoginData = {"username":"admin","password":"admin","email":"ev_admin@edgeverve.com"};
+var headers = {'tenantId': 'default','Accept': 'application/json'};
+var eventHistoryRecords = {url: baseurl + eventHistoryPlural + '?access_token=' + token, strictSSL : false,json: true,'headers': headers};
+var results;
 
 
 
@@ -49,48 +48,47 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       });
   });
 
-  var checkServiceCount = (x, cb) => {
-    console.log('checkServiceCount ', x);
+  var scaleTo = (n, cb) => {
+    console.log('scale service web to ' + n);
+    exec("docker service scale " + SERVICE_NAME + "=" + n, (err, stdout) => {
+      if (err) console.log("Error in func One: " + err);
+      verifyScale(n, callback);  
+    })
+  }
+
+  var verifyScale = (n, cb) => {
+    console.log('verify service count is ', n);
     exec ("docker service ps " + SERVICE_NAME + " --format '{{json .ID}}' | wc -l", (err, stdout) => {
       if (err) {
-        console.log("Error in getServiceCount: " + err)
+        console.log("Error in getServiceCount: " + err);
+        setTimeout(verifyScale, 100, n, cb);
       } else {
         var countStatus = stdout;
-        if (countStatus != x){
-          console.log('checkServiceCount - waiting ');
-          console.log("checkServiceCount - Status: " + countStatus + ", expected: " + x );
-          setTimeout(checkServiceCount, 100, x, cb);
+        if (countStatus != n){
+          console.log('verifyScale - waiting Status: ' + countStatus + ', expected: ' + n);
+          setTimeout(verifyScale, 100, n, cb);
         } else {
-          console.log('checkServiceCount - finished');
+          console.log('verifyScale - finished');
           cb();
         }
       }
     });
   }
 
-  it('Recover - Default sceanrio', function (done) {
-    var eventHistoryStatus = {};
-    eventHistoryStatus.undefined = 0;
-    eventHistoryStatus.RecoveryFinished = 0;
-    eventHistoryStatus.ToBeRecovered = 0;
-    eventHistoryStatus.InRecovery = 0;
-    
+  var initResults = () => {
+    results = {};
+    results.undefined = 0;
+    results.RecoveryFinished = 0;
+    results.ToBeRecovered = 0;
+    results.InRecovery = 0;
+  }
+
+  it('Recover - Default sceanrio', function (done) {    
     async.series({
       clearHistory: (callback) => {
-
         console.log("At clear history");
-        var url = baseurl + eventHistoryPlural + '?access_token=' + token;
-        console.log("url: " + url);
-        request.get({
-            url: url,//baseurl + eventHistoryPlural + '?access_token=' + token,
-            strictSSL : false,
-            json: true,
-            headers: {
-                'tenantId': 'default',
-                'Accept': 'application/json'
-            }
-          }, 
-          function(error, response, body) {
+        console.log("url: " + eventHistoryRecords.url);
+        request.get(eventHistoryRecords, function(error, response, body) {
             if (err) console.log("error in fetching event-history records:", error || body.error);
             console.log("Recived event history records");
             console.log(body);
@@ -112,53 +110,40 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
             })
         });
       },
-      scaleServiceCountUp: function(callback){
-        console.log('scaleServiceCountUp');
-        // load 5 node servers
-        exec("docker service scale " + SERVICE_NAME + "=5", (err, stdout) => {
-          if (err) console.log("Error in func One: " + err);
-          checkServiceCount(5, callback);  
-        })
+      scaleServiceTo5: (callback) => {
+        scaleTo(5, callback);
       },
       initiateNodes: function(callback) {
-        // create multipel nodes
         console.log('create 50 note records');
         for (var i=0; i<100; i++){
-          var createUrl = baseurl + modelPlural + "/" + i + "/" + '?access_token=' + token;
-          request.post({
-            url: createUrl,
-            json: {},
-            headers: {},
-            method: 'POST'
-          }, function (error, r, body) { });
+          var createUrl = baseurl + modelPlural + i + '?access_token=' + token;
+          request.post({url: createUrl,json: {}, 'headers': headers, method: 'POST'}, function (error, r, body) { });
         }
         callback();    
       },
-      scaleServiceCountDown: function(callback){
-        console.log('scaleServiceCountDown');
-        //scale down 3 nodes 
-        exec("docker service scale " + SERVICE_NAME + "=3", (err, stdout) => {
-          if (err) console.log("Error in func One: " + err);
-          checkServiceCount(3, callback);  
-        })
+      scaleServiceCountDown: (callback) => {
+        scaleTo(3, callback);
       }, 
-      checkDeadNodesStatus: function (callback){
-        console.log('checkDeadNodesStatus');
-        // query event history model to verify nodes where recovered 
-        eventHistoryModel = getEventHistoryModel();
-        eventHistoryModel.find({}, ignoreScopeOptions, function (err, results) {
-          
-          results.array.forEach(function(eventHistoryRecord) {
-            var sttaus  = eventHistoryRecord.status;
-            eventHistoryStatus[status]++;
-          }, this);
-          callback();
+      getServiceStatus: (callback) => {
+        initResults();
+        console.log('getServiceStatus');
+        request.get(eventHistoryRecords, function(error, response, records) {
+          records.forEach((eventHistoryRecord) => {
+            results[eventHistoryRecord.status]++;
+          }, this); 
+          if (results.ToBeRecovered > 0 || results.InRecovery > 0 ) 
+            setTimeout(getServiceStatus, 100, callback);
+          else 
+            callback();
         });
       }
-    }, function(err, results) {
-        // results is now equal to: {one: 1, two: 2}
-        console.log(eventHistoryStatus);
-        done();
+    }, function(err) {
+        console.log(results);
+        if (results.RecoveryFinished == 2 )
+          done();
+        else 
+          done(new Error ("Not All dead hosts were recoverd"));
+        
     });
   });
 });
