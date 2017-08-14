@@ -27,7 +27,7 @@ services:
       - router_network
   
   web:
-    image: $REGISTRY/${APP_IMAGE_NAME}:testing
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:testing
     depends_on:
       - mongo
       - broadcaster
