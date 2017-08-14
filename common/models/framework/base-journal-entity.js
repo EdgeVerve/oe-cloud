@@ -75,7 +75,7 @@ module.exports = function (BaseJournalEntity) {
         operationContext.journalEntityId = instance.id;
         operationContext.journalEntityVersion = instance._version;
         operationContext.journalEntityType = ctx.Model.definition.name;
-        operationContext.activity = activity.toObject();
+        operationContext.activity = activity;
         operationContext.actorEntity = actor[0];
         if (!options.actorInstancesMap) {
           options.actorInstancesMap = {};
@@ -199,7 +199,7 @@ module.exports = function (BaseJournalEntity) {
       var options = ctx.options;
       var actor = options.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity, options, function (err) {
+        actor.journalSaved(activity.seqNum, options, function (err) {
           if (err) {
             return cb(err);
           }
