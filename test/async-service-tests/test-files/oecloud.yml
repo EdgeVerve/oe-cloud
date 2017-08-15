@@ -1,0 +1,59 @@
+version: "3"
+services:
+  mongo:
+    image: ${REGISTRY}/alpine-mongo:latest
+    networks:
+      - ${NETWORK_NAME}
+      
+  broadcaster:
+    image: ${REGISTRY}/evf-broadcaster-server:latest
+    environment:
+      SERVICE_PORTS: "2345"
+    networks:
+      - ${NETWORK_NAME}
+ 
+  routerservice:
+    image: ${REGISTRY}/evfpaas-router-service:latest
+    environment:
+      HASH_RING_REFRESH_TIME_INTERVAL: "10000"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      SERVICE_PORTS: "3000"
+      BROADCASTER_HOST : "broadcaster"
+      ROUTER_HOST: ${ROUTER}
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+  
+  web:
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:async-test
+    depends_on:
+      - mongo
+      - broadcaster
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 60s
+    environment:
+      VIRTUAL_HOST: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME},${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+      SERVICE_PORTS: "3000"
+      FORCE_SSL: "yes"
+      CONSISTENT_HASH: "true"
+      SERVICE_NAME: "${APP_IMAGE_NAME}"
+      BROADCASTER_HOST: "broadcaster"
+      ORCHESTRATOR: "dockerSwarm"
+      APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      ROUTER_HOST: ${ROUTER}
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+
+networks:
+  $NETWORK_NAME:
+  router_network:
+    external: true
