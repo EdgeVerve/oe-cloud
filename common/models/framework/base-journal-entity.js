@@ -35,14 +35,14 @@ module.exports = function (BaseJournalEntity) {
     });
   };
 
-  var performNonAtomicOperation = function (journalEntity, operationContext, next) {
+  var performNonAtomicOperation = function (operationContext, next) {
     var startup = '';
     var actor = operationContext.actorEntity;
     delete operationContext.actorEntity;
     var options = operationContext.options;
     delete operationContext.options;
     var modelActivity = operationContext.activity;
-    operationContext.activity = modelActivity.toObject();
+    operationContext.activity = modelActivity.__data;
     return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
@@ -109,7 +109,7 @@ module.exports = function (BaseJournalEntity) {
         if (err) {
           return cb(err);
         }
-        performNonAtomicOperation(instance, operationContext, function (err, res) {
+        performNonAtomicOperation(operationContext, function (err, res) {
           if (err) {
             return cb(err);
           }

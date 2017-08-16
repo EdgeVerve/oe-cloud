@@ -201,7 +201,6 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = ctx.envelope;
       envelope.seqNum = envelope.seqNum + 1;
-      ctx.activity.seqNum = envelope.seqNum;
       self.nonAtomicAction(ctx, function () {
         envelope.doNotDelete--;
         return cb(null, { validation: true, seqNum: envelope.seqNum });
