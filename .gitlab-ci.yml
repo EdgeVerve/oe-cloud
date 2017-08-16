@@ -60,38 +60,38 @@ buildjob:
   tags:
     - CEP_RUNNER
 
-# mongotest:
-#   stage: post-build-test
-#   script:
-#     - export NODE_ENV=docker
-#     - export MONGO_HOST="10.73.53.144"
-#     - export DB=mongo
-#     - export DB_NAME=${APP_IMAGE_NAME}_mongo
-#     - export STARTUP_CMD="npm run grunt-cover"
-#     - export FILE_NAME=docker-compose.test.env.yml
-#     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-#     - export exit_status=0
-#     - export nameWebService=${STACK_NAME}"_web"
-#     - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
-#     - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
-#     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
-#     - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-#     - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-#     - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-#     - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-#     - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-#     - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
-#     - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-#     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-#     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-#     - docker stack ps --no-trunc ${STACK_NAME}
-#     - mocha test/01-cleanup.js
-#     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-#     - exit $exit_status
-#   after_script:
-#     - sh /removeStack.sh
-#   tags:
-#     - CEP_RUNNER
+mongotest:
+  stage: post-build-test
+  script:
+    - export NODE_ENV=docker
+    - export MONGO_HOST="10.73.53.144"
+    - export DB=mongo
+    - export DB_NAME=${APP_IMAGE_NAME}_mongo
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export exit_status=0
+    - export nameWebService=${STACK_NAME}"_web"
+    - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
+    - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
+    - mocha test/01-cleanup.js
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - exit $exit_status
+  after_script:
+    - sh /removeStack.sh
+  tags:
+    - CEP_RUNNER
 
 postgrestest:
   stage: post-build-test
@@ -128,37 +128,37 @@ postgrestest:
     - CEP_RUNNER
 
 
-# swarm:
-#   stage: post-build-test
-#   script:
-#     - export STARTUP_CMD="npm run grunt-cover"
-#     - export FILE_NAME=docker-compose.test.env.yml
-#     - export DB_NAME=${APP_IMAGE_NAME}_mongo
-#     - export DB=mongo
-#     - export STACK_NAME=${APP_IMAGE_NAME}
-#     - export NETWORK_NAME=${APP_IMAGE_NAME}
-#     - export exit_status="0"
-#     - export nameWebService=${STACK_NAME}"_web"
-#     - export nameDBService=${STACK_NAME}"_"${DB}
-#     - export HAPROXY=10.73.96.214
-#     - docker stack rm ${APP_IMAGE_NAME}
-#     - node test/actor-tests/prepareIntegrationTest.js
-#     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
-#     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
-#     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
-#     - mv -f qqq2.yml qqq.yml
-#     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
-#     - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
-#     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
-#     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-#     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-#     - export countElapsed=0
-#     - export app_exit_status=0
-#     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-#     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-#     - docker stack ps --no-trunc ${STACK_NAME}
-#     - time mocha test/actor-tests/actorIntegrationTest.js
-#     - node test/actor-tests/cleanupIntegrationTest.js
-#     - docker stack rm ${APP_IMAGE_NAME}
-#   tags:
-#     - CEP_RUNNER
+swarm:
+  stage: post-build-test
+  script:
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export DB_NAME=${APP_IMAGE_NAME}_mongo
+    - export DB=mongo
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${APP_IMAGE_NAME}
+    - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
+    - export HAPROXY=10.73.96.214
+    - docker stack rm ${APP_IMAGE_NAME}
+    - node test/actor-tests/prepareIntegrationTest.js
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
+    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
+    - mv -f qqq2.yml qqq.yml
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
+    - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
+    - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - docker stack ps --no-trunc ${STACK_NAME}
+    - time mocha test/actor-tests/actorIntegrationTest.js
+    - node test/actor-tests/cleanupIntegrationTest.js
+    - docker stack rm ${APP_IMAGE_NAME}
+  tags:
+    - CEP_RUNNER
