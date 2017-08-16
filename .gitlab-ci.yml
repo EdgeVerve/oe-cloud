@@ -172,7 +172,6 @@ retry-service:
     - docker stack rm ${STACK_NAME}
     - docker stack rm ${RETRTY_STACK_NAME}
     - sleep 10
-    # make this folder put inside: test data, test file
     - cd test/async-service-tests/test-files
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:async-test .
     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:async-test
@@ -189,9 +188,8 @@ retry-service:
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    # run our test
     - cd ../../..
-    - time mocha test/async-service-tests/async-service-integration-test.js
+    - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
     - docker stack rm ${APP_IMAGE_NAME}
     - docker stack rm ${RETRTY_STACK_NAME}
   tags:

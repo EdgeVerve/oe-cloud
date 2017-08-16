@@ -12,8 +12,8 @@
             "type": "string",
             "id": true
         },
-        "skuCode": {
-            "type": "string"
+        "amount": {
+            "type": "number"
         },
         "status": {
             "type": "string"
