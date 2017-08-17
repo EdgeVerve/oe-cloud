@@ -167,10 +167,10 @@ retry-service:
     - export STACK_NAME=${APP_IMAGE_NAME}-r
     - export NETWORK_NAME=${STACK_NAME}
     - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
-    - export RETRTY_STACK_NAME=${APP_IMAGE_NAME}-rs
-    - export RETRY_NETWORK_NAME=${RETRTY_STACK_NAME}
+    - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
+    - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
     - docker stack rm ${STACK_NAME}
-    - docker stack rm ${RETRTY_STACK_NAME}
+    - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
     - cd test/async-service-tests/test-files
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:async-test .
@@ -180,7 +180,8 @@ retry-service:
     - docker stack deploy -c oecloud.yml ${STACK_NAME}
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
     - mv -f retry-service2.yml retry-service.yml
-    - docker stack deploy -c retry-service.yml ${RETRTY_STACK_NAME}
+    - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
+    - docker service logs -f ${RETRY_STACK_NAME}_server &
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
@@ -192,6 +193,6 @@ retry-service:
     - sleep 60
     - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
     - docker stack rm ${APP_IMAGE_NAME}
-    - docker stack rm ${RETRTY_STACK_NAME}
+    - docker stack rm ${RETTY_STACK_NAME}
   tags:
     - CEP_RUNNER
