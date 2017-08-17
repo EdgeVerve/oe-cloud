@@ -68,10 +68,9 @@ describe(chalk.blue('retry integration tests'), function () {
               done(error || body.error);
             } else {
               console.log('get response body:', body);
+              body = JSON.parse(body);
               expect(response.statusCode).to.equal(200);
-              expect(body.balbla).to.equal(postData.blabla);
-              expect(body.status).to.equal(postData.status);
-              expect(body.amount).to.equal(postData.amount);
+              expect(body).to.include(postData);
               done();
             }
           });
