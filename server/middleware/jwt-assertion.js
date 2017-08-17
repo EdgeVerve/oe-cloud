@@ -34,7 +34,7 @@ module.exports = function JWTAssertionFn(options) {
   if (process.env.JWT_CONFIG && process.env.JWT_CONFIG.length > 0) {
     try {
       var tempConfig = JSON.parse(process.env.JWT_CONFIG);
-      jwtConfig = tempConfig && typeof tempConfig === Object ? tempConfig : jwtConfig;
+      jwtConfig = tempConfig && typeof tempConfig === 'object' ? tempConfig : jwtConfig;
     } catch (e) {
       log.error(e);
     }
