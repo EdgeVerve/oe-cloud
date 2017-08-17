@@ -32,59 +32,31 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     tenantId: 'tenant1',
     tenantName: 'tenant1'
   }, {
-    tenantId: 'tenant2',
-    tenantName: 'tenant2'
-  }];
-  var datasources;
-  if(process.env.NODE_ENV == 'postgres')
-  {
-    datasources = [{
-      'host': postgresHost,
-      'port': 27017,
-      'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/' + dbName + '1',
-      'database': dbName + '1',
-      'password': 'postgres',
-      'name': 'db1',
-      'connector': 'loopback-connector-postgresql',
-      'user': 'postgres',
-      'max': 50,
-      'connectionTimeout': 50000
-    }, {
-        'host': postgresHost,
-        'port': 27017,
-        'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/' + dbName + '2',
-        'database': dbName + '2',
-        'password': 'postgres',
-        'name': 'db2',
-        'connector': 'loopback-connector-postgresql',
-        'user': 'postgres',
-        'max': 50,
-        'connectionTimeout': 50000
-      }];
-  } else {
-    datasources = [{
+      tenantId: 'tenant2',
+      tenantName: 'tenant2'
+    }];
+
+  datasources = [{
+    'host': mongoHost,
+    'port': 27017,
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
+    'database': dbName + '1',
+    'password': 'admin',
+    'name': 'db1',
+    'connector': 'mongodb',
+    'user': 'admin',
+    'connectionTimeout': 50000
+  }, {
       'host': mongoHost,
       'port': 27017,
-      'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
-      'database': dbName + '1',
+      'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
+      'database': dbName + '2',
       'password': 'admin',
-      'name': 'db1',
+      'name': 'db2',
       'connector': 'mongodb',
       'user': 'admin',
       'connectionTimeout': 50000
-    }, {
-        'host': mongoHost,
-        'port': 27017,
-        'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
-        'database': dbName + '2',
-        'password': 'admin',
-        'name': 'db2',
-        'connector': 'mongodb',
-        'user': 'admin',
-        'connectionTimeout': 50000
-      }];
-
-  }
+    }];
 
 
   var user1 = {
@@ -103,17 +75,17 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     modelName: productModelName,
     dataSourceName: datasources[0].name
   }, {
-    modelName: 'BaseUser',
-    dataSourceName: datasources[0].name
-  }];
+      modelName: 'BaseUser',
+      dataSourceName: datasources[0].name
+    }];
 
   var mappings2 = [{
     modelName: productModelName,
     dataSourceName: datasources[1].name
   }, {
-    modelName: 'BaseUser',
-    dataSourceName: datasources[1].name
-  }];
+      modelName: 'BaseUser',
+      dataSourceName: datasources[1].name
+    }];
 
   function cleandb(done) {
     bootstrap.models.Tenant.destroyAll({}, bootstrap.defaultContext, function (err, res) {
