@@ -37,7 +37,7 @@ var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
 
 
 describe('Caching Test', function () {
-this.timeout(20000);
+    this.timeout(20000);
     var modelName = 'CachingTest';
     var TestModel = null;
     var dsname = 'db';
@@ -162,6 +162,8 @@ this.timeout(20000);
         config.disablecaching = false;
         // Get a datasource
         dataSource = app.datasources[dsname];
+        // eslint-disable-next-line
+        console.log("\n\n===============>>", dataSource.name);
 
         var TestModelSchema = {
             'name': {
@@ -215,6 +217,8 @@ this.timeout(20000);
 
     describe('Caching Test - when dblock off', function () {
         before('Run test', function (done) {
+            // eslint-disable-next-line
+            console.log("\n\n----------->>", dataSource.name);
             api.set('x-evproxy-db-lock', '0');
             stage1_creat(done);
         });
