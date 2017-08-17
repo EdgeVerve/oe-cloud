@@ -13,8 +13,6 @@ module.exports = function (BaseJournalEntity) {
 
     async.eachSeries(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
-      var modelActivity = operationContext.activity;
-      operationContext.activity = modelActivity.toObject();
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
         if (err) {
           return callback(err);
@@ -23,7 +21,7 @@ module.exports = function (BaseJournalEntity) {
           error2.retriable = false;
           return callback(error2);
         }
-        modelActivity.seqNum = validationObj.seqNum;
+        operationContext.activity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
         return callback();
       });
@@ -35,14 +33,12 @@ module.exports = function (BaseJournalEntity) {
     });
   };
 
-  var performNonAtomicOperation = function (operationContext, next) {
+  var performNonAtomicOperation = function (journalEntity, operationContext, next) {
     var startup = '';
     var actor = operationContext.actorEntity;
     delete operationContext.actorEntity;
     var options = operationContext.options;
     delete operationContext.options;
-    var modelActivity = operationContext.activity;
-    operationContext.activity = modelActivity.__data;
     return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
@@ -51,7 +47,7 @@ module.exports = function (BaseJournalEntity) {
         error.retriable = false;
         return next(error);
       }
-      modelActivity.seqNum = validationObj.seqNum;
+      operationContext.activity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
@@ -76,6 +72,7 @@ module.exports = function (BaseJournalEntity) {
         } else if (actor.length > 1) {
           return callback(new Error('Something went wrong. Too many ctors with id ' + activity.entityId));
         }
+        operationContext.activity = activity;
         operationContext.journalEntityId = instance.id;
         operationContext.journalEntityVersion = instance._version;
         operationContext.journalEntityType = ctx.Model.definition.name;
@@ -109,7 +106,7 @@ module.exports = function (BaseJournalEntity) {
         if (err) {
           return cb(err);
         }
-        performNonAtomicOperation(operationContext, function (err, res) {
+        performNonAtomicOperation(instance, operationContext, function (err, res) {
           if (err) {
             return cb(err);
           }
@@ -203,7 +200,7 @@ module.exports = function (BaseJournalEntity) {
       var options = ctx.options;
       var actor = ctx.hookState.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity.seqNum, options, function (err) {
+        actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {
             return cb(err);
           }

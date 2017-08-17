@@ -63,8 +63,8 @@ module.exports = function (BaseActorEntity) {
         },
         isStatic: false,
         accepts: {
-          arg: 'seqNum',
-          type: 'string'
+          arg: 'activity',
+          type: 'object'
         },
         returns: {
           arg: 'response',
@@ -201,6 +201,7 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = ctx.envelope;
       envelope.seqNum = envelope.seqNum + 1;
+      ctx.activity.seqNum = envelope.seqNum;
       self.nonAtomicAction(ctx, function () {
         envelope.doNotDelete--;
         return cb(null, { validation: true, seqNum: envelope.seqNum });
@@ -456,13 +457,13 @@ module.exports = function (BaseActorEntity) {
     });
   };
 
-  BaseActorEntity.prototype.journalSaved = function (seqNum, options, cb) {
+  BaseActorEntity.prototype.journalSaved = function (activity, options, cb) {
     var self = this;
     var id = this.__data.id;
     var modelName = this.constructor.modelName;
     var setMessageStatus = function (currentEnvelope) {
       currentEnvelope.msg_queue.forEach(function (message) {
-        if (message.seqNum === seqNum) {
+        if (message.seqNum === activity.seqNum) {
           message.journalStatus = 'saved';
           return;
         }
