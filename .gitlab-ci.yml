@@ -164,10 +164,10 @@ retry-service:
   script: 
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
-    - export STACK_NAME=${APP_IMAGE_NAME}-retry-service-test
+    - export STACK_NAME=${APP_IMAGE_NAME}-r
     - export NETWORK_NAME=${STACK_NAME}
     - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
-    - export RETRTY_STACK_NAME=${APP_IMAGE_NAME}-retry-stack
+    - export RETRTY_STACK_NAME=${APP_IMAGE_NAME}-rs
     - export RETRY_NETWORK_NAME=${RETRTY_STACK_NAME}
     - docker stack rm ${STACK_NAME}
     - docker stack rm ${RETRTY_STACK_NAME}
