@@ -164,7 +164,8 @@ retry-service:
   script: 
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
-    - export STACK_NAME=${APP_IMAGE_NAME}-r
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
+    - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
     - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
     - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
@@ -181,7 +182,7 @@ retry-service:
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
     - mv -f retry-service2.yml retry-service.yml
     - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
-    - docker service logs -f ${RETRY_STACK_NAME}_server &
+    - docker service logs -f ${STACK_NAME}_web &
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)

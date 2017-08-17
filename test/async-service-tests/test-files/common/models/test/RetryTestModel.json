@@ -2,7 +2,7 @@
     "name": "RetryTestModel",
     "base": "BaseEntity",
     "strict": false,
-    "plural": "testes",
+    "plural": "RetryTestModel",
     "idInjection": true,
     "options": {
         "validateUpsert": true
