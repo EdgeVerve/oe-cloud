@@ -17,6 +17,7 @@ var postgresDBName = process.env.DB_NAME || 'postgres';
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);
 	before('Delete collections', function (done) {
+
 		if (process.env.NODE_ENV == 'postgres') {
 			var pgdb1 = new Db(dbName + "pg1", new Server(mongoHost, 27017));
 			pgdb1.open(function (err, db1) {
@@ -34,29 +35,30 @@ describe('ZZ Final Cleanup', function () {
 				});
 			});
 		}
-		
-		var db = new Db(dbName, new Server(mongoHost, 27017));
-		db.open(function (err, db) {
-			if (err) {
-				console.log("Error - ", err);
-			}
-			db.dropDatabase();
-			var db1 = new Db(dbName + '1', new Server(mongoHost, 27017));
-			db1.open(function (err, db1) {
+		else {
+			var db = new Db(dbName, new Server(mongoHost, 27017));
+			db.open(function (err, db) {
 				if (err) {
 					console.log("Error - ", err);
 				}
-				db1.dropDatabase();
-				var db2 = new Db(dbName + '2', new Server(mongoHost, 27017));
-				db2.open(function (err, db2) {
+				db.dropDatabase();
+				var db1 = new Db(dbName + '1', new Server(mongoHost, 27017));
+				db1.open(function (err, db1) {
 					if (err) {
 						console.log("Error - ", err);
 					}
-					db2.dropDatabase();
-					done();
+					db1.dropDatabase();
+					var db2 = new Db(dbName + '2', new Server(mongoHost, 27017));
+					db2.open(function (err, db2) {
+						if (err) {
+							console.log("Error - ", err);
+						}
+						db2.dropDatabase();
+						done();
+					});
 				});
 			});
-		});
+		}
 	});
 
 	it('Should delete collections', function (done) {
