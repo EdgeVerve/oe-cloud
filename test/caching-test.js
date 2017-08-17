@@ -162,8 +162,6 @@ describe('Caching Test', function () {
         config.disablecaching = false;
         // Get a datasource
         dataSource = app.datasources[dsname];
-        // eslint-disable-next-line
-        console.log("\n\n===============>>", dataSource.name);
 
         var TestModelSchema = {
             'name': {
@@ -217,8 +215,6 @@ describe('Caching Test', function () {
 
     describe('Caching Test - when dblock off', function () {
         before('Run test', function (done) {
-            // eslint-disable-next-line
-            console.log("\n\n----------->>", dataSource.name);
             api.set('x-evproxy-db-lock', '0');
             stage1_creat(done);
         });
