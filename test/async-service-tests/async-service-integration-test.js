@@ -69,7 +69,9 @@ describe(chalk.blue('retry integration tests'), function () {
             } else {
               console.log('get response body:', body);
               expect(response.statusCode).to.equal(200);
-              expect(body).to.include(postData);
+              expect(body.balbla).to.equal(postData.blabla);
+              expect(body.status).to.equal(postData.status);
+              expect(body.amount).to.equal(postData.amount);
               done();
             }
           });
