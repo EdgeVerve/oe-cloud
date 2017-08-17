@@ -164,6 +164,7 @@ retry-service:
   script: 
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
+    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
     - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
@@ -174,8 +175,8 @@ retry-service:
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
     - cd test/async-service-tests/test-files
-    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:async-test .
-    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:async-test
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
+    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
     - mv -f oecloud2.yml oecloud.yml
     - docker stack deploy -c oecloud.yml ${STACK_NAME}
