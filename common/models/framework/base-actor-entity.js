@@ -63,8 +63,8 @@ module.exports = function (BaseActorEntity) {
         },
         isStatic: false,
         accepts: {
-          arg: 'activity',
-          type: 'object'
+          arg: 'seqNum',
+          type: 'string'
         },
         returns: {
           arg: 'response',
@@ -210,18 +210,16 @@ module.exports = function (BaseActorEntity) {
   };
   // should be async
   BaseActorEntity.prototype.reserveAmount = function (context) {
-    var journalEntity = context.journalEntity;
-    var journalEntityType = journalEntity._type;
-    var journalEntityVersion = journalEntity._version;
+    var journalEntityType = context.journalEntityType;
+    var journalEntityVersion = context.journalEntityVersion;
 
     var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
   };
 
   BaseActorEntity.prototype.nonAtomicAction = function (context, cb) {
-    var journalEntity = context.journalEntity;
-    var journalEntityType = journalEntity._type;
-    var journalEntityVersion = journalEntity._version;
+    var journalEntityType = context.journalEntityType;
+    var journalEntityVersion = context.journalEntityVersion;
     var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
     return cb();
@@ -386,16 +384,16 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  function createFilterObj(envelope, state, currentJournalEntity) {
+  function createFilterObj(envelope, state, currentJournalEntityId) {
     var filterBy = {};
     filterBy.modelName = envelope.modelName;
     filterBy.entityId = envelope.actorId;
     filterBy.seqNum = state.seqNum;
-    filterBy.journalId = currentJournalEntity.id;
+    filterBy.journalId = currentJournalEntityId;
     return filterBy;
   }
 
-  BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
+  BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
     var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
@@ -433,7 +431,7 @@ module.exports = function (BaseActorEntity) {
             log.debug('did not find journal instances in startup');
             return asyncCb();
           }
-          var filterBy = createFilterObj(envelope, state, currentJournalEntity);
+          var filterBy = createFilterObj(envelope, state, currentJournalEntityId);
           returnedInstances = filterResults(returnedInstances, filterBy);
           for (var i = 0; i < returnedInstances.length; i++) {
             var startingObj = { stateObj: state.stateObj, seqNum: state.seqNum };
@@ -459,13 +457,13 @@ module.exports = function (BaseActorEntity) {
     });
   };
 
-  BaseActorEntity.prototype.journalSaved = function (activity, options, cb) {
+  BaseActorEntity.prototype.journalSaved = function (seqNum, options, cb) {
     var self = this;
     var id = this.__data.id;
     var modelName = this.constructor.modelName;
     var setMessageStatus = function (currentEnvelope) {
       currentEnvelope.msg_queue.forEach(function (message) {
-        if (message.seqNum === activity.seqNum) {
+        if (message.seqNum === seqNum) {
           message.journalStatus = 'saved';
           return;
         }

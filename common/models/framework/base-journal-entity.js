@@ -13,6 +13,8 @@ module.exports = function (BaseJournalEntity) {
 
     async.eachSeries(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
+      var modelActivity = operationContext.activity;
+      operationContext.activity = modelActivity.toObject();
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
         if (err) {
           return callback(err);
@@ -21,7 +23,7 @@ module.exports = function (BaseJournalEntity) {
           error2.retriable = false;
           return callback(error2);
         }
-        operationContext.activity.seqNum = validationObj.seqNum;
+        modelActivity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
         return callback();
       });
@@ -39,6 +41,8 @@ module.exports = function (BaseJournalEntity) {
     delete operationContext.actorEntity;
     var options = operationContext.options;
     delete operationContext.options;
+    var modelActivity = operationContext.activity;
+    operationContext.activity = modelActivity.toObject();
     return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
@@ -47,7 +51,7 @@ module.exports = function (BaseJournalEntity) {
         error.retriable = false;
         return next(error);
       }
-      operationContext.activity.seqNum = validationObj.seqNum;
+      modelActivity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
@@ -70,11 +74,11 @@ module.exports = function (BaseJournalEntity) {
         } else if (actor.length === 0) {
           return callback(new Error('Invalid activity. No actor with id ' + activity.entityId));
         } else if (actor.length > 1) {
-          return callback(new Error('Something went wrong. Too many actors with id ' + activity.entityId));
+          return callback(new Error('Something went wrong. Too many ctors with id ' + activity.entityId));
         }
-        operationContext.activity = activity;
-        operationContext.journalEntity = instance.toObject();
-        operationContext.journalEntity._type = ctx.Model.definition.name;
+        operationContext.journalEntityId = instance.id;
+        operationContext.journalEntityVersion = instance._version;
+        operationContext.journalEntityType = ctx.Model.definition.name;
         operationContext.activity = activity;
         operationContext.actorEntity = actor[0];
         if (!options.actorInstancesMap) {
@@ -145,32 +149,6 @@ module.exports = function (BaseJournalEntity) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
-  /*
-  var writePending = function (ctx, next) {
-    var ignoreScopeOptions = {
-      ignoreAutoScope: true,
-      fetchAllScopes: true
-    };
-    var pendingModel = loopback.findModel('PendingJournal');
-    var pending = {};
-    pending.savedCtx = JSON.stringify(ctx.options);
-    pending.savedData = JSON.stringify(ctx.instance.__data);
-    pending.journalName = ctx.Model.modelName;
-    pending.instanceVersion = ctx.instance._version;
-    pending.status = 'pending';
-    pending.isFirstPending = true;
-
-    pendingModel.create(pending, ignoreScopeOptions, function (err, res) {
-      if (err) {
-        log.error(log.defaultContext(), err);
-      } else {
-        var error = new Error('Pending ' + res.id.toString());
-        error.status = 500;
-        next(error);
-      }
-    });
-  };
-  */
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance === false || !(ctx.instance)) {
@@ -225,7 +203,7 @@ module.exports = function (BaseJournalEntity) {
       var options = ctx.options;
       var actor = options.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity, options, function (err) {
+        actor.journalSaved(activity.seqNum, options, function (err) {
           if (err) {
             return cb(err);
           }
