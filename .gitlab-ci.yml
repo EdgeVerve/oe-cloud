@@ -195,6 +195,6 @@ retry-service:
     - sleep 60
     - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
     - docker stack rm ${APP_IMAGE_NAME}
-    - docker stack rm ${RETTY_STACK_NAME}
+    - docker stack rm ${RETRY_STACK_NAME}
   tags:
     - CEP_RUNNER
