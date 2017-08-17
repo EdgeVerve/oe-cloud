@@ -26,6 +26,7 @@ buildjob:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
+    - npm set progress=false
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
@@ -139,24 +140,23 @@ swarm:
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
     - docker stack rm ${APP_IMAGE_NAME}
-    - node test/actor-tests/prepareIntegrationTest.js
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
-    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    - cd test/actor-tests/test-files
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
+    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:testing
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
     - mv -f qqq2.yml qqq.yml
-    - sed 's/\$ROUTER/'"$ROUTER"'/g' qqq.yml > qqq2.yml
-    - mv -f qqq2.yml qqq.yml
-    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/actor-tests/actorIntegrationTest.js > test/actor-tests/actorIntegrationTest2.js
-    - mv -f test/actor-tests/actorIntegrationTest2.js test/actor-tests/actorIntegrationTest.js
+    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' ../actorIntegrationTest.js > ../actorIntegrationTest2.js
+    - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - docker stack ps ${APP_IMAGE_NAME}
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - export countElapsed=0
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - cd ../../..
     - time mocha test/actor-tests/actorIntegrationTest.js
-    - node test/actor-tests/cleanupIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
     - CEP_RUNNER

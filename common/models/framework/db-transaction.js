@@ -53,7 +53,7 @@ module.exports = function DBTransactionFn(DbTransaction) {
       async.each(txnEach, function dbTransactionAsyncEachTxnFn(t, callback) {
         if (t.opData) {
           var model = loopback.getModel(t.opData.modelName);
-          var conn = model.getDataSource().connector;
+          var conn = model.getDataSource(obj.options).connector;
           // defaulting to idName as id in case of rest (as at this moment no way to find idName for rest)
           var idName = conn.dataSource.name === 'rest' ? 'id' : conn.idName(t.opData.modelName);
           switch (t.opData.op) {
