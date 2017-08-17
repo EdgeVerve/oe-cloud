@@ -28,17 +28,14 @@ buildjob:
     - echo "Performing code style check..."
     - status_eslint=0
     - exit_status=0
-    #- git submodule init
-    #- git submodule update
-    - npm install --no-optional
-    # - time npm install eslint babel-eslint --no-optional
-    # - if npm run lint; then status_eslint=0; else status_eslint=1; fi
-    # - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-    # - if [ $exit_status == 1 ]; then exit $exit_status; fi
-    # - echo "Code style check done successfully"
-    # - time npm install --no-optional
-    - echo "node modules installed"
-    - echo "Building image..."
+    - npm set progress=false
+    - time npm install eslint babel-eslint --no-optional
+    - if npm run lint; then status_eslint=0; else status_eslint=1; fi
+    - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
+    - echo "Code style check done successfully"
+    - echo "Building oe-cloud image..."
+    - time npm install --no-optional
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull . & BUILD_PID=$!
     - mkdir -p /data/db
     - mongod --dbpath /data/db &

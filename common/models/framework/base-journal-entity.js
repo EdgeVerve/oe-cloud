@@ -13,8 +13,6 @@ module.exports = function (BaseJournalEntity) {
 
     async.eachSeries(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
-      var modelActivity = operationContext.activity;
-      operationContext.activity = modelActivity.toObject();
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
         if (err) {
           return callback(err);
@@ -23,7 +21,7 @@ module.exports = function (BaseJournalEntity) {
           error2.retriable = false;
           return callback(error2);
         }
-        modelActivity.seqNum = validationObj.seqNum;
+        operationContext.activity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
         return callback();
       });
@@ -41,8 +39,6 @@ module.exports = function (BaseJournalEntity) {
     delete operationContext.actorEntity;
     var options = operationContext.options;
     delete operationContext.options;
-    var modelActivity = operationContext.activity;
-    operationContext.activity = modelActivity.toObject();
     return actor.validateNonAtomicAction(operationContext, options, function (err, validationObj) {
       if (err) {
         return next(err);
@@ -51,7 +47,7 @@ module.exports = function (BaseJournalEntity) {
         error.retriable = false;
         return next(error);
       }
-      modelActivity.seqNum = validationObj.seqNum;
+      operationContext.activity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
       return next(null, startup);
     });
@@ -76,15 +72,16 @@ module.exports = function (BaseJournalEntity) {
         } else if (actor.length > 1) {
           return callback(new Error('Something went wrong. Too many ctors with id ' + activity.entityId));
         }
+        operationContext.activity = activity;
         operationContext.journalEntityId = instance.id;
         operationContext.journalEntityVersion = instance._version;
         operationContext.journalEntityType = ctx.Model.definition.name;
         operationContext.activity = activity;
         operationContext.actorEntity = actor[0];
-        if (!options.actorInstancesMap) {
-          options.actorInstancesMap = {};
+        if (!ctx.hookState.actorInstancesMap) {
+          ctx.hookState.actorInstancesMap = {};
         }
-        options.actorInstancesMap[activity.entityId] = actor[0];
+        ctx.hookState.actorInstancesMap[activity.entityId] = actor[0];
         operationContext.options = options;
         return callback(null, operationContext);
       });
@@ -201,9 +198,9 @@ module.exports = function (BaseJournalEntity) {
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
     async.each(activities, function (activity, cb) {
       var options = ctx.options;
-      var actor = options.actorInstancesMap[activity.entityId];
+      var actor = ctx.hookState.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity.seqNum, options, function (err) {
+        actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {
             return cb(err);
           }
