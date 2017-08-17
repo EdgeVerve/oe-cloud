@@ -16,6 +16,7 @@ var parentModelName = "SupplierModel";
 var childModelName = "AccountsModel";
 
 describe(chalk.blue('Decision table hasOne relation check'), function () {
+  this.timeout(20000);
   var parentModel;
   var childModel;
   before('Create DecisionTables and models for hasOne relation check', function (done) {

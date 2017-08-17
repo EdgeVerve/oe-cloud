@@ -16,6 +16,7 @@ var parentModelName = "CountryModel";
 var childModelName = "CityModel";
 
 describe(chalk.blue('Decision table belongsTo relation check'), function () {
+  this.timeout(20000);
   var parentModel;
   var childModel;
   before('Create DecisionTables and models for belopngsTo relation check', function (done) {

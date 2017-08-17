@@ -17,7 +17,7 @@ chai.use(require('chai-things'));
 var async = require('async');
 
 describe(chalk.blue('UIElement'), function () {
-  this.timeout(10000);
+  this.timeout(20000);
 
   var designationModelName = 'Designation';
   var salutationModelName = 'Salutation';

@@ -18,6 +18,7 @@ var decisionTableRules = ['RoutingRules', 'ElectricityBill', 'Holidays', 'Member
 var decision_table = {};
 
 describe(chalk.blue('Decision table evaluation'), function () {
+    this.timeout(20000);
     before('Create DecisionTables', function (done) {
         var datatext = fs.readFile(path.join(__dirname, 'business-rule-data', 'DecisionTable.json'), function (err, data){
             DTData = JSON.parse(data);
