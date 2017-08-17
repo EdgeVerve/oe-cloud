@@ -27,7 +27,7 @@ services:
       - router_network
   
   web:
-    image: ${REGISTRY}/${APP_IMAGE_NAME}:async-test
+    image: ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
     depends_on:
       - mongo
       - broadcaster
