@@ -338,7 +338,7 @@ describe(chalk.blue('Node-red test'), function () {
 });
 
 describe(chalk.blue('Access control to node-red test'), function () {
-
+    this.timeout(20000);
     var accessToken_developer;
     var accessToken_admin;
 

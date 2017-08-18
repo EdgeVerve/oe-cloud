@@ -23,6 +23,7 @@ var api = bootstrap.api;
 var async = require('async');
 var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var dbName = process.env.DB_NAME || 'db';
 
 var accessToken;
 
@@ -171,7 +172,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
     }
 
     function finishTestAndCheck(result) {
-      var url = 'mongodb://' + mongoHost + ':27017/db';
+      var url = 'mongodb://' + mongoHost + ':27017/' + dbName;
       MongoClient.connect(url, function (err, db) {
         if (err) return done(err);
         else {
@@ -200,6 +201,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
       });
     }
   });
+  
 
   after('check state is updated against DB', function (done) {
     var stateModel = loopback.getModel('State');
