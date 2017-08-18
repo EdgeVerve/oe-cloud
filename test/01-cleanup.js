@@ -19,13 +19,13 @@ describe('ZZ Final Cleanup', function () {
 	before('Delete collections', function (done) {
 
 		if (process.env.NODE_ENV == 'postgres') {
-			var pgdb1 = new Db(dbName + "pg1", new Server(mongoHost, 27017));
+			var pgdb1 = new Db(dbName + "1", new Server(mongoHost, 27017));
 			pgdb1.open(function (err, db1) {
 				if (err) {
 					console.log("Error - ", err);
 				}
 				db1.dropDatabase();
-				var pgdb2 = new Db(dbName + "pg2", new Server(mongoHost, 27017));
+				var pgdb2 = new Db(dbName + "2", new Server(mongoHost, 27017));
 				pgdb2.open(function (err, db2) {
 					if (err) {
 						console.log("Error - ", err);
