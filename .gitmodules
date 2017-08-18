@@ -1,4 +1,0 @@
-[submodule "nm"]
-	path = node_modules
-	url = http://10.73.97.24/oecloud.io/gourav-nm.git
-	branch = master

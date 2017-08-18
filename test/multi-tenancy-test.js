@@ -18,7 +18,7 @@ var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var dbName = process.env.DB_NAME || 'db';
-var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+
 // function GenerateModelName(model) {
 //    return model + Math.floor(Math.random() * (999));
 // }
@@ -32,11 +32,11 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     tenantId: 'tenant1',
     tenantName: 'tenant1'
   }, {
-      tenantId: 'tenant2',
-      tenantName: 'tenant2'
-    }];
+    tenantId: 'tenant2',
+    tenantName: 'tenant2'
+  }];
 
-  datasources = [{
+  var datasources = [{
     'host': mongoHost,
     'port': 27017,
     'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
@@ -47,17 +47,16 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     'user': 'admin',
     'connectionTimeout': 50000
   }, {
-      'host': mongoHost,
-      'port': 27017,
-      'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
-      'database': dbName + '2',
-      'password': 'admin',
-      'name': 'db2',
-      'connector': 'mongodb',
-      'user': 'admin',
-      'connectionTimeout': 50000
-    }];
-
+    'host': mongoHost,
+    'port': 27017,
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
+    'database': dbName + '2',
+    'password': 'admin',
+    'name': 'db2',
+    'connector': 'mongodb',
+    'user': 'admin',
+    'connectionTimeout': 50000
+  }];
 
   var user1 = {
     'username': 'user1',
@@ -75,17 +74,17 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     modelName: productModelName,
     dataSourceName: datasources[0].name
   }, {
-      modelName: 'BaseUser',
-      dataSourceName: datasources[0].name
-    }];
+    modelName: 'BaseUser',
+    dataSourceName: datasources[0].name
+  }];
 
   var mappings2 = [{
     modelName: productModelName,
     dataSourceName: datasources[1].name
   }, {
-      modelName: 'BaseUser',
-      dataSourceName: datasources[1].name
-    }];
+    modelName: 'BaseUser',
+    dataSourceName: datasources[1].name
+  }];
 
   function cleandb(done) {
     bootstrap.models.Tenant.destroyAll({}, bootstrap.defaultContext, function (err, res) {
