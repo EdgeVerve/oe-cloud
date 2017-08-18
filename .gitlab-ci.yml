@@ -19,7 +19,6 @@ before_script:
   - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - export ROUTER=cep_router
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
 
@@ -131,7 +130,6 @@ swarm:
   stage: post-build-test
   script:
     - export ROUTER="cep_router"
-    - export DB_NAME=${APP_IMAGE_NAME}_mongo
     - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${APP_IMAGE_NAME}
     - export exit_status="0"
