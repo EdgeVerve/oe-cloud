@@ -31,7 +31,7 @@ var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 describe('crypto Test', function() {
     var modelName = 'CryptoTest';
     var dsname = 'db';
-    var dbname = dsname;
+    var dbname = process.env.DB_NAME || dsname;
     var ccNo = "1234-5678-9012-3456";
 
     var TestModelSchema = {

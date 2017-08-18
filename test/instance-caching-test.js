@@ -44,7 +44,8 @@ var altContext = {
 };;
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
-var dbname = 'db';
+var dsName = 'db';
+var dbname = process.env.DB_NAME || 'db';
 var dataSource;
 var accessToken = null;
 
@@ -127,7 +128,7 @@ describe('Instance Caching Test', function () {
   var TestModelNoInstanceCache = null;
 
   before('login using admin', function fnLogin(done) {
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var sendData = {
       'username': 'admin',
       'password': 'admin'
@@ -150,7 +151,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var data = {
       'name': modelName,
       'base': 'BaseEntity',
@@ -188,7 +189,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model with No InstanceCache', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var data = {
       'name': modelNameNoInstanceCache,
       'base': 'BaseEntity',
@@ -226,7 +227,7 @@ describe('Instance Caching Test', function () {
   });
 
   describe('CRUD tests', function () {
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     it('Should NOT cache the Test instance after create', function (done) {
       var id = uuid.v4();
       var result1, result2;
@@ -616,7 +617,7 @@ it('Should clear instance cache after destroyAll', function (done) {
       function dbQuery_update(result) {
         var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
       if (dataSource.name === 'mongodb') {
-        MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
+        MongoClient.connect('mongodb://' + mongoHost + ':27017/' + dbname, function (err, db) {
           if (err) return done(err);
           else {
             db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {
