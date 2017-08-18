@@ -16,6 +16,7 @@ before_script:
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
+  - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - export ROUTER=cep_router
@@ -64,7 +65,7 @@ mongotest:
     - export NODE_ENV=docker
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
-    - export DB_NAME=${APP_IMAGE_NAME}_mongo
+    - export DB_NAME=${CI_PIPELINE_ID}_mongo
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
@@ -98,7 +99,7 @@ postgrestest:
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
     - export DB=postgres
-    - export DB_NAME=${APP_IMAGE_NAME}_pg
+    - export DB_NAME=${CI_PIPELINE_ID}_pg
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
