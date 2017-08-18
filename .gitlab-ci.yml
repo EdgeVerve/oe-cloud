@@ -26,6 +26,7 @@ before_script:
   - export NETWORK_NAME=${APP_IMAGE_NAME}
   - export APP_TAG=latest
   - export ROUTER=cep_router
+  
 
 buildjob:
   stage: build
