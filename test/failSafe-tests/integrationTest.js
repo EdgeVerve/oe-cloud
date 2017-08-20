@@ -16,6 +16,7 @@ var baseurl = "https://" + APP_IMAGE_NAME + "." + DOMAIN_NAME + "/api/";
 var modelPlural = 'Notes/';
 var eventHistoryPlural = 'EventsHistroy/';
 var headers = {'tenantId': 'default','Accept': 'application/json'};
+var eventHistoryRecords;
 var results;
 
 
@@ -43,6 +44,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
           console.log("success " + body.id);
           console.log(body);
           token = body.id;
+          eventHistoryRecords = {url: baseurl + eventHistoryPlural + '?access_token=' + token, strictSSL : false,json: true,'headers': headers};
           done();
         }
       });
@@ -75,7 +77,6 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
     });
   }
   var getServiceStatus = (callback) => {
-    var eventHistoryRecords = {url: baseurl + eventHistoryPlural + '?access_token=' + token, strictSSL : false,json: true,'headers': headers};
     initResults();
     console.log('getServiceStatus');
     request.get(eventHistoryRecords, function(error, response, records) {
