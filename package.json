@@ -56,6 +56,7 @@
     "mustache": "2.2.0",
     "mv": "^2.1.1",
     "node-async-locks": "^1.0.1",
+    "node-docker-api": "^1.1.16",
     "node-red": "0.16.2",
     "node-uuid": "1.4.7",
     "oe-explorer": "git+http://evgit/oecloud.io/oe-explorer.git#v0.9.0",
