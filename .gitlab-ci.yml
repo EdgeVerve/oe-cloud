@@ -205,12 +205,15 @@ swarmFailSafe:
   stage: post-build-test
   script:
     - export HAPROXY=10.73.96.214
+    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-fs
+    - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
     - docker stack rm ${APP_IMAGE_NAME}
     - sleep 10
     - node test/failSafe-tests/prepareIntegrationTest.js
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
-    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:latest .
+    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:latest
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/failSafe-tests/failsafe.yml > failSafe2.yml
     - mv -f failSafe2.yml test/failSafe-tests/failsafe.yml
     - docker stack deploy -c test/failSafe-tests/failsafe.yml ${APP_IMAGE_NAME}
