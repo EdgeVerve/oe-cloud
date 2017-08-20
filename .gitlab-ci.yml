@@ -150,7 +150,6 @@ swarm:
     - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - docker stack ps ${APP_IMAGE_NAME}
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - export countElapsed=0
     - export app_exit_status=0
@@ -159,5 +158,45 @@ swarm:
     - cd ../../..
     - time mocha test/actor-tests/actorIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
+  tags:
+    - CEP_RUNNER
+
+retry-service:
+  stage: post-build-test
+  script: 
+    - export ROUTER="cep_router"
+    - export HAPROXY=10.73.96.214
+    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
+    - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
+    - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
+    - docker stack rm ${STACK_NAME}
+    - docker stack rm ${RETRY_STACK_NAME}
+    - sleep 10
+    - cd test/async-service-tests/test-files
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
+    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
+    - mv -f oecloud2.yml oecloud.yml
+    - docker stack deploy -c oecloud.yml ${STACK_NAME}
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
+    - mv -f retry-service2.yml retry-service.yml
+    - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
+    - docker service logs -f ${STACK_NAME}_web &
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - cd ../../..
+    - sleep 60
+    - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
+    - docker stack rm ${APP_IMAGE_NAME}
+    - docker stack rm ${RETRY_STACK_NAME}
   tags:
     - CEP_RUNNER
