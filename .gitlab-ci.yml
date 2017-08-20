@@ -204,18 +204,15 @@ retry-service:
 swarmFailSafe:
   stage: post-build-test
   script:
-    - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
+    - export NETWORK_NAME=${STACK_NAME}
     - docker stack rm ${APP_IMAGE_NAME}
+    - sleep 10
     - node test/failSafe-tests/prepareIntegrationTest.js
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest .
     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/failSafe-tests/failsafe.yml > failSafe2.yml
     - mv -f failSafe2.yml test/failSafe-tests/failsafe.yml
-    - sed 's/\$ROUTER/'"$ROUTER"'/g' test/failSafe-tests/failsafe.yml > failSafe2.yml
-    - mv -f failSafe2.yml test/failSafe-tests/failsafe.yml
-    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' test/failSafe-tests/integrationTest.js > test/failSafe-tests/integrationTest2.js
-    - mv -f test/failSafe-tests/integrationTest2.js test/failSafe-tests/integrationTest.js
     - docker stack deploy -c test/failSafe-tests/failsafe.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)

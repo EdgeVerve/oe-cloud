@@ -1,13 +1,13 @@
 var request = require('request');
 var async = require('async');
 //var uuid = require('node-uuid');
-// var chai = require('chai');
-// var expect = chai.expect;
+var chai = require('chai');
+var expect = chai.expect;
 var chalk = require('chalk');
 var exec = require('child_process').exec;
 
-var APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
-var  DOMAIN_NAME = process.env.DOMAIN_NAME;
+const APP_IMAGE_NAME = process.env.APP_IMAGE_NAME;
+const  DOMAIN_NAME = process.env.DOMAIN_NAME;
 const SERVICE_NAME = APP_IMAGE_NAME + "_web";
 
 //var baseurl = "https://$EVFURL/api/";
@@ -40,6 +40,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
           console.log("error:", error || body.error);
           done(error || body.error);
         } else {
+          expect(response.statusCode).to.equal(200);
           console.log("success " + body.id);
           console.log(body);
           token = body.id;
@@ -74,6 +75,19 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       }
     });
   }
+  var getServiceStatus = (callback) => {
+    initResults();
+    console.log('getServiceStatus');
+    request.get(eventHistoryRecords, function(error, response, records) {
+      records.forEach((eventHistoryRecord) => {
+        results[eventHistoryRecord.status]++;
+      }, this); 
+      if (results.ToBeRecovered > 0 || results.InRecovery > 0 ) 
+        setTimeout(getServiceStatus, 100, callback);
+      else 
+        callback();
+    });
+  }
 
   var initResults = () => {
     results = {};
@@ -95,7 +109,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
             var eventHistoryRecords = body;
 
             eventHistoryRecords.forEach((eventHistoryRecord) => {
-              console.log("Tring to delete " + eventHistoryRecord.id);
+              console.log("Trying to delete " + eventHistoryRecord.id);
               request.delete(
                 baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
                 function(error, response, body) {
@@ -113,37 +127,31 @@ describe(chalk.blue('Failsafe - integrationTest'), function() {
       scaleServiceTo5: (callback) => {
         scaleTo(5, callback);
       },
-      initiateNodes: function(callback) {
+      initiateNodes: (callback) => {
         console.log('create 50 note records');
-        for (var i=0; i<100; i++){
-          var createUrl = baseurl + modelPlural + i + '?access_token=' + token;
-          request.post({url: createUrl,json: {}, 'headers': headers, method: 'POST'}, function (error, r, body) { });
-        }
-        callback();    
+        var createUrl = baseurl + modelPlural + i + '?access_token=' + token;
+        async.times(100, (n, next) => {
+            request.post({url: createUrl,json: {}, 'headers': headers, method: 'POST'}, function (error, r, body) {
+              expect(r.statusCode).to.equal(200);
+              return next(body.id);
+            });
+        }, (err, results) => {
+          if(err) {
+            return done(err);
+          }
+          return callback();
+        });
       },
       scaleServiceCountDown: (callback) => {
         scaleTo(3, callback);
       }, 
-      getServiceStatus: (callback) => {
-        initResults();
-        console.log('getServiceStatus');
-        request.get(eventHistoryRecords, function(error, response, records) {
-          records.forEach((eventHistoryRecord) => {
-            results[eventHistoryRecord.status]++;
-          }, this); 
-          if (results.ToBeRecovered > 0 || results.InRecovery > 0 ) 
-            setTimeout(getServiceStatus, 100, callback);
-          else 
-            callback();
-        });
-      }
+      getServiceStatus: getServiceStatus
     }, function(err) {
         console.log(results);
         if (results.RecoveryFinished == 2 )
           done();
         else 
           done(new Error ("Not All dead hosts were recoverd"));
-        
     });
   });
 });
