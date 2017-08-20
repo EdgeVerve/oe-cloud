@@ -202,7 +202,7 @@ retry-service:
     - CEP_RUNNER
 
 swarmFailSafe:
-  stage: test
+  stage: post-build-test
   script:
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
