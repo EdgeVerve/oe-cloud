@@ -78,10 +78,10 @@ module.exports = function (BaseJournalEntity) {
         operationContext.journalEntityType = ctx.Model.definition.name;
         operationContext.activity = activity;
         operationContext.actorEntity = actor[0];
-        if (!options.actorInstancesMap) {
-          options.actorInstancesMap = {};
+        if (!ctx.hookState.actorInstancesMap) {
+          ctx.hookState.actorInstancesMap = {};
         }
-        options.actorInstancesMap[activity.entityId] = actor[0];
+        ctx.hookState.actorInstancesMap[activity.entityId] = actor[0];
         operationContext.options = options;
         return callback(null, operationContext);
       });
@@ -198,9 +198,9 @@ module.exports = function (BaseJournalEntity) {
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
     async.each(activities, function (activity, cb) {
       var options = ctx.options;
-      var actor = options.actorInstancesMap[activity.entityId];
+      var actor = ctx.hookState.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity, options, function (err) {
+        actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {
             return cb(err);
           }
