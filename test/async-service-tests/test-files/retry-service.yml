@@ -17,7 +17,7 @@ services:
       RETRIABLE_STATUS_CODES: "[503,500]"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
     networks:
-      - async-service_network
+      - ${RETRY_NETWORK_NAME}
       - router_network
 
   rabbitmq:
@@ -26,7 +26,7 @@ services:
       VIRTUAL_HOST: "https://rabbitmq.oecloud.local,rabbitmq.oecloud.local"
       SERVICE_PORTS: "15672"
     networks:
-      - async-service_network
+      - ${RETRY_NETWORK_NAME}
       - router_network
 
   server:
@@ -48,10 +48,10 @@ services:
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       RETRIABLE_STATUS_CODES: "[503,500]"
     networks:
-      - async-service_network
+      - ${RETRY_NETWORK_NAME}
       - router_network
 
 networks:
-  async-service_network:
+  $RETRY_NETWORK_NAME:
   router_network:
     external: true
