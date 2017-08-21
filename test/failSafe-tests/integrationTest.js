@@ -103,14 +103,14 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
           console.log('Recived event history records');
           console.log(body);
           var eventHistoryRecords = body;
-          astnc.each(eventHistoryRecords, (eventHistoryRecord, cb) => {
+          async.each(eventHistoryRecords, (eventHistoryRecord, cb) => {
             console.log('Trying to delete ' + eventHistoryRecord.id);
             request.delete(
               baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
               function (error, response, body) {
                 if (error || body.error) {
                   console.log('error in deleting event-history record:', error || body.error);
-                  return cb(err);
+                  return cb(error);
                 }
                 console.log('Delete success' );
                 return cb();
