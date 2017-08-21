@@ -36,7 +36,7 @@ module.exports = function JWTAssertionFn(options) {
       var tempConfig = JSON.parse(process.env.JWT_CONFIG);
       jwtConfig = tempConfig && typeof tempConfig === 'object' ? tempConfig : jwtConfig;
     } catch (e) {
-      log.error(e);
+      log.error(options, e);
     }
   }
   const cachedTokens = {};
