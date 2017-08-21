@@ -1,0 +1,14 @@
+[
+  {
+    "path": "./",
+    "enabled": true
+  },
+  {
+    "path": "oe-component-sample-test",
+    "enabled": true
+  },
+  {
+    "path": "oe-component-non-existent",
+    "enabled": true
+  }
+]
