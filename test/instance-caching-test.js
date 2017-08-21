@@ -117,7 +117,7 @@ function mongoDeleteById(id, newModelName, cb) {
       "connectString": oracleHost + ":" + oraclePort + "/" + oracleService
     }, function (err, connection) {
       if (err) {
-        return done(err);
+        return cb(err);
       }
       connection.execute(
         "DELETE from \"" + loopbackModelNoCache.modelName.toUpperCase() + "\"  WHERE " + idFieldName + " = '" + id + "'",
