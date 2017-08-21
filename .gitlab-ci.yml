@@ -216,6 +216,8 @@ oracletest:
     - docker stack rm ${STACK_NAME}
     - node server/oracle-utility.js
     - exit $exit_status
+  tags:
+    - CEP_RUNNER
 
 retry-service:
   stage: post-build-test
