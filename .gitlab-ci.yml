@@ -172,6 +172,8 @@ oracletest:
   script:
     - export APP_TAG=oracle
     - export NODE_ENV=oracle
+    - export POSTGRES_HOST="10.73.53.144"
+    - export MONGO_HOST="10.73.53.144"
     - export ORACLE_HOST=10.73.53.144
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
