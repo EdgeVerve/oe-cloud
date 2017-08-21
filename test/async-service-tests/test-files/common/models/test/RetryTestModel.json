@@ -1,0 +1,27 @@
+{
+    "name": "RetryTestModel",
+    "base": "BaseEntity",
+    "strict": false,
+    "plural": "RetryTestModel",
+    "idInjection": true,
+    "options": {
+        "validateUpsert": true
+    },
+    "properties": {
+        "blabla": {
+            "type": "string",
+            "id": true
+        },
+        "amount": {
+            "type": "number"
+        },
+        "status": {
+            "type": "string"
+        }
+    },
+    "validations": [],
+    "methods": {},
+    "mixins": {
+        "RetrySupportMixin": true
+    }
+}

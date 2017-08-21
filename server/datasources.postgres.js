@@ -6,6 +6,7 @@
  */
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 // var mongoHost = process.env.MONGO_HOST || 'localhost';
+var dbName = process.env.DB_NAME || 'db';
 module.exports = {
   'nullsrc': {
     'name': 'nullsrc',
@@ -18,8 +19,8 @@ module.exports = {
   'db': {
     'host': postgresHost,
     'port': 5432,
-    'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/db',
-    'database': 'db',
+    'url': 'postgres://postgres:postgres@' + postgresHost + ':5432/' + dbName,
+    'database': dbName,
     'password': 'postgres',
     'name': 'db',
     'connector': 'loopback-connector-postgresql',

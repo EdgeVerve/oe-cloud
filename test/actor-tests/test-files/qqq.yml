@@ -27,7 +27,7 @@ services:
       - router_network
   
   web:
-    image: $REGISTRY/${APP_IMAGE_NAME}:latest
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:testing
     depends_on:
       - mongo
       - broadcaster
@@ -42,7 +42,6 @@ services:
       FORCE_SSL: "yes"
       CONSISTENT_HASH: "true"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
-      DB_NAME: ${DB_NAME}
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
       NETWORK_INTERFACE_NAME: "eth2"
