@@ -5,6 +5,7 @@
  *
  */
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var dbName = process.env.DB_NAME || 'db';
 module.exports = {
   'nullsrc': {
     'name': 'nullsrc',
@@ -17,8 +18,8 @@ module.exports = {
   'db': {
     'host': mongoHost,
     'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/db',
-    'database': 'db',
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName,
+    'database': dbName,
     'name': 'db',
     'connector': 'mongodb',
     'connectionTimeout': 50000

@@ -326,7 +326,7 @@ describe(chalk.blue('Composite Model test'), function () {
 
 
 
-    xit('Composite Model test - 1 customer record should be updated, 1 address recourd should be updated', function (done) {
+    it('Composite Model test - 1 customer record should be updated, 1 address recourd should be updated', function (done) {
         var compositeModel = loopback.getModel('CompositeModel', callContext);
         compositeModel.create({
             'Customer': [{
@@ -369,7 +369,7 @@ describe(chalk.blue('Composite Model test'), function () {
         });
     });
 
-    xit('should get the customer based on where condition', function (done) {
+    it('should get the customer based on where condition', function (done) {
         var customer = loopback.getModel('Customer', callContext);
         customer.find({
             where: {
@@ -383,7 +383,7 @@ describe(chalk.blue('Composite Model test'), function () {
 
     });
 
-    xit('should get the CustomerAddress based on where condition', function (done) {
+    it('should get the CustomerAddress based on where condition', function (done) {
         var customerAddress = loopback.getModel('CustomerAddress', callContext);
         customerAddress.find({
             where: {

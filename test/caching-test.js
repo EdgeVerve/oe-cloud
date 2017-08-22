@@ -8,7 +8,7 @@
  * This test is for unit-testing the query result caching feature in the framework.
  * The test involves creating a test model, inserting a record into it, fetching the 
  * record (so that it caches), deleting the record from the database by directly accessing
- * the DB (bypassing the framework, so that cache is not ecicted), fetching the 
+ * the DB (bypassing the framework, so that cache is not evicted), fetching the 
  * record again to see that the records are still fetched (from cache).
  * 
  *  Author: Ajith Vasudevan
@@ -35,7 +35,7 @@ describe('Caching Test', function () {
     var modelName = 'CachingTest';
     var TestModel = null;
     var dsname = 'db';
-    var dbname = dsname;
+    var dbName = process.env.DB_NAME || dsname;
     
     var result1, result2 = null;
     var id, dataSource; 
@@ -88,7 +88,7 @@ describe('Caching Test', function () {
     function stage3_updateDB (result, done) {
         result1 = result;
         if (dataSource.name === 'mongodb') {
-            MongoClient.connect('mongodb://'+mongoHost+':27017/db', function (err, db) {
+            MongoClient.connect('mongodb://'+mongoHost+':27017/' + dbName, function (err, db) {
                 if (err) return done(err);
                 else {
                     db.collection(modelName).update({ "_id": id }, {$set: { name: "value2" }}, { upsert: true }, function (err){
@@ -100,7 +100,7 @@ describe('Caching Test', function () {
         } else {
             var loopbackModelNoCache = loopback.getModel(modelName);
             var idFieldName =  loopbackModelNoCache.definition.idName();
-            var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
+            var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbName;
             var pg = require('pg');
             var client = new pg.Client(connectionString);
             client.connect(function (err) {
