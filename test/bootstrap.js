@@ -23,6 +23,7 @@ var expect = chai.expect;
 //by default event history mixin is disabled
 //unless it is set true in env variable
 process.env.ENABLE_EVENT_HISTORY = true;
+process.env.JWT_CONFIG = "{\"issuer\": \"mycompany.com\",\"audience\": \"mycompany.net\",\"secretOrKey\":\"secret\",\"keyToVerify\":\"client_id\"}";
 var app = evapp.loopback();
 app.locals.enableJwt = true;
 
