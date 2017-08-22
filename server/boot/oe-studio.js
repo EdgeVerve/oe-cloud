@@ -225,7 +225,7 @@ function setDesignerPath(DesignerPath, server) {
       return d.path.split('/')[1];
     });
     var baseModel = util.checkModelWithPlural(req.app, model);
-    var actualModel = loopback.findModel(baseModel, req.callContext);
+    var actualModel = loopback.findModel(baseModel);
     var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
     res.send(result);
   });

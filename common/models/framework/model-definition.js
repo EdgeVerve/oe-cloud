@@ -98,7 +98,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             collection: modeldefinition.variantOf
           };
         }
-      }      else {
+      } else {
         let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
         if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
           modeldefinition.mongodb = {
@@ -164,6 +164,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');
         err1.retriable = false;
         return next(err1);
+      }
+      if (modeldefinition.variantOf) {
+        modeldefinition.plural = baseModel.pluralModelName;
       }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
@@ -273,27 +276,27 @@ module.exports = function ModelDefintionFn(modelDefinition) {
                   base: modeldefinition.name
                 }
               }, ctx.options,
-              function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
-                if (err) {
-                  next();
-                  log.warn(ctx.options, {
-                    'message': 'WARNING',
-                    'cause': err,
-                    'details': ''
-                  });
-                  return;
-                }
-                if (modeldefinitions && modeldefinitions.length) {
-                  modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
-                    // For each Model defined in the DB which has the current model as base ...
-                    util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
-                      log.debug(ctx.options, 'emitting event model available ', md.name);
-                      modelDefinition.events.emit('model-' + md.name + '-available');
-                      doAutoUpdate(modelDefinition.app, md, ctx.options);
+                function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
+                  if (err) {
+                    next();
+                    log.warn(ctx.options, {
+                      'message': 'WARNING',
+                      'cause': err,
+                      'details': ''
                     });
-                  });
-                }
-              });
+                    return;
+                  }
+                  if (modeldefinitions && modeldefinitions.length) {
+                    modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
+                      // For each Model defined in the DB which has the current model as base ...
+                      util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
+                        log.debug(ctx.options, 'emitting event model available ', md.name);
+                        modelDefinition.events.emit('model-' + md.name + '-available');
+                        doAutoUpdate(modelDefinition.app, md, ctx.options);
+                      });
+                    });
+                  }
+                });
             });
           }
         }
