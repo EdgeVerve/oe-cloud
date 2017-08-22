@@ -167,6 +167,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       }
       if (modeldefinition.variantOf) {
         modeldefinition.plural = baseModel.pluralModelName;
+        modeldefinition.name = baseModel.name;
       }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
