@@ -123,7 +123,7 @@ module.exports = function startNodeRed(server, callback) {
     var globalContext = settings.functionGlobalContext;
     keys.forEach(function addToGlobalContext(key) {
       if (clientGlobalContext[key]) {
-        globalContext[key] = require(key);
+        globalContext[key.replace('.', '_')] = require(key);
       }
     });
   }
