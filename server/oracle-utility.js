@@ -5,70 +5,73 @@
  *
  */
 
-//Atul : Oracle utility to create users with all the required permissions.
+/* eslint-disable */
+
+// Atul : Oracle utility to create users with all the required permissions.
 // This file should be run before CI/CD is started 
 // This will create user based on CI_PROJECT_NAMESPACE (which is user name) and CI_PROJECT_NAME
+
+// ORACLE_HOST
+// ORACLE_SYSUSER
+// ORACLE_SYSPASSWORD
+// ORACLE_SID
+// CI_PROJECT_NAME
+// CI_PROJECT_NAMESPACE
 
 var oracledb = require('oracledb');
 var async = require('async');
 var oracleHost = process.env.ORACLE_HOST || 'localhost';
-//ORACLE_HOST
-//ORACLE_SYSUSER
-//ORACLE_SYSPASSWORD
-//ORACLE_SID
+var oraclePort = process.env.ORACLE_PORT || 1521;
 
-//CI_PROJECT_NAME
-//CI_PROJECT_NAMESPACE
 var oracleConnectSettings = {
-  "password": process.env.ORACLE_SYSPASSWORD || "manager1",
-  "user": process.env.ORACLE_SYSUSER || "sys",
-  "connectString": oracleHost + ":1522/" + (process.env.ORACLE_SID || "orclpdb.ad.infosys.com")
+  'password': process.env.ORACLE_SYSPASSWORD || 'manager1',
+  'user': process.env.ORACLE_SYSUSER || 'sys',
+  'connectString': oracleHost + ':' + oraclePort + '/' + (process.env.ORACLE_SID || 'orclpdb.ad.infosys.com')
 };
 
-var userName = process.env.CI_PROJECT_NAMESPACE.toUpperCase() + "-" + (process.env.CI_PROJECT_NAME || "oecloud").toUpperCase();
+var userName = process.env.CI_PROJECT_NAMESPACE.toUpperCase() + '-' + (process.env.CI_PROJECT_NAME || 'oecloud').toUpperCase();
 var password = process.env.CI_PROJECT_NAMESPACE.toLowerCase();
 
 var grants = [
-  "CREATE VIEW",
-  "ALTER SESSION",
-  "CREATE SESSION",
-  "CREATE SEQUENCE",
-  "CREATE SYNONYM",
-  "CREATE TABLE",
-  "UNLIMITED TABLESPACE"
+  'CREATE VIEW',
+  'ALTER SESSION',
+  'CREATE SESSION',
+  'CREATE SEQUENCE',
+  'CREATE SYNONYM',
+  'CREATE TABLE',
+  'UNLIMITED TABLESPACE',
+  'CREATE PROCEDURE'
 ];
 
 function createUser(connection, cb) {
-
   var sql = 'alter session set "_ORACLE_SCRIPT"=true';
   connection.execute(sql, function (e, r) {
     if (e) {
-      console.error("Ignoring error of alter session. UserName : " + userName + " Error :" + e);
+      console.error('Ignoring error of alter session. UserName : ' + userName + ' Error :' + e);
     }
     console.log(sql, ' ......... ok');
     var sql = 'CREATE USER "' + userName + '" IDENTIFIED BY ' + password;
 
     connection.execute(sql, function (err, result) {
       if (err) {
-        throw new Error("Unable to create user " + userName + " Error :" + err);
+        throw new Error('Unable to create user ' + userName + ' Error :' + err);
       }
       console.log(sql, ' ......... ok');
       async.each(grants, function (g, callback) {
-        var sql = "GRANT " + g + ' to "' + userName + '"';
+        var sql = 'GRANT ' + g + ' to "' + userName + '"';
 
         connection.execute(sql, function (err2, result2) {
           if (err2) {
-            throw new Error("Unable to execute grant " + sql);
+            throw new Error('Unable to execute grant ' + sql);
           }
           console.log(sql, ' ......... ok');
           return callback();
         });
       }, function (err) {
-        console.log("User " + userName + " Created successfully");
+        console.log('User ' + userName + ' Created successfully');
         return cb();
       });
     });
-
   });
 }
 
@@ -82,32 +85,32 @@ function dropTables(cb) {
     oracleConnectSettings2,
     function (err, connection) {
       if (err) {
-        throw new Error("Unable to connect to Oracle Database " + JSON.stringify(oracleConnectSettings));
+        throw new Error('Unable to connect to Oracle Database ' + JSON.stringify(oracleConnectSettings));
       }
       var sql = "select 'drop table \"' || table_name || '\"' from all_tables where owner = '" + userName + "'";
 
       connection.execute(sql, function (err, result) {
         if (err) {
-          throw new Error("Unable to find tables " + userName + " Error :" + err);
+          throw new Error('Unable to find tables ' + userName + ' Error :' + err);
         }
         connection.execute(sql, function (err2, result2) {
           if (err2) {
-            throw new Error("Unable to execute droping of table " + sql);
+            throw new Error('Unable to execute droping of table ' + sql);
           }
-          if (!result2 || !result2.rows || result2.rows.length == 0) {
+          if (!result2 || !result2.rows || result2.rows.length === 0) {
             return cb();
           }
           async.each(result2.rows, function (row, callback) {
             var sql = row[0];
             connection.execute(sql, function (err2, result2) {
               if (err2) {
-                throw new Error("Unable to drop table\nERROR : " + err2 + "\nSQL : " + sql);
+                throw new Error('Unable to drop table\nERROR : ' + err2 + '\nSQL : ' + sql);
               }
               console.log(sql, ' ......... ok');
               return callback();
             });
           }, function (err) {
-            console.log("Tables of user " + userName + " dropped successfully");
+            console.log('Tables of user ' + userName + ' dropped successfully');
             return cb();
           });
         });
@@ -119,9 +122,9 @@ oracledb.getConnection(
   oracleConnectSettings,
   function (err, connection) {
     if (err) {
-      throw new Error("Unable to connect to Oracle Database " + JSON.stringify(oracleConnectSettings));
+      throw new Error('Unable to connect to Oracle Database ' + JSON.stringify(oracleConnectSettings));
     }
-    var sql = "select username, user_id from dba_users where common = 'NO' and username = '" + userName + "'";
+    var sql = "select username, user_id from dba_users where username = '" + userName + "'";
     console.log(sql);
     connection.execute(sql,
       function (err, result) {
@@ -135,8 +138,7 @@ oracledb.getConnection(
             }
             return process.exit();
           });
-        }
-        else {
+        } else {
           dropTables(function (err) {
             if (err) {
               return process.exit(1);

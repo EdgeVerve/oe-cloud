@@ -172,8 +172,10 @@ function setDesignerPath(DesignerPath, server) {
 
     var r = {};
     for (var p in actualModel.definition.properties) {
-      r[p] = Object.assign({}, actualModel.definition.properties[p]);
-      r[p]["type"] = (actualModel.definition.properties[p] && actualModel.definition.properties[p].type && actualModel.definition.properties[p].type.name) || 'object';
+      if (actualModel.definition.properties.hasOwnProperty(p)) {
+        r[p] = Object.assign({}, actualModel.definition.properties[p]);
+        r[p].type = (actualModel.definition.properties[p] && actualModel.definition.properties[p].type && actualModel.definition.properties[p].type.name) || 'object';
+      }
     }
     return res.json(r);
   });
@@ -240,7 +242,7 @@ function setDesignerPath(DesignerPath, server) {
       return d.path.split('/')[1];
     });
     var baseModel = util.checkModelWithPlural(req.app, model);
-    var actualModel = loopback.findModel(baseModel);//, req.callContext);
+    var actualModel = loopback.findModel(baseModel);
     var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
     res.send(result);
   });
