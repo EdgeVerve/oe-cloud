@@ -242,7 +242,7 @@ retry-service:
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
     - mv -f oecloud2.yml oecloud.yml
     - docker stack deploy -c oecloud.yml ${STACK_NAME}
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
+    - sed 's/\$RETRY_NETWORK_NAME/'"$RETRY_NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
     - mv -f retry-service2.yml retry-service.yml
     - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
     - docker service logs -f ${STACK_NAME}_web &
