@@ -16,7 +16,7 @@ var dbm = require('../lib/db-migrate-helper');
 var modelDefModel = app.models.ModelDefinition;
 describe(chalk.blue('Database Migration'), function() {
   // To test this test case individually from mocha enable the below timeout
-  //this.timeout(1000000);
+  this.timeout(20000);
   describe(chalk.green('Migration Switch'), function(){
 
     before('Add -m switch to command args', function(done) {
