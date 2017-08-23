@@ -466,6 +466,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             }
           }
           propDetails.type = 'array';
+        } 
+        if (propDetails.refcodetype) {
+          associations.push(loopback.findModel(propDetails.refcodetype, options));
         }
         if (propDetails.enumtype) {
           var enumModel = model.app.models[propDetails.enumtype];
