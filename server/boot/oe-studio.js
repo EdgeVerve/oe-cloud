@@ -164,6 +164,23 @@ function setDesignerPath(DesignerPath, server) {
   });
 
 
+  // get properties of model
+  server.get(appconfig.designer.mountPath + '/properties/:model', function designerRoutes(req, res) {
+    var model = req.params.model;
+    var baseModel = util.checkModelWithPlural(req.app, model);
+    var actualModel = loopback.findModel(baseModel, req.callContext);
+
+    var r = {};
+    for (var p in actualModel.definition.properties) {
+      if (actualModel.definition.properties.hasOwnProperty(p)) {
+        r[p] = Object.assign({}, actualModel.definition.properties[p]);
+        r[p].type = (actualModel.definition.properties[p] && actualModel.definition.properties[p].type && actualModel.definition.properties[p].type.name) || 'object';
+      }
+    }
+    return res.json(r);
+  });
+
+
   server.get(appconfig.designer.mountPath + '/routes/:model', function designerRoutes(req, res) {
     var model = req.params.model;
     var remotes = server.remotes();
@@ -225,7 +242,7 @@ function setDesignerPath(DesignerPath, server) {
       return d.path.split('/')[1];
     });
     var baseModel = util.checkModelWithPlural(req.app, model);
-    var actualModel = loopback.findModel(baseModel, req.callContext);
+    var actualModel = loopback.findModel(baseModel);
     var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
     res.send(result);
   });

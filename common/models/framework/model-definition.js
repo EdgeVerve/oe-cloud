@@ -165,6 +165,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         err1.retriable = false;
         return next(err1);
       }
+      if (modeldefinition.variantOf) {
+        modeldefinition.plural = baseModel.pluralModelName;
+        modeldefinition.name = baseModel.modelName;
+      }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
   };
