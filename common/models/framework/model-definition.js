@@ -470,7 +470,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             }
           }
           propDetails.type = 'array';
-        } 
+        }
         if (propDetails.refcodetype) {
           associations.push(loopback.findModel(propDetails.refcodetype, options));
         }
