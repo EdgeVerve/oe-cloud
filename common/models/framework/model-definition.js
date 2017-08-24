@@ -165,6 +165,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         err1.retriable = false;
         return next(err1);
       }
+      if (modeldefinition.variantOf) {
+        modeldefinition.plural = baseModel.pluralModelName;
+        modeldefinition.name = baseModel.modelName;
+      }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
   };
@@ -265,6 +269,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           if (!modeldefinition.filebased) {
             util.createModel(modelDefinition.app, modeldefinition, ctx.options, function dbModelsMdAfterSaveModelDefFindModelCreateCb() {
               modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
+              doAutoUpdate(modelDefinition.app, modeldefinition, ctx.options);
               // Find all child models and re-create them so that the new base properties
               // are reflected in them
               modelDefinition.find({
@@ -288,6 +293,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
                     util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
                       log.debug(ctx.options, 'emitting event model available ', md.name);
                       modelDefinition.events.emit('model-' + md.name + '-available');
+                      doAutoUpdate(modelDefinition.app, md, ctx.options);
                     });
                   });
                 }
@@ -300,6 +306,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
       util.createModel(modelDefinition.app, modeldefinition, ctx.options, function dbModelMdAfterSaveMdFileBasedCreateCb() {
         log.debug(ctx.options, 'emitting event model available ', modeldefinition.name);
         modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
+        doAutoUpdate(modelDefinition.app, modeldefinition, ctx.options);
         // Find all child models and re-create them so that the new base properties
         // are reflected in them
         modelDefinition.find({
@@ -321,6 +328,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
               util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdFileBasedCreateMdFindCreateForEachCreateModelCb() {
                 log.debug(ctx.options, 'emitting event model available ', md.name);
                 modelDefinition.events.emit('model-' + md.name + '-available');
+                doAutoUpdate(modelDefinition.app, md, ctx.options);
               });
             });
           }
@@ -330,6 +338,35 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     }
     next();
   };
+
+  function doAutoUpdate(app, modeldefinition, options) {
+    var model = loopback.findModel(modeldefinition.name, options);
+    var ds = model.getDataSource(options);
+    log.debug(options, 'Performing autoupdate on model "', modeldefinition.name, '"');
+    if (ds) {
+      ds.autoupdate(model.modelName, function (err, result) {
+        if (err) {
+          log.error(options, 'ds.autoupdate for model="', modeldefinition.name, '" Error: ', err);
+        }
+        // Checking for history model
+        if (model.definition.settings.mixins && model.definition.settings.mixins.HistoryMixin && model._historyModel) {
+          var historyModel = model._historyModel;
+          var histDs = historyModel.getDataSource(options);
+          if (histDs) {
+            histDs.autoupdate(historyModel.modelName, function (err, result) {
+              if (err) {
+                log.error(options, 'ds.autoupdate for history model="', historyModel.modelName, '" Error: ', err);
+              }
+            });
+          } else {
+            log.warn(options, 'Unable to get datasource for history model - ', historyModel.name);
+          }
+        }
+      });
+    } else {
+      log.warn(options, 'Unable to get datasource for model - ', modeldefinition.name);
+    }
+  }
 
   /**
    * This function returns the plural form of specified input word

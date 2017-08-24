@@ -20,7 +20,6 @@ var async = require('async');
 var fs = require('fs');
 var expect = chai.expect;
 //var accessToken;
-
 var app = evapp.loopback();
 app.locals.enableJwt = true;
 
@@ -28,7 +27,7 @@ options.clientAppRootDir = __dirname;
 var basePath = app.get('restApiRoot');
 app.locals.apphome = __dirname;
 app.set('disableNodered', false);
-evapp.boot(app, options, function () {
+evapp.boot(app, options, function() {
     app.start();
     app.emit('EVstarted');
 });
@@ -56,20 +55,20 @@ function createAccessToken(username, callback) {
         where: {
             username: username
         }
-    }, defaultContext, function (err, userRec) {
+    }, defaultContext, function(err, userRec) {
         if (err) {
             callback(err, null);
         } else if (!userRec) {
             callback(new Error('user not found '), null);
         } else {
-            userRec.createAccessToken(User.DEFAULT_TTL, defaultContext, function (err, token) {
+            userRec.createAccessToken(User.DEFAULT_TTL, defaultContext, function(err, token) {
                 callback(err, token ? token.id : null);
             });
         }
     });
 }
 
-var createJWToken = function (user) {
+var createJWToken = function(user) {
     if (app.locals.enableJwt) {
         var obj = {
             'username': user.username,
@@ -109,22 +108,31 @@ if (config && config.disableWorkflow === true) {
 
 if (config) {
     config.enableDesigner = true;
+    config.designer.assetPath = ['client/bower_components/images'];
 }
 
-/* When tests are run in git-lab, the designer is not installed and 
- * none of the designer routes are setup. We create dummy directory before boot
+/* When tests are run in git-lab, the oe-studio is not installed and 
+ * none of the oe-studio routes are setup. We create dummy directory before boot
  */
 !fs.existsSync('client') && fs.mkdirSync('client');
 !fs.existsSync('client/bower_components') && fs.mkdirSync('client/bower_components');
-!fs.existsSync('client/bower_components/designer') && fs.mkdirSync('client/bower_components/designer');
-!fs.existsSync('client/bower_components/designer/templates') && fs.mkdirSync('client/bower_components/designer/templates');
-!fs.existsSync('client/bower_components/designer/styles') && fs.mkdirSync('client/bower_components/designer/styles');
-!fs.existsSync('client/bower_components/designer/index.html') && fs.writeFileSync('client/bower_components/designer/index.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/templates/default-form.html') && fs.writeFileSync('client/bower_components/designer/templates/default-form.html', '<dom-module id="my-form"><style></style><template id="my-form"><div>oeCloud.io Form</div></template><script>Polymer({is:"my-form"});</script></dom-module>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/templates/default-page.html') && fs.writeFileSync('client/bower_components/designer/templates/default-page.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
-!fs.existsSync('client/bower_components/designer/styles/default-theme.css') && fs.writeFileSync('client/bower_components/designer/styles/default-theme.css', 'some css stuff', 'utf-8');
+!fs.existsSync('client/bower_components/sample-element') && fs.mkdirSync('client/bower_components/sample-element');
+!fs.existsSync('client/bower_components/images') && fs.mkdirSync('client/bower_components/images');
+!fs.existsSync('client/bower_components/oe-studio') && fs.mkdirSync('client/bower_components/oe-studio');
+!fs.existsSync('client/bower_components/oe-studio/templates') && fs.mkdirSync('client/bower_components/oe-studio/templates');
+!fs.existsSync('client/bower_components/oe-studio/styles') && fs.mkdirSync('client/bower_components/oe-studio/styles');
+!fs.existsSync('client/bower_components/oe-studio/index.html') && fs.writeFileSync('client/bower_components/oe-studio/index.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-form.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-form.html', '<dom-module id=":componentName"><style></style><template id=":componentName"><div>oeCloud.io Form</div></template><script>Polymer({is:":componentName", properties:{ :modelAlias : {type: Object}});</script></dom-module>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-list.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-list.html', '<dom-module id=":componentName"><style></style><template id=":componentName"><div>oeCloud.io List</div></template><script>Polymer({is:":componentName"});</script></dom-module>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/templates/default-page.html') && fs.writeFileSync('client/bower_components/oe-studio/templates/default-page.html', '<html><body><div>oeCloud.io Page</div></body></html>', 'utf-8');
+!fs.existsSync('client/bower_components/oe-studio/styles/default-theme.css') && fs.writeFileSync('client/bower_components/oe-studio/styles/default-theme.css', 'some css stuff', 'utf-8');
+!fs.existsSync('client/bower_components/images/background.jpg') && fs.writeFileSync('client/bower_components/images/background.jpg', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/images/audio.mp3') && fs.writeFileSync('client/bower_components/images/audio.mp3', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/images/video.mp4') && fs.writeFileSync('client/bower_components/images/video.mp4', 'dummay asset data', 'utf-8');
+!fs.existsSync('client/bower_components/sample-element/sample-element.html') && fs.writeFileSync('client/bower_components/sample-element/sample-element.html', '<dom-module id="sample-element"><style></style><template id="sample-element"><div>Sample Element</div></template><script>Polymer({is:"sample-element"});</script></dom-module>', 'utf-8');
+!fs.existsSync('client/bower_components/sample-element/default-tpl.html') && fs.writeFileSync('client/bower_components/sample-element/default-tpl.html', '<dom-module id=":componentName"><style></style><template id=":componentName"><div>oeCloud.io List</div></template><script>Polymer({is:":componentName"});</script></dom-module>', 'utf-8');
 
-var createTestUser = function (user, rolename, cb) {
+var createTestUser = function(user, rolename, cb) {
     var User = loopback.getModelByType('BaseUser');
     var Role = loopback.getModelByType('BaseRole');
     var RoleMapping = loopback.getModelByType('BaseRoleMapping');
@@ -133,12 +141,12 @@ var createTestUser = function (user, rolename, cb) {
     var dbUser;
 
     async.series([
-        function (done) {
+        function(done) {
             Role.findOne({
                 where: {
                     name: rolename
                 }
-            }, defaultContext, function (err, res) {
+            }, defaultContext, function(err, res) {
                 if (res) {
                     dbRole = res;
                     done();
@@ -146,24 +154,24 @@ var createTestUser = function (user, rolename, cb) {
                     var role = {
                         name: rolename
                     };
-                    Role.create(role, defaultContext, function (err, res) {
+                    Role.create(role, defaultContext, function(err, res) {
                         dbRole = res;
                         done();
                     });
                 }
             });
         },
-        function (done) {
+        function(done) {
             User.findOne({
                 where: {
                     username: user.username
                 }
-            }, defaultContext, function (err, res) {
+            }, defaultContext, function(err, res) {
                 if (res) {
                     dbUser = res;
                     done();
                 } else {
-                    User.create(user, defaultContext, function (err2, res) {
+                    User.create(user, defaultContext, function(err2, res) {
                         //console.log('created user ', err2, res);
                         dbUser = res;
                         done();
@@ -171,13 +179,13 @@ var createTestUser = function (user, rolename, cb) {
                 }
             });
         },
-        function (done) {
+        function(done) {
             var UserProfile = loopback.getModelByType('UserProfile');
             UserProfile.findOne({
                 where: {
                     userId: dbUser.id
                 }
-            }, defaultContext, function (err, res) {
+            }, defaultContext, function(err, res) {
                 if (res) {
                     done();
                 } else {
@@ -187,20 +195,20 @@ var createTestUser = function (user, rolename, cb) {
                         department: 'finance',
                         userId: dbUser.id
                     };
-                    UserProfile.create(profile, defaultContext, function (err2, res) {
+                    UserProfile.create(profile, defaultContext, function(err2, res) {
                         done();
                     });
                 }
             });
         },
-        function (done) {
+        function(done) {
             RoleMapping.findOne({
                 where: {
                     principalId: dbUser.id,
                     principalType: 'USER',
                     roleId: dbRole.id
                 }
-            }, defaultContext, function (err, res) {
+            }, defaultContext, function(err, res) {
                 if (err) {
                     throw (new Error(err));
                 }
@@ -211,20 +219,20 @@ var createTestUser = function (user, rolename, cb) {
                     mapping.principalId = dbUser.id;
                     mapping.principalType = 'USER';
                     mapping.roleId = dbRole.id;
-                    RoleMapping.create(mapping, defaultContext, function (err, res) {
+                    RoleMapping.create(mapping, defaultContext, function(err, res) {
                         //console.log('created mapping ', err, res);
                         done();
                     });
                 }
             });
         },
-        function () {
+        function() {
             cb();
         }
     ]);
 };
 
-var createAdminUser = function (done) {
+var createAdminUser = function(done) {
 
     var adminUserContext = {
         ctx: {
@@ -233,13 +241,13 @@ var createAdminUser = function (done) {
         }
     };
 
-    async.series([function (cb) {
+    async.series([function(cb) {
                 var Tenant = loopback.getModelByType('Tenant');
                 Tenant.create({
                     tenantId: 'default',
                     tenantName: 'default',
                     id: '9fab3286-442a-11e6-beb8-9e71128cae77'
-                }, adminUserContext, function (err, res) {
+                }, adminUserContext, function(err, res) {
                     if (err) {
                         if (err.code === 11000) {
                             return cb();
@@ -249,16 +257,16 @@ var createAdminUser = function (done) {
                         cb();
                     }
                 });
-    }, function (cb) {
+            }, function(cb) {
                 var adminUser = {
                     username: 'admin',
-                    password:'admin',
+                    password: 'admin',
                     email: 'admin@mycompany.com',
                     emailVerified: true,
                     id: 'admin'
                 }
                 var BaseUser = loopback.getModelByType('BaseUser');
-                BaseUser.create(adminUser, adminUserContext, function (err, res) {
+                BaseUser.create(adminUser, adminUserContext, function(err, res) {
                     if (err) {
                         if (err.code === 11000) {
                             return cb();
@@ -268,7 +276,7 @@ var createAdminUser = function (done) {
                         cb();
                     }
                 });
-    }, function (cb) {
+            }, function(cb) {
                 var UserProfile = loopback.getModelByType('UserProfile');
                 UserProfile.create({
                     firstName: 'Super',
@@ -276,7 +284,7 @@ var createAdminUser = function (done) {
                     department: 'adminstration',
                     userId: 'admin',
                     id: 'fcd1a724-442a-11e6-beb8-9e71128cae77'
-                }, adminUserContext, function (err, res) {
+                }, adminUserContext, function(err, res) {
                     if (err) {
                         if (err.code === 11000) {
                             return cb();
@@ -286,14 +294,14 @@ var createAdminUser = function (done) {
                         cb();
                     }
                 });
-    },
-    function (cb) {
+            },
+            function(cb) {
                 var Role = loopback.getModelByType('BaseRole');
                 Role.create({
                     id: 'admin',
                     name: 'admin',
                     description: 'Admin'
-                }, adminUserContext, function (err, res) {
+                }, adminUserContext, function(err, res) {
                     if (err) {
                         if (err.code === 11000) {
                             return cb();
@@ -303,15 +311,15 @@ var createAdminUser = function (done) {
                         cb();
                     }
                 });
-    },
-    function (cb) {
+            },
+            function(cb) {
                 var RoleMapping = loopback.getModelByType('BaseRoleMapping');
                 RoleMapping.create({
                     id: 'admin',
                     principalType: 'USER',
                     principalId: 'admin',
                     roleId: 'admin'
-                }, adminUserContext, function (err, res) {
+                }, adminUserContext, function(err, res) {
                     if (err) {
                         if (err.code === 11000) {
                             return cb();
@@ -321,8 +329,9 @@ var createAdminUser = function (done) {
                         cb();
                     }
                 });
-    }],
-        function () {
+            }
+        ],
+        function() {
             done();
         }
     );
@@ -346,7 +355,7 @@ function login(credentials, cb) {
         .set('tenant_id', 'test-tenant')
         .post(postUrl)
         .send(postData)
-        .end(function (err, response) {
+        .end(function(err, response) {
             expect(response.body.id).to.be.defined;
             var accessToken = response.body.id;
             cb(accessToken);
@@ -370,9 +379,8 @@ module.exports = {
 };
 
 var createACLsforTest = function(done) {
-    var acls = [
-    {
-        "model" : "dev",
+    var acls = [{
+        "model": "dev",
         "principalType": "USER",
         "principalId": "admin",
         "permission": "ALLOW",
@@ -386,7 +394,7 @@ var createACLsforTest = function(done) {
 };
 
 Object.defineProperty(module.exports, "defaultContext", {
-    get: function () {
+    get: function() {
         var callContext = {
             ctx: {
                 tenantId: 'test-tenant',
@@ -399,18 +407,18 @@ Object.defineProperty(module.exports, "defaultContext", {
 
 // done(err||(new Error(res.body.error.details.messages.name[0])))
 
-describe(chalk.blue('bootstrap test'), function () {
+describe(chalk.blue('bootstrap test'), function() {
 
     this.timeout(30000);
 
-    before('wait for boot scripts to complete', function (done) {
-        app.on('EVstarted', function () {
+    before('wait for boot scripts to complete', function(done) {
+        app.on('EVstarted', function() {
             done();
         });
     });
 
-    it('waiting for boot scripts to finish', function (done) {
-        createAdminUser(function () {
+    it('waiting for boot scripts to finish', function(done) {
+        createAdminUser(function() {
             createTestUser(defaultUser, 'admin', function() {
                 createACLsforTest(done);
             });

@@ -44,7 +44,8 @@ var altContext = {
 };;
 var modelName = 'InstanceCachingTest';
 var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
-var dbname = 'db';
+var dsName = 'db';
+var dbname = process.env.DB_NAME || 'db';
 var dataSource;
 var accessToken = null;
 
@@ -127,7 +128,7 @@ describe('Instance Caching Test', function () {
   var TestModelNoInstanceCache = null;
 
   before('login using admin', function fnLogin(done) {
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var sendData = {
       'username': 'admin',
       'password': 'admin'
@@ -150,7 +151,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var data = {
       'name': modelName,
       'base': 'BaseEntity',
@@ -188,7 +189,7 @@ describe('Instance Caching Test', function () {
 
   before('Create Test Model with No InstanceCache', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     var data = {
       'name': modelNameNoInstanceCache,
       'base': 'BaseEntity',
@@ -226,7 +227,7 @@ describe('Instance Caching Test', function () {
   });
 
   describe('CRUD tests', function () {
-    dataSource = app.datasources[dbname];
+    dataSource = app.datasources[dsName];
     it('Should NOT cache the Test instance after create', function (done) {
       var id = uuid.v4();
       var result1, result2;
@@ -548,6 +549,55 @@ it('Should clear instance cache after destroyAll', function (done) {
       });
     });
 
+    it('Should delete empty instance in cache after create', function (done) {
+      var id = uuid.v4();
+      var result1, result2;
+      TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+        if (err) {
+          return done(err);
+        } else if (data.length !== 0) {
+          return done('There should not be an instance yet');
+        }
+        TestModel.create({
+          name: "Lior",
+          id: id
+        }, defaultContext, function (err, data) {
+          if (err) {
+            console.log(err);
+            return done(err);
+          } else {
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+                if (err) {
+                  return done(err);
+                } else if (data.length !== 1) {
+                  return done('find should return one instance');
+                }
+                result1 = Object.assign({}, data[0].toObject());
+                mongoDeleteById(id, TestModel.modelName, function (err) {
+                  if (err) {
+                    return done(err);
+                  }
+                  TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+                    if (err) {
+                      return done(err);
+                    } else if (data2.length === 0) {
+                      return done('instance not cached')
+                    }
+                    result2 = Object.assign({}, data2[0].toObject());
+                    expect(models[modelName]).not.to.be.null;
+                    expect(result1).not.to.be.null;
+                    expect(result2).not.to.be.null;
+                    expect(result1).to.deep.equal(result2);
+                    expect(result1.__data === result2.__data).to.be.true;
+                    return done();
+                  });
+                });
+              });
+          }
+        });
+      });
+    });
+
     it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
       /**
        * 1. create new modle instance 
@@ -567,7 +617,7 @@ it('Should clear instance cache after destroyAll', function (done) {
       function dbQuery_update(result) {
         var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache,bootstrap.defaultContext);
       if (dataSource.name === 'mongodb') {
-        MongoClient.connect('mongodb://' + mongoHost + ':27017/db', function (err, db) {
+        MongoClient.connect('mongodb://' + mongoHost + ':27017/' + dbname, function (err, db) {
           if (err) return done(err);
           else {
             db.collection(loopbackModelNoCache.modelName).update({ "_id": id }, { $set: { name: "value2" } }, { upsert: true }, function (err) {

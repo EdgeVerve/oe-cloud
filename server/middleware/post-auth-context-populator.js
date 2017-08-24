@@ -44,6 +44,7 @@ module.exports = function postAuthContextPopulator(options) {
       Object.keys(callContext.ctx).map(function callcontextForEachKeyFn(key, index) {
         callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
       });
+      callContext.accessTokenData = req.accessToken.__data;
       callContext.accessToken = req.accessToken.id;
       req.callContext = callContext;
 

@@ -10,7 +10,7 @@ var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
 
 module.exports = function failsafeObserverMixin(Model) {
-  if (disableEventHistoryManager) {
+  if (disableEventHistoryManager && disableEventHistoryManager === 'true') {
     return;
   }
   eventHistroyManager = require('./../../lib/event-history-manager.js');

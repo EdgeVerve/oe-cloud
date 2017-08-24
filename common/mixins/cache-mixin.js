@@ -87,6 +87,10 @@ function clearCacheOnDelete(ctx, next) {
  */
 
 var evictQueryCache = function evCacheMixinEvictQueryCacheCb(ctx, next) {
-  messaging.publish('evictQueryCache', ctx.Model.modelName);
+  var msg = {
+    modelName: ctx.Model.modelName,
+    evictCtx: ctx.hookState.evictCtx
+  };
+  messaging.publish('evictQueryCache', msg);
   next();
 };

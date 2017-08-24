@@ -2,10 +2,6 @@
     "restApiRoot": "/api",
     "host": "0.0.0.0",
     "port": 3000,
-    "multicastServerPort": 5017,
-    "multicastClientPort": 5018,
-    "multicastIP": "224.0.0.1",
-    "mutlicastTimeslice": 100,
     "cookieSecret": "cookie-secret",
     "remoting": {
         "context": {
@@ -74,9 +70,7 @@
         "DELETE",
         "PATCH"
     ],
-    "mqttOptions": "mqtt://<user>:<password>@<host>:<port>",
     "maxFailedLoginTries": 5,
-    "globalMessagingMode": "multicast",
     "memoryInterval": 1000,
     "memoryPoolChunk": 3,
     "eventReliabilityReplayThreshold": 3000,
