@@ -54,15 +54,15 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
 
   var verifyScale = (n, cb) => {
     console.log('verify service count is ', n);
-    exec('docker service ps ' + SERVICE_NAME + ' --format "{{json .ID}}" | wc -l', (err, stdout) => {
+    exec('docker service ps ' + SERVICE_NAME + ' --format "{{json .CurrentState}}" | grep Running | wc -l', (err, stdout) => {
       if (err) {
         console.log('Error in getServiceCount: ' + err);
         setTimeout(verifyScale, 100, n, cb);
       } else {
-        var countStatus = stdout;
+        var countStatus = parseInt(stdout, 10);
         if (countStatus !== n) {
           console.log('verifyScale - waiting Status: ' + countStatus + ', expected: ' + n);
-          setTimeout(verifyScale, 100, n, cb);
+          setTimeout(verifyScale, 5000, n, cb);
         } else {
           console.log('verifyScale - finished');
           cb();
@@ -72,13 +72,17 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
   };
   var getServiceStatus = (callback) => {
     initResults();
-    console.log('getServiceStatus');
     request.get(eventHistoryRecords, function (error, response, records) {
+      if (error) {
+        return callback(error);
+      }
+      expect(response.statusCode).to.equal(200);
+      expect(records.length).to.not.equal(0);
       records.forEach((eventHistoryRecord) => {
         results[eventHistoryRecord.status]++;
       }, this);
-      if (results.ToBeRecovered > 0 || results.InRecovery > 0 ) {
-        setTimeout(getServiceStatus, 100, callback);
+      if (results.RecoveryFinished < 2) {
+        setTimeout(getServiceStatus, 1000, callback);
       } else {
         return callback();
       }
@@ -129,11 +133,12 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
       },
       initiateNodes: (callback) => {
         console.log('create 50 note records');
+        var createUrl = baseurl + modelPlural + '?access_token=' + token;
+        console.log('posting to note: ', createUrl);
         async.times(100, (i, next) => {
-          var createUrl = baseurl + modelPlural + i + '?access_token=' + token;
           request.post({url: createUrl, json: {}, headers: headers, method: 'POST'}, function (error, r, body) {
             expect(r.statusCode).to.equal(200);
-            return next(body.id);
+            return next(null, body.id);
           });
         }, (err, results) => {
           if (err) {
