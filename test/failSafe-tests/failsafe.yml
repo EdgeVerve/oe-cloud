@@ -27,13 +27,13 @@ services:
       - router_network
   
   web:
-    image: $REGISTRY/${APP_IMAGE_NAME}:latest
+    image: $REGISTRY/${ORIG_APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
       - broadcaster
     deploy:
       mode: replicated
-      replicas: 1
+      replicas: 4
       update_config:
         delay: 60s
     environment:
@@ -42,12 +42,12 @@ services:
       FORCE_SSL: "yes"
       CONSISTENT_HASH: "true"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
-      DB_NAME: ${DB_NAME}
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
       APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       ROUTER_HOST: ${ROUTER}
+      ENABLE_EVENT_HISTORY: "true"
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
