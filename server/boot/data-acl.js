@@ -17,9 +17,11 @@ var log = require('oe-logger')('data-acl-boot');
 var messaging = require('../../lib/common/global-messaging');
 
 var dataACLModel;
+var appinstance;
 
 module.exports = function DataACL(app, cb) {
   log.debug(log.defaultContext(), 'In data-acl.js boot script.');
+  appinstance = app;
   dataACLModel = app.models.DataACL;
   // Creating 'before save' and 'after save' observer hooks for DataACL
   dataACLModel.observe('before save', dataACLBeforeSave);
@@ -45,8 +47,8 @@ module.exports = function DataACL(app, cb) {
       for (var i = 0; i < results.length; i++) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(DataACL.model) before save hooks when DataACL loads.
-        // Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
-        attachBeforeRemoteHookToModel(results[i].model);
+        // Passing directly model without checking existence since it is a mandatory field for DataACL.
+        attachBeforeRemoteHookToModel(results[i].model, {ctx: results[i]._autoScope});
       }
       cb();
     } else {
@@ -56,7 +58,7 @@ module.exports = function DataACL(app, cb) {
   });
 };
 
-// Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
+// Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to DataACL.
 messaging.subscribe('dataACLAttachHook', function (modelName, options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to attach remote hook for dataACL for model', modelName);
@@ -74,7 +76,7 @@ function dataACLBeforeSave(ctx, next) {
   var data = ctx.data || ctx.instance;
   // It is good to have if we have a declarative way of validating model existence.
   var modelName = data.model;
-  if (loopback.findModel(modelName)) {
+  if (loopback.findModel(modelName, ctx.options)) {
     log.debug(log.defaultContext(), 'Model ', modelName, ' exists. Continuing DataACL save.');
     next();
   } else {
@@ -114,6 +116,12 @@ function attachBeforeRemoteHookToModel(modelName, options) {
     model.settings._dataACLExists = true;
     // Attaching beforeRemote hook to model to do the DataACL applyFilter
     model.beforeRemote('**', function (ctx, modelInstance, next) {
+      var proxyKey = appinstance.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
+      if (ctx.req && ctx.req.headers && proxyKey) {
+        if (ctx.req.headers['x-evproxy-internal-key'] === proxyKey) {
+          return next();
+        }
+      }
       dataACLModel.applyFilter(ctx, next);
     });
   }
