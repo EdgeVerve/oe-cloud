@@ -24,7 +24,7 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
-var batchJobRunner = require('../lib/batchJob-runner.js');
+var batchJobRunner = require('../lib/queue-consumer.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
