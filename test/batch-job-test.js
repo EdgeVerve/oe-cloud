@@ -170,7 +170,6 @@ describe(chalk.blue('batch-job-test'), function () {
         })     
       };
 
-      var intrestDefinition = loopback.getModel(intrestModelName, bootstrap.defaultContext);
       accountDefinition.prototype.calculateFeesWithErrorPerAccount = function (account, ctx, callback){
         var transactionModel = loopback.getModel(transactionModelName, ctx);
         var idFieldName =  accountModel.definition.idName();
@@ -193,7 +192,8 @@ describe(chalk.blue('batch-job-test'), function () {
         }      
       };
 
-      intrestDefinition.prototype.calculateTotalFees = function(ctx, callback){
+      var intrestDefinition = loopback.getModel(intrestModelName, bootstrap.defaultContext);
+      intrestDefinition.prototype.calculateTotalFeesTest1 = function(ctx, callback){
         var idFieldName =  accountModel.definition.idName();
         var query = {};
         //query.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
@@ -208,7 +208,30 @@ describe(chalk.blue('batch-job-test'), function () {
               feeSum += account.currentMonthFees;
               cb();
             }, function(err) {
-                apiPostRequest(intrestModelPlural, {'totalFee': feeSum}, (err, callback) => {callback(err);}, callback);
+              var newId = intrestModelName + '_1';
+              apiPostRequest(intrestModelPlural, {'id' : newId, 'totalFee': feeSum}, (err, callback) => {callback(err);}, callback);
+            })
+        })
+      };
+      intrestDefinition.prototype.calculateTotalFeesTest2 = function(ctx, callback){
+        var idFieldName =  accountModel.definition.idName();
+        var query = {};
+        //query.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
+
+        accountModel.find(query, ctx, function(err, accounts) {
+            if (err){
+                log.error(log.defaultContext, err);
+                callback(err);
+            }
+            var feeSum = 0;
+            async.each(accounts, function(account, cb){
+              feeSum += account.currentMonthFees;
+              cb();
+            }, function(err) {
+              var newId = intrestModelName + '_2';
+                apiPostRequest(intrestModelPlural, {'id': newId, 'totalFee': feeSum}, (err, callback) => {
+                  callback(err);
+                }, callback);
             })
         })
       };
@@ -327,6 +350,7 @@ describe(chalk.blue('batch-job-test'), function () {
     
   });
 
+
   it('test batchJob execution', function createModels(done) {
     accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
     intrestModel = loopback.getModel(intrestModelName, bootstrap.defaultContext);
@@ -342,18 +366,19 @@ describe(chalk.blue('batch-job-test'), function () {
     msg.processEachModelName = accountModelName;
     msg.processEachFunction = "calculateFeesPerAccount";
     msg.generateResultsModelName = intrestModelName ;
-    msg.generateResultsFunctionName = 'calculateTotalFees';
+    msg.generateResultsFunctionName = 'calculateTotalFeesTest1';
 
     BatchJobRunner.processMsg(msg);
 
     function checkResults (tryouts, done) {
-        intrestModel.find({}, bootstrap.defaultContext, (err, res) => {
-            var instance = res[0] || {};
-            if (err) return done(err);
-            if (instance.totalFee == 10) return done();
-            else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
-            else return done(new Error ("Batch Job was not successful"));
-        })
+      var query = {where: {'id' : intrestModelName + '_1'}};
+      intrestModel.findOne(query, bootstrap.defaultContext, (err, res) => {
+          var instance = res || {};
+          if (err) return done(err);
+          if (instance.totalFee == 10) return done();
+          else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
+          else return done(new Error ("Batch Job was not successful"));
+      })
     }
     checkResults(1, done);
   })
@@ -372,18 +397,19 @@ describe(chalk.blue('batch-job-test'), function () {
     msg.processEachModelName = accountModelName;
     msg.processEachFunction = "calculateFeesWithErrorPerAccount";
     msg.generateResultsModelName = intrestModelName ;
-    msg.generateResultsFunctionName = 'calculateTotalFees';
+    msg.generateResultsFunctionName = 'calculateTotalFeesTest2';
 
     BatchJobRunner.processMsg(msg);
 
     function checkResults (tryouts, done) {
-        intrestModel.find({}, bootstrap.defaultContext, (err, res) => {
-            var instance = res[1] || {};
-            if (err) return done(err);
-            if (instance.totalFee == 5) return done();
-            else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
-            else return done(new Error ("Batch Job was not successful"));
-        })
+      var query = {where: {'id' : intrestModelName + '_2'}};
+      intrestModel.findOne(query, bootstrap.defaultContext, (err, res) => {
+          var instance = res || {};
+          if (err) return done(err);
+          if (instance.totalFee == 5) return done();
+          else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
+          else return done(new Error ("Batch Job was not successful"));
+      })
     }
     checkResults(1, done);
   })
