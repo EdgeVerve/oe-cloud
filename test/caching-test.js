@@ -29,11 +29,11 @@ var MongoClient = require('mongodb').MongoClient;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var accessToken = null;
-var oracleHost = process.env.ORACLE_HOST || 'localhost';
-var oraclePort = process.env.ORACLE_PORT || 1521;
+var oracleHost = process.env.ORACLE_HOST || '10.73.44.60';
+var oraclePort = process.env.ORACLE_PORT || '1522';
 var oracleService = process.env.ORACLE_SID || 'orclpdb.ad.infosys.com';
-var oracleUser = process.env.ORACLE_USERNAME || 'oeadmin';
-var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
+var oracleUser = process.env.ORACLE_USERNAME || 'ramesh';
+var oraclePassword = process.env.ORACLE_PASSWORD || 'ramesh';
 
 
 describe('Caching Test', function () {

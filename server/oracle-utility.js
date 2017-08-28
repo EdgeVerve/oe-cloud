@@ -26,7 +26,7 @@ var oraclePort = process.env.ORACLE_PORT || 1521;
 var oracleConnectSettings = {
   'password': process.env.ORACLE_SYSPASSWORD || 'manager1',
   'user': process.env.ORACLE_SYSUSER || 'sys',
-  'connectString': oracleHost + ':' + oraclePort  + '/' + (process.env.ORACLE_SID || 'orclpdb.ad.infosys.com')
+  'connectString': oracleHost + ':' + oraclePort + '/' + (process.env.ORACLE_SID || 'orclpdb.ad.infosys.com')
 };
 
 var userName = process.env.CI_PROJECT_NAMESPACE.toUpperCase() + '-' + (process.env.CI_PROJECT_NAME || 'oecloud').toUpperCase();
