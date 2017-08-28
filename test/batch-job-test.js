@@ -118,10 +118,10 @@ describe(chalk.blue('batch-job-test'), function () {
 
     function addAllFunctions() {
 
-        var transferDefinition = loopback.getModel(transactionModelName, bootstrap.defaultContext);
-            transferDefinition.prototype.performBusinessValidations = function (options, cb) {
-                cb();
-            };
+      var transferDefinition = loopback.getModel(transactionModelName, bootstrap.defaultContext);
+      transferDefinition.prototype.performBusinessValidations = function (options, cb) {
+          cb();
+      };
 
       var accountDefinition = loopback.getModel(accountModelName, bootstrap.defaultContext);
       accountDefinition.prototype.atomicTypes = ['DEBIT'];
@@ -170,7 +170,30 @@ describe(chalk.blue('batch-job-test'), function () {
         })     
       };
 
-      accountDefinition.prototype.calculateTotalFees = function(ctx, callback){
+      var intrestDefinition = loopback.getModel(intrestModelName, bootstrap.defaultContext);
+      accountDefinition.prototype.calculateFeesWithErrorPerAccount = function (account, ctx, callback){
+        var transactionModel = loopback.getModel(transactionModelName, ctx);
+        var idFieldName =  accountModel.definition.idName();
+        var accountId = account[idFieldName];
+        var lastChar = accountId.charAt(accountId.length-1);
+        if (['0', '2', '4', '6', '8'].includes(lastChar)){
+          account.updateAttribute('currentMonthFees', 0, ctx, function (err) {
+            if (err) log.error(log.defaultContext(), err);
+            callback(new Error('Random Error'));
+          });
+        } else {
+          var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
+          transactionModel.find(query, ctx, function (err, res) {
+            var intrest  = !res ? 0 : res.length; 
+            account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
+              if (err) log.error(log.defaultContext(), err);
+              callback(err);
+            });
+          });
+        }      
+      };
+
+      intrestDefinition.prototype.calculateTotalFees = function(ctx, callback){
         var idFieldName =  accountModel.definition.idName();
         var query = {};
         //query.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
@@ -182,13 +205,9 @@ describe(chalk.blue('batch-job-test'), function () {
             }
             var feeSum = 0;
             async.each(accounts, function(account, cb){
-                if (account.currentMonthFees === 1){
-                    feeSum += account.currentMonthFees;
-                    cb();
-                } else {
-                    cb(new Error("Batch Job was not successful on " + account.id));
-                }
-            }, (err) => {
+              feeSum += account.currentMonthFees;
+              cb();
+            }, function(err) {
                 apiPostRequest(intrestModelPlural, {'totalFee': feeSum}, (err, callback) => {callback(err);}, callback);
             })
         })
@@ -322,7 +341,7 @@ describe(chalk.blue('batch-job-test'), function () {
     //msg.fetchQuery.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
     msg.processEachModelName = accountModelName;
     msg.processEachFunction = "calculateFeesPerAccount";
-    msg.generateResultsModelName = accountModelName ;
+    msg.generateResultsModelName = intrestModelName ;
     msg.generateResultsFunctionName = 'calculateTotalFees';
 
     BatchJobRunner.processMsg(msg);
@@ -332,6 +351,36 @@ describe(chalk.blue('batch-job-test'), function () {
             var instance = res[0] || {};
             if (err) return done(err);
             if (instance.totalFee == 10) return done();
+            else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
+            else return done(new Error ("Batch Job was not successful"));
+        })
+    }
+    checkResults(1, done);
+  })
+
+  it('test batchJob execution - continue job in case of error', function createModels(done) {
+    accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
+    intrestModel = loopback.getModel(intrestModelName, bootstrap.defaultContext);
+    var idFieldName =  accountModel.definition.idName();
+
+    var msg = {};
+    msg.options = bootstrap.defaultContext;
+    msg.jobType = "model";
+    msg.fetchModelName = accountModelName;
+    msg.fetchQuery = {};
+    //msg.fetchQuery.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
+    msg.processEachModelName = accountModelName;
+    msg.processEachFunction = "calculateFeesWithErrorPerAccount";
+    msg.generateResultsModelName = intrestModelName ;
+    msg.generateResultsFunctionName = 'calculateTotalFees';
+
+    BatchJobRunner.processMsg(msg);
+
+    function checkResults (tryouts, done) {
+        intrestModel.find({}, bootstrap.defaultContext, (err, res) => {
+            var instance = res[1] || {};
+            if (err) return done(err);
+            if (instance.totalFee == 5) return done();
             else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
             else return done(new Error ("Batch Job was not successful"));
         })
