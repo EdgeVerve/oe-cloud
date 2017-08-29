@@ -120,7 +120,7 @@ module.exports = function (BaseJournalEntity) {
         if (err) {
           return cb(err);
         }
-        return cb(null, results.join('$'));
+        return cb(null, results.join('$') );
       });
     };
 
@@ -133,7 +133,7 @@ module.exports = function (BaseJournalEntity) {
           if (err) {
             return next(err);
           }
-          instance.startup = (resAtomic + resNonAtomic).slice(0, -1);
+          instance.startup = (resAtomic + resNonAtomic);
           return next();
         });
       });
