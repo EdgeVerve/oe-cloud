@@ -416,6 +416,12 @@ module.exports = function uiComponent(UIComponent) {
           fmeta.type = 'grid';
           fmeta.subModelMeta = modelTo.properties;
           fmeta.modeltype = modelTo.id;
+        } else if (relation.type === 'embedsOne' || relation.type === 'hasOne') {
+          fieldId = relationName;
+          props[fieldId] = props[fieldId] || {};
+          fmeta = props[fieldId];
+          fmeta.type = 'model';
+          fmeta.modeltype = modelTo.id;
         }
       });
 
