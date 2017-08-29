@@ -165,6 +165,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         err1.retriable = false;
         return next(err1);
       }
+      if (modeldefinition.variantOf) {
+        modeldefinition.plural = baseModel.pluralModelName;
+        modeldefinition.name = baseModel.modelName;
+      }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
   };
@@ -466,6 +470,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             }
           }
           propDetails.type = 'array';
+        }
+        if (propDetails.refcodetype) {
+          associations.push(loopback.findModel(propDetails.refcodetype, options));
         }
         if (propDetails.enumtype) {
           var enumModel = model.app.models[propDetails.enumtype];

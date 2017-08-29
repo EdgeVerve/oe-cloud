@@ -301,6 +301,26 @@ describe(chalk.blue('oe-studio-test'), function () {
         }
       });
   });
-  
+
+  it('returns properties', function (done) {
+    var api = defaults(supertest(bootstrap.app));
+    var getUrl = appconfig.designer.mountPath + '/properties/Literals';
+    api.set('Authorization', accessToken)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .get(getUrl)
+      .expect(200)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          console.log(result.body);
+          expect(result.body).to.exist;
+          expect(result.body.key).not.to.be.undefined;
+          expect(result.body.key.type).to.be.equal('String');
+          done();
+        }
+      });
+  });
   
 });
