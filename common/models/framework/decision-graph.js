@@ -5,14 +5,14 @@ var log = logger('decision-graph');
 
 module.exports = function(DecisionGraph) {
   DecisionGraph.observe('before save', function DecisionGraphBeforeSaveFn(ctx, next) {
-    var doc = ctx.options.document;
-    var base64String = doc.documentData.split(',')[1];
-    var binaryData = Buffer.from(base64String, 'base64').toString('binary');
+    var dataObj = ctx.instance || ctx.data;
+    var base64String = dataObj.file.split(',')[1];
+    // var binaryData = Buffer.from(base64String, 'base64').toString('binary');
+    var binaryData = new Buffer(base64String, 'base64').toString('binary');
     var workbook = XLSX.read(binaryData, { type: 'binary'});
     try {
       var jsonFeel = DL.parseWorkbook(workbook);
-      var data = ctx.instance || ctx.data;
-      data.data = jsonFeel;
+      dataObj.data = jsonFeel;
       next();
     }
     catch(e){

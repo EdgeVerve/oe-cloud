@@ -10,7 +10,8 @@
     "graphName": {
       "type": "string",
       "required": true,
-      "unique": true
+      "unique": true,
+      "id": true
     },
     "data": {
       "type": "object",
