@@ -13,8 +13,11 @@
       "unique": true
     },
     "decisionRules": {
-      "type": "Text",
-      "hidden": true
+      "type": "String",
+      "hidden": true,
+      "oracle":{
+          "dataType":"CLOB"
+        }
     }
   },
   "oeValidations": [],

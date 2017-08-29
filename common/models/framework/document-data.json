@@ -6,13 +6,16 @@
         "isFrameworkModel": true
     },
     "properties": {
-        "documentName":{
+        "documentName": {
             "type": "String",
             "required": true
         },
         "documentData": {
-            "type": "Text",
-            "required": true
+            "type": "String",
+            "required": true,
+            "oracle": {
+                "dataType": "CLOB"
+            }
         }
     },
     "oeValidations": [],
