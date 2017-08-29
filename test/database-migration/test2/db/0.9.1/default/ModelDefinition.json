@@ -1,0 +1,15 @@
+[{
+  "id": "12378",
+  "name": "DBMigrationTestModel1",
+  "base": "BaseEntity",
+  "properties": {
+    "name": "string",
+    "type": "string"
+  }
+},{
+  "name": "DBMigrationTestModel2",
+  "base": "BaseEntity",
+  "properties": {
+    "name": "string"
+  }
+}]

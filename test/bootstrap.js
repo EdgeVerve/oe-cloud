@@ -20,10 +20,8 @@ var async = require('async');
 var fs = require('fs');
 var expect = chai.expect;
 //var accessToken;
-//by default event history mixin is disabled
-//unless it is set true in env variable
-process.env.ENABLE_EVENT_HISTORY = true;
 var app = evapp.loopback();
+process.env.JWT_CONFIG = "{\"issuer\": \"mycompany.com\",\"audience\": \"mycompany.net\",\"secretOrKey\":\"secret\",\"keyToVerify\":\"client_id\"}";
 app.locals.enableJwt = true;
 
 options.clientAppRootDir = __dirname;
@@ -110,8 +108,8 @@ if (config && config.disableWorkflow === true) {
 }
 
 if (config) {
-  config.enableDesigner = true;
-  config.designer.assetPath = ['client/bower_components/images'];
+    config.enableDesigner = true;
+    config.designer.assetPath = ['client/bower_components/images'];
 }
 
 /* When tests are run in git-lab, the oe-studio is not installed and 
