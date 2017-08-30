@@ -228,3 +228,28 @@ swarmFailSafe:
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
     - CEP_RUNNER
+
+ldap-auth:
+  stage: post-build-test
+  script:
+    - export ROUTER="cep_router"
+    - export HAPROXY=10.73.96.214
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export STACK_NAME=${APP_IMAGE_NAME}-ldap
+    - export NETWORK_NAME=${STACK_NAME}
+    - docker stack rm ${STACK_NAME}
+    - sleep 10
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/ldap-auth-tests/oe-cloud.yml > test/ldap-auth-tests/oe-cloud2.yml
+    - mv -f test/ldap-auth-tests/oe-cloud2.yml test/ldap-auth-tests/oe-cloud.yml
+    - docker stack deploy -c test/ldap-auth-tests/oe-cloud.yml ${STACK_NAME}
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - cd ../../..
+    - time mocha --timeout 30000 test/ldap-auth-tests/ldap-authentication-test.js
+    - docker stack rm ${APP_IMAGE_NAME}
+  tags:
+    - CEP_RUNNER

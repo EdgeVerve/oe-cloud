@@ -94,6 +94,7 @@
     "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#v0.9.0",
     "mocha": "^3.4.2",
     "nock": "^7.2.2",
+    "passport-ldapauth": "^2.0.0",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
     "supertest": "^1.1.0"
