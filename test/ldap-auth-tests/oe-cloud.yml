@@ -60,7 +60,7 @@ services:
   ldap:
     image: $REGISTRY/openldap:sample
     networks:
-      - oecloud-network
+      - ${NETWORK_NAME}
 
 
 networks:
