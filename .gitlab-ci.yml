@@ -127,7 +127,7 @@ postgrestest:
     - CEP_RUNNER
 
 
-swarm:
+swarmActorPattern:
   stage: post-build-test
   script:
     - export STARTUP_CMD="npm run grunt-cover"
