@@ -87,7 +87,8 @@ module.exports = function uiComponent(UIComponent) {
       dbelements.forEach(function dbElementsForEach(e) {
         var elementData = {
           label: e.label,
-          textContent: e.textContent
+          textContent: e.textContent,
+          uitype: e.uitype
         };
         e.attributes && e.attributes.forEach(function attributesFetch(att) {
           elementData[att.name] = att.value;
