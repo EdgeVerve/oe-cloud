@@ -145,6 +145,7 @@ swarmActorPattern:
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
     - export HAPROXY=10.73.96.214
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - cd test/actor-tests/test-files
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
@@ -162,7 +163,8 @@ swarmActorPattern:
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
     - cd ../../..
     - time mocha test/actor-tests/actorIntegrationTest.js
-    - docker stack rm ${APP_IMAGE_NAME}
+  after_script:
+    - sh /removeStack.sh
   tags:
     - CEP_RUNNER
 
@@ -233,6 +235,8 @@ retry-service:
     - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
     - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
     - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
+    - echo "docker stack rm ${STACK_NAME}" >> /removeStacks.sh
+    - echo "docker stack rm ${RETRY_STACK_NAME}" >> /removeStacks.sh
     - docker stack rm ${STACK_NAME}
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
@@ -256,9 +260,8 @@ retry-service:
     - cd ../../..
     - sleep 60
     - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
-    - docker stack rm ${APP_IMAGE_NAME}
-    - docker stack rm ${RETRY_STACK_NAME}
-
+  after_script:
+    - sh /removeStacks.sh
   tags:
     - CEP_RUNNER
 
@@ -270,11 +273,12 @@ swarmFailSafe:
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-fs
     - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - sleep 10
     - node test/failSafe-tests/prepareIntegrationTest.js
-    - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:latest .
-    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:latest
+    - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:failsafe-test .
+    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:failsafe-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/failSafe-tests/failsafe.yml > failSafe2.yml
     - mv -f failSafe2.yml test/failSafe-tests/failsafe.yml
     - docker stack deploy -c test/failSafe-tests/failsafe.yml ${APP_IMAGE_NAME}
@@ -286,6 +290,33 @@ swarmFailSafe:
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
     - mocha --timeout 300000 test/failSafe-tests/integrationTest.js
     - node test/failSafe-tests/cleanupIntegrationTest.js
-    - docker stack rm ${APP_IMAGE_NAME}
+  after_script:
+    - sh /removeStack.sh
+  tags:
+    - CEP_RUNNER
+
+ldap-auth:
+  stage: post-build-test
+  script:
+    - export ROUTER="cep_router"
+    - export HAPROXY=10.73.96.214
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export STACK_NAME=${APP_IMAGE_NAME}-ldap
+    - export NETWORK_NAME=${STACK_NAME}
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
+    - docker stack rm ${STACK_NAME}
+    - sleep 10
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/ldap-auth-tests/oe-cloud.yml > test/ldap-auth-tests/oe-cloud2.yml
+    - mv -f test/ldap-auth-tests/oe-cloud2.yml test/ldap-auth-tests/oe-cloud.yml
+    - docker stack deploy -c test/ldap-auth-tests/oe-cloud.yml ${STACK_NAME}
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - time mocha --timeout 30000 test/ldap-auth-tests/ldap-authentication-test.js
+  after_script:
+    - sh /removeStack.sh
   tags:
     - CEP_RUNNER
