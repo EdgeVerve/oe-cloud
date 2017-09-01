@@ -163,6 +163,7 @@ module.exports = function uiComponent(UIComponent) {
     response.metadata = {};
     response.autoInjectFields = component.autoInjectFields;
     response.excludeFields = component.excludeFields;
+    response.resturl = component.resturl;
     response.options = component.options;
     response.polymerConfig = component.polymerConfig;
     response.gridConfig = component.gridConfig;
@@ -611,7 +612,6 @@ module.exports = function uiComponent(UIComponent) {
     }
     ]
   });
-
 
   UIComponent.remoteMethod('modelmeta', {
     description: 'Returns Model Meta Data',
