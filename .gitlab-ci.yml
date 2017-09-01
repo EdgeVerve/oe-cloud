@@ -183,7 +183,7 @@ oracletest:
     - npm install nan async --no-optional
     - mv /oracledb node_modules/
     - node server/oracle-utility.js
-    - npm install git+http://10.73.97.24/atul/loopback-connector-oracle.git --no-optional
+    - npm install git+http://10.73.97.24/oecloud.io/loopback-connector-oracle.git --no-optional
     ##- docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
     - docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --file Dockerfile_Oracle .
     - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
@@ -195,7 +195,7 @@ oracletest:
     #- docker service create --name test-${APP_IMAGE_NAME}:oracle --env NODE_ENV=oracle ${REGISTRY}/${APP_IMAGE_NAME}-oracle npm run oracle
     #- docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run grunt-cover
     - export DB=oracle
-    - export STARTUP_CMD="npm run grunt-cover"
+    - export STARTUP_CMD="npm run grunt-test"
     - export FILE_NAME=docker-compose.test.env.yml
     - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
     - export NETWORK_NAME=${STACK_NAME}
