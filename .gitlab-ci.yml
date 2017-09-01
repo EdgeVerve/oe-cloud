@@ -62,7 +62,7 @@ buildjob:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 mongotest:
   stage: post-build-test
@@ -95,7 +95,7 @@ mongotest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 postgrestest:
   stage: post-build-test
@@ -129,7 +129,7 @@ postgrestest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 
 swarmActorPattern:
@@ -166,7 +166,7 @@ swarmActorPattern:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 oracletest:
   image: registry.oecloud.local/debian-node-oracle-docker
@@ -221,7 +221,7 @@ oracletest:
     - node server/oracle-utility.js
     - exit $exit_status
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 retry-service:
   stage: post-build-test
@@ -263,7 +263,7 @@ retry-service:
   after_script:
     - sh /removeStacks.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
 
 swarmFailSafe:
   stage: post-build-test
@@ -319,4 +319,4 @@ ldap-auth:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_2
