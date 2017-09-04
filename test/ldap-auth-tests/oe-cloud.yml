@@ -27,13 +27,13 @@ services:
       - router_network
   
   web:
-    image: $REGISTRY/${ORIG_APP_IMAGE_NAME}:failsafe-test
+    image: $REGISTRY/${APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
       - broadcaster
     deploy:
       mode: replicated
-      replicas: 4
+      replicas: 1
       update_config:
         delay: 60s
     environment:
@@ -47,17 +47,20 @@ services:
       APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       ROUTER_HOST: ${ROUTER}
-      ENABLE_EVENT_HISTORY: "true"
+      NODE_ENV: "env"
+      DATASOURCES: '{"db": {"host": "mongo","port": 27017,"url": "mongodb://mongo:27017/db","database": "db","name": "db","connector": "mongodb","connectionTimeout": 50000}}'
+      PROVIDERS: '{"ldap": {"provider": "ldap","module": "passport-ldapauth","authScheme": "ldap","server": {"url": "ldap://ldap:389","bindDN":"cn=admin,dc=example,dc=org","bindCredentials": "admin","searchBase":"cn=israel,ou=users,dc=example,dc=org","searchFilter": "(uid={{"{{username}}"}})"},"authPath": "/auth/ldap","setAccessToken": true,"json": true, "session":false}}'
+
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
       - ${NETWORK_NAME}
       - router_network
-    healthcheck:
-      test: "wget -s http://localhost:3000"
-      interval: 1m
-      timeout: 3s
-      retries: 10 
+      
+  ldap:
+    image: $REGISTRY/openldap:sample
+    networks:
+      - ${NETWORK_NAME}
 
 
 networks:

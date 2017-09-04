@@ -215,20 +215,6 @@ function finalBoot(appinstance, options, cb) {
           next();
         });
 
-        appinstance.remotes().before('**', function appInstanceBeforeAll(ctx, next) {
-          if (err) {
-            return next(err);
-          }
-
-          var proxyKey = appinstance.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
-          if (ctx.req && ctx.req.headers && proxyKey) {
-            if (ctx.req.headers['x-evproxy-internal-key'] === proxyKey) {
-              return next();
-            }
-          }
-          var DataACL = loopback.getModelByType('DataACL');
-          DataACL.applyFilter(ctx, next);
-        });
         appinstance.remotes().after('**', function afterRemoteListner(ctx, next) {
           if (ctx.req.callContext && ctx.req.callContext.statusCode) {
             ctx.res.statusCode = ctx.req.callContext.statusCode;
