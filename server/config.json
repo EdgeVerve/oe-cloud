@@ -103,6 +103,7 @@
         "password": "admin",
         "email": "admin@mycompany.com"
     },
+    "schedulerPath": "http://localhost:3001/api/",
     "dbLockMode": "dbLock",
     "scriptTag": [
         "<img",
