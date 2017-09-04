@@ -54,28 +54,21 @@ module.exports = function BaseEntityFn(BaseEntity) {
       // so a different tenant will still be able to access
       // but still with same scope
       if (Model && Model._ownDefinition && Model._ownDefinition.scope) {
-        var ModelDefinition = loopback.getModel('ModelDefinition');
-        ModelDefinition.findOne({ where: { name: Model.modelName } },
-          ctx.req.callContext,
-          function reqCallContext(err, instance) {
-            if (err) {
-              log.error(ctx, err.message);
-              return next(err);
-            }
-            if (!instance) {
-              var msg = 'Unknown model or not authorised';
-              var error = new Error(msg);
-              error.statusCode = error.status = 404;
-              error.code = 'MODEL_NOT_FOUND';
-              error.name = 'Data Error';
-              error.message = msg;
-              error.code = 'DATA_ERROR_070';
-              error.type = 'noModelExists';
-              error.retriable = false;
-              return next(error, null);
-            }
-            return next();
-          });
+        var resModel = loopback.findModel(Model.modelName, ctx.req.callContext);
+        if (!resModel) {
+          var msg = 'Unknown model or not authorised';
+          log.error(ctx.req.callContext, msg + ' for model ' + Model.modelName);
+          var error = new Error(msg);
+          error.statusCode = error.status = 404;
+          error.code = 'MODEL_NOT_FOUND';
+          error.name = 'Data Error';
+          error.message = msg;
+          error.code = 'DATA_ERROR_070';
+          error.type = 'noModelExists';
+          error.retriable = false;
+          return next(error, null);
+        }
+        next();
       } else {
         return next();
       }
