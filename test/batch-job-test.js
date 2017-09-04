@@ -156,7 +156,7 @@ describe(chalk.blue('batch-job-test'), function () {
         return stateObj;
       };
 
-      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, callback){
+      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, version, callback){
 
         accountModel.find({}, ctx, (err, accounts)=> {
 
@@ -177,7 +177,7 @@ describe(chalk.blue('batch-job-test'), function () {
               });
             });
           }, function(err) {
-            callback(err, monitoringId);
+            callback(err, monitoringId, version);
           });
         });  
       };
