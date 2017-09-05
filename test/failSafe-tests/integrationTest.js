@@ -35,17 +35,18 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
           done(error || body.error);
         } else {
           expect(response.statusCode).to.equal(200);
-          console.log('success ' + body.id);
-          console.log(body);
+          console.log('login using admin - success - ' + body.id);
           token = body.id;
-          eventHistoryRecords = {url: baseurl + eventHistoryPlural + '?access_token=' + token, strictSSL: false, json: true, 'headers': headers};
+          eventHistoryRecords = {
+            url: baseurl + eventHistoryPlural + '?access_token=' + token,
+            strictSSL: false, json: true, 'headers': headers
+          };
           done();
         }
       });
   });
 
   var scaleTo = (n, cb) => {
-    console.log('scale service web to ' + n);
     exec('docker service scale ' + SERVICE_NAME + '=' + n, (err, stdout) => {
       if (err) console.log('Error in func One: ' + err);
       verifyScale(n, cb);
@@ -53,34 +54,35 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
   };
 
   var verifyScale = (n, cb) => {
-    console.log('verify service count is ', n);
     exec('docker service ps ' + SERVICE_NAME + ' --format "{{json .CurrentState}}" | grep Running | wc -l', (err, stdout) => {
       if (err) {
-        console.log('Error in getServiceCount: ' + err);
         setTimeout(verifyScale, 100, n, cb);
       } else {
         var countStatus = parseInt(stdout, 10);
         if (countStatus !== n) {
-          console.log('verifyScale - waiting Status: ' + countStatus + ', expected: ' + n);
           setTimeout(verifyScale, 5000, n, cb);
         } else {
-          console.log('verifyScale - finished');
           cb();
         }
       }
     });
   };
+
   var getServiceStatus = (callback) => {
+    console.log("Step 5: get eventHistoryRecord status.");
     initResults();
     request.get(eventHistoryRecords, function (error, response, records) {
       if (error) {
+        console.log('Step 5: error accord while fetching eventHistoryRecords: ' + error);
         return callback(error);
       }
+      console.log('Step 5: fetched eventHistory rcords.');
       expect(response.statusCode).to.equal(200);
       expect(records.length).to.not.equal(0);
       records.forEach((eventHistoryRecord) => {
         results[eventHistoryRecord.status]++;
       }, this);
+      Console.log('Step 5: results ' + results);
       if (results.RecoveryFinished < 2) {
         setTimeout(getServiceStatus, 1000, callback);
       } else {
@@ -100,7 +102,7 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
   it('Recover - Default sceanrio', function (done) {
     async.series({
       clearHistory: (callback) => {
-        console.log('At clear history');
+        console.log('Step 1: clear history');
         console.log('url: ' + eventHistoryRecords.url);
         request.get(eventHistoryRecords, function (error, response, body) {
           if (error) console.log('error in fetching event-history records:', error || body.error);
@@ -116,7 +118,6 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
                   console.log('error in deleting event-history record:', error || body.error);
                   return cb(error);
                 }
-                console.log('Delete success' );
                 return cb();
               }
             );
@@ -129,12 +130,12 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
         });
       },
       scaleServiceTo5: (callback) => {
-        scaleTo(5, callback);
+        console.log('Step 2: scale service to 5.');
+        scaleTo(5,callback);
       },
-      initiateNodes: (callback) => {
-        console.log('create 50 note records');
+      createModelInstances: (callback) => {
+        console.log('Step 3: creat model instaces.');
         var createUrl = baseurl + modelPlural + '?access_token=' + token;
-        console.log('posting to note: ', createUrl);
         async.times(100, (i, next) => {
           request.post({url: createUrl, json: {}, headers: headers, method: 'POST'}, function (error, r, body) {
             expect(r.statusCode).to.equal(200);
@@ -148,17 +149,21 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
         });
       },
       scaleServiceCountDown: (callback) => {
+        console.log('Step 4: scale services down to 3');
         scaleTo(3, callback);
       },
       getServiceStatus: getServiceStatus
     }, (err) => {
+      console.log('Step 6: done.')
       if (err) {
         return done(err);
       }
-      console.log(results);
+      
       if (results.RecoveryFinished === 2 ) {
         return done();
       }
+      console.log('Test failed, please view the results below');
+      console.log(results);
       return done(new Error('Not All dead hosts were recoverd'));
     });
   });

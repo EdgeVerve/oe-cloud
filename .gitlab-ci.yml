@@ -228,7 +228,7 @@ swarmFailSafe:
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - mocha --timeout 600000 test/failSafe-tests/integrationTest.js
+    - mocha --timeout 1200000 test/failSafe-tests/integrationTest.js
     - node test/failSafe-tests/cleanupIntegrationTest.js
   after_script:
     - sh /removeStack.sh
