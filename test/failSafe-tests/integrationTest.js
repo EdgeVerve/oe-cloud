@@ -82,7 +82,8 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
       records.forEach((eventHistoryRecord) => {
         results[eventHistoryRecord.status]++;
       }, this);
-      console.log('Step 5: results ' + results);
+      console.log('Step 5: results');
+      console.log(results);
       if (results.RecoveryFinished < 2) {
         setTimeout(getServiceStatus, 1000, callback);
       } else {
