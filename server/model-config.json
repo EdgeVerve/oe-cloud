@@ -234,6 +234,14 @@
         "public": true,
         "dataSource": "db"
     },
+    "DecisionGraph": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DecisionService": {
+        "public": true,
+        "dataSource": "db"
+    },
     "DecisionTable": {
         "public": true,
         "dataSource": "db"
