@@ -57,7 +57,7 @@ module.exports = function ModelRule(app, cb) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(ModelRule.modelName) before save hooks when ModelRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for ModelRule.
-        attachBeforeSaveHookToModel(results[i].modelName, options);
+        attachBeforeSaveHookToModel(results[i].modelName, {ctx: results[i]._autoScope});
       }
       cb();
     } else {
@@ -83,7 +83,7 @@ function modelRuleAfterSave(ctx, next) {
   log.debug(log.defaultContext(), 'modelRuleAfterSave method.');
   var data = ctx.data || ctx.instance;
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
-  messaging.publish('modelRuleAttachHook', data.modelName);
+  messaging.publish('modelRuleAttachHook', data.modelName, ctx.options);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
   attachBeforeSaveHookToModel(data.modelName, ctx.options);
   next();

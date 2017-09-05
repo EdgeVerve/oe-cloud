@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "adm-zip": "^0.4.7",
+    "amqplib": "^0.5.1",
     "async": "2.4.1",
     "body-parser": "1.14.1",
     "bunyan": "^1.5.1",
@@ -56,6 +57,7 @@
     "mustache": "2.2.0",
     "mv": "^2.1.1",
     "node-async-locks": "^1.0.1",
+    "node-docker-api": "^1.1.16",
     "node-red": "0.16.2",
     "node-uuid": "1.4.7",
     "oe-explorer": "git+http://evgit/oecloud.io/oe-explorer.git#v0.9.0",
@@ -93,6 +95,7 @@
     "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#v0.9.0",
     "mocha": "^3.4.2",
     "nock": "^7.2.2",
+    "passport-ldapauth": "^2.0.0",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
     "supertest": "^1.1.0"

@@ -24,6 +24,7 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
+var batchJobRunner = require('../lib/queue-consumer.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
@@ -188,6 +189,7 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
+      batchJobRunner.init();
       var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
       if (!disableEventHistoryManager || disableEventHistoryManager !== 'true') {
         eventHistroyManager = require('../lib/event-history-manager.js');
@@ -213,20 +215,6 @@ function finalBoot(appinstance, options, cb) {
           next();
         });
 
-        appinstance.remotes().before('**', function appInstanceBeforeAll(ctx, next) {
-          if (err) {
-            return next(err);
-          }
-
-          var proxyKey = appinstance.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
-          if (ctx.req && ctx.req.headers && proxyKey) {
-            if (ctx.req.headers['x-evproxy-internal-key'] === proxyKey) {
-              return next();
-            }
-          }
-          var DataACL = loopback.getModelByType('DataACL');
-          DataACL.applyFilter(ctx, next);
-        });
         appinstance.remotes().after('**', function afterRemoteListner(ctx, next) {
           if (ctx.req.callContext && ctx.req.callContext.statusCode) {
             ctx.res.statusCode = ctx.req.callContext.statusCode;

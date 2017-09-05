@@ -42,17 +42,26 @@ services:
       FORCE_SSL: "yes"
       CONSISTENT_HASH: "true"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
-      DB_NAME: ${DB_NAME}
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
       APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       ROUTER_HOST: ${ROUTER}
+      NODE_ENV: "env"
+      DATASOURCES: '{"db": {"host": "mongo","port": 27017,"url": "mongodb://mongo:27017/db","database": "db","name": "db","connector": "mongodb","connectionTimeout": 50000}}'
+      PROVIDERS: '{"ldap": {"provider": "ldap","module": "passport-ldapauth","authScheme": "ldap","server": {"url": "ldap://ldap:389","bindDN":"cn=admin,dc=example,dc=org","bindCredentials": "admin","searchBase":"cn=israel,ou=users,dc=example,dc=org","searchFilter": "(uid={{"{{username}}"}})"},"authPath": "/auth/ldap","setAccessToken": true,"json": true, "session":false}}'
+
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
       - ${NETWORK_NAME}
       - router_network
+      
+  ldap:
+    image: $REGISTRY/openldap:sample
+    networks:
+      - ${NETWORK_NAME}
+
 
 networks:
   $NETWORK_NAME:

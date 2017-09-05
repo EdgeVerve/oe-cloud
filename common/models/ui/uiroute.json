@@ -55,7 +55,7 @@
       "description": "whether ev-app-route should retain the state when you switch the route"
     },
     "transitions": {
-      "type": "object",
+      "type": ["object"],
       "description": "Specifies the event based route transitions when application is at this route"
     }
   },

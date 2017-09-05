@@ -8,9 +8,7 @@ const loopback = require('loopback');
 const Passport = require('passport');
 const logger = require('oe-logger');
 const log = logger('JWT-Assertion');
-const path = require('path');
 const app = require('../server').app;
-const fs = require('fs');
 const uuid = require('node-uuid');
 const jwtUtil = require('../../lib/jwt-token-util');
 /**
@@ -27,22 +25,26 @@ module.exports = function JWTAssertionFn(options) {
   const JwtStrategy = require('passport-jwt').Strategy;
   const ExtractJwt = require('passport-jwt').ExtractJwt;
 
-  const filepath = path.resolve(path.join(app.locals.apphome, 'jwt-config.json'));
-  const file = fs.existsSync(filepath) ? filepath : '../../server/jwt-config.json';
-
-  const jwtConfig = require(file);
-
+  var jwtConfig = {
+    'issuer': 'mycompany.com',
+    'audience': 'mycompany.net',
+    'secretOrKey': 'secret',
+    'keyToVerify': 'client_id'
+  };
+  if (process.env.JWT_CONFIG && process.env.JWT_CONFIG.length > 0) {
+    try {
+      var tempConfig = JSON.parse(process.env.JWT_CONFIG);
+      jwtConfig = tempConfig && typeof tempConfig === 'object' ? tempConfig : jwtConfig;
+    } catch (e) {
+      log.error(options, e);
+    }
+  }
   const cachedTokens = {};
 
   const opts = {};
-
+  var key = process.env.SECRET_OR_KEY && process.env.SECRET_OR_KEY.length > 0 ? jwtUtil.sanitizePublicKey(process.env.SECRET_OR_KEY) : jwtUtil.sanitizePublicKey(jwtConfig.secretOrKey) || 'secret';
   // secretOrKey is a REQUIRED string or buffer containing the secret(symmetric) or PEM - encoded public key
-  if (jwtConfig.secretOrKey.indexOf('-----BEGIN') > -1) {
-    opts.secretOrKey = jwtUtil.sanitizePublicKey(jwtConfig.secretOrKey);
-  } else {
-    opts.secretOrKey = jwtConfig.secretOrKey;
-  }
-
+  opts.secretOrKey = key;
 
   // issuer: If defined the token issuer (iss) will be verified against this value.
   opts.issuer = jwtConfig.issuer;
@@ -53,6 +55,7 @@ module.exports = function JWTAssertionFn(options) {
   // Function that accepts a reqeust as the only parameter and returns the either JWT as a string or null
   opts.jwtFromRequest = ExtractJwt.fromAuthHeader();
   opts.jwtFromRequest = ExtractJwt.fromHeader('x-jwt-assertion');
+
 
   // Registering jwt strategy for passport.
   // decodedToken  is an object literal containing the decoded JWT payload
@@ -70,6 +73,9 @@ module.exports = function JWTAssertionFn(options) {
       if (req.headers['x-evproxy-internal-key'] === proxyKey) {
         return next();
       }
+    }
+    if (process.env.SECRET_OR_KEY && process.env.SECRET_OR_KEY.length > 0) {
+      Passport._strategies.jwt._secretOrKey = jwtUtil.sanitizePublicKey(process.env.SECRET_OR_KEY);
     }
     Passport.authenticate('jwt', (err, user, info) => {
       if (err) {

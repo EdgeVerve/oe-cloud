@@ -21,6 +21,7 @@ var fs = require('fs');
 var expect = chai.expect;
 //var accessToken;
 var app = evapp.loopback();
+process.env.JWT_CONFIG = "{\"issuer\": \"mycompany.com\",\"audience\": \"mycompany.net\",\"secretOrKey\":\"secret\",\"keyToVerify\":\"client_id\"}";
 app.locals.enableJwt = true;
 
 options.clientAppRootDir = __dirname;
