@@ -1,6 +1,6 @@
-var XLSX = require('xlsx');
-var feel = require('js-feel')
-var DL = feel.decisionLogic;
+// var XLSX = require('xlsx');
+var feel = require('js-feel');
+// var DL = feel.decisionLogic;
 var DS = feel.decisionService;
 
 var logger = require('oe-logger');
@@ -17,6 +17,7 @@ module.exports = function (DecisionService) {
         next(err);
       } else {
         // var keys = result.data;
+        // eslint-disable-next-line
         if (decisions.every(p => p in result.data)) {
           next();
         } else {
@@ -36,7 +37,6 @@ module.exports = function (DecisionService) {
       {
         arg: 'name',
         type: 'string',
-        description: 'service name',
         http: {
           source: 'path'
         },
@@ -67,29 +67,29 @@ module.exports = function (DecisionService) {
   DecisionService.invoke = function DecisionServiceInvoke(name, payload, options, cb) {
     DecisionService.findOne({ where: { name: name } }, options, (err, result) => {
       if (err) {
-        cb(err)
-      }
-      else {
-
+        cb(err);
+      } else {
         var decisions = result.decisions;
         result['decision-graph'](options, (err, graph) => {
-          var decisionMap = graph.data;
-          var ast = DS.createDecisionGraphAST(decisionMap);
-          var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
-          Promise.all(promises).then(answers => {
-            var final = answers.reduce((hash, answer) => {
-              return Object.assign({}, hash, answer)
-            }, {});
-
-            cb(null, final);
-          })
-          .catch(err => {
+          if (err) {
             cb(err);
-          });
+          } else {
+            var decisionMap = graph.data;
+            var ast = DS.createDecisionGraphAST(decisionMap);
+            var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
+            Promise.all(promises).then(answers => {
+              var final = answers.reduce((hash, answer) => {
+                return Object.assign({}, hash, answer);
+              }, {});
+
+              cb(null, final);
+            })
+              .catch(err => {
+                cb(err);
+              });
+          }
         });
       }
-
-
     });
   };
 };
