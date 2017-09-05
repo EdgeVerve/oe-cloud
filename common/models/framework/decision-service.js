@@ -1,30 +1,31 @@
 var XLSX = require('xlsx');
-var DL = require('js-feel').decisionLogic;
+var feel = require('js-feel')
+var DL = feel.decisionLogic;
+var DS = feel.decisionService;
+
 var logger = require('oe-logger');
 var log = logger('decision-service');
 var util = require('util');
 
-module.exports = function(DecisionService) {
-  DecisionService.observe('before save', function(ctx, next) {
+module.exports = function (DecisionService) {
+  DecisionService.observe('before save', function (ctx, next) {
     var dataObj = ctx.instance || ctx.data;
     var decisions = dataObj.decisions;
-    
-    dataObj["decision-graph"](ctx.options, function(err, result){
+
+    dataObj['decision-graph'](ctx.options, function (err, result) {
       if (err) {
         next(err);
-      }
-      else {
+      } else {
         // var keys = result.data;
         if (decisions.every(p => p in result.data)) {
           next();
-        }
-        else {
+        } else {
           var idx = decisions.findIndex(d => !(d in result.data));
           var item = decisions[idx];
-          var errStr = util.format('Decision %s does not belong to the decision graph: %s', item, result.graphName);
+          var errStr = util.format('Decision %s does not belong to the decision graph: %s', item, result.name);
           log.error(errStr);
           next(new Error(errStr));
-        }       
+        }
       }
     });
   });
@@ -64,8 +65,31 @@ module.exports = function(DecisionService) {
   });
 
   DecisionService.invoke = function DecisionServiceInvoke(name, payload, options, cb) {
-    setTimeout(function(){
-      cb(null, { response: { name, payload }});
-    })
-  }
-}
+    DecisionService.findOne({ where: { name: name } }, options, (err, result) => {
+      if (err) {
+        cb(err)
+      }
+      else {
+
+        var decisions = result.decisions;
+        result['decision-graph'](options, (err, graph) => {
+          var decisionMap = graph.data;
+          var ast = DS.createDecisionGraphAST(decisionMap);
+          var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
+          Promise.all(promises).then(answers => {
+            var final = answers.reduce((hash, answer) => {
+              return Object.assign({}, hash, answer)
+            }, {});
+
+            cb(null, final);
+          })
+          .catch(err => {
+            cb(err);
+          });
+        });
+      }
+
+
+    });
+  };
+};

@@ -7,7 +7,7 @@
     "isFrameworkModel": true
   },
   "properties": {
-    "graphName": {
+    "name": {
       "type": "string",
       "required": true,
       "unique": true,
@@ -16,17 +16,18 @@
     "data": {
       "type": "object",
       "hidden": true
-    },
-    "file": {
-      "type": "string",
-      "hidden": true,
-      "required": false,
-      "description": "A URI encoded string representing a workbook (MS Excel)"
     }
   },
   "oeValidations": [],
   "validations": [],
   "cacheable": true,
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "relations": {
+    "graphDocument": {
+      "type": "belongsTo",
+      "model": "DocumentData",
+      "foreignKey": ""
+    }
+  }
 }

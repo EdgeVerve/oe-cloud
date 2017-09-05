@@ -25,7 +25,7 @@
     "decision-graph": {
       "type": "belongsTo",
       "model": "DecisionGraph",
-      "foreignKey": "graphName"
+      "foreignKey": "graphId"
     }
   },
   "cacheable": true,
