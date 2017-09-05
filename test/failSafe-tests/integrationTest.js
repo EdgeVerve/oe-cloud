@@ -103,14 +103,10 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
     async.series({
       clearHistory: (callback) => {
         console.log('Step 1: clear history');
-        console.log('url: ' + eventHistoryRecords.url);
         request.get(eventHistoryRecords, function (error, response, body) {
           if (error) console.log('error in fetching event-history records:', error || body.error);
-          console.log('Recived event history records');
-          console.log(body);
           var eventHistoryRecords = body;
           async.each(eventHistoryRecords, (eventHistoryRecord, cb) => {
-            console.log('Trying to delete ' + eventHistoryRecord.id);
             request.delete(
               baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
               function (error, response, body) {
