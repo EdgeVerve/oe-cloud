@@ -50,7 +50,8 @@ describe(chalk.blue('Decision table evaluation'), function () {
     });
 
     it('Output hit policy', function (done) {
-        var payload = { "Age" : 18, "Risk category" : "High", "Debt review" : "false" };
+        var payload = { "Age" : 18, "Risk category" : "High", "Debt review" : false };
+        debugger;
         models.DecisionTable.exec("RoutingRulesOutput", payload, bootstrap.defaultContext, function (err, result) {
             if (err) {
                 done(err);
@@ -73,7 +74,7 @@ describe(chalk.blue('Decision table evaluation'), function () {
     });
 
     it('Collect hit policy without any operator', function (done) {
-        var payload = { "Age" : 18, "Risk category" : "High", "Debt review" : "false" };
+        var payload = { "Age" : 18, "Risk category" : "High", "Debt review" : false };
         models.DecisionTable.exec("RoutingRules", payload, bootstrap.defaultContext, function (err, result) {
             if (err) {
                 done(err);
@@ -130,7 +131,7 @@ describe(chalk.blue('Decision table evaluation'), function () {
     it('Collect hit policy with + operator for strings', function (done) {
         var payload = { "loanAmount" : 2000, "salary" : 20000 };
         models.DecisionTable.exec("MembershipSum", payload, bootstrap.defaultContext, function (err, result) {
-            expect(result.membership).to.equal("SILVER GENERAL");
+            expect(result.membership).to.equal("SILVER GENERAL GENERAL");
             done();
         });
     });
