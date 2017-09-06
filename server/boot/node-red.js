@@ -326,7 +326,9 @@ module.exports = function startNodeRed(server, callback) {
       return res.status(404).json({ error: 'Invalid Node-RED-Deployment-Type in header', message: 'Node-RED-Deployment-Type \'reload\' is not supported for HTTP POST.' });
     }
     var autoscopeField = getAutoscopeField(flowModel, req.callContext);
-
+    // Adding simple ctx with tenantId default, as file based node-red flows are not multi-tenant at this moment
+    // TODO: if multi tenat support required in file based node-red flows, use req.callContext
+    var reqCallContext = { ctx: { tenantId: 'default' } };
     var nodesToRemove = [];
     var dbFlows = [];
     var allflows = redNodes.getFlows();
@@ -339,6 +341,9 @@ module.exports = function startNodeRed(server, callback) {
       var nodes = [];
       var creds = [];
       allflows = _.cloneDeep(reqFlows);
+      allflows.forEach(function (obj) {
+        obj.callContext = reqCallContext;
+      });
       reqFlows.every(function (flow) {
         if (flow.type === 'tab') {
           tabs.push(flow);
@@ -351,6 +356,7 @@ module.exports = function startNodeRed(server, callback) {
       creds = reqFlows.filter(function (c) {
         if (c.z === '') {
           delete c.credentials;
+          c.callContext = reqCallContext;
           return true;
         }
       });
@@ -376,27 +382,31 @@ module.exports = function startNodeRed(server, callback) {
           tab.order = order++;
           return tab;
         });
-        fs.writeFile(path.join(dir, credSplitFileName), JSON.stringify(creds, null, 2), function (err) {
-          if (err) {
-            console.error(err);
-          }
-          async.concat(tabs, function (tab, cb) {
-            var fName = path.join(dir, 'red_' + tab.label + '_' + tab.id + '.json');
-            var flow = nodes.filter(function (f) {
-              delete f.credentials;
-              return f.z === tab.id;
-            });
-            flow.push(tab);
 
-            fs.writeFile(fName, JSON.stringify(flow, null, 2), function (err) {
-              if (err) {
-                return cb({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO SAVE FLOWS TO FILE' });
-              }
-              cb();
-            });
-          }, function (err) {
+        async.concat(tabs, function (tab, cb) {
+          var fName = path.join(dir, 'red_' + tab.label + '_' + tab.id + '.json');
+          var flow = nodes.filter(function (f) {
+            delete f.credentials;
+            return f.z === tab.id;
+          });
+          flow.push(tab);
+          flow.forEach(function (obj) {
+            obj.callContext = reqCallContext;
+          });
+
+          fs.writeFile(fName, JSON.stringify(flow, null, 2), function (err) {
             if (err) {
-              return res.status(500).json(err);
+              return cb({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO SAVE FLOWS TO FILE' });
+            }
+            cb();
+          });
+        }, function (err) {
+          if (err) {
+            return res.status(500).json(err);
+          }
+          fs.writeFile(path.join(dir, credSplitFileName), JSON.stringify(creds, null, 2), function (err) {
+            if (err) {
+              console.error(err);
             }
             redNodes.setFlows(allflows, deploymentType).then(function setFlowsCb() {
               return res.status(200).json({ rev: reqFlows.rev });
@@ -404,8 +414,8 @@ module.exports = function startNodeRed(server, callback) {
               console.log(' *** ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS *** ', err);
               return res.status(500).json({ error: 'unexpected_error', message: 'ERROR : NODE RED WAS NOT ABLE TO LOAD FLOWS' });
             });
-            // return res.status(200).end();
           });
+          // return res.status(200).end();
         });
       });
     } else {

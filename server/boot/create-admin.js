@@ -107,7 +107,8 @@ var createAdminUser = function createAdminUser(done) {
         cb();
       }
     });
-  }],
+  }
+  ],
   function finalCallback() {
     done();
   }
@@ -116,10 +117,10 @@ var createAdminUser = function createAdminUser(done) {
 
 module.exports = function CreateAdmin(app) {
   /**
-   * createAdminUser calls only when oecloud.io app boots.(Not for any apps which are dependent on oecloud.io)
-   */
+     * createAdminUser calls only when oecloud.io app boots.(Not for any apps which are dependent on oecloud.io)
+     */
   var flag = app.locals.standAlone;
-  if (flag) {
+  if (flag || process.env.CREATE_ADMIN) {
     createAdminUser(function createAdminUser() {
       log.debug(log.defaultContext(), 'Admin user created for framework');
     });
