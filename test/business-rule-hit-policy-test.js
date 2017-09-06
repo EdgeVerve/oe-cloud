@@ -135,7 +135,7 @@ describe(chalk.blue('Decision table evaluation'), function () {
                 done(err)
             }
             else {
-                expect(result.membership).to.equal("SILVER GENERAL");
+                expect(result.membership).to.equal("SILVER GENERAL GENERAL");
                 done();
             }            
         });
