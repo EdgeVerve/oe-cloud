@@ -1,0 +1,34 @@
+{
+  "name": "DecisionService",
+  "base": "BaseEntity",
+  "description": "This model is used to expose services from decision graphs stored in DecisionGraph model",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "description": "name for decision service",
+      "unique": true
+    },
+    "decisions": {
+      "type": ["string"],
+      "description": "decisions this service exposes from its associated decision graph",
+      "required": true
+    }
+  },
+  "oeValidations": [],
+  "validations": [],
+  "relations": {
+    "decision-graph": {
+      "type": "belongsTo",
+      "model": "DecisionGraph",
+      "foreignKey": "graphId"
+    }
+  },
+  "cacheable": true,
+  "acls": [],
+  "methods": {}
+}
