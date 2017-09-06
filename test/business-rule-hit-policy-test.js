@@ -131,8 +131,13 @@ describe(chalk.blue('Decision table evaluation'), function () {
     it('Collect hit policy with + operator for strings', function (done) {
         var payload = { "loanAmount" : 2000, "salary" : 20000 };
         models.DecisionTable.exec("MembershipSum", payload, bootstrap.defaultContext, function (err, result) {
-            expect(result.membership).to.equal("SILVER GENERAL GENERAL");
-            done();
+            if (err) {
+                done(err)
+            }
+            else {
+                expect(result.membership).to.equal("SILVER GENERAL");
+                done();
+            }            
         });
     });
 
