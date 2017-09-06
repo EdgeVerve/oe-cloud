@@ -70,8 +70,8 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
 
   var getServiceStatus = (callback) => {
     console.log("Step 5: get eventHistoryRecord status.");
-    //initResults();
-    results = [];
+    initResults();
+    //results = [];
     request.get(eventHistoryRecords, function (error, response, records) {
       if (error) {
         console.log('Step 5: error accord while fetching eventHistoryRecords: ' + error);
@@ -81,16 +81,16 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
       expect(response.statusCode).to.equal(200);
       expect(records.length).to.not.equal(0);
       records.forEach((eventHistoryRecord) => {
-        //results[eventHistoryRecord.status]++;
-        results.push(eventHistoryRecord.status);
+        results[eventHistoryRecord.status]++;
+        //results.push(eventHistoryRecord.status);
       }, this);
       console.log('Step 5: results');
       console.log(results);
-      //if (results.RecoveryFinished < 2) {
+      if (results.RecoveryFinished < 2) {
         setTimeout(getServiceStatus, 5*5000, callback);
-      // } else {
-      //   return callback();
-      // }
+       } else {
+         return callback();
+       }
     });
   };
 
