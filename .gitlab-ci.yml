@@ -57,7 +57,7 @@ buildjob:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 mongotest:
   stage: post-build-test
@@ -90,7 +90,7 @@ mongotest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 postgrestest:
   stage: post-build-test
@@ -124,7 +124,7 @@ postgrestest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 
 swarm:
@@ -159,7 +159,7 @@ swarm:
     - time mocha test/actor-tests/actorIntegrationTest.js
     - docker stack rm ${APP_IMAGE_NAME}
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 retry-service:
   stage: post-build-test
@@ -199,4 +199,4 @@ retry-service:
     - docker stack rm ${APP_IMAGE_NAME}
     - docker stack rm ${RETRY_STACK_NAME}
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
