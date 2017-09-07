@@ -57,7 +57,7 @@ buildjob:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 mongotest:
   stage: post-build-test
@@ -90,7 +90,7 @@ mongotest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 postgrestest:
   stage: post-build-test
@@ -124,7 +124,7 @@ postgrestest:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 
 swarmActorPattern:
@@ -161,7 +161,7 @@ swarmActorPattern:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 retry-service:
   stage: post-build-test
@@ -259,4 +259,4 @@ ldap-auth:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
