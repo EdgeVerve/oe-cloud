@@ -252,6 +252,7 @@ describe(chalk.blue('UIElement'), function () {
   });
 
   it('returns error if form-template is not found', function (done) {
+    this.timeout(60000);
     fetchComponent('modelperson-missing', function (err, data) {
       expect(err).to.exist;
       expect(data).to.not.exist;
