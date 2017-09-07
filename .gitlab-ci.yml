@@ -139,7 +139,7 @@ swarmActorPattern:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
-    - export HAPROXY=10.73.96.214
+    - export HAPROXY=10.73.44.46
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - cd test/actor-tests/test-files
@@ -167,7 +167,7 @@ retry-service:
   stage: post-build-test
   script: 
     - export ROUTER="cep_router"
-    - export HAPROXY=10.73.96.214
+    - export HAPROXY=10.73.44.46
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
     - export STACK_NAME=${APP_IMAGE_NAME}
@@ -203,12 +203,12 @@ retry-service:
   after_script:
     - sh /removeStacks.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 swarmFailSafe:
   stage: post-build-test
   script:
-    - export HAPROXY=10.73.96.214
+    - export HAPROXY=10.73.44.46
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-fs
     - export STACK_NAME=${APP_IMAGE_NAME}
@@ -233,7 +233,7 @@ swarmFailSafe:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_ATUL
 
 ldap-auth:
   stage: post-build-test
