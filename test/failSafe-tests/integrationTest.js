@@ -106,30 +106,30 @@ describe(chalk.blue('Failsafe - integrationTest'), function () {
 
   it('Recover - Default sceanrio', function (done) {
     async.series({
-      clearHistory: (callback) => {
-        console.log('Step 1: clear history');
-        request.get(eventHistoryRecords, function (error, response, body) {
-          if (error) console.log('error in fetching event-history records:', error || body.error);
-          var eventHistoryRecords = body;
-          async.each(eventHistoryRecords, (eventHistoryRecord, cb) => {
-            request.delete(
-              baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
-              function (error, response, body) {
-                if (error || body.error) {
-                  console.log('error in deleting event-history record:', error || body.error);
-                  return cb(error);
-                }
-                return cb();
-              }
-            );
-          }, (err)=> {
-            if (err) {
-              return callback(err);
-            }
-            callback();
-          });
-        });
-      },
+      // clearHistory: (callback) => {
+      //   console.log('Step 1: clear history');
+      //   request.get(eventHistoryRecords, function (error, response, body) {
+      //     if (error) console.log('error in fetching event-history records:', error || body.error);
+      //     var eventHistoryRecords = body;
+      //     async.each(eventHistoryRecords, (eventHistoryRecord, cb) => {
+      //       request.delete(
+      //         baseurl + eventHistoryPlural + eventHistoryRecord.id + '?access_token=' + token,
+      //         function (error, response, body) {
+      //           if (error || body.error) {
+      //             console.log('error in deleting event-history record:', error || body.error);
+      //             return cb(error);
+      //           }
+      //           return cb();
+      //         }
+      //       );
+      //     }, (err)=> {
+      //       if (err) {
+      //         return callback(err);
+      //       }
+      //       callback();
+      //     });
+      //   });
+      // },
       scaleServiceTo5: (callback) => {
         console.log('Step 2: scale service to 5.');
         scaleTo(5,callback);
