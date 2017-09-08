@@ -23,7 +23,7 @@ var async = require('async');
 describe(chalk.blue('Decision service insertion tests'), function() {
     this.timeout(60000);
     var testData = {
-        graphName: 'foo',
+        graphName: 'foo1',
         svcName: 'foosvc',
         graphDocument: {
             "documentName": "RoutingDecisionService-Demo.xlsx",
