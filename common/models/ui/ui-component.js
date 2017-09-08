@@ -87,7 +87,8 @@ module.exports = function uiComponent(UIComponent) {
       dbelements.forEach(function dbElementsForEach(e) {
         var elementData = {
           label: e.label,
-          textContent: e.textContent
+          textContent: e.textContent,
+          uitype: e.uitype
         };
         e.attributes && e.attributes.forEach(function attributesFetch(att) {
           elementData[att.name] = att.value;
@@ -162,6 +163,7 @@ module.exports = function uiComponent(UIComponent) {
     response.metadata = {};
     response.autoInjectFields = component.autoInjectFields;
     response.excludeFields = component.excludeFields;
+    response.resturl = component.resturl;
     response.options = component.options;
     response.polymerConfig = component.polymerConfig;
     response.gridConfig = component.gridConfig;
@@ -610,7 +612,6 @@ module.exports = function uiComponent(UIComponent) {
     }
     ]
   });
-
 
   UIComponent.remoteMethod('modelmeta', {
     description: 'Returns Model Meta Data',

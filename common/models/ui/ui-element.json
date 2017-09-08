@@ -26,6 +26,12 @@
 			"description": "textContent property of HTML Elements, or localise key",
 			"max": 500
 		},
+		"uitype": {
+			"type": "string",
+			"required": false,
+			"description": "control type to render this field",
+			"max": 50
+		},
 		"label": {
 			"type": "string",
 			"required": false,

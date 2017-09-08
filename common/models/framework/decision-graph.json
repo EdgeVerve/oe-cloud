@@ -1,0 +1,33 @@
+{
+  "name": "DecisionGraph",
+  "base": "BaseEntity",
+  "description": "This model is used for storing decision graphs",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "id": true
+    },
+    "data": {
+      "type": "object",
+      "hidden": true
+    }
+  },
+  "oeValidations": [],
+  "validations": [],
+  "cacheable": true,
+  "acls": [],
+  "methods": {},
+  "relations": {
+    "graphDocument": {
+      "type": "belongsTo",
+      "model": "DocumentData",
+      "foreignKey": ""
+    }
+  }
+}
