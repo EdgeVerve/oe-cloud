@@ -194,7 +194,7 @@ function hierarchyAfterAccess(ctx, next) {
     Object.keys(modelProp).forEach((key) => {
       const prop = modelProp[key];
       if (prop.unique) {
-        if (typeof prop.unique === 'boolean') {
+        if (typeof prop.unique === 'boolean' || typeof prop.unique === 'string') {
           uniq.push(key);
         } else if (typeof prop.unique === 'object') {
           prop.unique.scopedTo ? uniq = uniq.concat(prop.unique.scopedTo) : null;
@@ -349,7 +349,7 @@ function createQuery(ctx, context, hierarchy) {
  */
 function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) {
   var modelName = ctx.Model.clientModelName || ctx.Model.modelName;
-  if (modelName.toLowerCase().concat('Hierarchy') === key) {
+  if (modelName.toLowerCase() === key) {
     if (ctx.isNewInstance && data.id !== 'root') {
       if (!data.id) {
         data.id = uuid.v4();
