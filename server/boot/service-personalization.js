@@ -5,7 +5,7 @@ The Program may contain/reference third party or open source components, the rig
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
 /**
- * This boot script brings the personalization rules
+ * This boot script brings the ability to apply personalization rules to the model.
  *
  * @memberof Boot Scripts
  * @author Pradeep Kumar Tippa
@@ -48,12 +48,12 @@ module.exports = function ServicePersonalization(app, cb) {
       // The below code for the if clause will not executed for test cases with clean/empty DB.
       // In order to execute the below code and get code coverage for it we should have
       // some rules defined for some models in the database before running tests for coverage.
-      log.debug(log.defaultContext(), 'Some modelRules are present, on loading of this ModelRule model');
+      log.debug(log.defaultContext(), 'Some PersonalizationRules are present, on loading of this PersonalizationRule model');
       for (var i = 0; i < results.length; i++) {
         // No need to publish the message to other nodes, since other nodes will attach the hooks on their boot.
         // Attaching all models(PersonalizationRule.modelName) before save hooks when PersonalizationRule loads.
         // Passing directly modelName without checking existence since it is a mandatory field for PersonalizationRule.
-        attachRemoteHooksToModel(results[i].modelName, options);
+        attachRemoteHooksToModel(results[i].modelName, {ctx: results[i]._autoScope});
       }
       cb();
     } else {
@@ -62,7 +62,7 @@ module.exports = function ServicePersonalization(app, cb) {
   });
 };
 
-// Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to ModelRule.
+// Subscribing for messages to attach 'before save' hook for modelName model when POST/PUT to PersonalizationRule.
 messaging.subscribe('personalizationRuleAttachHook', function (modelName, options) {
   // TODO: need to enhance test cases for running in cluster and send/recieve messages in cluster.
   log.debug(log.defaultContext(), 'Got message to ');
@@ -98,7 +98,7 @@ function personalizationRuleAfterSave(ctx, next) {
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave method.');
   var data = ctx.data || ctx.instance;
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
-  messaging.publish('personalizationRuleAttachHook', data.modelName);
+  messaging.publish('personalizationRuleAttachHook', data.modelName, ctx.options);
   log.debug(log.defaultContext(), 'personalizationRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
   attachRemoteHooksToModel(data.modelName, ctx.options);
   next();
