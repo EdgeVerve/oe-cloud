@@ -179,7 +179,7 @@ describe(chalk.blue('batch-job-test'), function () {
           }, function(err) {
             callback(err, monitoringId, version);
           });
-        });  
+        })     
       };
 
       accountDefinition.prototype.calculateFeesWithErrorPerAccount = function (account, ctx, callback){
@@ -254,6 +254,74 @@ describe(chalk.blue('batch-job-test'), function () {
 
   });
 
+  before('create batchJob models', function createModels(done) {
+    var modelDefinition = loopback.findModel('ModelDefinition');
+    var data = {
+      'name': 'TestBatchJob',
+      'base': 'BaseEntity',
+      'properties': {
+        "jobType": {
+            "type": "string",
+            "required": true
+        },
+        "fetchModelName": {
+            "type": "string"
+        },
+        "fetchQuery": {
+            "type": "string"
+        },
+        "fetchFilePath": {
+            "type": "string"
+        },
+        "fetchDelimiter": {
+            "type": "string"
+        },
+        "processEachModelName": {
+            "type": "string",
+            "required": true
+        },
+        "processEachFunction": {
+            "type": "string",
+            "required": true
+        },
+        "generateResultsModelName": {
+            "type": "string",
+            "required": true
+        },
+        "generateResultsFunctionName": {
+            "type": "string",
+            "required": true
+        },
+        "runPeriodically": {
+            "type": "boolean",
+            "required": true
+        },
+        "cronTime": {
+            "type": "string"
+        },
+        "jobTime": {
+            "type": "date"
+        },
+        "timeZone": {
+            "type": "string",
+            "required": true
+        },
+        "priority": {
+            "type": "string",
+            "required": true
+        }
+      }
+    };
+
+    modelDefinition.create(data, bootstrap.defaultContext, (err) => {
+        if (err)
+            done(err)
+        else 
+            done();
+    });
+
+  });
+
   var ids = [];
 
   before('create 10 accounts with 20 tnxs in each', function (done){
@@ -301,39 +369,33 @@ describe(chalk.blue('batch-job-test'), function () {
     var idFieldName =  accountModel.definition.idName();
 
     var msg = {};
-   
+    msg.i = 2;
     msg.options = bootstrap.defaultContext;
-    msg.jobModelName = accountModelName;
-    msg.jobFnName = 'calculateFeesPerAccount';
-    msg.jobFnParams = [0.5];
+    msg.jobType = "model";
+    msg.fetchModelName = accountModelName;
+    msg.fetchQuery = {};
+    //msg.fetchQuery.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
+    msg.processEachModelName = accountModelName;
+    msg.processEachFunction = "calculateFeesPerAccount";
+    msg.generateResultsModelName = intrestModelName ;
+    msg.generateResultsFunctionName = 'calculateTotalFeesTest1';
 
     BatchJobRunner.processMsg(msg);
 
-    function checkResults (tryouts, done) {      
-      accountModel.find({}, bootstrap.defaultContext, function(err, accounts) {
-          if (err && tryouts === 10){
-              log.error(log.defaultContext, err);
-              return done(new Error ("Batch Job was not successful"));
-          }
-          if (err) {
-            return setTimeout(checkResults, 500, tryouts+1, done);
-          }
-          var feeSum = 0;
-          async.each(accounts, function(account, cb){
-            feeSum += account.currentMonthFees;
-            cb();
-          }, function(err) {
-            if (err) return done(err);
-            if (feeSum == 5) return done();
-            else if (tryouts < 10 ) return setTimeout(checkResults, 500, tryouts+1, done);
-            else return done(new Error ("Batch Job was not successful"));            
-          })
+    function checkResults (tryouts, done) {
+      var query = {where: {'id' : intrestModelName + '_1'}};
+      intrestModel.findOne(query, bootstrap.defaultContext, (err, res) => {
+          var instance = res || {};
+          if (err) return done(err);
+          if (instance.totalFee == 10) return done();
+          else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
+          else return done(new Error ("Batch Job was not successful"));
       })
     }
     checkResults(1, done);
   })
 
-  xit('test batchJob execution - continue job in case of error', function createModels(done) {
+  it('test batchJob execution - continue job in case of error', function createModels(done) {
     accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
     intrestModel = loopback.getModel(intrestModelName, bootstrap.defaultContext);
     var idFieldName =  accountModel.definition.idName();

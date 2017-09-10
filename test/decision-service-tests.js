@@ -22,7 +22,7 @@ var async = require('async');
 
 describe(chalk.blue('Decision service insertion tests'), function() {
     var testData = {
-        graphName: 'foo',
+        graphName: 'foo1',
         svcName: 'foosvc',
         graphDocument: {
             "documentName": "RoutingDecisionService-Demo.xlsx",
