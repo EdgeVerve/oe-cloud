@@ -104,7 +104,7 @@
         "email": "admin@mycompany.com"
     },
     "schedulerPort": 3001,
-    "schedulerHost": "localhost",
+    "schedulerHost": "scheduler",
     "dbLockMode": "dbLock",
     "scriptTag": [
         "<img",
