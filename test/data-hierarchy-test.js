@@ -46,7 +46,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     autoscope: [
       'tenantId'
     ],
-    'hierarchyScope': ['region']
+    'hierarchyScope': ['regionHierarchy']
   };
 
   var productModel = 'Product';
@@ -70,7 +70,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     autoscope: [
       'tenantId'
     ],
-    hierarchyScope: ['region']
+    hierarchyScope: ['regionHierarchy']
   };
 
   var settingsModel = 'SystemSettings';
@@ -97,7 +97,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     autoscope: [
       'tenantId'
     ],
-    hierarchyScope: ['region'],
+    hierarchyScope: ['regionHierarchy'],
     upward: true
   };
 
@@ -173,7 +173,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,');
             callback();
           }
         });
@@ -190,7 +190,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,');
             callback();
           }
         });
@@ -208,7 +208,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,india,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,');
             callback();
           }
         });
@@ -226,7 +226,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,india,delhi,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,delhi,');
             callback();
           }
         });
@@ -244,7 +244,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,india,bangalore,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,bangalore,');
             callback();
           }
         });
@@ -262,7 +262,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,japan,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,japan,');
             callback();
           }
         });
@@ -280,7 +280,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(result).not.to.be.null;
             expect(result).not.to.be.empty;
             expect(result).not.to.be.undefined;
-            expect(result._hierarchyScope.region).to.be.equal(',root,asia,japan,tokyo,');
+            expect(result._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,japan,tokyo,');
             callback();
           }
         });
@@ -302,7 +302,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,'
+          'regionHierarchy': ',root,asia,'
         };
         var newProduct = {
           'productName': 'Coca-Cola'
@@ -316,7 +316,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.productName).to.be.equal('Coca-Cola');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,');
             callback();
           }
         });
@@ -325,7 +325,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,india,'
+          'regionHierarchy': ',root,asia,india,'
         };
         var newProduct = {
           'productName': 'Diet coke'
@@ -339,7 +339,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.productName).to.be.equal('Diet coke');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,india,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,');
             callback();
           }
         });
@@ -348,7 +348,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,india,delhi,'
+          'regionHierarchy': ',root,asia,india,delhi,'
         };
         var newProduct = {
           'productName': 'Coke Zero'
@@ -362,7 +362,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.productName).to.be.equal('Coke Zero');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,india,delhi,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,delhi,');
             callback();
           }
         });
@@ -371,7 +371,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,india,'
+          'regionHierarchy': ',root,asia,india,'
         };
         var newProduct = {
           'productName': 'Pulpy Orange'
@@ -385,7 +385,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.productName).to.be.equal('Pulpy Orange');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,india,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,');
             callback();
           }
         });
@@ -404,7 +404,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,'
+      'regionHierarchy': ',root,asia,india,'
     };
 
     ProductModel.find({}, callContext, function (err, res) {
@@ -427,7 +427,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,delhi,'
+      'regionHierarchy': ',root,asia,india,delhi,'
     };
 
     ProductModel.find({}, callContext, function (err, res) {
@@ -451,7 +451,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,'
+      'regionHierarchy': ',root,asia,india,'
     };
 
     ProductModel.find({ 'depth': '*' }, callContext, function (err, res) {
@@ -474,7 +474,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,'
+      'regionHierarchy': ',root,asia,india,'
     };
 
     ProductModel.find({ 'depth': '1' }, callContext, function (err, res) {
@@ -497,7 +497,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,'
+      'regionHierarchy': ',root,asia,india,'
     };
 
     ProductModel.find({ 'depth': '3' }, callContext, function (err, res) {
@@ -523,7 +523,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,india,'
+          'regionHierarchy': ',root,asia,india,'
         };
         var newSetting = {
           'name': 'passwordPolicy',
@@ -540,7 +540,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.name).to.be.equal('passwordPolicy');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,india,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,');
             callback();
           }
         });
@@ -549,7 +549,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
         callContext.ctx = {
           'tenantId': 'test-tenant',
           'username': 'testuser',
-          'region': ',root,asia,india,bangalore,'
+          'regionHierarchy': ',root,asia,india,bangalore,'
         };
         var newSetting = {
           'name': 'passwordPolicy',
@@ -566,7 +566,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
             expect(res).not.to.be.empty;
             expect(res).not.to.be.undefined;
             expect(res.name).to.be.equal('passwordPolicy');
-            expect(res._hierarchyScope.region).to.be.equal(',root,asia,india,bangalore,');
+            expect(res._hierarchyScope.regionHierarchy).to.be.equal(',root,asia,india,bangalore,');
             callback();
           }
         });
@@ -585,7 +585,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,'
+      'regionHierarchy': ',root,asia,india,'
     };
 
     SettingsModel.find({}, callContext, function (err, res) {
@@ -609,7 +609,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,bangalore,'
+      'regionHierarchy': ',root,asia,india,bangalore,'
     };
 
     SettingsModel.find({}, callContext, function (err, res) {
@@ -633,7 +633,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,bangalore,'
+      'regionHierarchy': ',root,asia,india,bangalore,'
     };
 
     SettingsModel.find({ 'depth': '1' }, callContext, function (err, res) {
@@ -657,7 +657,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,delhi,'
+      'regionHierarchy': ',root,asia,india,delhi,'
     };
 
     SettingsModel.find({}, callContext, function (err, res) {
@@ -680,7 +680,7 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
     callContext.ctx = {
       'tenantId': 'test-tenant',
       'username': 'testuser',
-      'region': ',root,asia,india,delhi,'
+      'regionHierarchy': ',root,asia,india,delhi,'
     };
 
     SettingsModel.find({ 'depth': 1 }, callContext, function (err, res) {
@@ -724,7 +724,7 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
       type: 'string'
     });
 
-    atModel.defineProperty('region', {
+    atModel.defineProperty('regionHierarchy', {
       type: 'string'
     });
 
@@ -742,7 +742,7 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
               next(err);
             } else if (res) {
               // console.log("========================== res", res);
-              data.__data.region = res._hierarchyScope.region;
+              data.__data.regionHierarchy = res._hierarchyScope.regionHierarchy;
               // console.log("*********************", ctx.instance);
               next();
             } else {
