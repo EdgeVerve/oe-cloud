@@ -53,6 +53,12 @@ services:
     networks:
       - ${NETWORK_NAME}
       - router_network
+    healthcheck:
+      test: "wget -s http://localhost:3000"
+      interval: 1m
+      timeout: 3s
+      retries: 10 
+
 
 networks:
   $NETWORK_NAME:
