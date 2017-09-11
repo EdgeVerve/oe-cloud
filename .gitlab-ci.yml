@@ -1,6 +1,10 @@
 stages:
   - build
   - post-build-test
+  - swarmActorPattern
+  - retry-service
+  - swarmFailSafe
+  - ldap-auth
 
 cache:
   untracked: true
@@ -128,7 +132,7 @@ postgrestest:
 
 
 swarmActorPattern:
-  stage: post-build-test
+  stage: swarmActorPattern 
   script:
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
@@ -164,7 +168,7 @@ swarmActorPattern:
     - CEP_RUNNER
 
 retry-service:
-  stage: post-build-test
+  stage: retry-service
   script: 
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
@@ -206,7 +210,7 @@ retry-service:
     - CEP_RUNNER
 
 swarmFailSafe:
-  stage: post-build-test
+  stage: swarmFailSafe
   script:
     - export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
@@ -236,7 +240,7 @@ swarmFailSafe:
     - CEP_RUNNER
 
 ldap-auth:
-  stage: post-build-test
+  stage: ldap-auth
   script:
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
