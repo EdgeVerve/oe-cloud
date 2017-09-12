@@ -1,3 +1,9 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
 var fs = require('fs');
 
 var notejs = 'module.exports = function (Model) {Model.prototype.remote2 = function (cb) {cb(null, {message: "remote 2 ok"});};Model.remoteMethod("remote2", {isStatic: false,description: "remote2",accessType: "READ",accepts: [],http: {verb: "GET",path: "/remote2"},returns: {type: "object",root: true}});Model.observe("after save", function (ctx, next) {var err = new Error("Note after save fail");return next(err);});};';
