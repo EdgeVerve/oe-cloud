@@ -20,6 +20,7 @@ var mongoHost = process.env.MONGO_HOST || 'localhost';
 var dbName = process.env.DB_NAME || 'db';
 
 describe(chalk.blue('Decision graph insertion tests'), function() {
+    this.timeout(60000);
     before('remove db entries', function(done){
         models.DecisionGraph.destroyAll({}, bootstrap.defaultContext, function(err){
             done();

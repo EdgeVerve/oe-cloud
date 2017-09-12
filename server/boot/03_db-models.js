@@ -124,7 +124,7 @@ function attachBeforeSaveHook(app, cb) {
       // When a model(A) is created with relation of another model(B), and lets say the related model(B)
       // doesn't exists, loopback will created a model with settings as {'unresolved': true}
       // So added additional check for unresolved model setting.
-      if (model && model.settings && !data.variantOf && typeof model.settings.unresolved === 'undefined' && typeof model.settings._dynamicModel === 'undefined') {
+      if (model && model.settings  && typeof model.settings.unresolved === 'undefined' && typeof model.settings._dynamicModel === 'undefined' && !data.variantOf) {
         var modelFoundErr = new Error();
         modelFoundErr.name = 'Data Error';
         modelFoundErr.message = 'Model \'' + data.name + '\' is a system or filebased model. ModelDefinition doesn\'t allow overriding of it.';

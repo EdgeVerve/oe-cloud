@@ -63,7 +63,7 @@ function apiGetRequest(url, callback, done) {
 }
 
 describe(chalk.blue('batch-job-test'), function () {
-  
+  this.timeout(20000);
   before('login using admin', function fnLogin(done) {
     var sendData = {
       'username': 'admin',
