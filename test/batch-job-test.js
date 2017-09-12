@@ -166,13 +166,7 @@ describe(chalk.blue('batch-job-test'), function () {
             var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
             transactionModel.find(query, ctx, function (err, res) {
               var intrest  = !res ? 0 : res.length * interestCoefficient; 
-              account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
-                if (err) {
-                  log.error(log.defaultContext(), err);
-                  // Enter Monitoring Per Instance Processing - Maybe
-                }
-                cb();
-              });
+              retryUpdateAttributes(account, intrest, ctx, cb);
             });
           }, function(err) {
             callback(err, monitoringId, version);
@@ -182,6 +176,19 @@ describe(chalk.blue('batch-job-test'), function () {
 
       accountDefinition.prototype.associatedModels = [transactionModelName];
       return done();
+    }
+
+    function retryUpdateAttributes(account, intrest, ctx, callback) {
+      account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
+        if (err) {
+          log.error(log.defaultContext(), err);
+          // Enter Monitoring Per Instance Processing - Maybe
+          if (err.message === 'Instance is already locked') {
+            setTimeout(retryUpdateAttributes, 2000, account, intrest, ctx, callback);
+          }
+        }
+        callback();
+      });
     }
 
   });
@@ -221,7 +228,7 @@ describe(chalk.blue('batch-job-test'), function () {
     });
 
     async.parallel(createAccounts, function (err){
-      setTimeout(function(err) {return done(err);}, 5000, err);
+      return done(err);
     });    
     
   });
