@@ -156,157 +156,32 @@ describe(chalk.blue('batch-job-test'), function () {
         return stateObj;
       };
 
-      accountDefinition.prototype.calculateFeesPerAccount = function (account, ctx, callback){
-        var transactionModel = loopback.getModel(transactionModelName, ctx);
-        var idFieldName =  accountModel.definition.idName();
-        var accountId = account[idFieldName];
-        var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
-        transactionModel.find(query, ctx, function (err, res) {
-          var intrest  = !res ? 0 : res.length; 
-          account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
-            if (err) log.error(log.defaultContext(), err);
-            callback(err);
-          });
-        })     
-      };
-
-      accountDefinition.prototype.calculateFeesWithErrorPerAccount = function (account, ctx, callback){
-        var transactionModel = loopback.getModel(transactionModelName, ctx);
-        var idFieldName =  accountModel.definition.idName();
-        var accountId = account[idFieldName];
-        var lastChar = accountId.charAt(accountId.length-1);
-        if (['0', '2', '4', '6', '8'].includes(lastChar)){
-          account.updateAttribute('currentMonthFees', 0, ctx, function (err) {
-            if (err) log.error(log.defaultContext(), err);
-            callback(new Error('Random Error'));
-          });
-        } else {
-          var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
-          transactionModel.find(query, ctx, function (err, res) {
-            var intrest  = !res ? 0 : res.length; 
-            account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
-              if (err) log.error(log.defaultContext(), err);
-              callback(err);
+      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, callback){
+        accountModel.find({}, ctx, (err, accounts)=> {
+          async.each(accounts, function(account, cb){
+            var transactionModel = loopback.getModel(transactionModelName, ctx);
+            var idFieldName =  accountModel.definition.idName();
+            var accountId = account[idFieldName];
+            var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
+            transactionModel.find(query, ctx, function (err, res) {
+              var intrest  = !res ? 0 : res.length * interestCoefficient; 
+              account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
+                if (err) {
+                  log.error(log.defaultContext(), err);
+                  // Enter Monitoring Per Instance Processing - Maybe
+                }
+                cb();
+              });
             });
+          }, function(err) {
+            callback(err, monitoringId);
           });
-        }      
-      };
-
-      var intrestDefinition = loopback.getModel(intrestModelName, bootstrap.defaultContext);
-      intrestDefinition.prototype.calculateTotalFeesTest1 = function(ctx, callback){
-        var idFieldName =  accountModel.definition.idName();
-        var query = {};
-        //query.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
-
-        accountModel.find(query, ctx, function(err, accounts) {
-            if (err){
-                log.error(log.defaultContext, err);
-                callback(err);
-            }
-            var feeSum = 0;
-            async.each(accounts, function(account, cb){
-              feeSum += account.currentMonthFees;
-              cb();
-            }, function(err) {
-              var newId = intrestModelName + '_1';
-              apiPostRequest(intrestModelPlural, {'id' : newId, 'totalFee': feeSum}, (err, callback) => {callback(err);}, callback);
-            })
-        })
-      };
-      intrestDefinition.prototype.calculateTotalFeesTest2 = function(ctx, callback){
-        var idFieldName =  accountModel.definition.idName();
-        var query = {};
-        //query.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
-
-        accountModel.find(query, ctx, function(err, accounts) {
-            if (err){
-                log.error(log.defaultContext, err);
-                callback(err);
-            }
-            var feeSum = 0;
-            async.each(accounts, function(account, cb){
-              feeSum += account.currentMonthFees;
-              cb();
-            }, function(err) {
-              var newId = intrestModelName + '_2';
-                apiPostRequest(intrestModelPlural, {'id': newId, 'totalFee': feeSum}, (err, callback) => {
-                  callback(err);
-                }, callback);
-            })
-        })
-      };
+        });  
+      };        
 
       accountDefinition.prototype.associatedModels = [transactionModelName];
       return done();
     }
-
-  });
-
-  before('create batchJob models', function createModels(done) {
-    var modelDefinition = loopback.findModel('ModelDefinition');
-    var data = {
-      'name': 'TestBatchJob',
-      'base': 'BaseEntity',
-      'properties': {
-        "jobType": {
-            "type": "string",
-            "required": true
-        },
-        "fetchModelName": {
-            "type": "string"
-        },
-        "fetchQuery": {
-            "type": "string"
-        },
-        "fetchFilePath": {
-            "type": "string"
-        },
-        "fetchDelimiter": {
-            "type": "string"
-        },
-        "processEachModelName": {
-            "type": "string",
-            "required": true
-        },
-        "processEachFunction": {
-            "type": "string",
-            "required": true
-        },
-        "generateResultsModelName": {
-            "type": "string",
-            "required": true
-        },
-        "generateResultsFunctionName": {
-            "type": "string",
-            "required": true
-        },
-        "runPeriodically": {
-            "type": "boolean",
-            "required": true
-        },
-        "cronTime": {
-            "type": "string"
-        },
-        "jobTime": {
-            "type": "date"
-        },
-        "timeZone": {
-            "type": "string",
-            "required": true
-        },
-        "priority": {
-            "type": "string",
-            "required": true
-        }
-      }
-    };
-
-    modelDefinition.create(data, bootstrap.defaultContext, (err) => {
-        if (err)
-            done(err)
-        else 
-            done();
-    });
 
   });
 
@@ -357,61 +232,59 @@ describe(chalk.blue('batch-job-test'), function () {
     var idFieldName =  accountModel.definition.idName();
 
     var msg = {};
-    msg.i = 2;
     msg.options = bootstrap.defaultContext;
-    msg.jobType = "model";
-    msg.fetchModelName = accountModelName;
-    msg.fetchQuery = {};
-    //msg.fetchQuery.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
-    msg.processEachModelName = accountModelName;
-    msg.processEachFunction = "calculateFeesPerAccount";
-    msg.generateResultsModelName = intrestModelName ;
-    msg.generateResultsFunctionName = 'calculateTotalFeesTest1';
+    msg.jobModelName = accountModelName;
+    msg.jobFnName = 'calculateFeesPerAccount';
+    msg.jobFnParams = [0.5];
 
     BatchJobRunner.processMsg(msg);
 
-    function checkResults (tryouts, done) {
-      var query = {where: {'id' : intrestModelName + '_1'}};
-      intrestModel.findOne(query, bootstrap.defaultContext, (err, res) => {
-          var instance = res || {};
-          if (err) return done(err);
-          if (instance.totalFee == 10) return done();
-          else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
-          else return done(new Error ("Batch Job was not successful"));
+    function checkResults (tryouts, done) {      
+      accountModel.find({}, bootstrap.defaultContext, function(err, accounts) {
+          if (err && tryouts === 10){
+              log.error(log.defaultContext, err);
+              return done(new Error ("Batch Job was not successful"));
+          }
+          if (err) {
+            return setTimeout(checkResults, 500, tryouts+1, done);
+          }
+          var feeSum = 0;
+          async.each(accounts, function(account, cb){
+            feeSum += account.currentMonthFees;
+            cb();
+          }, function(err) {
+            if (err) return done(err);
+            if (feeSum == 5) return done();
+            else if (tryouts < 10 ) return setTimeout(checkResults, 500, tryouts+1, done);
+            else return done(new Error ("Batch Job was not successful"));            
+          })
       })
     }
     checkResults(1, done);
-  })
 
-  it('test batchJob execution - continue job in case of error', function createModels(done) {
-    accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
-    intrestModel = loopback.getModel(intrestModelName, bootstrap.defaultContext);
-    var idFieldName =  accountModel.definition.idName();
+  });
 
-    var msg = {};
-    msg.options = bootstrap.defaultContext;
-    msg.jobType = "model";
-    msg.fetchModelName = accountModelName;
-    msg.fetchQuery = {};
-    //msg.fetchQuery.where[idFieldName]= { regexp: accountModelName + '_' + '[0-9]*' };
-    msg.processEachModelName = accountModelName;
-    msg.processEachFunction = "calculateFeesWithErrorPerAccount";
-    msg.generateResultsModelName = intrestModelName ;
-    msg.generateResultsFunctionName = 'calculateTotalFeesTest2';
-
-    BatchJobRunner.processMsg(msg);
-
-    function checkResults (tryouts, done) {
-      var query = {where: {'id' : intrestModelName + '_2'}};
-      intrestModel.findOne(query, bootstrap.defaultContext, (err, res) => {
-          var instance = res || {};
-          if (err) return done(err);
-          if (instance.totalFee == 5) return done();
-          else if (tryouts < 10 ) setTimeout(checkResults, 500, tryouts+1, done);
-          else return done(new Error ("Batch Job was not successful"));
-      })
-    }
-    checkResults(1, done);
-  })
+  after('delete all the test accounts', function(done) {
+    var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
+    async.each([accountModelName, transactionModelName, intrestModelName], function (modelName, callback) {
+      var Model = loopback.getModel(modelName, bootstrap.defaultContext);
+      Model.destroyAll({}, deleteContext, function(err) {
+        if (err) {
+          if (err.message == 'Cannot delete journal entry') return callback();
+          
+          log.error(err.message);
+          return callback(err);
+        } else {
+          return callback();
+        }
+      });
+    }, function(err) {
+      if (err) done(err);
+      else done();
+      });
+    });
+    
+    
 
 });
+
