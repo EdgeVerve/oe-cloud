@@ -159,8 +159,7 @@ describe(chalk.blue('batch-job-test'), function () {
       accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, version, callback) {
 
         accountModel.find({}, ctx, (err, accounts)=> {
-
-          async.each(accounts, function(account, cb){
+          async.each(accounts, function(account, cb) {
             var transactionModel = loopback.getModel(transactionModelName, ctx);
             var idFieldName =  accountModel.definition.idName();
             var accountId = account[idFieldName];
@@ -179,29 +178,7 @@ describe(chalk.blue('batch-job-test'), function () {
             callback(err, monitoringId, version);
           });
         });
-      };
-
-      accountDefinition.prototype.calculateFeesWithErrorPerAccount = function (account, ctx, callback) {
-        var transactionModel = loopback.getModel(transactionModelName, ctx);
-        var idFieldName =  accountModel.definition.idName();
-        var accountId = account[idFieldName];
-        var lastChar = accountId.charAt(accountId.length-1);
-        if (['0', '2', '4', '6', '8'].includes(lastChar)){
-          account.updateAttribute('currentMonthFees', 0, ctx, function (err) {
-            if (err) log.error(log.defaultContext(), err);
-            callback(new Error('Random Error'));
-          });
-        } else {
-          var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
-          transactionModel.find(query, ctx, function (err, res) {
-            var intrest  = !res ? 0 : res.length; 
-            account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
-              if (err) log.error(log.defaultContext(), err);
-              callback(err);
-            });
-          });
-        }
-      };        
+      };    
 
       accountDefinition.prototype.associatedModels = [transactionModelName];
       return done();
@@ -244,11 +221,10 @@ describe(chalk.blue('batch-job-test'), function () {
     });
 
     async.parallel(createAccounts, function (err){
-      done(err);
+      setTimeout(function(err) {return done(err);}, 5000, err);
     });    
     
   });
-
 
   it('test batchJob execution', function createModels(done) {
     accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
@@ -288,7 +264,7 @@ describe(chalk.blue('batch-job-test'), function () {
 
   });
 
-  after('delete all the test accounts', function(done) {
+  after('delete all the test Models', function(done) {
     var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
     async.each([accountModelName, transactionModelName, intrestModelName], function (modelName, callback) {
       var Model = loopback.getModel(modelName, bootstrap.defaultContext);
@@ -307,8 +283,5 @@ describe(chalk.blue('batch-job-test'), function () {
       else done();
       });
     });
-    
-    
-
 });
 
