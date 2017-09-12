@@ -54,7 +54,7 @@ function deleteAndCreate(model, items, callback) {
 
 describe(chalk.blue('grid-config'), function () {
 
-    this.timeout(10000);
+    this.timeout(60000);
 
     var modelA = "GridOrder";
 

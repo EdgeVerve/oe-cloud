@@ -16,7 +16,7 @@ var supertest = require('supertest');
 var loopback = require('loopback');
 
 describe(chalk.blue('concurrency-test'), function () {
-    this.timeout(2000);
+    this.timeout(20000);
     var testModelName = 'MyConcurrentModel';
     var url = bootstrap.basePath + '/' + testModelName + 's';
     var testModelDetails = {

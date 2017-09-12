@@ -13,7 +13,7 @@ var chalk = require('chalk');
 var loopback = require('loopback');
 
 describe(chalk.blue('change request model test'), function () {
-
+	this.timeout(20000);
 	var modelName = 'ChangeRequestModelTest';
 	var changeRequestId = null;
 	var updateInstanceId = null;

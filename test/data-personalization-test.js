@@ -1341,7 +1341,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 });
 
 describe(chalk.blue('Data Personalization Test --Programatic'), function () {
-  // this.timeout(1000000);
+  this.timeout(20000);
   // Testmodel  has no autoscoped variable.
   var modelName = 'DataPersonalizationModel';
 

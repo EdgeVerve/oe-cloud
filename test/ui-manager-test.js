@@ -20,7 +20,7 @@ var baseUrl = bootstrap.basePath;
 var options;
 var accessToken;
 describe(chalk.blue('ui-manager-test'), function () {
-  this.timeout(10000);
+  this.timeout(60000);
 
   before('prepare test data', function (done) {
     options = {};

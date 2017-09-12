@@ -410,7 +410,7 @@ Object.defineProperty(module.exports, "defaultContext", {
 
 describe(chalk.blue('bootstrap test'), function() {
 
-    this.timeout(30000);
+    this.timeout(80000);
 
     before('wait for boot scripts to complete', function(done) {
         app.on('EVstarted', function() {

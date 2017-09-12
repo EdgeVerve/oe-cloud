@@ -88,12 +88,13 @@ function dropTables(cb) {
         throw new Error('Unable to connect to Oracle Database ' + JSON.stringify(oracleConnectSettings));
       }
       var sql = "select 'drop table \"' || table_name || '\"' from all_tables where owner = '" + userName + "'";
+      var totalRows = 1000;
 
-      connection.execute(sql, function (err, result) {
+      connection.execute(sql, {}, {maxRows: totalRows}, function (err, result) {
         if (err) {
           throw new Error('Unable to find tables ' + userName + ' Error :' + err);
         }
-        connection.execute(sql, function (err2, result2) {
+        connection.execute(sql, {}, {maxRows: totalRows}, function (err2, result2) {
           if (err2) {
             throw new Error('Unable to execute droping of table ' + sql);
           }

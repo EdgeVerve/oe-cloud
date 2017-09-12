@@ -102,7 +102,10 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   Model.defineProperty('_fsCtx', {
-    type: String
+    type: 'string',
+    oracle: {
+      'dataType': 'CLOB'
+    }
   });
 
   if (Model.definition.settings.hidden) {

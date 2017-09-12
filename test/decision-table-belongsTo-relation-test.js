@@ -16,11 +16,11 @@ var parentModelName = "CountryModel";
 var childModelName = "CityModel";
 
 xdescribe(chalk.blue('Decision table belongsTo relation check'), function () {
+  this.timeout(60000);
   var parentModel;
   var childModel;
+  before('Create DecisionTables and models for belopngsTo relation check', function (done) {
 
-  before('Create DecisionTables and models for belongsTo relation check', function (done) {
-    // debugger;
     models.ModelDefinition.create({
       'name': parentModelName,
       'base': 'BaseEntity',
@@ -63,24 +63,21 @@ xdescribe(chalk.blue('Decision table belongsTo relation check'), function () {
               }
             }, bootstrap.defaultContext, function (err, data) {
               if (err) {
-                done(err);
+                return done(err);
               }
-              else {
-                expect(data.name).to.be.equal("RelationValidator");
-                var modelRuleData = {
-                  "modelName": childModelName,
-                  "disabled": false,
-                  "validationRules": ["RelationValidator"]
+              expect(data.name).to.be.equal("RelationValidator");
+              var modelRuleData = {
+                "modelName": childModelName,
+                "disabled": false,
+                "validationRules": ["RelationValidator"]
+              }
+              models.ModelRule.create(modelRuleData, bootstrap.defaultContext, function (err, result) {
+                if (err) {
+                  return done(err);
                 }
-                models.ModelRule.create(modelRuleData, bootstrap.defaultContext, function (err, result) {
-                  if (err) {
-                    return done(err);
-                  }
-                  expect(result.modelName).to.be.equal(childModel.modelName);
-                  done();
-                });
-              }
-              
+                expect(result.modelName).to.be.equal(childModel.modelName);
+                done();
+              });
             });
           }
         });
@@ -91,43 +88,35 @@ xdescribe(chalk.blue('Decision table belongsTo relation check'), function () {
   it('Successfully creates childModel data as belongsTo validation passes', function (done) {
     var childPayload = { "name": "Sydney", "id": "sy1", "countryId": "aus1", "countryName": "Australia" };
     var parentPayload = { "name": "Australia", "id": "aus1" };
-    // debugger;
     parentModel.create(parentPayload, bootstrap.defaultContext, function (err, parentInst) {
       if (err) {
-        done(err);
+        return done(err);
       }
-      else {
-        debugger;
-        childModel.create(childPayload, bootstrap.defaultContext, function (err, childInst) {
-          if (err) {
-            done(err);
-          }
-          expect(childInst.name).to.be.equal(childPayload.name);
-          expect(childInst.id).to.be.equal(childPayload.id);
-          expect(childInst.countryId).to.be.equal(childPayload.countryId);
-          expect(childInst.countryName).to.be.equal(childPayload.countryName);
-          expect(childInst.countryName).to.be.equal(parentPayload.name);
-          done();
-        });        
-      }
-      
+      childModel.create(childPayload, bootstrap.defaultContext, function (err, childInst) {
+        if (err) {
+          return done(err);
+        }
+        expect(childInst.name).to.be.equal(childPayload.name);
+        expect(childInst.id).to.be.equal(childPayload.id);
+        expect(childInst.countryId).to.be.equal(childPayload.countryId);
+        expect(childInst.countryName).to.be.equal(childPayload.countryName);
+        expect(childInst.countryName).to.be.equal(parentPayload.name);
+        done();
+      });
     });
   });
 
   it('Fails to create childModel data as belongsTo validation is not met', function (done) {
     var childPayload = { "name": "Wellington", "id": "wl1", "countryId": "nz1", "countryName": "Nova Zeelandia" };
     var parentPayload = { "name": "New Zealand", "id": "nz1" };
-    debugger;
     parentModel.create(parentPayload, bootstrap.defaultContext, function (err, parentInst) {
       if (err) {
-        done(err);
+        return done(err);
       }
-      else {
-        childModel.create(childPayload, bootstrap.defaultContext, function (err, childInst) {
-          expect(err).not.to.be.undefined;
-          done();
-        });
-      }      
+      childModel.create(childPayload, bootstrap.defaultContext, function (err, childInst) {
+        expect(err).not.to.be.undefined;
+        done();
+      });
     });
   });
 });

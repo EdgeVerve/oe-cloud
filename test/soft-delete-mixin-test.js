@@ -49,7 +49,7 @@ var softDeleteMixin = require('../common/mixins/soft-delete-mixin.js');
 
 
 describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
-
+  this.timeout(20000);
   var testDatasourceName = uuid.v4();
   var modelName = 'TestModel';
 

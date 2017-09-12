@@ -20,7 +20,7 @@ var supertest = require('supertest');
 var loopback = require('loopback');
 
 describe(chalk.blue('fail-test'), function () {
-
+    this.timeout(20000);
     var testModelName = 'FailedVehicle';
     var testModelDetails = {
         name: testModelName,

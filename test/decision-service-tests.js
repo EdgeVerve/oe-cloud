@@ -21,6 +21,7 @@ var dbName = process.env.DB_NAME || 'db';
 var async = require('async');
 
 describe(chalk.blue('Decision service insertion tests'), function() {
+    this.timeout(60000);
     var testData = {
         graphName: 'foo1',
         svcName: 'foosvc',
