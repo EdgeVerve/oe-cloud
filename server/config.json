@@ -103,8 +103,6 @@
         "password": "admin",
         "email": "admin@mycompany.com"
     },
-    "schedulerPort": 3001,
-    "schedulerHost": "localhost",
     "dbLockMode": "dbLock",
     "scriptTag": [
         "<img",
