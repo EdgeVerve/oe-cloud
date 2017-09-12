@@ -25,7 +25,7 @@ var dbName = process.env.DB_NAME || 'db';
 
 describe(chalk.blue('multi-tenancy-test'), function () {
   var accessTokens = {};
-  this.timeout(20000);
+  this.timeout(60000);
   var productModelName = 'MyProducts';
 
   var tenants = [{
