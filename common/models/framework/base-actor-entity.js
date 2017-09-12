@@ -410,7 +410,7 @@ module.exports = function (BaseActorEntity) {
       }
       envelope.processedSeqNum = envelope.seqNum = state.__data.seqNum;
       var query = {};
-      if (self.getDataSource().name === 'evmongodb') {
+      if (self.getDataSource(options).name === 'mongodb') {
         query = {
           where: {
             or: [
