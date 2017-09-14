@@ -24,7 +24,8 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
-var batchJobRunner = require('../lib/queue-consumer.js');
+var queueConsumer = require('../lib/queue-consumer.js');
+var serverMonitor = require('../lib/server-monitor.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
@@ -189,7 +190,8 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
-      batchJobRunner.init();
+      serverMonitor.init();
+      queueConsumer.init(serverMonitor.eventEmitter);
       var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
       if (!disableEventHistoryManager || disableEventHistoryManager !== 'true') {
         eventHistroyManager = require('../lib/event-history-manager.js');
