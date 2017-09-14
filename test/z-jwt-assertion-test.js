@@ -36,19 +36,19 @@ var testModel = {
     "plural": "managerTables",
     "base": "BaseEntity",
     "acls": [{
-            "accessType": "*",
-            "principalType": "ROLE",
-            "principalId": "$everyone",
-            "permission": "DENY",
-            "property": "*"
-        },
-        {
-            "accessType": "*",
-            "principalType": "ROLE",
-            "principalId": "manager",
-            "permission": "ALLOW",
-            "property": "*"
-        }
+        "accessType": "*",
+        "principalType": "ROLE",
+        "principalId": "$everyone",
+        "permission": "DENY",
+        "property": "*"
+    },
+    {
+        "accessType": "*",
+        "principalType": "ROLE",
+        "principalId": "manager",
+        "permission": "ALLOW",
+        "property": "*"
+    }
     ]
 
 }
@@ -77,36 +77,36 @@ var demouser3 = {
     'id': 1000
 }
 
-var createToken = function(user, key, algo) {
+var createToken = function (user, key, algo) {
     var secret = key || 'secret';
     var token = jwt.sign(user, secret);
     return token;
 };
 
 // Test cases for testing the JWT authentication scheme .
-describe(chalk.blue('JWT assertion test'), function() {
+describe(chalk.blue('JWT assertion test'), function () {
     var endPointUrl = bootstrap.basePath + '/BaseUsers';
 
-    this.timeout(5000);
+    this.timeout(20000);
 
-    before('Adding user to BaseUser', function(done) {
+    before('Adding user to BaseUser', function (done) {
         var User = loopback.getModelByType('User');
-        User.create([demouser1, demouser3], bootstrap.defaultContext, function(err, users) {
+        User.create([demouser1, demouser3], bootstrap.defaultContext, function (err, users) {
             if (err) {
                 done(err);
             } else {
                 var trustedApp = loopback.getModelByType('TrustedApp');
-                trustedApp.create(appDetails, bootstrap.defaultContext, function(err, tapp) {
+                trustedApp.create(appDetails, bootstrap.defaultContext, function (err, tapp) {
                     if (err) {
                         done(err);
                     } else {
                         var modelDef = loopback.getModelByType('ModelDefinition');
-                        modelDef.create(testModel, bootstrap.defaultContext, function(err, model) {
+                        modelDef.create(testModel, bootstrap.defaultContext, function (err, model) {
                             if (err) {
                                 done(err);
                             } else {
                                 var role = loopback.getModelByType('BaseRole');
-                                role.create(roleDetail, bootstrap.defaultContext, function(err, role) {
+                                role.create(roleDetail, bootstrap.defaultContext, function (err, role) {
                                     if (err) {
                                         done(err);
                                     } else {
@@ -121,7 +121,7 @@ describe(chalk.blue('JWT assertion test'), function() {
         });
     });
 
-    it('Test - Authorized user - Should give user details ', function(done) {
+    it('Test - Authorized user - Should give user details ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -141,7 +141,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -149,7 +149,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized User - Should give User access even if app details not present but jwt username matches', function(done) {
+    it('Test - Authorized User - Should give User access even if app details not present but jwt username matches', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -170,7 +170,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -178,7 +178,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Unauthorized user - Should not give user details', function(done) {
+    it('Test - Unauthorized user - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -197,7 +197,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -205,7 +205,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Token expired - Should not give user details', function(done) {
+    it('Test - Token expired - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -225,7 +225,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -233,7 +233,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Invalid audience - Should not give user details', function(done) {
+    it('Test - Invalid audience - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -252,7 +252,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -260,7 +260,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Invalid secret - Should not give user details', function(done) {
+    it('Test - Invalid secret - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -280,7 +280,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -288,7 +288,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Invalid issuer - Should not give user details', function(done) {
+    it('Test - Invalid issuer - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -308,7 +308,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -316,7 +316,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Username and email missing - Should not give user details', function(done) {
+    it('Test - Username and email missing - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -333,7 +333,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -341,7 +341,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - New user - Should not give user details', function(done) {
+    it('Test - New user - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -359,7 +359,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -367,7 +367,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized app - Should give app access to test model with access only to manager ', function(done) {
+    it('Test - Authorized app - Should give app access to test model with access only to manager ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -388,7 +388,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('email', 'rocky@email.com')
             .set('roles', '["manager"]')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -396,7 +396,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized app - Should not give app access if trusted app not found ', function(done) {
+    it('Test - Authorized app - Should not give app access if trusted app not found ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -417,7 +417,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('email', 'rocky@email.com')
             .set('roles', '["manager"]')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -425,7 +425,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized app - Should not give app access to test model with unsupported role passed ', function(done) {
+    it('Test - Authorized app - Should not give app access to test model with unsupported role passed ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -446,7 +446,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('email', 'rocky@email.com')
             .set('roles', '["supplier"]')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -454,7 +454,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized app - Should not give app access if username email not given in header ', function(done) {
+    it('Test - Authorized app - Should not give app access if username email not given in header ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -473,7 +473,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('tenant_id', 'test-tenant')
             .set('roles', '["manager"]')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -482,7 +482,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             });
     });
 
-    it('Test - Authorized User - Should not give model access if app details not present but jwt username matches just by role passed in header', function(done) {
+    it('Test - Authorized User - Should not give model access if app details not present but jwt username matches just by role passed in header', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -506,7 +506,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('email', 'rocky@email.com')
             .set('roles', '["manager"]')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -584,7 +584,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -592,7 +592,7 @@ describe(chalk.blue('JWT assertion test'), function() {
                 }
             });
     });
-    it('Test - Authorized User - Should not give model access if app details not present but jwt username matches just by role passed in header', function(done) {
+    it('Test - Authorized User - Should not give model access if app details not present but jwt username matches just by role passed in header', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -616,7 +616,7 @@ describe(chalk.blue('JWT assertion test'), function() {
             .set('email', 'rocky@email.com')
             .set('roles', '["manager"]')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -627,9 +627,10 @@ describe(chalk.blue('JWT assertion test'), function() {
 
 });
 
-describe(chalk.blue('JWT assertion inherited model test'), function() {
+describe(chalk.blue('JWT assertion inherited model test'), function () {
+    this.timeout(20000);
     var endPointUrl2 = bootstrap.basePath + '/UserTestModel2';
-    before('Changing config to use JWT Assertion', function(done) {
+    before('Changing config to use JWT Assertion', function (done) {
         var BaseUser = loopback.findModel('BaseUser');
         var newUserModel = 'UserTestModel2';
         var modelDetails = {
@@ -646,7 +647,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
         });
 
         var user = loopback.findModel('UserTestModel2');
-        user.create(demouser2, bootstrap.defaultContext, function(err, res) {
+        user.create(demouser2, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
                 // delete app.models["UserTestModel2"];
@@ -655,8 +656,8 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
         });
     });
 
-    after('Remove Test Model', function(done) {
-        models.UserTestModel2.destroyById(100, bootstrap.defaultContext, function(err, res) {
+    after('Remove Test Model', function (done) {
+        models.UserTestModel2.destroyById(100, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -664,7 +665,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
         });
     });
 
-    it('Test - Authorized user - Should give user details ', function(done) {
+    it('Test - Authorized user - Should give user details ', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -684,7 +685,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(200)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -692,7 +693,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Unauthorized user - Should not give user details', function(done) {
+    it('Test - Unauthorized user - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -712,7 +713,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -720,7 +721,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Token expired - Should not give user details', function(done) {
+    it('Test - Token expired - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -740,7 +741,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -748,7 +749,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Invalid audience - Should not give user details', function(done) {
+    it('Test - Invalid audience - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -768,7 +769,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -776,7 +777,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Invalid secret - Should not give user details', function(done) {
+    it('Test - Invalid secret - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'mycompany.com',
@@ -796,7 +797,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -804,7 +805,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Invalid issuer - Should not give user details', function(done) {
+    it('Test - Invalid issuer - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -824,7 +825,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -832,7 +833,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - Username and email missing - Should not give user details', function(done) {
+    it('Test - Username and email missing - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -850,7 +851,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {
@@ -858,7 +859,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
                 }
             });
     });
-    it('Test - New user - Should not give user details', function(done) {
+    it('Test - New user - Should not give user details', function (done) {
         // JWT
         var jwtOptions = {
             'iss': 'infosys.com',
@@ -877,7 +878,7 @@ describe(chalk.blue('JWT assertion inherited model test'), function() {
             .set('x-jwt-assertion', jwt)
             .set('tenant_id', 'test-tenant')
             .expect(401)
-            .end(function(err, res) {
+            .end(function (err, res) {
                 if (err) {
                     done(err);
                 } else {

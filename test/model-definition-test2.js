@@ -18,6 +18,7 @@ var debug = require('debug')('model-definition-test');
 
 describe(chalk.blue('model-definition - Programmatic'), function () {
   after('cleaning up', function (done) {
+    this.timeout(20000);
     models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function (err, result) {
       console.log('Clean Up - Destroyed ModelDefinition');
       done();

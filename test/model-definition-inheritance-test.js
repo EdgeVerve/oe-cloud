@@ -514,7 +514,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
 describe(chalk.blue('model-definition-Inheritance  Programmatically'), function () {
 
     //var loopbackContext;
-
+    this.timeout(20000);
     var modelName = 'TestTable';
     var postData = {
         name: modelName,

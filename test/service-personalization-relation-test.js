@@ -281,8 +281,9 @@ describe(chalk.blue('service - personalization - relation test'), function () {
           expect(results).to.be.instanceof(Array);
           expect(results.length).to.equal(3);
           expect(results[0].billingAddress.street).to.be.equal('BTM');
+          expect(results[1].billingAddress.street).to.be.equal('Ecity');
+          expect(results[2].billingAddress.street).to.be.equal('HSR');
           done();
-
         });
     });
   });
