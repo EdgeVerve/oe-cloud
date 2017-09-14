@@ -17,18 +17,18 @@ var loopback = require('loopback');
 var async = require('async');
 var app = bootstrap.app;
 
-describe(chalk.blue('Data Personalization Test --REST'), function DatPersonalizationRest() {
-  // Testmodel  has no autoscoped variable.
+describe(chalk.blue('Data Personalization Test --REST'), function DataPersonalizationRest() {
   this.timeout(1000000);
-  var personalizedModel;
-  var personalizedModel1;
-  var personalizedModel2;
+  var fiveKageModel;
+  var tailedBeastModel;
+  var animeCharacterModel;
   var personalizedModelScope;
   var PersonalizedModelWithScopeAsModel;
 
-  var modelName = 'DataPersonalizationModel';
-  var modelDetails = {
-    name: modelName,
+  // Testmodel has no autoscoped variable(not auto-scoped)
+  var fiveKage = 'FiveKage';
+  var fiveKageDetails = {
+    name: fiveKage,
     base: 'BaseEntity',
     properties: {
       'name': {
@@ -38,16 +38,16 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     },
     strict: false,
     idInjection: false,
-    plural: modelName,
+    plural: fiveKage,
     mixins: {
       'HistoryMixin': true
     }
   };
 
   // Testmodel one has one autoscoped variable(tenantId)
-  var modelName1 = 'DataPersonalizationModelOne';
-  var modelDetails1 = {
-    name: modelName1,
+  var tailedBeast = 'TailedBeast';
+  var tailedBeastsDetails = {
+    name: tailedBeast,
     base: 'BaseEntity',
     properties: {
       'name': {
@@ -57,7 +57,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     },
     strict: false,
     idInjection: true,
-    plural: modelName1,
+    plural: tailedBeast,
     mixins: {
       'HistoryMixin': true
     },
@@ -67,9 +67,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   };
 
   // Testmodel two has two autoscoped variable(tenantId,username)
-  var modelName2 = 'DataPersonalizationModelTwo';
-  var modelDetails2 = {
-    name: modelName2,
+  var animeCharacter = 'AnimeCharacter';
+  var animeCharacterDetails = {
+    name: animeCharacter,
     base: 'BaseEntity',
     properties: {
       'name': {
@@ -79,7 +79,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     },
     strict: false,
     idInjection: false,
-    plural: modelName2,
+    plural: animeCharacter,
     mixins: {
       'HistoryMixin': true
     },
@@ -136,177 +136,177 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
     ]
   };
 
-  var testData = [
+  var characterData = [
     {
-      'name': 'noScope'
+      'name': 'Naruto'
     },
     {
-      'name': 's1d1',
+      'name': 'Hinata',
       'scope': {
         'device': 'ios'
       }
     },
     {
-      'name': 's1d2',
+      'name': 'Sasuke',
       'scope': {
         'device': 'android'
       }
     },
     {
-      'name': 's1d3',
+      'name': 'Sakura',
       'scope': {
         'device': 'windows'
       }
     },
     {
-      'name': 's2d1l1',
+      'name': 'RockLee',
       'scope': {
         'device': 'ios',
         'location': 'us'
       }
     },
     {
-      'name': 's2d1l2',
+      'name': 'Gaara',
       'scope': {
         'device': 'ios',
         'location': 'uk'
       }
     },
     {
-      'name': 's2d1l3',
+      'name': 'Shikamaru',
       'scope': {
         'device': 'ios',
         'location': 'in'
       }
     },
     {
-      'name': 's2d2l1',
+      'name': 'Choji',
       'scope': {
         'device': 'android',
         'location': 'us'
       }
     },
     {
-      'name': 's2d2l2',
+      'name': 'Shino',
       'scope': {
         'device': 'android',
         'location': 'uk'
       }
     },
     {
-      'name': 's2d2l3',
+      'name': 'TenTen',
       'scope': {
         'device': 'android',
         'location': 'in'
       }
     },
     {
-      'name': 's2d1ln1',
+      'name': 'Minato',
       'scope': {
         'device': 'ios',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2d1ln2',
+      'name': 'Nagato',
       'scope': {
         'device': 'ios',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2d1ln3',
+      'name': 'Itachi',
       'scope': {
         'device': 'ios',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2d2ln1',
+      'name': 'Madara',
       'scope': {
         'device': 'android',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2d2ln2',
+      'name': 'Neji',
       'scope': {
         'device': 'android',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2d2ln3',
+      'name': 'Might Guy',
       'scope': {
         'device': 'android',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l1ln1',
+      'name': 'Jiraya',
       'scope': {
         'location': 'us',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l1ln2',
+      'name': 'Sai',
       'scope': {
         'location': 'us',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l1ln3',
+      'name': 'Tsunade',
       'scope': {
         'location': 'us',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l2ln1',
+      'name': 'Kakashi',
       'scope': {
         'location': 'uk',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l2ln2',
+      'name': 'Karin',
       'scope': {
         'location': 'uk',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l2ln3',
+      'name': 'Ino',
       'scope': {
         'location': 'uk',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l3ln1',
+      'name': 'Sasori',
       'scope': {
         'location': 'in',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l3ln2',
+      'name': 'Orochimaru',
       'scope': {
         'location': 'in',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l3ln3',
+      'name': 'Obito',
       'scope': {
         'location': 'in',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's3d1l1ln1',
+      'name': 'Hashirama',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
@@ -314,7 +314,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       }
     },
     {
-      'name': 's3d2l3ln2',
+      'name': 'Kiba',
       'scope': {
         'location': 'in',
         'lang': 'en-uk',
@@ -322,7 +322,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       }
     },
     {
-      'name': 's3d3l3ln3',
+      'name': 'Killer Bee',
       'scope': {
         'location': 'in',
         'lang': 'en-in',
@@ -330,7 +330,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       }
     },
     {
-      'name': 's3d3l1ln3',
+      'name': 'Temari',
       'scope': {
         'location': 'us',
         'lang': 'en-in',
@@ -338,7 +338,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       }
     },
     {
-      'name': 's3d3l2ln3',
+      'name': 'Asuma',
       'scope': {
         'location': 'uk',
         'lang': 'en-in',
@@ -346,12 +346,13 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       }
     }
   ];
-  var testData1 = [
+
+  var kageData = [
     {
-      'name': 'e1'
+      'name': 'HoKage'
     },
     {
-      'name': 's1l1',
+      'name': 'RaiKage',
       'scope': {
         'location': 'us'
       }
@@ -361,7 +362,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   before('Create Test model', function restBeforeAll(done) {
     async.parallel([
       function asyncModel(callback) {
-        models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function modelCreate(err, res) {
+        models.ModelDefinition.create(fiveKageDetails, bootstrap.defaultContext, function modelCreate(err, res) {
           if (err) {
             log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel model');
             callback(err);
@@ -371,7 +372,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         });
       },
       function asyncModelOne(callback) {
-        models.ModelDefinition.create(modelDetails1, bootstrap.defaultContext, function modelOneCreate(err, res) {
+        models.ModelDefinition.create(tailedBeastsDetails, bootstrap.defaultContext, function modelOneCreate(err, res) {
           if (err) {
             log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel1 model');
             callback(err);
@@ -381,7 +382,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         });
       },
       function asyncModelTwo(callback) {
-        models.ModelDefinition.create(modelDetails2, bootstrap.defaultContext, function modelTwoCreate(err, res) {
+        models.ModelDefinition.create(animeCharacterDetails, bootstrap.defaultContext, function modelTwoCreate(err, res) {
           if (err) {
             log.debug(bootstrap.defaultContext, 'unable to create DataPersonalizationModel2 model');
             callback(err);
@@ -413,11 +414,11 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         if (err) {
           done(err);
         } else {
-          personalizedModel = loopback.getModel(modelName, bootstrap.defaultContext);
-          personalizedModel1 = loopback.getModel(modelName1, bootstrap.defaultContext);
-          personalizedModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
+          fiveKageModel = loopback.getModel(fiveKage, bootstrap.defaultContext);
+          tailedBeastModel = loopback.getModel(tailedBeast, bootstrap.defaultContext);
+          animeCharacterModel = loopback.getModel(animeCharacter, bootstrap.defaultContext);
           personalizedModelScope = loopback.getModel(myScopeModel, bootstrap.defaultContext);
-          PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel, bootstrap.defaultContext);
+          PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel1, bootstrap.defaultContext);
           done();
         }
       });
@@ -443,15 +444,15 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
       'roles': '0'
     };
 
-    personalizedModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
+    fiveKageModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
       if (err) {
         done(err);
       }
-      personalizedModel1.destroyAll({}, callContext, function modelDestroyAll(err, result) {
+      tailedBeastModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
         if (err) {
           done(err);
         }
-        personalizedModel2.destroyAll({}, callContext, function modelDestroyAll(err, result) {
+        animeCharacterModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
           if (err) {
             done(err);
           }
@@ -462,10 +463,10 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should insert data into TestModel with and without any manual scope into non-autoscoped test model[Group of records]', function (done) {
-    var url1 = bootstrap.basePath + '/' + modelName;
+    var url = bootstrap.basePath + '/' + fiveKage;
     api
-      .post(url1)
-      .send(testData1)
+      .post(url)
+      .send(kageData)
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .expect(200).end(function (err, result) {
@@ -481,10 +482,10 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should insert data into TestModel with and without any manual scope [Group of records]', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .post(url)
-      .send(testData)
+      .send(characterData)
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .expect(200).end(function (err, result) {
@@ -501,9 +502,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 
   it('- Should insert data into TestModel without any manual or auto scope in data', function (done) {
     var postData = {
-      'name': 'noScope'
+      'name': 'Kurama'
     };
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     api
       .post(url)
       .send(postData)
@@ -513,7 +514,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         if (err) {
           done(err);
         } else {
-          expect(result.body.name).to.be.equal('noScope');
+          expect(result.body.name).to.be.equal('Kurama');
           done();
         }
       });
@@ -521,14 +522,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 
   it('- Should insert data into TestModel with manual scope', function (done) {
     var postData = {
-      'name': 's3d2l3ln1',
+      'name': 'Ten-Tails',
       'scope': {
         'location': 'in',
         'lang': 'en-us',
         'device': 'android'
       }
     };
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     api
       .post(url)
       .send(postData)
@@ -538,7 +539,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         if (err) {
           done(err);
         } else {
-          expect(result.body.name).to.be.equal('s3d2l3ln1');
+          expect(result.body.name).to.be.equal('Ten-Tails');
           done();
         }
       });
@@ -546,14 +547,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 
   it('- Should not insert data into TestModel with auto scope defined on model and not passed as part of header or query string', function (done) {
     var postData = {
-      'name': 's3d2l1ln1',
+      'name': 'Shukaku',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
         'device': 'android'
       }
     };
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     api
       .post(url)
       .send(postData)
@@ -565,7 +566,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
 
   it('- Should not insert data into TestModel with auto scope', function (done) {
     var postData = {
-      'name': 's3d2l1ln1',
+      'name': 'Matatabi',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
@@ -573,7 +574,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         'tenantId': 'test-tenant'
       }
     };
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     api
       .post(url)
       .send(postData)
@@ -584,7 +585,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should retrieve data from TestModel without any manual scope contributors', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -600,7 +601,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should retrieve data from TestModel with context contributors', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -623,7 +624,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should retrieve data from TestModel without any autoscoped values defined on Model', function (done) {
-    var url = bootstrap.basePath + '/' + modelName;
+    var url = bootstrap.basePath + '/' + fiveKage;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -646,7 +647,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should not retrieve any data from TestModel with autoscoped values defined on Model but not provided by user', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -662,7 +663,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
   });
 
   it('- Should retrieve data from TestModel in Descending order based on score calculated from context', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -680,14 +681,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
           done(err);
         } else {
           expect(result.body).not.to.be.empty;
-          expect(result.body[0].name).to.be.equal('s3d3l3ln3');
+          expect(result.body[0].name).to.be.equal('Killer Bee');
           done();
         }
       });
   });
 
   it('- Should retrieve data from TestModel in Descending order based on score calculated from context', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -705,14 +706,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
           done(err);
         } else {
           expect(result.body).not.to.be.empty;
-          expect(result.body[0].name).to.be.equal('s3d1l1ln1');
+          expect(result.body[0].name).to.be.equal('Hashirama');
           done();
         }
       });
   });
 
   it('- Should retrieve data from TestModel without any scope when defaults is set', function (done) {
-    var url = bootstrap.basePath + '/' + modelName2;
+    var url = bootstrap.basePath + '/' + animeCharacter;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -724,16 +725,16 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
           done(err);
         } else {
           expect(result.body).not.to.be.empty;
-          expect(result.body[0].name).to.be.equal('noScope');
+          expect(result.body[0].name).to.be.equal('Naruto');
           done();
         }
       });
   });
 
   it('- Should be able to post data with scope containing array of values', function (done) {
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     var postData = {
-      'name': 'S1RolesArray',
+      'name': 'Son Goku',
       'scope': {
         'roles': ['admin', 'designer']
       }
@@ -751,14 +752,14 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
           expect(result.body).not.to.be.null;
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
-          expect(result.body.name).to.be.equal('S1RolesArray');
+          expect(result.body.name).to.be.equal('Son Goku');
           done();
         }
       });
   });
 
   it('- Should be able retrieve all record with scope values in ignoreList', function (done) {
-    var url = bootstrap.basePath + '/' + modelName1;
+    var url = bootstrap.basePath + '/' + tailedBeast;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -773,6 +774,30 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
           expect(result.body).to.have.length(1);
+          done();
+        }
+      });
+  });
+
+  it('- Should be able to write custom query on scope which will take higher precidence on manual scope query', function (done) {
+    var url = bootstrap.basePath + '/' + tailedBeast + '?filter={"where":{"scope.device": "android"}}';
+    api
+      .get(url)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('tenant_id', 'test-tenant')
+      .set('device', 'windows')
+      .set('lang', 'en-us')
+      .set('location', 'in')
+      .expect(200).end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).not.to.be.null;
+          expect(result.body).not.to.be.empty;
+          expect(result.body).not.to.be.undefined;
+          expect(result.body).to.have.length(1);
+          expect(result.body[0].name).to.be.equal('Ten-Tails');
           done();
         }
       });
@@ -910,30 +935,6 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
                 done();
               }
             });
-        }
-      });
-  });
-
-  it('- Should be able to write custom query on scope which will take higher precidence on manual scope query', function (done) {
-    var url = bootstrap.basePath + '/' + modelName1 + '?filter={"where":{"scope.device": "android"}}';
-    api
-      .get(url)
-      .set('Content-Type', 'application/json')
-      .set('Accept', 'application/json')
-      .set('tenant_id', 'test-tenant')
-      .set('device', 'windows')
-      .set('lang', 'en-us')
-      .set('location', 'in')
-      .expect(200).end(function (err, result) {
-        if (err) {
-          done(err);
-        } else {
-          expect(result.body).not.to.be.null;
-          expect(result.body).not.to.be.empty;
-          expect(result.body).not.to.be.undefined;
-          expect(result.body).to.have.length(1);
-          expect(result.body[0].name).to.be.equal('s3d2l3ln1');
-          done();
         }
       });
   });
@@ -1338,192 +1339,200 @@ describe(chalk.blue('Data Personalization Test --REST'), function DatPersonaliza
         }
       });
   });
+
 });
+//End Of Describe
+
 
 describe(chalk.blue('Data Personalization Test --Programatic'), function () {
-  this.timeout(20000);
-  // Testmodel  has no autoscoped variable.
-  var modelName = 'DataPersonalizationModel';
+  this.timeout(200000);
 
+  var fiveKageModel;
+  var tailedBeastModel;
+  var animeCharacterModel;
+  var personalizedModelScope;
+  var PersonalizedModelWithScopeAsModel;
+
+  // Testmodel has no autoscoped variable(not auto-scoped)
+  var fiveKage = 'FiveKage';
   // Testmodel one has one autoscoped variable(tenantId)
-  var modelName1 = 'DataPersonalizationModelOne';
-
+  var tailedBeast = 'TailedBeast';
   // Testmodel two has two autoscoped variable(tenantId,username)
-  var modelName2 = 'DataPersonalizationModelTwo';
+  var animeCharacter = 'AnimeCharacter';
   var myScopeModel = 'CustomScope';
   var myScopeModel1 = 'ModelWithScopeAsModel';
 
-  var testData = [
+  var characterData = [
     {
-      'name': 'noScope'
+      'name': 'Naruto'
     },
     {
-      'name': 's1d1',
+      'name': 'Hinata',
       'scope': {
         'device': 'ios'
       }
     },
     {
-      'name': 's1d2',
+      'name': 'Sasuke',
       'scope': {
         'device': 'android'
       }
     },
     {
-      'name': 's1d3',
+      'name': 'Sakura',
       'scope': {
         'device': 'windows'
       }
     },
     {
-      'name': 's2d1l1',
+      'name': 'RockLee',
       'scope': {
         'device': 'ios',
         'location': 'us'
       }
     },
     {
-      'name': 's2d1l2',
+      'name': 'Gaara',
       'scope': {
         'device': 'ios',
         'location': 'uk'
       }
     },
     {
-      'name': 's2d1l3',
+      'name': 'Shikamaru',
       'scope': {
         'device': 'ios',
         'location': 'in'
       }
     },
     {
-      'name': 's2d2l1',
+      'name': 'Choji',
       'scope': {
         'device': 'android',
         'location': 'us'
       }
     },
     {
-      'name': 's2d2l2',
+      'name': 'Shino',
       'scope': {
         'device': 'android',
         'location': 'uk'
       }
     },
     {
-      'name': 's2d2l3',
+      'name': 'TenTen',
       'scope': {
         'device': 'android',
         'location': 'in'
       }
     },
     {
-      'name': 's2d1ln1',
+      'name': 'Minato',
       'scope': {
         'device': 'ios',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2d1ln2',
+      'name': 'Nagato',
       'scope': {
         'device': 'ios',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2d1ln3',
+      'name': 'Itachi',
       'scope': {
         'device': 'ios',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2d2ln1',
+      'name': 'Madara',
       'scope': {
         'device': 'android',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2d2ln2',
+      'name': 'Neji',
       'scope': {
         'device': 'android',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2d2ln3',
+      'name': 'Might Guy',
       'scope': {
         'device': 'android',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l1ln1',
+      'name': 'Jiraya',
       'scope': {
         'location': 'us',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l1ln2',
+      'name': 'Sai',
       'scope': {
         'location': 'us',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l1ln3',
+      'name': 'Tsunade',
       'scope': {
         'location': 'us',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l2ln1',
+      'name': 'Kakashi',
       'scope': {
         'location': 'uk',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l2ln2',
+      'name': 'Karin',
       'scope': {
         'location': 'uk',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l2ln3',
+      'name': 'Ino',
       'scope': {
         'location': 'uk',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's2l3ln1',
+      'name': 'Sasori',
       'scope': {
         'location': 'in',
         'lang': 'en-us'
       }
     },
     {
-      'name': 's2l3ln2',
+      'name': 'Orochimaru',
       'scope': {
         'location': 'in',
         'lang': 'en-uk'
       }
     },
     {
-      'name': 's2l3ln3',
+      'name': 'Obito',
       'scope': {
         'location': 'in',
         'lang': 'en-in'
       }
     },
     {
-      'name': 's3d1l1ln1',
+      'name': 'Hashirama',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
@@ -1531,7 +1540,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       }
     },
     {
-      'name': 's3d2l3ln2',
+      'name': 'Kiba',
       'scope': {
         'location': 'in',
         'lang': 'en-uk',
@@ -1539,7 +1548,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       }
     },
     {
-      'name': 's3d3l3ln3',
+      'name': 'Killer Bee',
       'scope': {
         'location': 'in',
         'lang': 'en-in',
@@ -1547,7 +1556,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       }
     },
     {
-      'name': 's3d3l1ln3',
+      'name': 'Temari',
       'scope': {
         'location': 'us',
         'lang': 'en-in',
@@ -1555,7 +1564,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       }
     },
     {
-      'name': 's3d3l2ln3',
+      'name': 'Asuma',
       'scope': {
         'location': 'uk',
         'lang': 'en-in',
@@ -1563,37 +1572,32 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       }
     }
   ];
-  var testData1 = [
+
+  var kageData = [
     {
-      'name': 'e1'
+      'name': 'HoKage'
     },
     {
-      'name': 's1l1',
+      'name': 'RaiKage',
       'scope': {
         'location': 'us'
       }
     }
   ];
 
-  var personalizedModel;
-  var personalizedModel1;
-  var personalizedModel2;
-  var personalizedModelScope;
-  var PersonalizedModelWithScopeAsModel;
-
   before('Create Test Models', function (done) {
-    personalizedModel = loopback.getModel(modelName, bootstrap.defaultContext);
-    personalizedModel1 = loopback.getModel(modelName1, bootstrap.defaultContext);
-    personalizedModel2 = loopback.getModel(modelName2, bootstrap.defaultContext);
+    fiveKageModel = loopback.getModel(fiveKage, bootstrap.defaultContext);
+    tailedBeastModel = loopback.getModel(tailedBeast, bootstrap.defaultContext);
+    animeCharacterModel = loopback.getModel(animeCharacter, bootstrap.defaultContext);
     personalizedModelScope = loopback.getModel(myScopeModel, bootstrap.defaultContext);
     PersonalizedModelWithScopeAsModel = loopback.getModel(myScopeModel1, bootstrap.defaultContext);
     done();
   });
 
-  after('Remove Test Model', function (done) {
+  after('Remove Test Model', function restAfterAll(done) {
     var callContext = {};
     callContext.ctx = {
-      'tenantId': ['test-tenant', 'test-tenant'],
+      'tenantId': 'test-tenant',
       'username': 'testuser',
       'device': ['ios', 'windows', 'android'],
       'location': ['us', 'in', 'uk'],
@@ -1610,21 +1614,18 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'roles': '0'
     };
 
-    personalizedModel.destroyAll({}, callContext, function (err, result) {
+    fiveKageModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
       if (err) {
         done(err);
       }
-      // console.log('destroy response1 ', err, result);
-      personalizedModel1.destroyAll({}, callContext, function (err, result) {
+      tailedBeastModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
         if (err) {
           done(err);
         }
-        // console.log('destroy response2 ', err, result);
-        personalizedModel2.destroyAll({}, callContext, function (err, result) {
+        animeCharacterModel.destroyAll({}, callContext, function modelDestroyAll(err, result) {
           if (err) {
             done(err);
           }
-          // console.log('destroy response3 ', err, result);
           done();
         });
       });
@@ -1643,7 +1644,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    personalizedModel2.create(testData, callContext, function (err, result) {
+    animeCharacterModel.create(characterData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1664,7 +1665,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    personalizedModel.create(testData1, callContext, function (err, result) {
+    fiveKageModel.create(kageData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1676,7 +1677,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
   it('- Should insert data into TestModel without any manual or auto scope in data', function (done) {
     var postData = {
-      'name': 'noScope'
+      'name': 'Saiken'
     };
 
     var callContext = {};
@@ -1688,11 +1689,11 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
-        expect(result.name).to.be.equal('noScope');
+        expect(result.name).to.be.equal('Saiken');
         // expect(result.body.scope).not.to.be.null;
         //  expect(result.body.scope).not.to.be.undefined;
         // expect(result.body.scope.tenantId).to.be.equal('test-tenant');
@@ -1704,7 +1705,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
   it('- Should insert data into TestModel with manual scope', function (done) {
     var postData = [
       {
-        'name': 's3d2l3ln1',
+        'name': 'Shukaku',
         'scope': {
           'location': 'in',
           'lang': 'en-us',
@@ -1712,13 +1713,13 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         }
       },
       {
-        'name': 'S1Deviceios',
+        'name': 'Kurama',
         'scope': {
           'device': 'ios'
         }
       },
       {
-        'name': 'S1Devicewindows',
+        'name': 'Gyuki',
         'scope': {
           'device': 'windows'
         }
@@ -1734,7 +1735,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1750,7 +1751,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
   it('- Should not insert data into TestModel with auto scope defined on model and not passed as part of header or query string', function (done) {
     var postData = {
-      'name': 's3d2l1ln1',
+      'name': 'Ten-Tails',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
@@ -1761,7 +1762,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     var callContext = {};
     callContext.ctx = {};
 
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         expect(err).not.to.be.null;
         done();
@@ -1773,7 +1774,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
   it('- Should not insert data into TestModel with auto scope', function (done) {
     var postData = {
-      'name': 's3d2l1ln1',
+      'name': 'Matatabi',
       'scope': {
         'location': 'us',
         'lang': 'en-us',
@@ -1792,7 +1793,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'tenantId': '0'
     };
 
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         expect(err).not.to.be.null;
         done();
@@ -1814,7 +1815,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1843,7 +1844,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1872,7 +1873,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    personalizedModel.find({}, callContext, function (err, result) {
+    fiveKageModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -1899,7 +1900,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done();
       } else {
@@ -1927,12 +1928,12 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '50'
     };
 
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
         expect(result).not.to.be.empty;
-        expect(result[0].name).to.be.equal('s3d3l3ln3');
+        expect(result[0].name).to.be.equal('Killer Bee');
         done();
       }
     });
@@ -1957,12 +1958,12 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'lang': '30'
     };
 
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
         expect(result).not.to.be.empty;
-        expect(result[0].name).to.be.equal('s3d1l1ln1');
+        expect(result[0].name).to.be.equal('Hashirama');
         done();
       }
     });
@@ -1981,12 +1982,12 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0',
       'defaults': '0'
     };
-    personalizedModel2.find({}, callContext, function (err, result) {
+    animeCharacterModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
         expect(result).not.to.be.empty;
-        expect(result[0].name).to.be.equal('noScope');
+        expect(result[0].name).to.be.equal('Naruto');
         done();
       }
     });
@@ -1994,7 +1995,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
   it('- Should be able to post data with scope containing array of values', function (done) {
     var postData = {
-      'name': 'S1RolesArray',
+      'name': 'Saiken',
       'scope': {
         'roles': ['admin', 'designer']
       }
@@ -2011,7 +2012,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'username': '0'
     };
 
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2021,7 +2022,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         expect(result._scope).to.be.instanceof(Array);
         expect(result._scope).to.have.length(3);
         expect(result._scope).to.have.members(['roles:admin', 'roles:designer', 'tenantId:test-tenant']);
-        expect(result.name).to.be.equal('S1RolesArray');
+        expect(result.name).to.be.equal('Saiken');
         done();
       }
     });
@@ -2041,7 +2042,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    personalizedModel1.find({}, callContext, function (err, result) {
+    tailedBeastModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2057,11 +2058,11 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
 
   it('- Should be able to post data with ignoreAutoScope setting', function (done) {
     var postData = {
-      'name': 'skipAutoScopeRecord'
+      'name': 'Kyubi'
     };
     var callContext = { ctx: {} };
     callContext.ignoreAutoScope = 'true';
-    personalizedModel1.create(postData, callContext, function (err, result) {
+    tailedBeastModel.create(postData, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2070,7 +2071,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         expect(result).not.to.be.undefined;
         expect(result._scope).to.have.length(1);
         expect(result._scope).to.have.members(['tenantId:default']);
-        expect(result.name).to.be.equal('skipAutoScopeRecord');
+        expect(result.name).to.be.equal('Kyubi');
         done();
       }
     });
@@ -2092,7 +2093,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    personalizedModel1.find({}, callContext, function (err, result) {
+    tailedBeastModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2119,7 +2120,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
       'device': '0'
     };
 
-    personalizedModel1.find({
+    tailedBeastModel.find({
       'where': {
         'scope.device': 'ios'
       }
@@ -2131,7 +2132,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         expect(result).not.to.be.empty;
         expect(result).not.to.be.undefined;
         expect(result).to.have.length(1);
-        expect(result[0].name).to.be.equal('S1Deviceios');
+        expect(result[0].name).to.be.equal('Kurama');
         done();
       }
     });
@@ -2141,7 +2142,7 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     var callContext = {};
     callContext.ignoreAutoScope = true;
 
-    personalizedModel1.find({}, callContext, function (err, result) {
+    tailedBeastModel.find({}, callContext, function (err, result) {
       if (err) {
         done(err);
       } else {
@@ -2149,7 +2150,556 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
         expect(result).not.to.be.empty;
         expect(result).not.to.be.undefined;
         expect(result).to.have.length(1);
-        expect(result[0].name).to.be.equal('skipAutoScopeRecord');
+        expect(result[0].name).to.be.equal('Kyubi');
+        done();
+      }
+    });
+  });
+
+  it('- Should be able to update record with scope for same tenant', function (done) {
+    var postData = {
+      'name': 'Isobu',
+      'scope': {
+        'org': 'ev'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0'
+    };
+
+    tailedBeastModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Isobu');
+        postData.id = result.id;
+        postData._version = result._version;
+        postData.name = 'Isobu Part2';
+        tailedBeastModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            done(err);
+          } else {
+            expect(res).not.to.be.null;
+            expect(res).not.to.be.empty;
+            expect(res).not.to.be.undefined;
+            expect(res._scope).to.be.instanceof(Array);
+            expect(res.name).to.be.equal('Isobu Part2');
+
+            callContext.ctx = {
+              'tenantId': 'test-tenant',
+              'org': 'ev'
+            };
+
+            callContext.ctxWeights = {
+              'tenantId': '0',
+              'org': '1'
+            };
+
+            tailedBeastModel.find({ where: { 'name': 'Isobu' } }, callContext, function (err, res1) {
+              if (err) {
+                done(err);
+              } else {
+                expect(res1).not.to.be.null;
+                expect(res1).to.be.empty;
+                expect(res1).not.to.be.undefined;
+
+                tailedBeastModel.find({}, callContext, function (err, res2) {
+                  if (err) {
+                    done(err);
+                  } else {
+                    expect(res2).not.to.be.null;
+                    expect(res2).not.to.be.empty;
+                    expect(res2).not.to.be.undefined;
+                    expect(res2[0].name).to.be.equal('Isobu Part2');
+                    done();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should create a new record when scope is changed for upsert for same tenant', function (done) {
+    var postData = {
+      'name': 'Chomei',
+      'scope': {
+        'org': 'infy'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0'
+    };
+
+    tailedBeastModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Chomei');
+
+        postData.id = result.id;
+        //postData._version = result._version;
+        postData.name = 'Chomei part2';
+        postData.scope.unit = 'finacle';
+
+        tailedBeastModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            done(err);
+          } else {
+            expect(res).not.to.be.null;
+            expect(res).not.to.be.empty;
+            expect(res).not.to.be.undefined;
+            expect(res._scope).to.be.instanceof(Array);
+            expect(res.name).to.be.equal('Chomei part2');
+
+            callContext.ctx = {
+              'tenantId': 'test-tenant',
+              'org': 'infy',
+              'unit': 'finacle'
+            };
+
+            callContext.ctxWeights = {
+              'tenantId': '0',
+              'org': '1',
+              'unit': '1'
+            };
+
+            tailedBeastModel.find({ where: { 'name': 'Chomei' } }, callContext, function (err, res1) {
+              if (err) {
+                done(err);
+              } else {
+                expect(res1).not.to.be.null;
+                expect(res1).not.to.be.empty;
+                expect(res1).not.to.be.undefined;
+                expect(res1[0].name).to.be.equal('Chomei');
+
+                tailedBeastModel.find({}, callContext, function (err, res2) {
+                  if (err) {
+                    done(err);
+                  } else {
+                    expect(res2).not.to.be.null;
+                    expect(res2).not.to.be.empty;
+                    expect(res2).not.to.be.undefined;
+                    expect(res2[0].name).to.be.equal('Chomei part2');
+                    expect(res2[1].name).to.be.equal('Chomei');
+                    done();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should not be able to update data created by another tenant', function (done) {
+    var postData = {
+      'name': 'Nine tails',
+      'scope': {
+        'org': 'fin'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'org': 'fin'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0',
+      'org': '1'
+    };
+
+    tailedBeastModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Nine tails');
+        postData.id = result.id;
+        postData._version = result._version;
+        postData.name = 'Nine tails Kurama';
+
+        callContext.ctx = {
+          'tenantId': 'new-tenant',
+          'org': 'fin'
+        };
+
+
+        tailedBeastModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            done(err);
+          } else {
+            expect(res).not.to.be.null;
+            expect(res).not.to.be.empty;
+            expect(res).not.to.be.undefined;
+            expect(res._scope).to.be.instanceof(Array);
+            expect(res.name).to.be.equal('Nine tails Kurama');
+
+            tailedBeastModel.find({}, callContext, function (err, res1) {
+              if (err) {
+                done(err);
+              } else {
+                expect(res1).not.to.be.null;
+                expect(res1).not.to.be.empty;
+                expect(res1).not.to.be.undefined;
+                expect(res1[0].name).to.be.equal('Nine tails Kurama');
+
+                callContext.ctx = {
+                  'tenantId': 'test-tenant',
+                  'org': 'fin'
+                };
+
+
+                tailedBeastModel.find({}, callContext, function (err, res2) {
+                  if (err) {
+                    done(err);
+                  } else {
+                    expect(res2).not.to.be.null;
+                    expect(res2).not.to.be.empty;
+                    expect(res2).not.to.be.undefined;
+                    expect(res2[0].name).to.be.equal('Nine tails');
+                    done();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should be able to update record with scope for same tenant when idInjection is false on model', function (done) {
+    var postData = {
+      'name': 'Rinn',
+      'scope': {
+        'org': 'ev'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'test-case'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0',
+      'username': '0'
+    };
+
+    animeCharacterModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Rinn');
+        postData.id = result.id;
+        postData._version = result._version;
+        postData.name = 'Rinn Nohara';
+
+        animeCharacterModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            done(err);
+          } else {
+            expect(res).not.to.be.null;
+            expect(res).not.to.be.empty;
+            expect(res).not.to.be.undefined;
+            expect(res._scope).to.be.instanceof(Array);
+            expect(res.name).to.be.equal('Rinn Nohara');
+
+            callContext.ctx = {
+              'tenantId': 'test-tenant',
+              'username': 'test-case',
+              'org': 'ev'
+            };
+
+            callContext.ctxWeights = {
+              'tenantId': '0',
+              'username': '0',
+              'org': '1'
+            };
+
+            animeCharacterModel.find({ where: { 'name': 'Rinn' } }, callContext, function (err, res1) {
+              if (err) {
+                done(err);
+              } else {
+                expect(res1).not.to.be.null;
+                expect(res1).to.be.empty;
+                expect(res1).not.to.be.undefined;
+
+                animeCharacterModel.find({}, callContext, function (err, res2) {
+                  if (err) {
+                    done(err);
+                  } else {
+                    expect(res2).not.to.be.null;
+                    expect(res2).not.to.be.empty;
+                    expect(res2).not.to.be.undefined;
+                    expect(res2[0].name).to.be.equal('Rinn Nohara');
+                    done();
+                  }
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should create a new record when scope is changed for upsert for same tenant when idInjection is false on model', function (done) {
+    var postData = {
+      'name': 'Zetsu',
+      'scope': {
+        'org': 'infy'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'test-case'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0',
+      'username': '0'
+    };
+
+    animeCharacterModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Zetsu');
+
+        postData.id = result.id;
+        postData._version = result._version;
+        postData.name = 'Black Zetsu';
+        postData.scope.unit = 'finacle';
+
+        animeCharacterModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            expect(err).not.to.be.null;
+            expect(err).not.to.be.undefined;
+            done();
+          } else {
+            done(new Error('should throw an error because of same id'));
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should not be able to update data created by another tenant when idInjection is false on model', function (done) {
+    var postData = {
+      'name': 'Kabuto',
+      'scope': {
+        'org': 'ev'
+      }
+    };
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'test-case'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0',
+      'username': '0'
+    };
+
+    animeCharacterModel.create(postData, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result._scope).to.be.instanceof(Array);
+        expect(result.name).to.be.equal('Kabuto');
+        postData.id = result.id;
+        postData._version = result._version;
+        postData.name = 'Kabuto Yakushi';
+
+        callContext.ctx = {
+          'tenantId': 'new-tenant',
+          'username': 'new-test-case'
+        };
+
+        animeCharacterModel.upsert(postData, callContext, function (err, res) {
+          if (err) {
+            return done(err);
+            //expect(err).not.to.be.null;
+            //expect(err).not.to.be.undefined;
+            //done();
+          }
+          else {
+            //done(new Error('Should not update the record of other tenant'));
+            expect(res.id).to.not.equal(postData.id);
+            return done();
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should be able to post a record with unique validation on property with scope', function (done) {
+    var modelUnique = 'ModelUnique';
+    var modelDetailsUnique = {
+      name: modelUnique,
+      base: 'BaseEntity',
+      properties: {
+        'a': {
+          'type': 'string',
+          'unique': true
+        },
+        'b': {
+          'type': 'string',
+          'unique': true
+        }
+      },
+      strict: false,
+      idInjection: false,
+      mixins: {
+        'HistoryMixin': true
+      },
+      autoscope: [
+        'tenantId'
+      ],
+      scoreScheme: 'max'
+    };
+
+    var postData = [
+      {
+        'a': '1',
+        'b': '1',
+        'scope': {
+          'rule': 'x'
+        }
+      },
+      {
+        'a': '2',
+        'b': '2',
+        'scope': {
+          'rule': 'x'
+        }
+      },
+      {
+        'a': '1',
+        'b': '1',
+        'scope': {
+          'rule': 'y',
+          'category': 'x'
+        }
+      },
+      {
+        'a': '2',
+        'b': '1',
+        'scope': {
+          'rule': 'y',
+          'category': 'y'
+        }
+      },
+      {
+        'a': '1',
+        'b': '2',
+        'scope': {
+          'rule': 'y',
+          'category': 'y'
+        }
+      }
+    ];
+
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'unique-tenant'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0'
+    };
+
+    models.ModelDefinition.create(modelDetailsUnique, callContext, function (err, res) {
+      if (err) {
+        done(err);
+      } else {
+        var uniquePropModel = loopback.getModel('ModelUnique', callContext);
+        uniquePropModel.create(postData, callContext, function (err, result) {
+          if (err) {
+            done(err);
+          } else {
+            expect(result).not.to.be.null;
+            expect(result).not.to.be.empty;
+            expect(result).not.to.be.undefined;
+            expect(result).to.be.instanceof(Array);
+            expect(result).to.have.length(5);
+            done();
+          }
+        });
+      }
+    });
+  });
+
+  it('- Should be able to get unique records with unique validation on property with scope', function (done) {
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'unique-tenant',
+      'rule': 'y',
+      'category': 'y'
+    };
+
+    callContext.ctxWeights = {
+      'tenantId': '0',
+      'rule': '0',
+      'category': '0'
+    };
+
+    var uniquePropModel = loopback.getModel('ModelUnique', callContext);
+    uniquePropModel.find({}, callContext, function (err, result) {
+      if (err) {
+        done(err);
+      } else {
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result).to.be.instanceof(Array);
+        expect(result).to.have.length(2);
         done();
       }
     });
@@ -2589,559 +3139,13 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     });
   });
 
-  it('- Should be able to update record with scope for same tenant', function (done) {
-    var postData = {
-      'name': 'myRecord',
-      'scope': {
-        'org': 'ev'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0'
-    };
-
-    personalizedModel1.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('myRecord');
-        postData.id = result.id;
-        postData._version = result._version;
-        postData.name = 'changedName';
-        personalizedModel1.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            done(err);
-          } else {
-            expect(res).not.to.be.null;
-            expect(res).not.to.be.empty;
-            expect(res).not.to.be.undefined;
-            expect(res._scope).to.be.instanceof(Array);
-            expect(res.name).to.be.equal('changedName');
-
-            callContext.ctx = {
-              'tenantId': 'test-tenant',
-              'org': 'ev'
-            };
-
-            callContext.ctxWeights = {
-              'tenantId': '0',
-              'org': '1'
-            };
-
-            personalizedModel1.find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
-              if (err) {
-                done(err);
-              } else {
-                expect(res1).not.to.be.null;
-                expect(res1).to.be.empty;
-                expect(res1).not.to.be.undefined;
-
-                personalizedModel1.find({}, callContext, function (err, res2) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    expect(res2).not.to.be.null;
-                    expect(res2).not.to.be.empty;
-                    expect(res2).not.to.be.undefined;
-                    expect(res2[0].name).to.be.equal('changedName');
-                    done();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should create a new record when scope is changed for upsert for same tenant', function (done) {
-    var postData = {
-      'name': 'upsertTestRecord',
-      'scope': {
-        'org': 'infy'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0'
-    };
-
-    personalizedModel1.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('upsertTestRecord');
-
-        postData.id = result.id;
-        //postData._version = result._version;
-        postData.name = 'upsertTestRecordChanged';
-        postData.scope.unit = 'finacle';
-
-        personalizedModel1.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            done(err);
-          } else {
-            expect(res).not.to.be.null;
-            expect(res).not.to.be.empty;
-            expect(res).not.to.be.undefined;
-            expect(res._scope).to.be.instanceof(Array);
-            expect(res.name).to.be.equal('upsertTestRecordChanged');
-
-            callContext.ctx = {
-              'tenantId': 'test-tenant',
-              'org': 'infy',
-              'unit': 'finacle'
-            };
-
-            callContext.ctxWeights = {
-              'tenantId': '0',
-              'org': '1',
-              'unit': '1'
-            };
-
-            personalizedModel1.find({ where: { 'name': 'upsertTestRecord' } }, callContext, function (err, res1) {
-              if (err) {
-                done(err);
-              } else {
-                expect(res1).not.to.be.null;
-                expect(res1).not.to.be.empty;
-                expect(res1).not.to.be.undefined;
-                expect(res1[0].name).to.be.equal('upsertTestRecord');
-
-                personalizedModel1.find({}, callContext, function (err, res2) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    expect(res2).not.to.be.null;
-                    expect(res2).not.to.be.empty;
-                    expect(res2).not.to.be.undefined;
-                    expect(res2[0].name).to.be.equal('upsertTestRecordChanged');
-                    expect(res2[1].name).to.be.equal('upsertTestRecord');
-                    done();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should not be able to update data created by another tenant', function (done) {
-    var postData = {
-      'name': 'newRecord',
-      'scope': {
-        'org': 'fin'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant',
-      'org': 'fin'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0',
-      'org': '1'
-    };
-
-    personalizedModel1.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('newRecord');
-        postData.id = result.id;
-        postData._version = result._version;
-        postData.name = 'newRecordChanged';
-
-        callContext.ctx = {
-          'tenantId': 'new-tenant',
-          'org': 'fin'
-        };
-
-
-        personalizedModel1.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            done(err);
-          } else {
-            expect(res).not.to.be.null;
-            expect(res).not.to.be.empty;
-            expect(res).not.to.be.undefined;
-            expect(res._scope).to.be.instanceof(Array);
-            expect(res.name).to.be.equal('newRecordChanged');
-
-            personalizedModel1.find({}, callContext, function (err, res1) {
-              if (err) {
-                done(err);
-              } else {
-                expect(res1).not.to.be.null;
-                expect(res1).not.to.be.empty;
-                expect(res1).not.to.be.undefined;
-                expect(res1[0].name).to.be.equal('newRecordChanged');
-
-                callContext.ctx = {
-                  'tenantId': 'test-tenant',
-                  'org': 'fin'
-                };
-
-
-                personalizedModel1.find({}, callContext, function (err, res2) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    expect(res2).not.to.be.null;
-                    expect(res2).not.to.be.empty;
-                    expect(res2).not.to.be.undefined;
-                    expect(res2[0].name).to.be.equal('newRecord');
-                    done();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should be able to update record with scope for same tenant when idInjection is false on model', function (done) {
-    var postData = {
-      'name': 'myRecord',
-      'scope': {
-        'org': 'ev'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant',
-      'username': 'test-case'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0',
-      'username': '0'
-    };
-
-    personalizedModel2.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('myRecord');
-        postData.id = result.id;
-        postData._version = result._version;
-        postData.name = 'changedName';
-
-        personalizedModel2.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            done(err);
-          } else {
-            expect(res).not.to.be.null;
-            expect(res).not.to.be.empty;
-            expect(res).not.to.be.undefined;
-            expect(res._scope).to.be.instanceof(Array);
-            expect(res.name).to.be.equal('changedName');
-
-            callContext.ctx = {
-              'tenantId': 'test-tenant',
-              'username': 'test-case',
-              'org': 'ev'
-            };
-
-            callContext.ctxWeights = {
-              'tenantId': '0',
-              'username': '0',
-              'org': '1'
-            };
-
-            personalizedModel2.find({ where: { 'name': 'myRecord' } }, callContext, function (err, res1) {
-              if (err) {
-                done(err);
-              } else {
-                expect(res1).not.to.be.null;
-                expect(res1).to.be.empty;
-                expect(res1).not.to.be.undefined;
-
-                personalizedModel2.find({}, callContext, function (err, res2) {
-                  if (err) {
-                    done(err);
-                  } else {
-                    expect(res2).not.to.be.null;
-                    expect(res2).not.to.be.empty;
-                    expect(res2).not.to.be.undefined;
-                    expect(res2[0].name).to.be.equal('changedName');
-                    done();
-                  }
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should create a new record when scope is changed for upsert for same tenant when idInjection is false on model', function (done) {
-    var postData = {
-      'name': 'upsertTestRecord',
-      'scope': {
-        'org': 'infy'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant',
-      'username': 'test-case'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0',
-      'username': '0'
-    };
-
-    personalizedModel2.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('upsertTestRecord');
-
-        postData.id = result.id;
-        postData._version = result._version;
-        postData.name = 'upsertTestRecordChanged';
-        postData.scope.unit = 'finacle';
-
-        personalizedModel2.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            expect(err).not.to.be.null;
-            expect(err).not.to.be.undefined;
-            done();
-          } else {
-            done(new Error('should throw an error because of same id'));
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should not be able to update data created by another tenant when idInjection is false on model', function (done) {
-    var postData = {
-      'name': 'newRecord',
-      'scope': {
-        'org': 'ev'
-      }
-    };
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'test-tenant',
-      'username': 'test-case'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0',
-      'username': '0'
-    };
-
-    personalizedModel2.create(postData, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result._scope).to.be.instanceof(Array);
-        expect(result.name).to.be.equal('newRecord');
-        postData.id = result.id;
-        postData._version = result._version;
-        postData.name = 'newRecordChanged';
-
-        callContext.ctx = {
-          'tenantId': 'new-tenant',
-          'username': 'new-test-case'
-        };
-
-        personalizedModel2.upsert(postData, callContext, function (err, res) {
-          if (err) {
-            return done(err);
-            //expect(err).not.to.be.null;
-            //expect(err).not.to.be.undefined;
-            //done();
-          }
-          else {
-            //done(new Error('Should not update the record of other tenant'));
-            expect(res.id).to.not.equal(postData.id);
-            return done();
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should be able to post a record with unique validation on property with scope', function (done) {
-    var modelUnique = 'ModelUnique';
-    var modelDetailsUnique = {
-      name: modelUnique,
-      base: 'BaseEntity',
-      properties: {
-        'a': {
-          'type': 'string',
-          'unique': true
-        },
-        'b': {
-          'type': 'string',
-          'unique': true
-        }
-      },
-      strict: false,
-      idInjection: false,
-      mixins: {
-        'HistoryMixin': true
-      },
-      autoscope: [
-        'tenantId'
-      ],
-      scoreScheme: 'max'
-    };
-
-    var postData = [
-      {
-        'a': '1',
-        'b': '1',
-        'scope': {
-          'rule': 'x'
-        }
-      },
-      {
-        'a': '2',
-        'b': '2',
-        'scope': {
-          'rule': 'x'
-        }
-      },
-      {
-        'a': '1',
-        'b': '1',
-        'scope': {
-          'rule': 'y',
-          'category': 'x'
-        }
-      },
-      {
-        'a': '2',
-        'b': '1',
-        'scope': {
-          'rule': 'y',
-          'category': 'y'
-        }
-      },
-      {
-        'a': '1',
-        'b': '2',
-        'scope': {
-          'rule': 'y',
-          'category': 'y'
-        }
-      }
-    ];
-
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'unique-tenant'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0'
-    };
-
-    models.ModelDefinition.create(modelDetailsUnique, callContext, function (err, res) {
-      if (err) {
-        done(err);
-      } else {
-        var uniquePropModel = loopback.getModel('ModelUnique', callContext);
-        uniquePropModel.create(postData, callContext, function (err, result) {
-          if (err) {
-            done(err);
-          } else {
-            expect(result).not.to.be.null;
-            expect(result).not.to.be.empty;
-            expect(result).not.to.be.undefined;
-            expect(result).to.be.instanceof(Array);
-            expect(result).to.have.length(5);
-            done();
-          }
-        });
-      }
-    });
-  });
-
-  it('- Should be able to get unique records with unique validation on property with scope', function (done) {
-    var callContext = {};
-    callContext.ctx = {
-      'tenantId': 'unique-tenant',
-      'rule': 'y',
-      'category': 'y'
-    };
-
-    callContext.ctxWeights = {
-      'tenantId': '0',
-      'rule': '0',
-      'category': '0'
-    };
-
-    var uniquePropModel = loopback.getModel('ModelUnique', callContext);
-    uniquePropModel.find({}, callContext, function (err, result) {
-      if (err) {
-        done(err);
-      } else {
-        expect(result).not.to.be.null;
-        expect(result).not.to.be.empty;
-        expect(result).not.to.be.undefined;
-        expect(result).to.be.instanceof(Array);
-        expect(result).to.have.length(2);
-        done();
-      }
-    });
-  });
 });
+//End Of Describe
+
 
 describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls --REST'), function () {
   this.timeout(1000000);
-  var modelName = 'DataPersonalizationTestModel';
+  var modelName = 'OnlineGames';
   var personalizedModel;
   var newModelDetails = {
     name: modelName,
@@ -3166,18 +3170,17 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
 
   var testData = [
     {
-      'name': 'emptyscope',
+      'name': 'Assasins Creed',
       'id': '1a'
     },
     {
-      'name': 's1l1',
+      'name': 'Counter Strike',
       'id': '2a'
     },
     {
-      'name': 's1l1',
+      'name': 'Injustice',
       'id': '3a'
     }
-
   ];
 
   before('Create Test model', function (done) {
@@ -3209,14 +3212,6 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
         done(err);
       } else {
         log.debug(bootstrap.defaultContext, 'Records deleted from Test model');
-        // models['ModelDefinition'].destroyAll({ "where": { "name": modelName } }, function(err, result) {
-        //     if (err) {
-        //         done(err);
-        //     }
-        //     else {
-        //         done();
-        //     }
-        // });
       }
     });
     done();
@@ -3235,6 +3230,10 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
           done(err);
         } else {
           testData = result.body;
+          expect(result.body).not.to.be.null;
+          expect(result.body).not.to.be.empty;
+          expect(result.body).not.to.be.undefined;
+          expect(result.body).to.have.length(3);
           done();
         }
       });
@@ -3274,6 +3273,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
           expect(result.body).not.to.be.null;
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
+          expect(result.body).to.have.length(3);
           done();
         }
       });
@@ -3293,7 +3293,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
           expect(result.body).not.to.be.null;
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
-          expect(result.body.name).to.be.equal('emptyscope');
+          expect(result.body.name).to.be.equal('Assasins Creed');
           done();
         }
       });
@@ -3322,8 +3322,8 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   it('- PUT', function (done) {
     var postData = testData[1];
     delete postData._version;
-    postData.id = 2;
-    postData.name = 's1d1';
+    postData.id = '4a';
+    postData.name = 'Sword Art Online';
 
     var url = bootstrap.basePath + '/' + modelName;
     api
@@ -3336,7 +3336,10 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
         if (err) {
           done(err);
         } else {
-          expect(result.body.name).to.be.equal('s1d1');
+          expect(result.body).not.to.be.null;
+          expect(result.body).not.to.be.empty;
+          expect(result.body).not.to.be.undefined;
+          expect(result.body.name).to.be.equal('Sword Art Online');
           testData[1] = result.body;
           done();
         }
@@ -3344,7 +3347,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- FINDONE', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/findOne';
+    var url = bootstrap.basePath + '/' + modelName + '/findOne?{"where":{"name":"Assasins Creed"}';
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3357,7 +3360,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
           expect(result.body).not.to.be.null;
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
-          expect(result.body[1]).to.be.undefined;
+          expect(result.body.name).to.be.equal('Assasins Creed');
           done();
         }
       });
@@ -3365,7 +3368,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
 
   it('- PUT by ID', function (done) {
     var postData = testData[2];
-    postData.name = 's1l-us';
+    postData.name = 'Injustice 2';
     var url = bootstrap.basePath + '/' + modelName + '/3a';
     api
       .put(url)
@@ -3377,7 +3380,10 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
         if (err) {
           done(err);
         } else {
-          expect(result.body.name).to.be.equal('s1l-us');
+          expect(result.body).not.to.be.null;
+          expect(result.body).not.to.be.empty;
+          expect(result.body).not.to.be.undefined;
+          expect(result.body.name).to.be.equal('Injustice 2');
           testData[2] = result.body;
           done();
         }
@@ -3395,8 +3401,13 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
         if (err) {
           done(err);
         } else {
+          expect(result.body).not.to.be.null;
+          expect(result.body).not.to.be.empty;
+          expect(result.body).not.to.be.undefined;
+          expect(result.body.count).to.be.equal(1);
           done();
         }
       });
   });
 });
+//End of Describe
