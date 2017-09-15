@@ -180,6 +180,7 @@ oracletest:
   image: registry.oecloud.local/debian-node-oracle-docker
   stage: post-build-test
   script:
+    - cd .. && mv oe-cloud/ /root/ && cd /root/oe-cloud
     - export APP_TAG=oracle
     - export NODE_ENV=oracle
     - export POSTGRES_HOST="10.73.53.144"
