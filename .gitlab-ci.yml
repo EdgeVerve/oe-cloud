@@ -1,4 +1,3 @@
-
 # ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
 #Bangalore, India. All Rights Reserved.
 
@@ -235,7 +234,7 @@ oracletest:
     - node server/oracle-utility.js
     - exit $exit_status
   tags:
-    - CEP_RUNNER_2
+    - CEP_RUNNER
 
 retry-service:
   stage: retry-service
