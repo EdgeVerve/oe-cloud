@@ -99,8 +99,8 @@ module.exports = function GruntConfig(grunt) {
           excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
           timeout: 60000,
           check: {
-            lines: 75,
-            statements: 75
+            lines: 80,
+            statements: 80
           },
           reportFormats: ['lcov']
         }
