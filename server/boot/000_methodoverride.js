@@ -6,7 +6,7 @@
  */
 
 /**
- * This boot script override the existing loopback findModel, getModel and getMOdelById.
+ * This boot script override the existing loopback findModel, getModel and getModelById.
  * The new implementation take the options as second argument and
  *  gives personalized model based on options.
  *

@@ -97,7 +97,7 @@ describe(chalk.blue('batch-job-test'), function () {
             'default': 0
         }
       }
-    }
+    };
     modelDefinition.create(data, bootstrap.defaultContext, createAccountModel);    
 
     function createAccountModel(){
@@ -162,31 +162,39 @@ describe(chalk.blue('batch-job-test'), function () {
         return stateObj;
       };
 
-      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, callback){
+      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, version, callback) {
+
         accountModel.find({}, ctx, (err, accounts)=> {
-          async.each(accounts, function(account, cb){
+          async.each(accounts, function(account, cb) {
             var transactionModel = loopback.getModel(transactionModelName, ctx);
             var idFieldName =  accountModel.definition.idName();
             var accountId = account[idFieldName];
             var query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + accountId } } };
             transactionModel.find(query, ctx, function (err, res) {
               var intrest  = !res ? 0 : res.length * interestCoefficient; 
-              account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
-                if (err) {
-                  log.error(log.defaultContext(), err);
-                  // Enter Monitoring Per Instance Processing - Maybe
-                }
-                cb();
-              });
+              retryUpdateAttributes(account, intrest, ctx, cb);
             });
           }, function(err) {
-            callback(err, monitoringId);
+            callback(err, monitoringId, version);
           });
-        });  
-      };        
+        });
+      };    
 
       accountDefinition.prototype.associatedModels = [transactionModelName];
       return done();
+    }
+
+    function retryUpdateAttributes(account, intrest, ctx, callback) {
+      account.updateAttribute('currentMonthFees', intrest, ctx, function (err) {
+        if (err) {
+          log.error(log.defaultContext(), err);
+          // Enter Monitoring Per Instance Processing - Maybe
+          if (err.message === 'Instance is already locked') {
+            setTimeout(retryUpdateAttributes, 2000, account, intrest, ctx, callback);
+          }
+        }
+        callback();
+      });
     }
 
   });
@@ -226,11 +234,10 @@ describe(chalk.blue('batch-job-test'), function () {
     });
 
     async.parallel(createAccounts, function (err){
-      done(err);
+      return done(err);
     });    
     
   });
-
 
   it('test batchJob execution', function createModels(done) {
     accountModel = loopback.getModel(accountModelName, bootstrap.defaultContext);
@@ -263,14 +270,14 @@ describe(chalk.blue('batch-job-test'), function () {
             if (feeSum == 5) return done();
             else if (tryouts < 10 ) return setTimeout(checkResults, 500, tryouts+1, done);
             else return done(new Error ("Batch Job was not successful"));            
-          })
-      })
+          });
+      });
     }
     checkResults(1, done);
 
   });
 
-  after('delete all the test accounts', function(done) {
+  after('delete all the test Models', function(done) {
     var deleteContext = {fetchAllScopes: true, ctx: {tenantId: 'test-tenant'}};
     async.each([accountModelName, transactionModelName, intrestModelName], function (modelName, callback) {
       var Model = loopback.getModel(modelName, bootstrap.defaultContext);
@@ -289,8 +296,5 @@ describe(chalk.blue('batch-job-test'), function () {
       else done();
       });
     });
-    
-    
-
 });
 
