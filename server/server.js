@@ -24,8 +24,8 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
-var queueConsumer = require('../lib/queue-consumer.js');
 var serverMonitor = require('../lib/server-monitor.js');
+var queueConsumer = require('../lib/queue-consumer.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
