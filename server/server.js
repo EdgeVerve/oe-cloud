@@ -190,8 +190,12 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
-      serverMonitor.init();
-      queueConsumer.init(serverMonitor.eventEmitter);
+
+      var disableJobRunner = process.env.DISABLE_JOB_RUNNER;
+      if (!disableJobRunner) {
+        serverMonitor.init();
+        queueConsumer.init(serverMonitor.eventEmitter);
+      }
       var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
       if (!disableEventHistoryManager || disableEventHistoryManager !== 'true') {
         eventHistroyManager = require('../lib/event-history-manager.js');

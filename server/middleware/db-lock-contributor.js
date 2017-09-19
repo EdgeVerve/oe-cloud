@@ -27,7 +27,7 @@ module.exports = function dbLockContributor(options) {
       req.callContext.lockMode = DB_LOCK_MODE;
       next();
     } else {
-      var err = new Error('invalid value in x-evproxy-db-lockk header');
+      var err = new Error('invalid value in x-evproxy-db-lock header');
       log.error(req.callContext, err);
       throw err;
     }

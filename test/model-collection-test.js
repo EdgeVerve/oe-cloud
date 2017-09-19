@@ -50,14 +50,13 @@ describe('Model Collection Test', function () {
 
     var TestModelDefinition3 = {
         'name': 'CCModel',
-        'base': 'BaseEntity',
-        'variantOf': 'AAModel'
+        'base': 'BaseEntity'
     };
 
     var TestModelDefinition4 = {
         'name': 'DDModel',
         'base': 'BaseEntity',
-        'variantOf': 'AAModel',
+        'variantOf': 'CCModel',
         'mongodb': {
             'collection': 'AnotherCollection'
         }
@@ -65,19 +64,24 @@ describe('Model Collection Test', function () {
 
     before('Create Test Models and do model collection test', function (done) {
         async.series([
-                    function clean(cb) {
+            function clean(cb) {
                 deleteTestModelDefinitions(cb);
             },
-                    function (cb) {
-                ModelDefinition.create(TestModelDefinition1, bootstrap.defaultContext, function (err, data) {
+            function (cb) {
+                let context = {
+                    ctx: {
+                        tenantId: 'default'
+                    }
+                }
+                ModelDefinition.create(TestModelDefinition1, context, function (err, data) {
                     if (err) {
                         console.log("Error creating TestModelDefinition1", err);
                     }
                     result1 = data;
                     cb();
                 });
-                    },
-                    function (cb) {
+            },
+            function (cb) {
                 ModelDefinition.create(TestModelDefinition2, bootstrap.defaultContext, function (err, data) {
                     if (err) {
                         console.log("Error creating TestModelDefinition2", err);
@@ -85,17 +89,22 @@ describe('Model Collection Test', function () {
                     result2 = data;
                     cb();
                 });
-                    },
-                    function (cb) {
-                ModelDefinition.create(TestModelDefinition3, bootstrap.defaultContext, function (err, data) {
+            },
+            function (cb) {
+                let context = {
+                    ctx: {
+                        tenantId: 'default'
+                    }
+                }
+                ModelDefinition.create(TestModelDefinition3, context, function (err, data) {
                     if (err) {
                         console.log("Error creating TestModelDefinition3", err);
                     }
                     result3 = data;
                     cb();
                 });
-                    },
-                    function (cb) {
+            },
+            function (cb) {
                 ModelDefinition.create(TestModelDefinition4, bootstrap.defaultContext, function (err, data) {
                     if (err) {
                         console.log("Error creating TestModelDefinition4", err);
@@ -103,10 +112,10 @@ describe('Model Collection Test', function () {
                     result4 = data;
                     cb();
                 });
-                    }
+            }
 
 
-                    ], function () {
+        ], function () {
             done();
         });
     });
@@ -119,18 +128,23 @@ describe('Model Collection Test', function () {
 
 
     function deleteTestModelDefinitions(done) {
+        let context = {
+            ctx: {
+                tenantId: 'default'
+            }
+        }
         async.parallel([
-    	              function (cb) {
+            function (cb) {
                 ModelDefinition.remove({
-                    'name': 'AAModel'
-                }, bootstrap.defaultContext, function (err, info) {
+                    'clientModelName': 'AAModel'
+                }, context, function (err, info) {
                     if (err) {
                         console.log(err, info);
                     }
                     cb();
                 });
-    	              },
-    	              function (cb) {
+            },
+            function (cb) {
                 ModelDefinition.remove({
                     'clientModelName': 'BBModel'
                 }, bootstrap.defaultContext, function (err, info) {
@@ -139,18 +153,18 @@ describe('Model Collection Test', function () {
                     }
                     cb();
                 });
-    	              },
-    	              function (cb) {
+            },
+            function (cb) {
                 ModelDefinition.remove({
                     'clientModelName': 'CCModel'
-                }, bootstrap.defaultContext, function (err, info) {
+                }, context, function (err, info) {
                     if (err) {
                         console.log(err, info);
                     }
                     cb();
                 });
-    	              },
-    	              function (cb) {
+            },
+            function (cb) {
                 ModelDefinition.remove({
                     'clientModelName': 'DDModel'
                 }, bootstrap.defaultContext, function (err, info) {
@@ -159,8 +173,8 @@ describe('Model Collection Test', function () {
                     }
                     cb();
                 });
-    	              }
-    	              ], function () {
+            }
+        ], function () {
             done();
         });
 
@@ -183,7 +197,7 @@ describe('Model Collection Test', function () {
     it('Should automatically add the missing mongodb collection tags in a new model variant of the variant of the first model', function (done) {
         expect(result3).not.to.be.null;
         expect(result3.mongodb).not.to.be.null;
-        expect(result3.mongodb.collection).to.equal('SomeCollection');
+        expect(result3.mongodb.collection).to.equal('CCModel');
         done();
     });
 
