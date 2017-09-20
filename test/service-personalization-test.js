@@ -53,6 +53,9 @@ describe(chalk.blue('service-personalization'), function () {
       'isAvailable': {
         'type': 'boolean',
         'required': true
+      },
+      'keywords': {
+        'type': []
       }
     };
 
@@ -1252,7 +1255,7 @@ describe(chalk.blue('service-personalization'), function () {
     });
   });
 
-  it('should give filterd result when lbFilter is applied', function (done) {
+  it('t21 should give filterd result when lbFilter is applied', function (done) {
     // Setup personalization rule
     var ruleForAndroid = {
       'modelName': 'ProductOwner',
@@ -1289,6 +1292,83 @@ describe(chalk.blue('service-personalization'), function () {
         });
     });
 
+  });
+
+  it('t22 should replace field value names array datatype while posting when fieldValueReplace personalization is configured', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      'modelName': 'ProductCatalog',
+      'personalizationRule': {
+        'fieldValueReplace': {
+          'keywords': {
+            'Alpha': 'A',
+            "Bravo": 'B'
+          }
+        }
+      },
+      'scope': {
+        'device': 'mobile'
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'Smart Watch',
+          'desc': 'Smart watch with activity tracker',
+          'category': 'electronics',
+          'price': {
+            'value': 5000,
+            'currency': 'inr'
+          },
+          "keywords": ["Alpha", "Bravo", "Charlie", "Delta"],
+          'isAvailable': true,
+          'id': 'watch1'
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('device', 'mobile')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result.name).to.be.equal('Smart Watch');
+              expect(result.keywords).to.be.an('array');
+              expect(result.keywords).to.have.length(4);
+              expect(result.keywords).to.include.members(['A', 'B', 'Charlie', 'Delta']);
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t23 should replace field values on array datatype in response when fieldValueReplace personalization is configured ', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch1';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('DEVICE', 'mobile')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result.name).to.be.equal('Smart Watch');
+        expect(result.keywords).to.be.an('array');
+        expect(result.keywords).to.have.length(4);
+        expect(result.keywords).to.include.members(['A', 'B', 'Charlie', 'Delta']);
+        done();
+      });
   });
 
 });
