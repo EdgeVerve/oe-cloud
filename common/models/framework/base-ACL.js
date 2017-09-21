@@ -17,6 +17,7 @@ var AccessRequest = loopbackAccessContext.AccessRequest;
 
 var ACL = loopback.ACL;
 
+var RoleMapping = loopback.RoleMapping;
 /**
  * @classdesc This model controls the access control for APIs
  * Earlier these methods were part of boot script
@@ -44,6 +45,13 @@ module.exports = function DBTransactionFn(BaseACL) {
       context = new AccessContext(context);
     }
 
+    // Checking the AccessContext has accessToken with roles attached
+    if (context.accessToken && context.accessToken.roles && Array.isArray(context.accessToken.roles)) {
+      // Looping through Roles in accessToken and adding them to context.principals as RoleMapping.ROLE
+      context.accessToken.roles.forEach((role) => {
+        context.addPrincipal(RoleMapping.ROLE, role);
+      });
+    }
     var model = context.model;
     var property = context.property;
     var accessType = context.accessType;
