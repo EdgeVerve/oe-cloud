@@ -179,7 +179,7 @@ oracletest:
   image: registry.oecloud.local/debian-node-oracle-docker
   stage: post-build-test
   script:
-    - cd .. && mv oe-cloud/ /root/ && cd /root/oe-cloud
+    - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
     - export APP_TAG=oracle
     - export NODE_ENV=oracle
     - export POSTGRES_HOST="10.73.53.144"
@@ -232,6 +232,7 @@ oracletest:
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - docker stack rm ${STACK_NAME}
     - node server/oracle-utility.js
+    - cd .. && mv oe-cloud/ ${PROJECT_DIR} && cd ${PROJECT_DIR}/oe-cloud
     - exit $exit_status
   tags:
     - CEP_RUNNER
