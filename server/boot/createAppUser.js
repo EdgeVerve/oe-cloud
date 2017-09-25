@@ -76,8 +76,7 @@ module.exports = function createAdminUser(app, done) {
       }
     });
   }],
-    function finalCallback() {
-      done();
-    }
-  );
+  function finalCallback() {
+    done();
+  });
 };

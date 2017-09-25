@@ -99,7 +99,8 @@
     "passport-ldapauth": "^2.0.0",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^1.1.0"
+    "supertest": "^1.1.0",
+    "oe-jwt-generator": "git+http://evgit/oecloud.io/oe-jwt-generator"
   },
   "repository": {
     "type": "git",
