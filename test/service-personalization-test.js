@@ -1580,6 +1580,51 @@ describe(chalk.blue('service-personalization'), function () {
 
   });
 
+  it('t29 should get result on get when format personalization rule is applied and no formatType is given', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "format": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "character": "X",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "kl"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var productWithId = productCatalogUrl + '/watch3';
+        api.get(productWithId)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'kl')
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('908070XXXX');
+              done();
+            }
+          });
+      }
+    });
+
+  });
+
 });
 
 //1. sort
