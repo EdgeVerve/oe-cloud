@@ -56,6 +56,10 @@ describe(chalk.blue('service-personalization'), function () {
       },
       'keywords': {
         'type': []
+      },
+      'modelNo': {
+        'type': 'string',
+        'length': 10
       }
     };
 
@@ -1369,6 +1373,211 @@ describe(chalk.blue('service-personalization'), function () {
         expect(result.keywords).to.include.members(['A', 'B', 'Charlie', 'Delta']);
         done();
       });
+  });
+
+  it('t24 should be able to create a format personalization rule, post data and get response in specific format', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "format": {
+          "modelNo": {
+            "pattern": "([0-9]{3})([0-9]{3})([0-9]{4})",
+            "character": "X",
+            "formatType": "($1) $2-$3",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "us"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'Omnitrix',
+          'desc': 'Alien tech smart watch allows to transform into .... nah nothing, just a smart watch',
+          'category': 'electronics',
+          'price': {
+            'value': 89000,
+            'currency': 'inr'
+          },
+          "keywords": ["Alpha", "Bravo"],
+          'isAvailable': true,
+          'id': 'watch2',
+          "modelNo": "1233567891"
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'us')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('(123) 356-XXXX');
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t25 should get result in specific format on get when format personalization rule is applied', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch2';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('region', 'us')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result.modelNo).to.be.equal('(123) 356-XXXX');
+        done();
+      });
+  });
+
+  it('t26 should be able to create a format personalization rule, post data and get response in specific format', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "format": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "character": "-",
+            "formatType": "+91 $1 $2$3",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "in"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'MultiTrix',
+          'desc': 'There is no such smart watch',
+          'category': 'electronics',
+          'price': {
+            'value': 23400,
+            'currency': 'inr'
+          },
+          "keywords": ["Charlie", "India"],
+          'isAvailable': true,
+          'id': 'watch3',
+          "modelNo": "9080706050"
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'in')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('+91 90807 0----');
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t27 should get result in specific formatType on get when format personalization rule is applied', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch3';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('region', 'in')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result.modelNo).to.be.equal('+91 90807 0----');
+        done();
+      });
+  });
+
+  it('t28 should get result in specific format on get when format personalization rule is applied no masking', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "format": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "character": "X",
+            "formatType": "+91 $1 $2$3"
+          }
+        }
+      },
+      "scope": {
+        "region": "ka"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var productWithId = productCatalogUrl + '/watch3';
+        api.get(productWithId)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'ka')
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('+91 90807 06050');
+              done();
+            }
+          });
+      }
+    });
+
   });
 
 });
