@@ -13,7 +13,6 @@
         }
     },
     "session:before": {
-        "loopback#context": {},
         "./middleware/pre-auth-context-populator": {
             "params": {
                 "excludeHeadersList": [
