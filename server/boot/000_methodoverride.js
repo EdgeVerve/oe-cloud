@@ -4,6 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
+
 /**
  * This boot script override the existing loopback findModel, getModel and getModelById.
  * The new implementation take the options as second argument and
