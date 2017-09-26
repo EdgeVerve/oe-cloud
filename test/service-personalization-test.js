@@ -55,7 +55,7 @@ describe(chalk.blue('service-personalization'), function () {
         'required': true
       },
       'keywords': {
-        'type': []
+        'type': 'array'
       },
       'modelNo': {
         'type': 'string',
@@ -1375,16 +1375,16 @@ describe(chalk.blue('service-personalization'), function () {
       });
   });
 
-  it('t24 should be able to create a format personalization rule, post data and get response in specific format', function (done) {
+  it('t24 should be able to create a fieldMask personalization rule, post data and get response in specific format', function (done) {
     // Setup personalization rule
     var ruleForMobile = {
       "modelName": "ProductCatalog",
       "personalizationRule": {
-        "format": {
+        "fieldMask": {
           "modelNo": {
             "pattern": "([0-9]{3})([0-9]{3})([0-9]{4})",
-            "character": "X",
-            "formatType": "($1) $2-$3",
+            "maskCharacter": "X",
+            "format": "($1) $2-$3",
             "mask": ['$3']
           }
         }
@@ -1434,7 +1434,7 @@ describe(chalk.blue('service-personalization'), function () {
     });
   });
 
-  it('t25 should get result in specific format on get when format personalization rule is applied', function (done) {
+  it('t25 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
     // Setup personalization rule
     var productWithId = productCatalogUrl + '/watch2';
     api.get(productWithId)
@@ -1455,16 +1455,16 @@ describe(chalk.blue('service-personalization'), function () {
       });
   });
 
-  it('t26 should be able to create a format personalization rule, post data and get response in specific format', function (done) {
+  it('t26 should be able to create a fieldMask personalization rule, post data and get response in specific format', function (done) {
     // Setup personalization rule
     var ruleForMobile = {
       "modelName": "ProductCatalog",
       "personalizationRule": {
-        "format": {
+        "fieldMask": {
           "modelNo": {
             "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
-            "character": "-",
-            "formatType": "+91 $1 $2$3",
+            "maskCharacter": "-",
+            "format": "+91 $1 $2$3",
             "mask": ['$3']
           }
         }
@@ -1514,7 +1514,7 @@ describe(chalk.blue('service-personalization'), function () {
     });
   });
 
-  it('t27 should get result in specific formatType on get when format personalization rule is applied', function (done) {
+  it('t27 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
     // Setup personalization rule
     var productWithId = productCatalogUrl + '/watch3';
     api.get(productWithId)
@@ -1535,16 +1535,16 @@ describe(chalk.blue('service-personalization'), function () {
       });
   });
 
-  it('t28 should get result in specific format on get when format personalization rule is applied no masking', function (done) {
+  it('t28 should get result in specific format on get when fieldMask personalization rule is applied no masking', function (done) {
     // Setup personalization rule
     var ruleForMobile = {
       "modelName": "ProductCatalog",
       "personalizationRule": {
-        "format": {
+        "fieldMask": {
           "modelNo": {
             "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
-            "character": "X",
-            "formatType": "+91 $1 $2$3"
+            "maskCharacter": "X",
+            "format": "+91 $1 $2$3"
           }
         }
       },
@@ -1580,15 +1580,15 @@ describe(chalk.blue('service-personalization'), function () {
 
   });
 
-  it('t29 should get result on get when format personalization rule is applied and no formatType is given', function (done) {
+  it('t29 should get result on get when fieldMask personalization rule is applied and no format is given', function (done) {
     // Setup personalization rule
     var ruleForMobile = {
       "modelName": "ProductCatalog",
       "personalizationRule": {
-        "format": {
+        "fieldMask": {
           "modelNo": {
             "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
-            "character": "X",
+            "maskCharacter": "X",
             "mask": ['$3']
           }
         }
