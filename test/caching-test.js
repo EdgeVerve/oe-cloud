@@ -190,7 +190,7 @@ describe('Caching Test', function () {
             stage1_creat(done);
         });
 
-        it('Should cache the TestModel when cacheable is set to "true"', function (done) {
+        xit('Should cache the TestModel when cacheable is set to "true"', function (done) {
             expect(models[modelName]).not.to.be.null;
             expect(result1).not.to.be.null;
             expect(result2).not.to.be.null;
