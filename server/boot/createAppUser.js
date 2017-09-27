@@ -42,22 +42,6 @@ module.exports = function createAdminUser(app, done) {
         cb();
       }
     });
-  }, function roleOp(cb) {
-    var Role = loopback.getModelByType('BaseRole');
-    Role.findOrCreate({
-      id: 'admin',
-      name: 'admin',
-      description: 'Admin'
-    }, adminUserContext, function roleCreate(err, res) {
-      if (err) {
-        if (err.code === 11000) {
-          return cb();
-        }
-        cb(err);
-      } else {
-        cb();
-      }
-    });
   }, function roleMappingOp(cb) {
     var RoleMapping = loopback.getModelByType('BaseRoleMapping');
     RoleMapping.findOrCreate({
