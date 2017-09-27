@@ -101,8 +101,8 @@ module.exports = function GruntConfig(grunt) {
           check: {
             lines: 80,
             statements: 80,
-			branches :65,
-			functions :85
+            branches: 65,
+            functions: 85
           },
           reportFormats: ['lcov']
         }
