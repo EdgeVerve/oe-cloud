@@ -162,6 +162,9 @@ describe('Instance Caching Test', function () {
         queryCacheExpiration: 5000,
         disableManualPersonalization: true
       },
+      'mixins': {
+        'CacheMixin': true
+      },
       'properties': {
         'name': {
           'type': 'string'

@@ -13,7 +13,7 @@
     },
     "mixins": {
         "ObserverMixin": true,
-        "CacheMixin": true,
+        "CacheMixin": false,
         "ModelValidations": true,
         "PropertyExpressionMixin": true,
         "ExpressionAstPopulatorMixin": true,
