@@ -1,3 +1,9 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
 var fs = require('fs');
 
 fs.unlink('common/models/framework/note.js',function(err){

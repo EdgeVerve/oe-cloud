@@ -27,7 +27,7 @@ services:
       - router_network
   
   web:
-    image: $REGISTRY/${ORIG_APP_IMAGE_NAME}:latest
+    image: $REGISTRY/${ORIG_APP_IMAGE_NAME}:failsafe-test
     depends_on:
       - mongo
       - broadcaster
@@ -53,6 +53,12 @@ services:
     networks:
       - ${NETWORK_NAME}
       - router_network
+    healthcheck:
+      test: "wget -s http://localhost:3000"
+      interval: 1m
+      timeout: 3s
+      retries: 10 
+
 
 networks:
   $NETWORK_NAME:

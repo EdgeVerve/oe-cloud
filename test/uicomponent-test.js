@@ -17,7 +17,7 @@ chai.use(require('chai-things'));
 var async = require('async');
 
 describe(chalk.blue('UIElement'), function () {
-  this.timeout(10000);
+  this.timeout(60000);
 
   var designationModelName = 'Designation';
   var salutationModelName = 'Salutation';
@@ -39,12 +39,12 @@ describe(chalk.blue('UIElement'), function () {
       {
         'code': 'DV',
         'description': 'Developer'
-            },
+      },
       {
         'code': 'MGR',
         'description': 'Manager'
-            }
-         ]
+      }
+    ]
   };
 
   var salutationModelDetails = {
@@ -155,21 +155,21 @@ describe(chalk.blue('UIElement'), function () {
     name: 'XAddress',
     base: 'BaseEntity',
     properties: {
-      line1: {type: 'string'},
-      line2: {type: 'string'}
+      line1: { type: 'string' },
+      line2: { type: 'string' }
     }
   }
   var departmentModel = {
     name: 'XDepartment',
     base: 'BaseEntity',
     properties: {
-      name: {type: 'string'}
+      name: { type: 'string' }
     }
   }
 
   var metadataCache = {};
 
-  function createModels(allModels, callback) {}
+  function createModels(allModels, callback) { }
 
   function fetchComponent(componentName, callback) {
     bootstrap.models.UIComponent.component(componentName, bootstrap.defaultContext, function (err, data) {
@@ -202,12 +202,11 @@ describe(chalk.blue('UIElement'), function () {
   }
 
   before('setup data', function (done) {
-    this.timeout(20000);
     async.series([
-//      function step0a(next) {
-//        loopback.createModel(salutationModelName, salutationModelDetails.properties, salutationModelDetails);
-//        next();
-//      },
+      //      function step0a(next) {
+      //        loopback.createModel(salutationModelName, salutationModelDetails.properties, salutationModelDetails);
+      //        next();
+      //      },
       function step0b(next) {
         loopback.createModel(designationModelName, designationModelDetails.properties, designationModelDetails);
         next();
@@ -259,7 +258,7 @@ describe(chalk.blue('UIElement'), function () {
       done();
     });
   });
-    it('returns error if form-template is not provided', function (done) {
+  it('returns error if form-template is not provided', function (done) {
     fetchComponent('modelperson-', function (err, data) {
       expect(err).to.exist;
       expect(data).to.not.exist;
@@ -267,7 +266,7 @@ describe(chalk.blue('UIElement'), function () {
       done();
     });
   });
-  
+
 
   it('returns error if model is not found', function (done) {
     fetchComponent('missingmodel-form', function (err, data) {
@@ -277,7 +276,7 @@ describe(chalk.blue('UIElement'), function () {
       done();
     });
   });
-  
+
   it('loads default form template', function (done) {
     var metadata = metadataCache['modelperson-form'];
     expect(metadata).to.exist;
@@ -406,15 +405,15 @@ describe(chalk.blue('UIElement'), function () {
     });
   });
 
-  
+
   it('configure creates the UIComponent for form and list templates', function (done) {
-    bootstrap.models.UIComponent.configure(['Salutation'], bootstrap.defaultContext, function(err, results){
+    bootstrap.models.UIComponent.configure(['Salutation'], bootstrap.defaultContext, function (err, results) {
       expect(results).to.be.an('array');
       expect(results.length).to.equal(2);
       done(err);
     });
   });
-  
+
 
 
 });
