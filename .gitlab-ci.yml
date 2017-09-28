@@ -14,8 +14,7 @@ cache:
   paths: 
     - node_modules/
 
-image:
-  name: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+image: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
 
 variables:
   USER_BROADCASTER: "false"
