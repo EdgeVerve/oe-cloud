@@ -13,7 +13,10 @@ cache:
   untracked: true
   paths: 
     - node_modules/
-    
+
+image:
+  name: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+
 variables:
   USER_BROADCASTER: "false"
   DOMAIN_NAME: oecloud.local
