@@ -144,10 +144,15 @@ postgrestest:
 swarmActorPattern:
   stage: swarmActorPattern 
   script:
-    - export ROUTER="cep_router"
+    - export STARTUP_CMD="npm run grunt-cover"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export DB_NAME=${APP_IMAGE_NAME}_mongo
+    - export DB=mongo
     - export STACK_NAME=${APP_IMAGE_NAME}
     - export NETWORK_NAME=${APP_IMAGE_NAME}
     - export exit_status="0"
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
     - export HAPROXY=10.73.96.214
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
