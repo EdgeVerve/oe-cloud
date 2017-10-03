@@ -1,0 +1,97 @@
+version: "3"
+services:
+  mongo:
+    image: ${REGISTRY}/alpine-mongo:latest
+    networks:
+      - ${NETWORK_NAME}
+      
+  broadcaster:
+    image: ${REGISTRY}/evf-broadcaster-server:latest
+    environment:
+      SERVICE_PORTS: "2345"
+    networks:
+      - ${NETWORK_NAME}
+ 
+  routerservice:
+    image: ${REGISTRY}/evfpaas-router-service:latest
+    environment:
+      HASH_RING_REFRESH_TIME_INTERVAL: "10000"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      SERVICE_PORTS: "3000"
+      BROADCASTER_HOST : "broadcaster"
+      ROUTER_HOST: ${ROUTER}
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+
+  rabbitmq:
+    image: registry.oecloud.local/rabbitmq:3.6-management-alpine
+    environment:
+      VIRTUAL_HOST: "https://rabbitmq.oecloud.local,rabbitmq.oecloud.local"
+      SERVICE_PORTS: "15672"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+
+  scheduler:
+    entrypoint: ["node", "."]
+    image: registry.evfapp.qa/karin-scheduler
+    depends_on:
+      - mongo
+    environment:
+      VIRTUAL_HOST: "https://${SCHEDULER_NAME}.${DOMAIN_NAME},${SCHEDULER_NAME}.${DOMAIN_NAME}"
+      SERVICE_PORTS: "3001"
+      FORCE_SSL: "yes"
+      DISABLE_JOB_RUNNER: "true"
+      RABBITMQ_HOSTNAME: "rabbitmq"
+    extra_hosts:
+      - "${SCHEDULER_NAME}.${DOMAIN_NAME}:${HAPROXY}"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+  
+  web:
+    entrypoint: ["node", "."]
+    image: $REGISTRY/${APP_IMAGE_NAME}:latest
+    depends_on:
+      - mongo
+      - broadcaster
+      - scheduler
+      - routerservice
+      - rabbitmq
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 60s
+    environment:
+      VIRTUAL_HOST: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME},${APP_IMAGE_NAME}.${DOMAIN_NAME}"
+      SERVICE_PORTS: "3000"
+      FORCE_SSL: "yes"
+      SCHEDULER_HOST: "scheduler"
+      CONSISTENT_HASH: "true"
+      SERVICE_NAME: "${APP_IMAGE_NAME}"
+      BROADCASTER_HOST: "broadcaster"
+      ORCHESTRATOR: "dockerSwarm"
+      APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
+      NODE_TLS_REJECT_UNAUTHORIZED: "0"
+      ROUTER_HOST: ${ROUTER}
+      NODE_ENV: "env"
+      RABBITMQ_HOSTNAME: "rabbitmq"
+    extra_hosts:
+      - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
+    networks:
+      - ${NETWORK_NAME}
+      - router_network
+    healthcheck:
+      test: "curl http://0.0.0.0:3000/"
+      interval: 1m30s
+      timeout: 3s
+      retries: 5
+
+networks:
+  $NETWORK_NAME:
+  router_network:
+    external: true

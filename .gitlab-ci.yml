@@ -4,9 +4,10 @@
 stages:
   - build
   - post-build-test
-  - swarmActorPattern
+  - job-scheduler-service
+  - swarm-actor-pattern
   - retry-service
-  - swarmFailSafe
+  - swarm-failsafe
   - ldap-auth
 
 cache:
@@ -143,8 +144,8 @@ postgrestest:
     - CEP_RUNNER
 
 
-swarmActorPattern:
-  stage: swarmActorPattern 
+swarm-actor-pattern:
+  stage: swarm-actor-pattern 
   script:
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
@@ -283,8 +284,8 @@ retry-service:
   tags:
     - CEP_RUNNER
 
-swarmFailSafe:
-  stage: swarmFailSafe
+swarm-failsafe:
+  stage: swarm-failsafe
   script:
     - export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
@@ -334,6 +335,34 @@ ldap-auth:
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
     - time mocha --timeout 30000 test/ldap-auth-tests/ldap-authentication-test.js
+  after_script:
+    - sh /removeStack.sh
+  tags:
+    - CEP_RUNNER
+
+job-scheduler-service:
+  stage: job-scheduler-service
+  script:
+    - export ROUTER="cep_router"
+    - export HAPROXY=10.73.96.214
+    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-s
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export SCHEDULER_NAME=${APP_IMAGE_NAME}-scheduler-service
+    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
+    - docker stack rm ${STACK_NAME}
+    - sleep 10
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/job-scheduler-service-tests/oe-cloud.yml > test/job-scheduler-service-tests/oe-cloud2.yml
+    - mv -f test/job-scheduler-service-tests/oe-cloud2.yml test/job-scheduler-service-tests/oe-cloud.yml
+    - docker stack deploy -c test/job-scheduler-service-tests/oe-cloud.yml ${STACK_NAME}
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - time mocha --timeout 30000 test/job-scheduler-service-tests/scheduler-test.js
   after_script:
     - sh /removeStack.sh
   tags:
