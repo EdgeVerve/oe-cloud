@@ -7,6 +7,8 @@ cache:
   paths: 
     - node_modules/
 
+image: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+
 before_script:
   - export USER_BROADCASTER=false
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
