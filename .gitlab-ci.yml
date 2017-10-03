@@ -1,3 +1,6 @@
+# ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+#Bangalore, India. All Rights Reserved.
+
 stages:
   - build
   - post-build-test
@@ -10,7 +13,9 @@ cache:
   untracked: true
   paths: 
     - node_modules/
-    
+
+image: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+
 variables:
   USER_BROADCASTER: "false"
   DOMAIN_NAME: oecloud.local
@@ -93,6 +98,7 @@ mongotest:
     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
+    - npm install mongodb pg chai --no-optional
     - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
@@ -127,6 +133,7 @@ postgrestest:
     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
+    - npm install mongodb pg chai --no-optional
     - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
@@ -176,6 +183,7 @@ oracletest:
   image: registry.oecloud.local/debian-node-oracle-docker
   stage: post-build-test
   script:
+    - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
     - export APP_TAG=oracle
     - export NODE_ENV=oracle
     - export POSTGRES_HOST="10.73.53.144"
@@ -228,9 +236,10 @@ oracletest:
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - docker stack rm ${STACK_NAME}
     - node server/oracle-utility.js
+    - cd .. && mv oe-cloud/ ${PROJECT_DIR} && cd ${PROJECT_DIR}/oe-cloud
     - exit $exit_status
   tags:
-    - CEP_RUNNER_2
+    - CEP_RUNNER
 
 retry-service:
   stage: retry-service
