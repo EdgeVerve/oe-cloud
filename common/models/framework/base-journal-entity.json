@@ -24,7 +24,18 @@
       "type": "embedsMany",
       "model": "ActorActivity",
       "property": "nonAtomicActivitiesList"
-
+    }
+  },
+  "indexes":{
+    "atomic_modelName_entityId_seqNum_index":{
+      "atomicActivitiesList.modelName" : 1,
+      "atomicActivitiesList.entityId" : 1,
+      "atomicActivitiesList.seqNum" : 1
+    },
+    "nonAtomic_modelName_entityId_seqNum_index":{
+      "nonAtomicActivitiesList.modelName" : 1,
+      "nonAtomicActivitiesList.entityId" : 1,
+      "nonAtomicActivitiesList.seqNum" : 1
     }
   },
   "mixins": {
