@@ -54,23 +54,23 @@ module.exports = function HeapDumpFn(app, cb) {
           writeHeapdump();
           // Calling writeHeapDump for given HEAPDUMP_INTERVAL
           setInterval(writeHeapdump, heapdumpInterval);
-  
+
           // Adding /heapdump route to application.
           app.get('/heapdump', function (req, res, next) {
             // Checking accessToken in request.
             if (!req.accessToken || !req.accessToken.roles || req.accessToken.roles.length === 0) {
               return res.status(401).json({ error: 'unauthorized' });
             }
-  
+
             // Checking that atleast one role must be admin from accessToken roles.
             var isAdminRole = req.accessToken.roles.some((role) => {
               return role === 'admin';
             });
-  
+
             if (!isAdminRole) {
               return res.status(401).json({ error: 'unauthorized' });
             }
-  
+
             // Checking heapdump files are available or not.
             if (!fs.existsSync(path.join(dirToStoreDump, heapdumpName1)) ||
                 !fs.existsSync(path.join(dirToStoreDump, heapdumpName2))) {
@@ -100,7 +100,7 @@ module.exports = function HeapDumpFn(app, cb) {
               res.end(null, 'binary');
             });
           });
-        }        
+        }
       });
     } else {
       log.error(log.defaultContext(), 'HEAPDUMP_INTERVAL env variable is not in proper format. Check @ms node_module for supported format.');
