@@ -199,6 +199,7 @@ oracletest:
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
     - npm install git+http://10.73.97.24/oecloud.io/loopback-connector-oracle.git --no-optional
+    - npm install --no-optional
     ##- docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
     - docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --file Dockerfile_Oracle .
     - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
