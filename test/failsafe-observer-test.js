@@ -25,7 +25,7 @@ var currHostName = os.hostname();
 chai.use(require('chai-datetime'));
 
 describe('failsafe-observer-mixin', function () {
-    this.timeout(20000);
+    this.timeout(90000);
     var modelName = 'FailSafeTestModel';
     var childModelName = 'FailSafeChildTestModel';
 

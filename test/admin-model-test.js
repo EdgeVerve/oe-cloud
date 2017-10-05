@@ -24,6 +24,7 @@ var testTenant = 'test-tenant';
 var fs = require('fs');
 var modelDefModel = loopback.findModel('ModelDefinition');
 describe(chalk.blue('Admin Model'), function() {
+    this.timeout(20000);
     describe(chalk.green('Upload'), function(){
         var orgAppHome;
         before('Set apphome & get access token', function(done) {

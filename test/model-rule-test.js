@@ -46,6 +46,7 @@ var modelRuleId, modelRuleVersion;
 chai.use(chaiThings);
 
 describe(chalk.blue('model-rule-test'), function () {
+    this.timeout(60000);
     before('create the temporary model.', function (done) {
         // Forming model metadata
         var data = [{

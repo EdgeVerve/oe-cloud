@@ -30,6 +30,7 @@ var credentials = {
     password:  'basetestuser123'
 };
 describe(chalk.blue('BaseUser Test'), function () {
+    this.timeout(20000);
     before('Create User', function(done) {
         var testUser = {
             username: credentials.username,

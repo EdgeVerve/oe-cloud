@@ -194,7 +194,7 @@ function hierarchyAfterAccess(ctx, next) {
     Object.keys(modelProp).forEach((key) => {
       const prop = modelProp[key];
       if (prop.unique) {
-        if (typeof prop.unique === 'boolean') {
+        if (typeof prop.unique === 'boolean' || typeof prop.unique === 'string') {
           uniq.push(key);
         } else if (typeof prop.unique === 'object') {
           prop.unique.scopedTo ? uniq = uniq.concat(prop.unique.scopedTo) : null;

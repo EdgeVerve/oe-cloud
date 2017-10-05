@@ -1,3 +1,10 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
 var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
@@ -102,7 +109,10 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   Model.defineProperty('_fsCtx', {
-    type: String
+    type: 'string',
+    oracle: {
+      'dataType': 'CLOB'
+    }
   });
 
   if (Model.definition.settings.hidden) {

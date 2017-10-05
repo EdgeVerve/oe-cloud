@@ -19,7 +19,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var loopback = require('loopback');
 describe(chalk.blue('basic-test'), function () {
-
+    this.timeout(60000);
     var testModelName = 'MyModel';
     var testModelDetails = {
         name: testModelName,
