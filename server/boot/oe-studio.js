@@ -36,24 +36,31 @@ function setDesignerPath(DesignerPath, server) {
       if (status) {
         var templateFiles = fs.readdirSync(dirName);
         templateFiles.forEach(function templateFilesForEach(fileName) {
-          var tplRecord = {
-            file: fileName,
-            path: dirName,
-            content: fs.readFileSync(dirName + '/' + fileName, {
-              encoding: 'utf-8'
-            })
-          };
-          var regex = /Polymer\s*\(/;
-          if (tplRecord.content && regex.test(tplRecord.content)) {
-            if (tplRecord.content.indexOf(':modelAlias') >= 0) {
-              tplRecord.type = 'form';
+          
+          var tplRecord = templatesData.find(function(item){
+            return item.file === fileName;
+          });
+          
+          if(!tplRecord){
+            tplRecord = {
+              file: fileName,
+              path: dirName,
+              content: fs.readFileSync(dirName + '/' + fileName, {
+                encoding: 'utf-8'
+              })
+            };
+            var regex = /Polymer\s*\(/;
+            if (tplRecord.content && regex.test(tplRecord.content)) {
+              if (tplRecord.content.indexOf(':modelAlias') >= 0) {
+                tplRecord.type = 'form';
+              } else {
+                tplRecord.type = 'component';
+              }
             } else {
-              tplRecord.type = 'component';
+              tplRecord.type = 'html';
             }
-          } else {
-            tplRecord.type = 'html';
+            templatesData.push(tplRecord);
           }
-          templatesData.push(tplRecord);
         });
       }
     });
