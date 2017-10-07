@@ -291,10 +291,14 @@ job-scheduler-service:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${STACK_NAME}
     - sleep 10
+    - node test/job-scheduler-service-tests/prepatre-test.js
+    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:oe-scheduler-test .
+    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:oe-scheduler-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/job-scheduler-service-tests/oe-cloud.yml > test/job-scheduler-service-tests/oe-cloud2.yml
     - mv -f test/job-scheduler-service-tests/oe-cloud2.yml test/job-scheduler-service-tests/oe-cloud.yml
     - docker stack deploy -c test/job-scheduler-service-tests/oe-cloud.yml ${STACK_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - echo "${HAPROXY} ${SCHEDULER_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - export countElapsed=0
     - export app_exit_status=0

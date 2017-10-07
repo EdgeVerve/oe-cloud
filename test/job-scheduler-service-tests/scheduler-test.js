@@ -12,11 +12,15 @@ var expect = chai.expect;
 var chalk = require('chalk');
 var async = require('async');
 
-const serviceName = process.env.APP_IMAGE_NAME;
 const domainName = process.env.DOMAIN_NAME;
 
+const serviceName = process.env.APP_IMAGE_NAME;
 const serviceHost = serviceName + '.' + domainName;
 const baseUrl = 'https://' + serviceHost + '/api/'; 
+
+const schedulerName = process.env.SCHEDULER_NAME;
+const schedulerHost = schedulerName + '.' + domainName;
+const baseSchedulerUrl = 'https://' + schedulerHost + '/api/'; 
 
 var token;
 
@@ -38,8 +42,8 @@ describe(chalk.blue(''), function () {
                 },
                 function (error, response, body) {
                     if (error || body.error) {
-                    console.log('error:', error || body.error);
-                    return cb(error || body.error);
+                        console.log('error:', error || body.error);
+                        return cb(error || body.error);
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('login using admin - success - ', body.id);
@@ -49,49 +53,35 @@ describe(chalk.blue(''), function () {
             );
         };
 
-        var createNoteDefinition = function (cb) {
-            var modelDefinition = loopback.findModel('ModelDefinition');
-            var data = {
-                'name': 'TestNote',
-                'base': 'BaseEntity',
-                'properties': {
-                    'title': {
-                        'type': 'string'
-                    },
-                    'content': {
-                        'type': 'string'
-                    }
-                }
+        var createNotes = function (cb) {
+            var data = { 
+                'title': 'noteTitle',
+                'content': 'noteContent'
             };
-            modelDefinition.create(data, defaultContext, function (err, record) {
+            var instances = [1,2,3,4,5,6,7,8,9,10];
+            async.each(instances, function (instance, eachCb) {
+                request.post(
+                    baseurl + 'TestNotes&access_token=' + token, {
+                    json: data
+                    },
+                    function (error, response, body) {
+                        if (error || body.error) {
+                            console.log('error:', error || body.error);
+                            return eachCb(error || body.error);
+                        }
+                        expect(response.statusCode).to.equal(200);
+                        console.log('TestNote instances creation - success');
+                        eachCb();
+                    }
+                );  
+            }, function (err) {
                 if (err) {
-                    console.log('error:', err);
+                    console.log('error in creating TestNote instance: ', err);
                     return cb(err);
                 }
-                console.log('TestNote model definition created');
-                return cb();
+                console.log('all TestNote instances created successfully');
+                cb();
             });
-        };
-
-        var createNoteLogic = function (cb) {
-            var testNoteDefinition = loopback.getModel('TestNote', defaultContext);
-            testNoteDefinition.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) {
-                testNoteDefinition.find({}, ctx, function (err, notes) {
-                    if (err) {
-                        return callback(err);
-                    }
-                    async.each(notes, function (note, cb) {
-                        note.updateAttribute('title', title, ctx, function (err) {
-                        if (err) {
-                            log.error(log.defaultContext(), err);
-                        }
-                        cb();
-                        });
-                    }, function (err) {
-                        callback(err, monitoringId, version);
-                    });
-                });
-            };
         };
 
         loginUser(function (err) {
@@ -100,18 +90,56 @@ describe(chalk.blue(''), function () {
                 return done(err);
             }
             console.log('login using admin - success');
-            createNoteDefinition(function (err) {
-                if (err) {
-                    console.log('err in creating TestNote definition: ', err);
-                    return done(err);
+            createNotes(function (err) {
+                if(err) {
+                    console.log('err in creating TestNote instances: ', err);
+                    return(err);
                 }
-                console.log('creating TestNote definition - success');
-                //continue logic here
+                console.log('creating TestNote instances: success');
+                return done();
             });
         });
     });
 
-    it('create', function (done) {
-
+    it('create once job and check it finishes successfully', function (done) {
+        var date = new Date();
+        var jobData = {
+            "jobModelName": "TestNote",
+            "jobFnName": "changeTitle",
+            "jobFnParams": ["My new Title"],
+            "frequency": "Once",
+            "jobDate": date,
+            "priority": "1"
+        };
+        request.post(
+            baseSchedulerUrl + 'Jobs&access_token=' + token, {
+            json: data
+            },
+            function (error, response, body) {
+                if (error || body.error) {
+                    console.log('error:', error || body.error);
+                    return done(error || body.error);
+                }
+                expect(response.statusCode).to.equal(200);
+                console.log('Job instance creation - success');
+                return continueLogic(body.id, done);
+            }
+        );
+        
+        var continueLogic = function (jobId, done) {
+            request.get(
+                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}&access_token=' + token, {
+                },
+                function (error, response, body) {
+                    if (error || body.error) {
+                        console.log('error:', error || body.error);
+                        return done(error || body.error);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    console.log('Getting monitoring instances - success');
+                    return done();
+                }
+            );
+        };
     });
 });

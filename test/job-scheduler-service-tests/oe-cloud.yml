@@ -37,9 +37,10 @@ services:
 
   scheduler:
     entrypoint: ["node", "."]
-    image: registry.evfapp.qa/karin-scheduler
+    image: registry.oecloud.local/oe-scheduler:latest
     depends_on:
       - mongo
+      - rabbitmq
     environment:
       VIRTUAL_HOST: "https://${SCHEDULER_NAME}.${DOMAIN_NAME},${SCHEDULER_NAME}.${DOMAIN_NAME}"
       SERVICE_PORTS: "3001"
@@ -54,7 +55,7 @@ services:
   
   web:
     entrypoint: ["node", "."]
-    image: $REGISTRY/${APP_IMAGE_NAME}:latest
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
       - broadcaster
@@ -78,18 +79,12 @@ services:
       APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       ROUTER_HOST: ${ROUTER}
-      NODE_ENV: "env"
       RABBITMQ_HOSTNAME: "rabbitmq"
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
       - ${NETWORK_NAME}
       - router_network
-    healthcheck:
-      test: "curl http://0.0.0.0:3000/"
-      interval: 1m30s
-      timeout: 3s
-      retries: 5
 
 networks:
   $NETWORK_NAME:
