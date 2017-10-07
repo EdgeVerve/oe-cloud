@@ -301,7 +301,11 @@ job-scheduler-service:
     - echo "${HAPROXY} ${SCHEDULER_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
     - isSchedulerStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${SCHEDULER_NAME}.${DOMAIN_NAME}/)
-    - if [ $isSchedulerStarted -e 200 ]; then echo "scheduler started..."; fi;
+    - if [ $isSchedulerStarted -eq 200 ]; then echo "scheduler started..."; fi;
+    - export countElapsedScheduler=0
+    - export app_exit_status_scheduler=0
+    - while [ $isSchedulerStarted -ne 200 ]; do let countElapsedScheduler=countElapsedScheduler+1; echo ""; echo -n "Waiting till the scheduler URL is up..."; export isSchedulerStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${SCHEDULER_NAME}.${DOMAIN_NAME}/); echo $isSchedulerStarted; sleep 15; if [ $countElapsedScheduler -eq 18 ] ; then export app_exit_status_scheduler=1; export isSchedulerStarted=200; fi; done
+    - if [ ${app_exit_status_scheduler} -ne 0 ]; then echo "Failed to start scheduler..."; fi;
     - export countElapsed=0
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
