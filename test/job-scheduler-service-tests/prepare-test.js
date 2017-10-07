@@ -16,7 +16,7 @@ fs.writeFile("common/models/framework/test-note.js", testNoteJs, function(err) {
 
 var testNoteJson = '{ "name": "TestNote", "base" : "BaseEntity", "strict" : false, "properties": { "title": { "type": "string" }, "content": { "type": "string" } } }';
 
-fs.writeFile("common/models/framework/test-note.json", notejson, function(err) {
+fs.writeFile("common/models/framework/test-note.json", testNoteJson, function(err) {
     if(err) {
         return process.exit(-1);
     }
