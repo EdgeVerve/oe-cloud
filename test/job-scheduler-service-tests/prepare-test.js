@@ -6,7 +6,7 @@
  */
 var fs = require('fs');
 
-var testNoteJs = 'var async = require('+'async'+'); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); }; };';
+var testNoteJs = 'var async = require(' + 'async' + '); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); };  Model.prototype.changeContentWithFail = function (content, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'content' + ', content, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { err = new Error(' + 'failing on purpose' + '); callback(err, monitoringId, version); }); }); }; };';
 
 fs.writeFile("common/models/framework/test-note.js", testNoteJs, function(err) {
     if(err) {

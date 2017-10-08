@@ -62,7 +62,7 @@ describe(chalk.blue(''), function () {
             var instances = [1,2,3,4,5,6,7,8,9,10];
             async.each(instances, function (instance, eachCb) {
                 request.post(
-                    baseUrl + 'TestNotes&access_token=' + token, {
+                    baseUrl + 'TestNotes?access_token=' + token, {
                     json: data
                     },
                     function (error, response, body) {
@@ -113,7 +113,7 @@ describe(chalk.blue(''), function () {
             "priority": "1"
         };
         request.post(
-            baseSchedulerUrl + 'Jobs&access_token=' + token, {
+            baseSchedulerUrl + 'Jobs?access_token=' + token, {
             json: data
             },
             function (error, response, body) {
@@ -130,8 +130,8 @@ describe(chalk.blue(''), function () {
         var retries = 0;
         var continueLogic = function (jobId, done) {
             request.get(
-                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}&access_token=' + token, {
-                },
+                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}?access_token=' + token,
+                {},
                 function (error, response, body) {
                     if (error || body.error) {
                         console.log('error:', error || body.error);
@@ -140,7 +140,7 @@ describe(chalk.blue(''), function () {
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting monitoring instances - success');
                     if (body.status === 'Finished Processing') {
-                        return done();
+                        return finalCheck(done);
                     }
                     if (retries < 10) {
                         retries = retries + 1;
@@ -149,6 +149,93 @@ describe(chalk.blue(''), function () {
                     var err = new Error('too many checks');
                     console.log(err);
                     return done(err);
+                }
+            );
+        };
+
+        var finalCheck = function (done) {
+            request.get(
+                baseUrl + 'Notes?access_token=' + token,
+                {},
+                function (error, response, body) {
+                    if (error || body.error) {
+                        console.log('error:', error || body.error);
+                        return done(error || body.error);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    console.log('Getting note instances - success');
+                    //ToDo: check if all content didn't change
+                    return done();
+                }
+            );
+        };
+    });
+
+    it('create one time job that is supposed to fail and check it fails and the correct error is saved', function (done) {
+        var date = new Date();
+        var jobData = {
+            "jobModelName": "TestNote",
+            "jobFnName": "changeContentWithFail",
+            "jobFnParams": ["My new Content"],
+            "frequency": "Once",
+            "jobDate": date,
+            "priority": "1"
+        };
+        request.post(
+            baseSchedulerUrl + 'Jobs?access_token=' + token, {
+            json: data
+            },
+            function (error, response, body) {
+                if (error || body.error) {
+                    console.log('error:', error || body.error);
+                    return done(error || body.error);
+                }
+                expect(response.statusCode).to.equal(200);
+                console.log('Job instance creation - success');
+                return continueLogic(body.id, done);
+            }
+        );
+
+        var retries = 0;
+        var continueLogic = function (jobId, done) {
+            request.get(
+                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}?access_token=' + token,
+                {},
+                function (error, response, body) {
+                    if (error || body.error) {
+                        console.log('error:', error || body.error);
+                        return done(error || body.error);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    console.log('Getting monitoring instances - success');
+                    if (body.status === 'Failed Processing') {
+                        expect(body.errorMsg).to.be('failing on purpose');
+                        return finalCheck(done);
+                    }
+                    if (retries < 10) {
+                        retries = retries + 1;
+                        return setTimeout(continueLogic, 3000, jobId, done);
+                    }
+                    var err = new Error('too many checks');
+                    console.log(err);
+                    return done(err);
+                }
+            );
+        };
+
+        var finalCheck = function (done) {
+            request.get(
+                baseUrl + 'Notes?access_token=' + token,
+                {},
+                function (error, response, body) {
+                    if (error || body.error) {
+                        console.log('error:', error || body.error);
+                        return done(error || body.error);
+                    }
+                    expect(response.statusCode).to.equal(200);
+                    console.log('Getting note instances - success');
+                    //ToDo: check if all content didn't change
+                    return done();
                 }
             );
         };
