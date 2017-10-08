@@ -20,7 +20,9 @@ const baseUrl = 'https://' + serviceHost + '/api/';
 
 const schedulerName = process.env.SCHEDULER_NAME;
 const schedulerHost = schedulerName + '.' + domainName;
-const baseSchedulerUrl = 'https://' + schedulerHost + '/api/'; 
+const baseSchedulerUrl = 'https://' + schedulerHost + '/api/';
+
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 var token;
 
@@ -34,8 +36,7 @@ var defaultContext = {
 describe(chalk.blue(''), function () {
     before('login using admin', function (done) {
         var loginUser = function (cb) {
-            var loginData = {'username': 'admin', 'password': 'admin'};
-            console.log('Base Url is ', baseUrl);
+            var loginData = {'username':'admin','password':'admin'};
             request.post(
                 baseUrl + 'BaseUsers/login', {
                 json: loginData
@@ -101,7 +102,7 @@ describe(chalk.blue(''), function () {
         });
     });
 
-    it('create once job and check it finishes successfully', function (done) {
+    it('create one time job that is supposed to succeed and check it finishes successfully', function (done) {
         var date = new Date();
         var jobData = {
             "jobModelName": "TestNote",
@@ -137,9 +138,13 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting monitoring instances - success');
-                    return done();
+                    return finalCheck(body, done);
                 }
             );
+        };
+
+        var finalCheck = function (body, done) {
+            return done();
         };
     });
 });
