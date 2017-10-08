@@ -155,7 +155,7 @@ describe(chalk.blue(''), function () {
 
         var finalCheck = function (done) {
             request.get(
-                baseUrl + 'Notes?access_token=' + token,
+                baseUrl + 'TestNotes?access_token=' + token,
                 {},
                 function (error, response, body) {
                     if (error || body.error) {
@@ -164,8 +164,12 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting note instances - success');
-                    //ToDo: check if all content didn't change
-                    return done();
+                    async.each(body, function (note, cb) {
+                        assert(note.title).to.be('My new Title');
+                        return cb();
+                    }, function (err) {
+                        return done(err);
+                    });
                 }
             );
         };
@@ -225,7 +229,7 @@ describe(chalk.blue(''), function () {
 
         var finalCheck = function (done) {
             request.get(
-                baseUrl + 'Notes?access_token=' + token,
+                baseUrl + 'TestNotes?access_token=' + token,
                 {},
                 function (error, response, body) {
                     if (error || body.error) {
@@ -234,8 +238,12 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting note instances - success');
-                    //ToDo: check if all content didn't change
-                    return done();
+                    async.each(body, function (note, cb) {
+                        assert(note.content).to.be('noteContent');
+                        return cb();
+                    }, function (err) {
+                        return done(err);
+                    });
                 }
             );
         };
