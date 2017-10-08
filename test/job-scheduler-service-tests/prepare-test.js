@@ -4,10 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-
-console.log('preperation finished');
-
-/*var fs = require('fs');
+var fs = require('fs');
 
 var testNoteJs = 'var async = require('+'async'+'); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); }; };';
 
@@ -36,4 +33,4 @@ fs.readFile('server/model-config.json', 'utf8', function(oErr, sText) {
             return process.exit(-1);
         }
     });
-});*/
+});
