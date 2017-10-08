@@ -126,7 +126,8 @@ describe(chalk.blue(''), function () {
                 return continueLogic(body.id, done);
             }
         );
-        
+
+        var retries = 0;
         var continueLogic = function (jobId, done) {
             request.get(
                 baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}&access_token=' + token, {
@@ -138,13 +139,18 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting monitoring instances - success');
-                    return finalCheck(body, done);
+                    if (body.status === 'Finished Processing') {
+                        return done();
+                    }
+                    if (retries < 10) {
+                        retries = retries + 1;
+                        return setTimeout(continueLogic, 3000, jobId, done);
+                    }
+                    var err = new Error('too many checks');
+                    console.log(err);
+                    return done(err);
                 }
             );
-        };
-
-        var finalCheck = function (body, done) {
-            return done();
         };
     });
 });
