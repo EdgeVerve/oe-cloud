@@ -35,9 +35,9 @@ describe(chalk.blue(''), function () {
     before('login using admin', function (done) {
         var loginUser = function (cb) {
             var loginData = {'username': 'admin', 'password': 'admin'};
-            console.log('Base Url is ', baseurl);
+            console.log('Base Url is ', baseUrl);
             request.post(
-                baseurl + 'BaseUsers/login', {
+                baseUrl + 'BaseUsers/login', {
                 json: loginData
                 },
                 function (error, response, body) {
@@ -61,7 +61,7 @@ describe(chalk.blue(''), function () {
             var instances = [1,2,3,4,5,6,7,8,9,10];
             async.each(instances, function (instance, eachCb) {
                 request.post(
-                    baseurl + 'TestNotes&access_token=' + token, {
+                    baseUrl + 'TestNotes&access_token=' + token, {
                     json: data
                     },
                     function (error, response, body) {
