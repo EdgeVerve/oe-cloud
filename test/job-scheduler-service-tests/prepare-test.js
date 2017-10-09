@@ -6,13 +6,13 @@
  */
 var fs = require('fs');
 
-var testNoteJs = 'module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var counter = 0; notes.forEach(function (note) { counter = counter + 1; note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } if (counter === 10) { callback(err, monitoringId, version); } }); }, this); }); };   Model.prototype.changeContentWithFail = function (content, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var number = 0; notes.forEach(function (note) { number = number + 1; note.updateAttribute(' + 'content' + ', content, ctx, function (err) { if (err) { console.log(err); } if (number === 10) { callback(err, monitoringId, version); } }); }, this); }); }; };';
+var testNoteJs = 'module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var counter = 0; notes.forEach(function (note) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } counter = counter + 1; if (counter === 10) { callback(err, monitoringId, version); } }); }, this); }); };  Model.prototype.changeContentWithFail = function (content, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var number = 0; notes.forEach(function (note) { note.updateAttribute(' + 'content' + ', content, ctx, function (err) { if (err) { console.log(err); } number = number + 1; if (number === 10) { callback(err, monitoringId, version); } }); }, this); }); }; };';
 
 fs.writeFile("common/models/framework/test-note.js", testNoteJs, function(err) {
     if(err) {
         return process.exit(-1);
     }
-}); 
+});
 
 var testNoteJson = '{ "name": "TestNote", "base" : "BaseEntity", "strict" : false, "properties": { "title": { "type": "string" }, "content": { "type": "string" } } }';
 
