@@ -110,6 +110,7 @@ describe(chalk.blue(''), function () {
             "jobFnParams": ["My new Title"],
             "frequency": "Once",
             "jobDate": date,
+            "timeZone":"Asia/Jerusalem",
             "priority": "1"
         };
         request.post(
@@ -183,6 +184,7 @@ describe(chalk.blue(''), function () {
             "jobFnParams": ["My new Content"],
             "frequency": "Once",
             "jobDate": date,
+            "timeZone":"Asia/Jerusalem",
             "priority": "1"
         };
         request.post(
