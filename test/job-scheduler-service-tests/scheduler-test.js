@@ -102,7 +102,7 @@ describe(chalk.blue(''), function () {
         });
     });
 
-    it('create one time job that is supposed to succeed and check it finishes successfully', function (done) {
+    it('create one time job that is supposed to succeed and check it finished successfully', function (done) {
         var date = new Date();
         var jobData = {
             "jobModelName": "TestNote",
@@ -175,7 +175,7 @@ describe(chalk.blue(''), function () {
         };
     });
 
-    it('create one time job that is supposed to fail and check it fails and the correct error is saved', function (done) {
+    it('create one time job that is supposed to fail and check it failed and the correct error is saved', function (done) {
         var date = new Date();
         var jobData = {
             "jobModelName": "TestNote",
