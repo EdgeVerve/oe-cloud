@@ -27,6 +27,7 @@ fs.writeFileSync('server/model-config.orig', fs.readFileSync('server/model-confi
 fs.readFile('server/model-config.json', 'utf8', function(oErr, sText) {
     var r1 = sText.substr(sText.length - 4, sText.length - 1);
     var result = sText.replace(r1, '},"TestNote": {"public": true,"dataSource": "db"}}');
+    console.log(result);
     fs.writeFile('server/model-config.json', result, function (err) {
         if(err) {
             return process.exit(-1);

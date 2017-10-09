@@ -49,7 +49,7 @@ describe(chalk.blue(''), function () {
                     expect(response.statusCode).to.equal(200);
                     console.log('login using admin - success - ', body.id);
                     token = body.id;
-                    cb();
+                    return cb();
                 }
             );
         };
@@ -72,7 +72,7 @@ describe(chalk.blue(''), function () {
                         }
                         expect(response.statusCode).to.equal(200);
                         console.log('TestNote instances creation - success');
-                        eachCb();
+                        return eachCb();
                     }
                 );  
             }, function (err) {
@@ -81,7 +81,7 @@ describe(chalk.blue(''), function () {
                     return cb(err);
                 }
                 console.log('all TestNote instances created successfully');
-                cb();
+                return cb();
             });
         };
 
@@ -91,15 +91,33 @@ describe(chalk.blue(''), function () {
                 return done(err);
             }
             console.log('login using admin - success');
-            createNotes(function (err) {
-                if(err) {
-                    console.log('err in creating TestNote instances: ', err);
-                    return(err);
+            getTestNoteModel(function (err) {
+                if (err) {
+                    return done(err);
                 }
-                console.log('creating TestNote instances: success');
-                return done();
+                createNotes(function (err) {
+                    if (err) {
+                        console.log('err in creating TestNote instances: ', err);
+                        return done(err);
+                    }
+                    console.log('creating TestNote instances: success');
+                    return done();
+                });
             });
         });
+
+        var getTestNoteModel = function(cb) {
+            request.get(baseUrl + 'ModelDefinitionfilter={"where":{"name": "' + TestNote + '"}}?access_token=' + token,
+            {},
+            function(error, response, body) {
+                if (error || body.error) {
+                    console.log('error:', error || body.error);
+                    return cb(error || body.error);
+                }
+                console.log(body);
+                return cb();
+            });
+        }
     });
 
     it('create one time job that is supposed to succeed and check it finishes successfully', function (done) {
