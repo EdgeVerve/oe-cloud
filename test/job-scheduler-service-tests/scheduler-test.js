@@ -107,7 +107,7 @@ describe(chalk.blue(''), function () {
         });
 
         var getTestNoteModel = function(cb) {
-            request.get(baseUrl + 'ModelDefinitionfilter={"where":{"name": "' + TestNote + '"}}?access_token=' + token,
+            request.get(baseUrl + 'ModelDefinitionfilter={"where":{"name": "TestNote"}}?access_token=' + token,
             {},
             function(error, response, body) {
                 if (error || body.error) {
