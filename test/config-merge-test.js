@@ -128,9 +128,7 @@ describe(chalk.blue('Config files merge test'), function () {
       'auth': {},
       'parse': {},
       'routes:before': {
-        'loopback#context': {
-
-        },
+        'loopback#context': {},
         './middleware/http-method-overriding-filter': {},
         './middleware/context-populator-filter': {
           'enabled': true
@@ -138,10 +136,10 @@ describe(chalk.blue('Config files merge test'), function () {
         './middleware/req-logging-filter': {},
         './middleware/contributor-selector-filter': {},
         './middleware/useragent-populator-filter': {},
-        './middleware/model-discovery-filter': {}
+        '../server/middleware/model-discovery-filter': ['restApiPath']
       },
       'routes:after': {
-        },
+      },
       'files': {
         'loopback#static': {
           'params': '$!../client'
@@ -173,7 +171,8 @@ describe(chalk.blue('Config files merge test'), function () {
       'auth': {},
       'parse': {},
       'routes:before': {
-        './middleware/routes-before-middleware': {}
+        './middleware/routes-before-middleware': {},
+        '../server/middleware/model-discovery-filter': ['restApiNewPath']
       },
       'routes:after': {
       },
@@ -203,7 +202,6 @@ describe(chalk.blue('Config files merge test'), function () {
     clientMiddleware = JSON.parse(replaceAll(tempmiddleware, temp, relativePath));
 
     mergeUtil.mergeMiddlewareConfig(serverMiddleware, clientMiddleware);
-
     expect(serverMiddleware).not.to.be.null;
     expect(serverMiddleware).not.to.be.empty;
     expect(serverMiddleware).not.to.be.undefined;
@@ -287,8 +285,8 @@ describe(chalk.blue('Config files merge test'), function () {
 
     function modifyPath(element) {
       if (element.indexOf('./') === 0 || element.indexOf('../') === 0) {
-                // Relative path
-                // element = path.resolve(options.clientAppRootDir, element);
+        // Relative path
+        // element = path.resolve(options.clientAppRootDir, element);
         return path.relative(options.appRootDir, path.resolve(options.clientAppRootDir, element));
       }
       return element;
@@ -407,6 +405,75 @@ describe(chalk.blue('Config files merge test'), function () {
     expect(serverComponetConfig).not.to.be.undefined;
     expect(Object.getOwnPropertyNames(serverComponetConfig).length).to.be.equal(3);
     expect(serverComponetConfig['loopback-component-explorer'].mountPath).to.be.equal('/swagger');
+    done();
+  });
+
+  it('Test - merge providers.json config ', function (done) {
+
+    var loadAppProviders = mergeUtil.loadAppProviders;
+    var applist = [
+      {
+        "path": "oe-workflow",
+        "enabled": false
+      },
+      {
+        "path": "./",
+        "enabled": true
+      }
+    ]
+    var providers = loadAppProviders(applist);
+    expect(providers).not.to.be.null;
+    expect(providers).not.to.be.undefined;
+    done();
+  });
+
+  it('Test - merge log config ', function (done) {
+
+    var loadAppLogConfig = mergeUtil.loadAppLogConfig;
+    var applist = [
+      {
+        "path": "oe-workflow",
+        "enabled": false
+      },
+      {
+        "path": "./",
+        "enabled": true
+      }
+    ]
+    var logConfig = loadAppLogConfig(applist);
+    expect(logConfig).not.to.be.null;
+    expect(logConfig).not.to.be.undefined;
+    done();
+  });
+
+  it('Test - Merge all configs using applist', function (done) {
+    var loadAppList = mergeUtil.loadAppList;
+    var applist = [
+      {
+        "path": "oe-workflow",
+        "enabled": false
+      },
+      {
+        "path": "./",
+        "enabled": true
+      }
+    ]
+    var options = loadAppList(applist, "./dummyClientPath", {});
+    expect(options).not.to.be.null;
+    expect(options).not.to.be.empty;
+    expect(options).not.to.be.undefined;
+    expect(options).to.include.keys('appRootDir', 'appConfigRootDir', 'modelsRootDir',
+      'dsRootDir', 'mixinDirs', 'bootDirs', 'clientAppRootDir', 'skipConfigurePassport',
+      'config', 'middleware', 'models', 'dataSources', 'components', 'providerJson');
+    expect(options.config).not.to.be.null;
+    expect(options.config).not.to.be.empty;
+    expect(options.config).not.to.be.undefined;
+    expect(options.config).to.include.keys('frameworkdsname', 'restApiRoot', 'host', 'port');
+    expect(options.config.modelstocache).to.be.instanceof(Array);
+    expect(options.middleware).not.to.be.null;
+    expect(options.middleware).not.to.be.empty;
+    expect(options.middleware).not.to.be.undefined;
+    expect(options.middleware).to.include.keys('initial:before', 'session:before', 'auth', 'auth:after');
     done();
   });
 });

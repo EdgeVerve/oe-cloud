@@ -1,3 +1,7 @@
+<!--
+©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
+-->
+
 # oeCloud.io JavaScript Style Guide
 
 ## Table of Contents

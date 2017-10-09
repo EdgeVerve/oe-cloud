@@ -53,6 +53,13 @@ describe(chalk.blue('service-personalization'), function () {
       'isAvailable': {
         'type': 'boolean',
         'required': true
+      },
+      'keywords': {
+        'type': 'array'
+      },
+      'modelNo': {
+        'type': 'string',
+        'length': 10
       }
     };
 
@@ -599,8 +606,11 @@ describe(chalk.blue('service-personalization'), function () {
             expect(results).to.be.instanceof(Array);
             expect(results.length).to.equal(6);
             expect(results[0].category).to.be.equal('electronics');
-            expect(results[0].name).to.be.equal('refrigerator');
-
+            expect(results[1].category).to.be.equal('electronics');
+            expect(results[2].category).to.be.equal('electronics');
+            expect(results[3].category).to.be.equal('furniture');
+            expect(results[4].category).to.be.equal('furniture');
+            expect(results[5].category).to.be.equal('furniture');
             done();
           });
       });
@@ -1249,7 +1259,7 @@ describe(chalk.blue('service-personalization'), function () {
     });
   });
 
-  it('should give filterd result when lbFilter is applied', function (done) {
+  it('t21 should give filterd result when lbFilter is applied', function (done) {
     // Setup personalization rule
     var ruleForAndroid = {
       'modelName': 'ProductOwner',
@@ -1284,6 +1294,333 @@ describe(chalk.blue('service-personalization'), function () {
           done();
 
         });
+    });
+
+  });
+
+  it('t22 should replace field value names array datatype while posting when fieldValueReplace personalization is configured', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      'modelName': 'ProductCatalog',
+      'personalizationRule': {
+        'fieldValueReplace': {
+          'keywords': {
+            'Alpha': 'A',
+            "Bravo": 'B'
+          }
+        }
+      },
+      'scope': {
+        'device': 'mobile'
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'Smart Watch',
+          'desc': 'Smart watch with activity tracker',
+          'category': 'electronics',
+          'price': {
+            'value': 5000,
+            'currency': 'inr'
+          },
+          "keywords": ["Alpha", "Bravo", "Charlie", "Delta"],
+          'isAvailable': true,
+          'id': 'watch1'
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('device', 'mobile')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result.name).to.be.equal('Smart Watch');
+              expect(result.keywords).to.be.an('array');
+              expect(result.keywords).to.have.length(4);
+              expect(result.keywords).to.include.members(['A', 'B', 'Charlie', 'Delta']);
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t23 should replace field values on array datatype in response when fieldValueReplace personalization is configured ', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch1';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('DEVICE', 'mobile')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result.name).to.be.equal('Smart Watch');
+        expect(result.keywords).to.be.an('array');
+        expect(result.keywords).to.have.length(4);
+        expect(result.keywords).to.include.members(['A', 'B', 'Charlie', 'Delta']);
+        done();
+      });
+  });
+
+  it('t24 should be able to create a fieldMask personalization rule, post data and get response in specific format', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "fieldMask": {
+          "modelNo": {
+            "pattern": "([0-9]{3})([0-9]{3})([0-9]{4})",
+            "maskCharacter": "X",
+            "format": "($1) $2-$3",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "us"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'Omnitrix',
+          'desc': 'Alien tech smart watch allows to transform into .... nah nothing, just a smart watch',
+          'category': 'electronics',
+          'price': {
+            'value': 89000,
+            'currency': 'inr'
+          },
+          "keywords": ["Alpha", "Bravo"],
+          'isAvailable': true,
+          'id': 'watch2',
+          "modelNo": "1233567891"
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'us')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('(123) 356-XXXX');
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t25 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch2';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('region', 'us')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result.modelNo).to.be.equal('(123) 356-XXXX');
+        done();
+      });
+  });
+
+  it('t26 should be able to create a fieldMask personalization rule, post data and get response in specific format', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "fieldMask": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "maskCharacter": "-",
+            "format": "+91 $1 $2$3",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "in"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var postData = {
+          'name': 'MultiTrix',
+          'desc': 'There is no such smart watch',
+          'category': 'electronics',
+          'price': {
+            'value': 23400,
+            'currency': 'inr'
+          },
+          "keywords": ["Charlie", "India"],
+          'isAvailable': true,
+          'id': 'watch3',
+          "modelNo": "9080706050"
+        };
+
+        api.post(productCatalogUrl)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'in')
+          .send(postData)
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('+91 90807 0----');
+              done();
+            }
+          });
+      }
+    });
+  });
+
+  it('t27 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
+    // Setup personalization rule
+    var productWithId = productCatalogUrl + '/watch3';
+    api.get(productWithId)
+      .set('Accept', 'application/json')
+      .set('TENANT_ID', tenantId)
+      .set('REMOTE_USER', 'testUser')
+      .set('region', 'in')
+      .expect(200).end(function (err, resp) {
+        if (err) {
+          done(err);
+        }
+        var result = resp.body;
+        expect(result).not.to.be.null;
+        expect(result).not.to.be.empty;
+        expect(result).not.to.be.undefined;
+        expect(result.modelNo).to.be.equal('+91 90807 0----');
+        done();
+      });
+  });
+
+  it('t28 should get result in specific format on get when fieldMask personalization rule is applied no masking', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "fieldMask": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "maskCharacter": "X",
+            "format": "+91 $1 $2$3"
+          }
+        }
+      },
+      "scope": {
+        "region": "ka"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var productWithId = productCatalogUrl + '/watch3';
+        api.get(productWithId)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'ka')
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('+91 90807 06050');
+              done();
+            }
+          });
+      }
+    });
+
+  });
+
+  it('t29 should get result on get when fieldMask personalization rule is applied and no format is given', function (done) {
+    // Setup personalization rule
+    var ruleForMobile = {
+      "modelName": "ProductCatalog",
+      "personalizationRule": {
+        "fieldMask": {
+          "modelNo": {
+            "pattern": "([0-9]{5})([0-9]{1})([0-9]{4})",
+            "maskCharacter": "X",
+            "mask": ['$3']
+          }
+        }
+      },
+      "scope": {
+        "region": "kl"
+      }
+    };
+
+    models.PersonalizationRule.create(ruleForMobile, bootstrap.defaultContext, function (err, rule) {
+      if (err) {
+        done(err);
+      } else {
+        var productWithId = productCatalogUrl + '/watch3';
+        api.get(productWithId)
+          .set('Accept', 'application/json')
+          .set('TENANT_ID', tenantId)
+          .set('REMOTE_USER', 'testUser')
+          .set('region', 'kl')
+          .expect(200).end(function (err, resp) {
+            if (err) {
+              done(err);
+            } else {
+              var result = resp.body;
+              expect(result).not.to.be.null;
+              expect(result).not.to.be.empty;
+              expect(result).not.to.be.undefined;
+              expect(result.modelNo).to.be.equal('908070XXXX');
+              done();
+            }
+          });
+      }
     });
 
   });

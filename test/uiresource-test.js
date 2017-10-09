@@ -19,7 +19,7 @@ var baseUrl = bootstrap.basePath;
 
 var options;
 describe(chalk.blue('UIResource-test'), function () {
-  this.timeout(10000);
+  this.timeout(60000);
 
   var htmlData, cssData;
   

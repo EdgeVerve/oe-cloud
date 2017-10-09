@@ -15,7 +15,8 @@ var models = bootstrap.models;
 var parentModelName = "CountryModel";
 var childModelName = "CityModel";
 
-describe(chalk.blue('Decision table belongsTo relation check'), function () {
+xdescribe(chalk.blue('Decision table belongsTo relation check'), function () {
+  this.timeout(60000);
   var parentModel;
   var childModel;
   before('Create DecisionTables and models for belopngsTo relation check', function (done) {

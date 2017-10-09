@@ -18,7 +18,7 @@ var loopback = require('loopback');
 chai.use(require('chai-things'));
 
 describe(chalk.blue('relation-has-one'), function () {
-
+  this.timeout(20000);
   var parentModelName = 'HasOneParent';
   var childModelName = 'HasOneChild';
 

@@ -1,3 +1,6 @@
+<!--
+©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
+-->
 # oeCloud.io (Open Enterprise for Cloud)
 
 oeCloud.io is an architectural blueprint for building enterprise systems leveraging open source framework and powered by automation tools. It is based on [loopback framework](https://github.com/strongloop/loopback). 

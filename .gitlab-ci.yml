@@ -1,12 +1,21 @@
+# ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+#Bangalore, India. All Rights Reserved.
+
 stages:
   - build
   - post-build-test
+  - swarmActorPattern
+  - retry-service
+  - swarmFailSafe
+  - ldap-auth
 
 cache:
   untracked: true
   paths: 
     - node_modules/
-    
+
+image: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+
 variables:
   USER_BROADCASTER: "false"
   DOMAIN_NAME: oecloud.local
@@ -19,9 +28,14 @@ before_script:
   - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - export ROUTER=cep_router
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
+  - export DOMAIN_NAME=oecloud.local
+  - export REGISTRY=registry.${DOMAIN_NAME}
+  - export NETWORK_NAME=${APP_IMAGE_NAME}
+  - export APP_TAG=latest
+  - export ROUTER=cep_router
+
 
 buildjob:
   stage: build
@@ -57,53 +71,7 @@ buildjob:
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER_ATUL
-
-retry-service:
-  stage: post-build-test
-  script: 
-    - export ROUTER="cep_router"
-    - export HAPROXY=10.73.44.46
-    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
-    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${STACK_NAME}
-    - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
-    - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
-    - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
-    - echo "docker stack rm ${STACK_NAME}" >> /removeStacks.sh
-    - echo "docker stack rm ${RETRY_STACK_NAME}" >> /removeStacks.sh
-    - docker stack rm ${STACK_NAME}
-    - docker stack rm ${RETRY_STACK_NAME}
-    - sleep 10
-    - cd test/async-service-tests/test-files
-    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
-    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
-    - mv -f oecloud2.yml oecloud.yml
-    - docker stack deploy -c oecloud.yml ${STACK_NAME}
-    - sed 's/\$RETRY_NETWORK_NAME/'"$RETRY_NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
-    - mv -f retry-service2.yml retry-service.yml
-    - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
-    - docker service logs -f ${STACK_NAME}_web &
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}"
-    - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}"
-    - echo "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/"
-    - sleep 900
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - cd ../../..
-    - sleep 60
-    - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
-  after_script:
-    - sh /removeStacks.sh
-  tags:
-    - CEP_RUNNER_ATUL
+    - CEP_RUNNER
 
 mongotest:
   stage: post-build-test
@@ -130,13 +98,14 @@ mongotest:
     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
+    - npm install mongodb pg chai --no-optional
     - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER_ATUL
+    - CEP_RUNNER
 
 postgrestest:
   stage: post-build-test
@@ -164,17 +133,18 @@ postgrestest:
     - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
     - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
     - docker stack ps --no-trunc ${STACK_NAME}
+    - npm install mongodb pg chai --no-optional
     - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER_ATUL
+    - CEP_RUNNER
 
 
 swarmActorPattern:
-  stage: post-build-test
+  stage: swarmActorPattern 
   script:
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
@@ -185,7 +155,7 @@ swarmActorPattern:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
-    - export HAPROXY=10.73.44.46
+    - export HAPROXY=10.73.96.214
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - cd test/actor-tests/test-files
@@ -207,14 +177,117 @@ swarmActorPattern:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER_ATUL
+    - CEP_RUNNER
 
-
-
-swarmFailSafe:
+oracletest:
+  image: registry.oecloud.local/debian-node-oracle-docker
   stage: post-build-test
   script:
-    - export HAPROXY=10.73.44.46
+    - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
+    - export APP_TAG=oracle
+    - export NODE_ENV=oracle
+    - export POSTGRES_HOST="10.73.53.144"
+    - export MONGO_HOST="10.73.53.144"
+    - export ORACLE_HOST=10.73.53.144
+    - export ORACLE_SYSUSER=oeadmin
+    - export ORACLE_SYSPASSWORD=oeadmin
+    - export ORACLE_SID=ORCLCDB
+    - npm install nan async --no-optional
+    - mv /oracledb node_modules/
+    #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
+    - export CI_PROJECT_NAMESPACE=${group}
+    - node server/oracle-utility.js
+    #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
+    - npm install git+http://10.73.97.24/oecloud.io/loopback-connector-oracle.git --no-optional
+    - npm install --no-optional
+    ##- docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --build-arg http_proxy=$http_proxy --build-arg https_proxy=$https_proxy --build-arg no_proxy=$no_proxy --file Dockerfile_Oracle .
+    - docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --file Dockerfile_Oracle .
+    - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+    - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
+    - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
+    - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')
+    - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
+    - docker image push ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}
+    #- docker service create --name test-${APP_IMAGE_NAME}:oracle --env NODE_ENV=oracle ${REGISTRY}/${APP_IMAGE_NAME}-oracle npm run oracle
+    #- docker run --env NODE_ENV=${NODE_ENV} --env ORACLE_HOST=${ORACLE_HOST} --env ORACLE_SID=${ORACLE_SID} --env ORACLE_USERNAME=${ORACLE_USERNAME} --env ORACLE_PASSWORD=${ORACLE_PASSWORD} ${REGISTRY}/${APP_IMAGE_NAME}:oracle npm run grunt-cover
+    - export DB=oracle
+    - export STARTUP_CMD="npm run grunt-test"
+    - export FILE_NAME=docker-compose.test.env.yml
+    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export exit_status=0
+    - export nameWebService=${STACK_NAME}"_web"
+    - export nameDBService=${STACK_NAME}"_"${DB}
+    - docker stack rm ${STACK_NAME}
+    - sleep 10
+    - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
+    - if [ $networkAvailable -eq 0 ]; then docker network create --driver overlay oecloud_ci_test; fi
+    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
+    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
+    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
+    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
+    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
+    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
+    - export DB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameDBService} | wc -l)
+    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
+    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
+    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
+    - docker stack ps --no-trunc ${STACK_NAME}
+    - if [ ${DB_CHECK} -ne 0 ]; then echo "Failed due to mongo service going down..."; export exit_status=1; fi
+    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
+    - docker stack rm ${STACK_NAME}
+    - node server/oracle-utility.js
+    - cd .. && mv oe-cloud/ ${PROJECT_DIR} && cd ${PROJECT_DIR}/oe-cloud
+    - exit $exit_status
+  tags:
+    - CEP_RUNNER
+
+retry-service:
+  stage: retry-service
+  script: 
+    - export ROUTER="cep_router"
+    - export HAPROXY=10.73.96.214
+    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
+    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${STACK_NAME}
+    - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
+    - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
+    - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
+    - echo "docker stack rm ${STACK_NAME}" >> /removeStacks.sh
+    - echo "docker stack rm ${RETRY_STACK_NAME}" >> /removeStacks.sh
+    - docker stack rm ${STACK_NAME}
+    - docker stack rm ${RETRY_STACK_NAME}
+    - sleep 10
+    - cd test/async-service-tests/test-files
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
+    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
+    - mv -f oecloud2.yml oecloud.yml
+    - docker stack deploy -c oecloud.yml ${STACK_NAME}
+    - sed 's/\$RETRY_NETWORK_NAME/'"$RETRY_NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
+    - mv -f retry-service2.yml retry-service.yml
+    - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
+    - docker service logs -f ${STACK_NAME}_web &
+    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
+    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
+    - export countElapsed=0
+    - export app_exit_status=0
+    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
+    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
+    - cd ../../..
+    - sleep 60
+    - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
+  after_script:
+    - sh /removeStacks.sh
+  tags:
+    - CEP_RUNNER
+
+swarmFailSafe:
+  stage: swarmFailSafe
+  script:
+    - export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-fs
     - export STACK_NAME=${APP_IMAGE_NAME}
@@ -234,15 +307,15 @@ swarmFailSafe:
     - export app_exit_status=0
     - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
     - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - mocha --timeout 300000 test/failSafe-tests/integrationTest.js
+    - mocha --timeout 600000 test/failSafe-tests/integrationTest.js
     - node test/failSafe-tests/cleanupIntegrationTest.js
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER_ATUL
+    - CEP_RUNNER
 
 ldap-auth:
-  stage: post-build-test
+  stage: ldap-auth
   script:
     - export ROUTER="cep_router"
     - export HAPROXY=10.73.96.214
@@ -265,5 +338,4 @@ ldap-auth:
   after_script:
     - sh /removeStack.sh
   tags:
-    - CEP_RUNNER_ATUL
-
+    - CEP_RUNNER
