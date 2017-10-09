@@ -114,7 +114,7 @@ describe(chalk.blue(''), function () {
         };
         request.post(
             baseSchedulerUrl + 'Jobs?access_token=' + token, {
-            json: data
+            json: jobData
             },
             function (error, response, body) {
                 if (error || body.error) {
@@ -187,7 +187,7 @@ describe(chalk.blue(''), function () {
         };
         request.post(
             baseSchedulerUrl + 'Jobs?access_token=' + token, {
-            json: data
+            json: jobData
             },
             function (error, response, body) {
                 if (error || body.error) {
