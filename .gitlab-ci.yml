@@ -291,7 +291,7 @@ job-scheduler-service:
     - docker stack rm ${STACK_NAME}
     - sleep 10
     - node test/job-scheduler-service-tests/prepare-test.js
-    - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test .
+    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME} -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test .
     - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/job-scheduler-service-tests/oe-cloud.yml > test/job-scheduler-service-tests/oe-cloud2.yml
     - mv -f test/job-scheduler-service-tests/oe-cloud2.yml test/job-scheduler-service-tests/oe-cloud.yml

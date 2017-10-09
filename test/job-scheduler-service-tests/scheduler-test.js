@@ -91,33 +91,15 @@ describe(chalk.blue(''), function () {
                 return done(err);
             }
             console.log('login using admin - success');
-            getTestNoteModel(function (err) {
+            createNotes(function (err) {
                 if (err) {
+                    console.log('err in creating TestNote instances: ', err);
                     return done(err);
                 }
-                createNotes(function (err) {
-                    if (err) {
-                        console.log('err in creating TestNote instances: ', err);
-                        return done(err);
-                    }
-                    console.log('creating TestNote instances: success');
-                    return done();
-                });
+                console.log('creating TestNote instances: success');
+                return done();
             });
         });
-
-        var getTestNoteModel = function(cb) {
-            request.get(baseUrl + 'ModelDefinitionfilter={"where":{"name": "TestNote"}}?access_token=' + token,
-            {},
-            function(error, response, body) {
-                if (error || body.error) {
-                    console.log('error:', error || body.error);
-                    return cb(error || body.error);
-                }
-                console.log(body);
-                return cb();
-            });
-        }
     });
 
     it('create one time job that is supposed to succeed and check it finishes successfully', function (done) {
