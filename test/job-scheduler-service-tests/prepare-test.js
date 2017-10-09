@@ -6,7 +6,7 @@
  */
 var fs = require('fs');
 
-var testNoteJs = 'var async = require(' + 'async' + '); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); };  Model.prototype.changeContentWithFail = function (content, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'content' + ', content, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { err = new Error(' + 'failing on purpose' + '); callback(err, monitoringId, version); }); }); }; };';
+var testNoteJs = 'var async = require('+'async'+'); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); }; };';
 
 fs.writeFile("common/models/framework/test-note.js", testNoteJs, function(err) {
     if(err) {
@@ -26,7 +26,6 @@ fs.writeFileSync('server/model-config.orig', fs.readFileSync('server/model-confi
 
 fs.readFile('server/model-config.json', 'utf8', function(oErr, sText) {
     var r1 = sText.substr(sText.length - 4, sText.length - 1);
-    var re = new RegExp(r1,"g");
     var result = sText.replace(r1, '},"TestNote": {"public": true,"dataSource": "db"}}');
     fs.writeFile('server/model-config.json', result, function (err) {
         if(err) {
