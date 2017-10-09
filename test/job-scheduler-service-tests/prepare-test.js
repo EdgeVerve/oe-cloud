@@ -6,8 +6,7 @@
  */
 var fs = require('fs');
 
-var testNoteJs = 'var async = require('+'async'+'); module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } async.each(notes, function (note, cb) { note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } cb(); }); }, function (err) { callback(err, monitoringId, version); }); }); }; };';
-//to do : add the new function as well
+var testNoteJs = 'module.exports = function (Model) { Model.prototype.changeTitle = function (title, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var counter = 0; notes.forEach(function (note) { counter = counter + 1; note.updateAttribute(' + 'title' + ', title, ctx, function (err) { if (err) { console.log(err); } if (counter === 10) { callback(err, monitoringId, version); } }); }, this); }); };   Model.prototype.changeContentWithFail = function (content, ctx, monitoringId, version, callback) { Model.find({}, ctx, (err, notes) => { if (err) { return callback(err); } var number = 0; notes.forEach(function (note) { number = number + 1; note.updateAttribute(' + 'content' + ', content, ctx, function (err) { if (err) { console.log(err); } if (number === 10) { callback(err, monitoringId, version); } }); }, this); }); }; };';
 
 fs.writeFile("common/models/framework/test-note.js", testNoteJs, function(err) {
     if(err) {
