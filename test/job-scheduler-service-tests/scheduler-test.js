@@ -131,8 +131,8 @@ describe(chalk.blue(''), function () {
         var retries = 0;
         var continueLogic = function (jobId, done) {
             request.get(
-                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}?access_token=' + token,
-                {},
+                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}&access_token=' + token,
+                {json: {}},
                 function (error, response, body) {
                     if (error || body.error) {
                         console.log('error:', error || body.error);
@@ -157,7 +157,7 @@ describe(chalk.blue(''), function () {
         var finalCheck = function (done) {
             request.get(
                 baseUrl + 'TestNotes?access_token=' + token,
-                {},
+                {json: {}},
                 function (error, response, body) {
                     if (error || body.error) {
                         console.log('error:', error || body.error);
@@ -205,8 +205,8 @@ describe(chalk.blue(''), function () {
         var retries = 0;
         var continueLogic = function (jobId, done) {
             request.get(
-                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}?access_token=' + token,
-                {},
+                baseSchedulerUrl + 'Monitorings?filter={"where":{"jobId": "' + jobId + '"}}&access_token=' + token,
+                {json: {}},
                 function (error, response, body) {
                     if (error || body.error) {
                         console.log('error:', error || body.error);
@@ -232,7 +232,7 @@ describe(chalk.blue(''), function () {
         var finalCheck = function (done) {
             request.get(
                 baseUrl + 'TestNotes?access_token=' + token,
-                {},
+                {json: {}},
                 function (error, response, body) {
                     if (error || body.error) {
                         console.log('error:', error || body.error);
