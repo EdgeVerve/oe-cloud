@@ -166,8 +166,6 @@ function createHistoryModel(model) {
   var newModel = loopback.createModel(auditModelName, properties, {
     base: 'PersistedModel',
     mixins: {
-      'ObserverMixin': true,
-      'CacheMixin': true,
       'SwitchDatasourceMixin': true
     },
     dataSourceGroup: dataSourceGroup
