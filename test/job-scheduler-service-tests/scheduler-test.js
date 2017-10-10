@@ -167,7 +167,7 @@ describe(chalk.blue(''), function () {
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting note instances - success');
                     async.each(body, function (note, cb) {
-                        assert(note.title).to.be('My new Title');
+                        expect(note.title).to.equal('My new Title');
                         return cb();
                     }, function (err) {
                         return done(err);
@@ -217,7 +217,7 @@ describe(chalk.blue(''), function () {
                     console.log('Getting monitoring instances - success');
                     console.log(body);
                     if (body[0].status === 'Failed Processing') {
-                        expect(body.errorMsg).to.be('failing on purpose');
+                        expect(body.errorMsg).to.equal('failing on purpose');
                         return finalCheck(done);
                     }
                     if (retries < 10) {
@@ -243,7 +243,7 @@ describe(chalk.blue(''), function () {
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting note instances - success');
                     async.each(body, function (note, cb) {
-                        assert(note.content).to.be('noteContent');
+                        expect(note.content).to.equal('noteContent');
                         return cb();
                     }, function (err) {
                         return done(err);
