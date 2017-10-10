@@ -108,41 +108,6 @@ mongotest:
   tags:
     - CEP_RUNNER
 
-postgrestest:
-  stage: post-build-test
-  script:
-    - export NODE_ENV=postgres
-    - export POSTGRES_HOST="10.73.53.144"
-    - export MONGO_HOST="10.73.53.144"
-    - export DB=postgres
-    - export DB_NAME=${CI_PIPELINE_ID}_pg
-    - export STARTUP_CMD="npm run grunt-cover"
-    - export FILE_NAME=docker-compose.test.env.yml
-    - export STACK_NAME=test-${DB}-${APP_IMAGE_NAME}
-    - export exit_status="0"
-    - export nameWebService=${STACK_NAME}"_web"
-    - export networkAvailable=$(docker network ls -q --filter name=oecloud_ci_test | wc -l)
-    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
-    - if [ $networkAvailable -ne 1 ]; then docker network create --driver overlay oecloud_ci_test; fi
-    - docker stack deploy --compose-file ${FILE_NAME} ${STACK_NAME}
-    - docker service logs -f ${nameWebService} | sed 's/^[^|]*|//g' &
-    - export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l)
-    - while [ $isShutdown -eq 0 ]; do echo "Test cases still running... "; export isShutdown=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | wc -l); sleep 20; done
-    - export LOGS_PID=$(ps ef | grep "[d]ocker service logs -f" | awk '{print $1}')
-    - if [ ${LOGS_PID} -ne 0 ]; then kill $LOGS_PID; fi
-    - export WEB_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | wc -l)
-    - export WEB_REJECTED_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Rejected | wc -l)
-    - export WEB_EXIT_CHECK=$(docker stack ps ${STACK_NAME} | grep "Shutdown" | grep ${nameWebService} | grep Failed | wc -l)
-    - docker stack ps --no-trunc ${STACK_NAME}
-    - npm install mongodb pg chai --no-optional
-    - mocha test/01-cleanup.js
-    - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
-    - exit $exit_status
-  after_script:
-    - sh /removeStack.sh
-  tags:
-    - CEP_RUNNER
-
 swarm-actor-pattern:
   stage: swarm-actor-pattern 
   script:
