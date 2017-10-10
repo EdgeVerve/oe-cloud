@@ -140,7 +140,6 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting monitoring instances - success');
-                    console.log(body);
                     if (body[0].status === 'Finished Processing') {
                         return finalCheck(done);
                     }
@@ -215,9 +214,8 @@ describe(chalk.blue(''), function () {
                     }
                     expect(response.statusCode).to.equal(200);
                     console.log('Getting monitoring instances - success');
-                    console.log(body);
                     if (body[0].status === 'Failed Processing') {
-                        expect(body.errorMsg).to.equal('failing on purpose');
+                        expect(body[0].errorMsg).to.equal('failing on purpose');
                         return finalCheck(done);
                     }
                     if (retries < 10) {
