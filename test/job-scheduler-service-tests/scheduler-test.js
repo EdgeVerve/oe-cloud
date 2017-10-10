@@ -123,7 +123,7 @@ describe(chalk.blue(''), function () {
                     return done(error || body.error);
                 }
                 expect(response.statusCode).to.equal(200);
-                console.log('Job instance creation - success');
+                console.log('Job instance creation - success', body.id);
                 return continueLogic(body.id, done);
             }
         );
@@ -197,7 +197,7 @@ describe(chalk.blue(''), function () {
                     return done(error || body.error);
                 }
                 expect(response.statusCode).to.equal(200);
-                console.log('Job instance creation - success');
+                console.log('Job instance creation - success', body.id);
                 return continueLogic(body.id, done);
             }
         );
