@@ -7,8 +7,9 @@ stages:
   - build
   - swarmActorPattern
   - retry-service
-  - swarmFailSafe
+  - swarm-failsafe
   - ldap-auth
+  - job-scheduler-service
 
 cache:
   untracked: true
@@ -221,8 +222,8 @@ retry-service:
   tags:
     - CEP_RUNNER
 
-swarmFailSafe:
-  stage: swarmFailSafe
+swarm-failsafe:
+  stage: swarm-failsafe
   script:
     - export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
