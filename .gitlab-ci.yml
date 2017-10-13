@@ -2,6 +2,7 @@
 #Bangalore, India. All Rights Reserved.
 
 stages:
+  - swarmActorPattern
   - build
   - post-build-test
   - swarmActorPattern
