@@ -177,18 +177,18 @@ describe(chalk.blue('Model Personalization test'), function () {
       }
       expect(results[0]).to.have.property('name');
       expect(results[0]).to.have.property('id');
-      expect(results[0]).to.have.property('address');
+      expect(results[0].__data).to.have.property('address');
       expect(results[0].name).to.equal('Tom');
-      expect(results[0].address[0]).to.have.property('city');
-      expect(results[0].address[0].city).to.equal('Denver');
-      expect(results[0].address[1].city).to.equal('Frankfort');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Denver');
+      expect(results[0].__data.address[1].city).to.equal('Frankfort');
       expect(results[1]).to.have.property('name');
       expect(results[1]).to.have.property('id');
-      expect(results[1]).to.have.property('address');
+      expect(results[1].__data).to.have.property('address');
       expect(results[1].name).to.equal('Harry');
-      expect(results[1].address[0]).to.have.property('city');
-      expect(results[1].address[0].city).to.equal('London');
-      expect(results[1].address[1].city).to.equal('Paris');
+      expect(results[1].__data.address[0]).to.have.property('city');
+      expect(results[1].__data.address[0].city).to.equal('London');
+      expect(results[1].__data.address[1].city).to.equal('Paris');
       done();
     });
   });
@@ -212,11 +212,11 @@ describe(chalk.blue('Model Personalization test'), function () {
       }
       expect(results[0]).to.have.property('name');
       expect(results[0]).to.have.property('id');
-      expect(results[0]).to.have.property('address');
+      expect(results[0].__data).to.have.property('address');
       expect(results[0].name).to.equal('John');
-      expect(results[0].address[0]).to.have.property('city');
-      expect(results[0].address[0].city).to.equal('Mumbai');
-      expect(results[0].address[1].city).to.equal('Delhi');
+      expect(results[0].__data.address[0]).to.have.property('city');
+      expect(results[0].__data.address[0].city).to.equal('Mumbai');
+      expect(results[0].__data.address[1].city).to.equal('Delhi');
       done();
     });
   });
@@ -308,10 +308,10 @@ describe(chalk.blue('Model Personalization test'), function () {
         expect(results.length).to.equal(1);
         expect(results[0]).to.have.property('name');
         expect(results[0]).to.have.property('id');
-        expect(results[0]).to.have.property('address');
+        expect(results[0].__data).to.have.property('address');
         expect(results[0].name).to.equal('Icici Tom');
-        expect(results[0].address[0]).to.have.property('city');
-        expect(results[0].address[0].city).to.equal('Bangalore');
+        expect(results[0].__data.address[0]).to.have.property('city');
+        expect(results[0].__data.address[0].city).to.equal('Bangalore');
         // previous records for icici are still retain  as new records are will use same collection
         // user can have new collection if he/she wants
         Employee.find({
@@ -320,8 +320,8 @@ describe(chalk.blue('Model Personalization test'), function () {
           expect(results.length).to.equal(3);
           expect(results[0]).to.have.property('name');
           expect(results[0]).to.have.property('id');
-          expect(results[0]).to.have.property('address');
-          expect(results[0]).to.have.property('age');
+          expect(results[0].__data).to.have.property('address');
+          //expect(results[0]).to.have.property('age');
           var doneFlag = false;
           for (var i = 0; i < results.length && !doneFlag; ++i) {
             if (results[i].name === 'Icici Tom' ) {
@@ -525,7 +525,7 @@ describe(chalk.blue('Model Personalization test'), function () {
       'name': 'Employee',
       'variantOf': 'Employee',
       'idInjection': false,
-      'mongodb': true,
+      'mongodb': {},
       properties: {
         'firstName': {
           'type': 'string'
