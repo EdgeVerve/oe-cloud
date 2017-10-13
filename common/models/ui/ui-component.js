@@ -419,7 +419,7 @@ module.exports = function uiComponent(UIComponent) {
           fmeta.subModelMeta = modelTo.properties;
           fmeta.modeltype = modelTo.id;
         } else if (relation.type === 'embedsOne' || relation.type === 'hasOne') {
-          fieldId = relationName;
+          fieldId = props[fieldId] ? fieldId : relationName;
           props[fieldId] = props[fieldId] || {};
           fmeta = props[fieldId];
           fmeta.type = 'model';
