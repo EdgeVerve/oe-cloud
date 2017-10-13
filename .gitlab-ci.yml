@@ -166,6 +166,9 @@ swarmActorPattern:
     - mv -f qqq2.yml qqq.yml
     - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' ../actorIntegrationTest.js > ../actorIntegrationTest2.js
     - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
+	- echo '------> qqq.yml start -------'
+	- cat qqq.yml
+	- echo '------> qqq.yml end -------'    
     - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
