@@ -141,6 +141,14 @@
     "modelId": {
       "type": "string"
     },
+    "cacheable": {
+      "type": "boolean",
+      "default": false
+    },
+    "disableInstanceCache": {
+      "type": "boolean",
+      "default": true
+    },
     "hidden": {
       "type": [
         "string"

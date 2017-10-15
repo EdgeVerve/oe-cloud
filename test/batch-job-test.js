@@ -190,10 +190,10 @@ describe(chalk.blue('batch-job-test'), function () {
           log.error(log.defaultContext(), err);
           // Enter Monitoring Per Instance Processing - Maybe
           if (err.message === 'Instance is already locked') {
-            setTimeout(retryUpdateAttributes, 2000, account, intrest, ctx, callback);
+            return setTimeout(retryUpdateAttributes, 2000, account, intrest, ctx, callback);
           }
         }
-        callback();
+        return callback();
       });
     }
 

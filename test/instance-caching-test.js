@@ -185,6 +185,7 @@ describe('Instance Caching Test', function () {
       'name': modelName,
       'base': 'BaseEntity',
       'idInjection': true,
+      'disableInstanceCache' : false,
       'options': {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
@@ -223,6 +224,7 @@ describe('Instance Caching Test', function () {
       'name': modelNameNoInstanceCache,
       'base': 'BaseEntity',
       'idInjection': true,
+      'disableInstanceCache': false,
       'options': {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
