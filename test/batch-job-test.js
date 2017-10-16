@@ -193,7 +193,7 @@ describe(chalk.blue('batch-job-test'), function () {
             return setTimeout(retryUpdateAttributes, 2000, account, intrest, ctx, callback);
           }
         }
-        callback();
+        return callback();
       });
     }
 
