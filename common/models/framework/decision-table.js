@@ -6,7 +6,8 @@
  */
 
 var XLSX = require('xlsx');
-var jsFeel = require('js-feel').decisionTable;
+var jsFeel = require('js-feel');
+var feelRelationsPlugin = require('../../../lib/feel-relations-plugin');
 var request = require('request');
 var utils = require('../../../lib/common/util');
 var assert = require('assert');
@@ -14,6 +15,8 @@ var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('decision-table');
 var delimiter = '&SP';
+jsFeel.use(feelRelationsPlugin);
+const dTable = jsFeel.decisionTable;
 
 module.exports = function decisionTableFn(decisionTable) {
   function droolsUrl() {
@@ -185,7 +188,7 @@ module.exports = function decisionTableFn(decisionTable) {
             });
           } else {
             var rules = JSON.parse(decisionTableData[0].decisionRules);
-            jsFeel.execute_decision_table(docId, rules, data, function (err, results) {
+            dTable.execute_decision_table(docId, rules, data, function (err, results) {
               if (rules.hitPolicy === 'V') {
                 if (err) {
                   results.push(err);
