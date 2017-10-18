@@ -162,7 +162,7 @@ describe(chalk.blue('batch-job-test'), function () {
         return stateObj;
       };
 
-      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, version, callback) {
+      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, callback) {
 
         accountModel.find({}, ctx, (err, accounts)=> {
           async.each(accounts, function(account, cb) {
@@ -175,7 +175,7 @@ describe(chalk.blue('batch-job-test'), function () {
               retryUpdateAttributes(account, intrest, ctx, cb);
             });
           }, function(err) {
-            callback(err, monitoringId, version);
+            callback(err);
           });
         });
       };    
