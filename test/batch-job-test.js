@@ -250,7 +250,7 @@ describe(chalk.blue('batch-job-test'), function () {
     msg.jobFnName = 'calculateFeesPerAccount';
     msg.jobFnParams = [0.5];
 
-    BatchJobRunner.processMsg(msg);
+    BatchJobRunner.processMsg(msg, ()=> msg.status = 'succsseful');
 
     function checkResults (tryouts, done) {      
       accountModel.find({}, bootstrap.defaultContext, function(err, accounts) {
