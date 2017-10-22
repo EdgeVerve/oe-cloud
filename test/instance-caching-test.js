@@ -190,7 +190,7 @@ describe('Instance Caching Test', function () {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
         queryCacheSize: 2000,
-        queryCacheExpiration: 5000,
+        queryCacheExpiration: 100,
         disableManualPersonalization: true
       },
       'properties': {
@@ -229,7 +229,7 @@ describe('Instance Caching Test', function () {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
         queryCacheSize: 2000,
-        queryCacheExpiration: 5000,
+        queryCacheExpiration: 100,
         disableManualPersonalization: true,
         disableInstanceCache: true
       },
@@ -371,7 +371,7 @@ describe('Instance Caching Test', function () {
                 //expect(result1).to.deep.equal(result2);
                 expect(result1.__data === result2.__data).to.be.true;
                 return done();
-              })
+              });
             });
           });
         }

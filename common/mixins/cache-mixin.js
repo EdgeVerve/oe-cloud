@@ -20,15 +20,15 @@
 
 var logger = require('oe-logger');
 var log = logger('cache-mixin');
-var messaging = require('../../lib/common/global-messaging');
+// var messaging = require('../../lib/common/global-messaging');
 
 module.exports = function CacheMixin(Model) {
   // Add an 'After Save' observer for this Model to evict the cache
   // corresponding to this Model's data whenever this Model's data
   // is updated.
+
   Model.evObserve('after save', clearCacheOnSave);
   Model.evObserve('after delete', clearCacheOnDelete);
-  Model.evObserve('after cache', evictQueryCache);
 
   // create the global evDisableInstanceCache object if not present
   if (!global.evDisableInstanceCache) {
@@ -74,23 +74,3 @@ function clearCacheOnSave(ctx, next) {
 function clearCacheOnDelete(ctx, next) {
   ctx.Model.clearCacheOnDelete(ctx, next);
 }
-
-
-/*
- * @function evCacheMixinEvictCacheCb
- * This function is invoked upon update of any data in this model.
- * It iterates through all cache keys of this Model and deletes them
- * so that the cache is re-built the next time data is accessed from
- * this model, thereby preventing stale data in the cache.
- * @param {object} ctx - The context object containing the model instance.
- * @param {function} next - The function to be called for letting Loopback know that it can proceed with the next hook.
- */
-
-var evictQueryCache = function evCacheMixinEvictQueryCacheCb(ctx, next) {
-  var msg = {
-    modelName: ctx.Model.modelName,
-    evictCtx: ctx.hookState.evictCtx
-  };
-  messaging.publish('evictQueryCache', msg);
-  next();
-};
