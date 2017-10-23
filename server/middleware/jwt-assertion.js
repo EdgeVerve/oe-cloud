@@ -25,20 +25,7 @@ module.exports = function JWTAssertionFn(options) {
   const JwtStrategy = require('passport-jwt').Strategy;
   const ExtractJwt = require('passport-jwt').ExtractJwt;
 
-  var jwtConfig = {
-    'issuer': 'mycompany.com',
-    'audience': 'mycompany.net',
-    'secretOrKey': 'secret',
-    'keyToVerify': 'client_id'
-  };
-  if (process.env.JWT_CONFIG && process.env.JWT_CONFIG.length > 0) {
-    try {
-      var tempConfig = JSON.parse(process.env.JWT_CONFIG);
-      jwtConfig = tempConfig && typeof tempConfig === 'object' ? tempConfig : jwtConfig;
-    } catch (e) {
-      log.error(options, e);
-    }
-  }
+  var jwtConfig = jwtUtil.getJWTConfig();
   const cachedTokens = {};
 
   const opts = {};
