@@ -20,7 +20,6 @@
 
 var logger = require('oe-logger');
 var log = logger('cache-mixin');
-// var messaging = require('../../lib/common/global-messaging');
 
 module.exports = function CacheMixin(Model) {
   // Add an 'After Save' observer for this Model to evict the cache
