@@ -1,4 +1,4 @@
-FROM registry.oecloud.local/alpine-node:latest
+FROM $REGISTRY/alpine-node:latest
 
 RUN mkdir -p /home/src
 

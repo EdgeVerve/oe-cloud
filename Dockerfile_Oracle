@@ -1,4 +1,4 @@
-FROM registry.oecloud.local/debian-node-oracle:latest
+FROM $REGISTRY/debian-node-oracle:latest
 
 #ARG http_proxy
 #ARG https_proxy

@@ -27,9 +27,9 @@ services:
       - router_network
 
   rabbitmq:
-    image: registry.oecloud.local/rabbitmq:3.6-management-alpine
+    image: ${REGISTRY}/rabbitmq:3.6-management-alpine
     environment:
-      VIRTUAL_HOST: "https://rabbitmq.oecloud.local,rabbitmq.oecloud.local"
+      VIRTUAL_HOST: "https://rabbitmq.${DOMAIN_NAME},rabbitmq.$DOMAIN_NAME"
       SERVICE_PORTS: "15672"
     networks:
       - ${NETWORK_NAME}
@@ -37,7 +37,7 @@ services:
 
   scheduler:
     entrypoint: ["node", "."]
-    image: registry.oecloud.local/oecloudio-oescheduler:latest
+    image: ${REGISTRY}/oecloudio-oescheduler:latest
     depends_on:
       - mongo
       - rabbitmq
