@@ -15,7 +15,7 @@ var api = supertest(app);
 var apiV2 = bootstrap.api;
 var models = bootstrap.models;
 var logger = require('oe-logger');
-var log = logger('data-personalization-test');
+var log = logger('data-hierarchy-test');
 var loopback = require('loopback');
 var async = require('async');
 
