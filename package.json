@@ -48,7 +48,7 @@
     "loopback-component-passport": "git+http://evgit/oecloud.io/loopback-component-passport.git#v0.9.0",
     "loopback-component-push": "1.7.0",
     "loopback-component-storage": "git+http://evgit/oecloud.io/loopback-component-storage.git#v0.9.0",
-    "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#v0.9.0",
+    "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#master",
     "loopback-connector-nodes-for-Node-RED": "git+http://evgit/oecloud.io/loopback-connector-nodes-for-Node-RED.git#v0.9.1",
     "loopback-datasource-juggler": "git+http://evgit/oecloud.io/loopback-datasource-juggler.git#master",
     "loopback-filters": "0.1.2",
@@ -93,13 +93,14 @@
     "grunt-mocha-istanbul": "^5.0.2",
     "grunt-mocha-test": "^0.13.2",
     "istanbul": "0.4.1",
-    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#v0.9.0",
+    "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#master",
     "mocha": "^3.4.2",
     "nock": "^7.2.2",
     "passport-ldapauth": "^2.0.0",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^1.1.0"
+    "supertest": "^1.1.0",
+    "oe-jwt-generator": "git+http://evgit/oecloud.io/oe-jwt-generator"
   },
   "repository": {
     "type": "git",
