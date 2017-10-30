@@ -62,6 +62,7 @@
     "node-red": "0.16.2",
     "node-uuid": "1.4.7",
     "oe-explorer": "git+http://evgit/oecloud.io/oe-explorer.git#v0.9.0",
+    "oe-jwt-generator": "git+http://evgit/oecloud.io/oe-jwt-generator#master",
     "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#v0.9.0",
     "oe-swagger-ui": "git+http://evgit/oecloud.io/oe-swagger-ui.git#v0.9.1",
     "passport-google-oauth": "0.1.5",
@@ -99,8 +100,7 @@
     "passport-ldapauth": "^2.0.0",
     "sinon": "^1.17.7",
     "superagent-defaults": "^0.1.14",
-    "supertest": "^1.1.0",
-    "oe-jwt-generator": "git+http://evgit/oecloud.io/oe-jwt-generator"
+    "supertest": "^1.1.0"
   },
   "repository": {
     "type": "git",
