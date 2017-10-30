@@ -336,6 +336,53 @@ describe('Instance Caching Test', function () {
       });
     });
 
+    it('Should cache the Test instance after findById, for system generated id', function (done) {
+      var result1, result2;
+      TestModel.create({
+        name: "Lior",
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          var id = data.id;
+          // update with query will delete instance array
+          TestModel.update({ name: "Lior" }, { name: "David" }, defaultContext, function (err, info) {
+            if (info.count !== 1) {
+              return done('too many instance with name lior');
+            }
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+              if (err) {
+                return done(err);
+              } else if (data.length !== 1) {
+                return done('find should return one instance');
+              }
+              result1 = Object.assign({}, data[0].toObject());
+              mongoDeleteById(id, TestModel.modelName, function (err) {
+                if (err) {
+                  return done(err);
+                }
+                TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
+                  if (err) {
+                    return done(err);
+                  } else if (data2.length === 0) {
+                    return done('instance not cached')
+                  }
+                  result2 = Object.assign({}, data2[0].toObject());
+                  expect(models[TestModel.modelName]).not.to.be.null;
+                  expect(result1).not.to.be.null;
+                  expect(result2).not.to.be.null;
+                  expect(result1).to.deep.equal(result2);
+                  expect(result1.__data === result2.__data).to.be.true;
+                  return done();
+                });
+              });
+            });
+          });
+        }
+      });
+    });
+
     it('Should cache the Test instance after upsert', function (done) {
       var id = uuid.v4();
       var result1, result2;
@@ -629,10 +676,46 @@ describe('Instance Caching Test', function () {
       });
     });
 
+    it('Should not cache id queries with operators', function (done) {
+      var id1 = uuid.v4();
+      var id2 = uuid.v4();
+      var result1, result2;
+      TestModel.create({
+        name: "Atul",
+        id: id1
+      }, defaultContext, function (err, data) {
+        if (err) {
+          console.log(err);
+          return done(err);
+        } else {
+          TestModel.find({ "where": { "id": { "inq": [id1, id2] } } }, defaultContext, function (err, data) {
+            if (err) {
+              return done(err);
+            } else if (data.length !== 1) {
+              return done('find should return one instance');
+            }
+            TestModel.create({
+              name: "Ramesh",
+              id: id2
+            }, defaultContext, function (err, data) {
+              TestModel.find({ "where": { "id": { "inq": [id1, id2] } } }, defaultContext, function (err, data) {
+                if (err) {
+                  return done(err);
+                } else if (data.length !== 2) {
+                  return done('find should return two instances');
+                }
+                return done();
+              });
+            });
+          });
+        }
+      });
+    });
+
     it('Should not cache in instance cache if disableInstanceCache flag is on, test1', function (done) {
       /**
-       * 1. create new modle instance 
-       * 2. run a find query 
+       * 1. create new modle instance
+       * 2. run a find query
        * 3. at this point, in a normal case, the instance should be cached
        * 4. change the db directly in the DB.
        * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
