@@ -20,6 +20,8 @@
 
 var logger = require('oe-logger');
 var log = logger('cache-mixin');
+var process = require('process');
+var consistentHash = process.env.CONSISTENT_HASH;
 
 module.exports = function CacheMixin(Model) {
   // Add an 'After Save' observer for this Model to evict the cache
@@ -49,7 +51,7 @@ module.exports = function CacheMixin(Model) {
     global.evcacheables[Model.modelName] = true;
   }
 
-  if (Model.definition && Model.definition.settings && Model.definition.settings.disableInstanceCache) {
+  if ((Model.definition && Model.definition.settings && Model.definition.settings.disableInstanceCache) || !consistentHash) {
     log.debug(log.defaultContext(), 'EV_CACHE', 'disable instance cache for model:', Model.modelName);
 
     // Mark the model as not instance cache enabled by adding a property with this model's name
