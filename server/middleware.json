@@ -62,7 +62,8 @@
             "paths": ["${restApiRoot}"]
         },
         "./middleware/recaptcha-validate": {},
-        "./middleware/db-lock-contributor": {}
+        "./middleware/db-lock-contributor": {},
+        "./middleware/no-query-cache-contributor": {}
     },
     "routes": {
     },
