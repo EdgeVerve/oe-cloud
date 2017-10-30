@@ -137,6 +137,11 @@ postgrestest:
     - mocha test/01-cleanup.js
     - if [ $WEB_CHECK -ne 0 ] && ([ $WEB_EXIT_CHECK -ne 0 -o $WEB_REJECTED_CHECK -ne 0 ]); then echo "Failed due to web service fail..."; export exit_status=1; fi
     - exit $exit_status
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - coverage/
   after_script:
     - sh /removeStack.sh
   tags:
