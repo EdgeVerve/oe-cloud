@@ -5,7 +5,7 @@ stages:
   - pre-build
   - pre-build-test
   - build
-  - swarmActorPattern
+  - swarm-actor-pattern
   - retry-service
   - ldap-auth
   - job-scheduler-service
@@ -143,8 +143,8 @@ buildjob:
   tags:
     - CEP_RUNNER
 
-swarmActorPattern:
-  stage: swarmActorPattern 
+swarm-actor-pattern:
+  stage: swarm-actor-pattern
   script:
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
