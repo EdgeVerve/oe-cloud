@@ -54,7 +54,9 @@ module.exports = function BaseUserIdentity(BaseUserIdentity) {
         }, this);
         BaseRoleMapping.create(roleMappings, ctx.options, (err, results) => {
           if (err) {
-            log.error(ctx.options, err);
+            err.forEach((error) => {
+              log.error(ctx.options, error);
+            });
             return next(err);
           }
           log.debug(ctx.options, 'created new ldap roles for user:', results);

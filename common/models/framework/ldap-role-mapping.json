@@ -8,10 +8,12 @@
   ],
   "properties": {
     "groupName": {
-      "type": "string"
+      "type": "string",
+      "description": "DN of the ldap group to be mapped to role array"
     },
     "roles": {
-        "type": "array"
+        "type": "array",
+        "description": "Array of BaseRole ids"
     }
   }
 }
