@@ -36,12 +36,11 @@ function setDesignerPath(DesignerPath, server) {
       if (status) {
         var templateFiles = fs.readdirSync(dirName);
         templateFiles.forEach(function templateFilesForEach(fileName) {
-          
-          var tplRecord = templatesData.find(function(item){
+          var tplRecord = templatesData.find(function (item) {
             return item.file === fileName;
           });
-          
-          if(!tplRecord){
+
+          if (!tplRecord) {
             tplRecord = {
               file: fileName,
               path: dirName,
@@ -154,17 +153,9 @@ function setDesignerPath(DesignerPath, server) {
   });
   module.prospectElements = prospectElements;
 
-  var evEnsureLoggedIn = function evEnsureLoggedIn(req, res, next) {
-    if (req.accessToken) {
-      next();
-    } else {
-      res.redirect('/login');
-      return;
-    }
-  };
 
   // server.use(loopback.static(DesignerPath));
-  server.get(appconfig.designer.mountPath, evEnsureLoggedIn, function sendResponse(req, res) {
+  server.get(appconfig.designer.mountPath, function sendResponse(req, res) {
     res.sendFile('index.html', {
       root: DesignerPath + '/' + designerName
     });
