@@ -63,7 +63,8 @@
         },
         "./middleware/recaptcha-validate": {},
         "./middleware/db-lock-contributor": {},
-        "./middleware/no-query-cache-contributor": {}
+        "./middleware/no-query-cache-contributor": {},
+        "./middleware/no-instance-cache-contributor": {}
     },
     "routes": {
     },
