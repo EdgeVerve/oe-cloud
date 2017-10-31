@@ -51,7 +51,7 @@ module.exports = function CacheMixin(Model) {
     global.evcacheables[Model.modelName] = true;
   }
 
-  if ((Model.definition && Model.definition.settings && Model.definition.settings.disableInstanceCache) || !consistentHash) {
+  if ((Model.definition && Model.definition.settings && Model.definition.settings.disableInstanceCache) || consistentHash === false) {
     log.debug(log.defaultContext(), 'EV_CACHE', 'disable instance cache for model:', Model.modelName);
 
     // Mark the model as not instance cache enabled by adding a property with this model's name
