@@ -140,6 +140,7 @@ postgrestest:
   artifacts:
     untracked: true
     expire_in: 2h
+    when: on_failure
     paths:
       - coverage/
   after_script:
