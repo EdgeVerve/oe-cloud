@@ -299,36 +299,30 @@ describe('Instance Caching Test', function () {
           console.log(err);
           return done(err);
         } else {
-          // update with query will delete instance array
-          TestModel.update({ name: "Lior" }, { name: "David" }, defaultContext, function (err, info) {
-            if (info.count !== 1) {
-              return done('too many instance with name lior');
+          TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+            if (err) {
+              return done(err);
+            } else if (data.length !== 1) {
+              return done('find should return one instance');
             }
-            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+            result1 = Object.assign({}, data[0].toObject());
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
-              } else if (data.length !== 1) {
-                return done('find should return one instance');
               }
-              result1 = Object.assign({}, data[0].toObject());
-              mongoDeleteById(id, TestModel.modelName, function (err) {
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                 if (err) {
                   return done(err);
+                } else if (data2.length === 0) {
+                  return done('instance not cached');
                 }
-                TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-                  if (err) {
-                    return done(err);
-                  } else if (data2.length === 0) {
-                    return done('instance not cached')
-                  }
-                  result2 = Object.assign({}, data2[0].toObject());
-                  expect(models[TestModel.modelName]).not.to.be.null;
-                  expect(result1).not.to.be.null;
-                  expect(result2).not.to.be.null;
-                  expect(result1).to.deep.equal(result2);
-                  expect(result1.__data === result2.__data).to.be.true;
-                  return done();
-                });
+                result2 = Object.assign({}, data2[0].toObject());
+                expect(models[TestModel.modelName]).not.to.be.null;
+                expect(result1).not.to.be.null;
+                expect(result2).not.to.be.null;
+                expect(result1).to.deep.equal(result2);
+                expect(result1.__data === result2.__data).to.be.true;
+                return done();
               });
             });
           });
@@ -346,36 +340,30 @@ describe('Instance Caching Test', function () {
           return done(err);
         } else {
           var id = data.id;
-          // update with query will delete instance array
-          TestModel.update({ name: "Lior" }, { name: "David" }, defaultContext, function (err, info) {
-            if (info.count !== 1) {
-              return done('too many instance with name lior');
+          TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+            if (err) {
+              return done(err);
+            } else if (data.length !== 1) {
+              return done('find should return one instance');
             }
-            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+            result1 = Object.assign({}, data[0].toObject());
+            mongoDeleteById(id, TestModel.modelName, function (err) {
               if (err) {
                 return done(err);
-              } else if (data.length !== 1) {
-                return done('find should return one instance');
               }
-              result1 = Object.assign({}, data[0].toObject());
-              mongoDeleteById(id, TestModel.modelName, function (err) {
+              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
                 if (err) {
                   return done(err);
+                } else if (data2.length === 0) {
+                  return done('instance not cached')
                 }
-                TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-                  if (err) {
-                    return done(err);
-                  } else if (data2.length === 0) {
-                    return done('instance not cached')
-                  }
-                  result2 = Object.assign({}, data2[0].toObject());
-                  expect(models[TestModel.modelName]).not.to.be.null;
-                  expect(result1).not.to.be.null;
-                  expect(result2).not.to.be.null;
-                  expect(result1).to.deep.equal(result2);
-                  expect(result1.__data === result2.__data).to.be.true;
-                  return done();
-                });
+                result2 = Object.assign({}, data2[0].toObject());
+                expect(models[TestModel.modelName]).not.to.be.null;
+                expect(result1).not.to.be.null;
+                expect(result2).not.to.be.null;
+                expect(result1).to.deep.equal(result2);
+                expect(result1.__data === result2.__data).to.be.true;
+                return done();
               });
             });
           });
@@ -605,22 +593,16 @@ describe('Instance Caching Test', function () {
           console.log(err);
           return done(err);
         } else {
-          // update with query should delete instance cache
-          TestModel.update({ name: "Praveen" }, { name: "Ramesh" }, defaultContext, function (err, info) {
-            if (info.count !== 1) {
-              return done('too many instance with name Praveen');
+          mongoDeleteById(id, TestModel.modelName, function (err) {
+            if (err) {
+              return done(err);
             }
-            mongoDeleteById(id, TestModel.modelName, function (err) {
+            TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
               if (err) {
                 return done(err);
               }
-              TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data2) {
-                if (err) {
-                  return done(err);
-                }
-                expect(data2.length).to.be.equal(0);
-                return done();
-              });
+              expect(data2.length).to.be.equal(0);
+              return done();
             });
           });
         }
@@ -726,7 +708,7 @@ describe('Instance Caching Test', function () {
 
       function apiRequest_find(result, callback) {
         apiGetRequest('/' + modelNameNoInstanceCache + 's/' + id, callback ? callback : dbQuery_update, done);
-      };
+      }
 
       function dbQuery_update(result) {
         var loopbackModelNoCache = loopback.getModel(modelNameNoInstanceCache, bootstrap.defaultContext);
