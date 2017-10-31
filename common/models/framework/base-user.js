@@ -366,8 +366,8 @@ module.exports = function BaseUser(BaseUser) {
 
   /**
    * Creating Authentication Token based on the Auth type..
-   * @param {object} accessToken - access token 
-   * @param {object} options - options 
+   * @param {object} accessToken - access token
+   * @param {object} options - options
    * @returns {function} cb - callback to be called which will gives authentication token.
   */
 
