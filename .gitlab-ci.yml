@@ -138,7 +138,9 @@ consistenthashtest:
 
 buildjob:
   stage: build
-  script:    
+  script: 
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile   
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
