@@ -98,13 +98,13 @@ var dsname = 'db';
       });
     });
   }
+  
+   var dataSource = app.datasources[dsname];
+   if (dataSource.name !== 'mongodb') {
+   return;
+   }
 
   before('setup', function (done) {
-    var dataSource = app.datasources[dsname];
-   if (dataSource.name !== 'mongodb') {
-     this.skip();
-     return done();
-   }
     cleandb(done);
   });
 
