@@ -169,25 +169,98 @@ describe(chalk.blue('Node-red test'), function () {
     });
 
 
-    it('Node-Red Test - admin user post flow', function (done) {
+ it('Node-Red - admin user post flow', function (done) {
 
-        var flows = [{ "id": "504e055c.3134cc", "type": "tab", "label": "node-red-default" },
+      var flows = [
+        { "id": "504e055c.3134cc", "type": "tab", "label": "node-red-default" },
         { "id": "f0978c55.016ab", "type": "async-observer", "z": "504e055c.3134cc", "name": "node-red-default", "modelname": "Literal", "method": "access", "x": 162, "y": 191, "wires": [["f0c48f2.d0e007"]] },
         { "id": "f0c48f2.d0e007", "type": "function", "z": "504e055c.3134cc", "name": "node-red-default", "func": "console.log('********* default***********');\nvar loopback = global.get('loopback');\nvar literalModel = loopback.findModel('" + "Literal" + "');\nliteralModel.emit(\"notifyLiteral2\", msg.callContext);\n\nreturn msg;", "outputs": 1, "noerr": 0, "x": 439, "y": 165, "wires": [["900d6af6.7e8ec8"]] },
-        { "id": "900d6af6.7e8ec8", "type": "debug", "z": "504e055c.3134cc", "name": "node-red-default", "active": true, "console": "false", "complete": "true", "x": 661, "y": 147, "wires": [] }];
+        { "id": "900d6af6.7e8ec8", "type": "debug", "z": "504e055c.3134cc", "name": "node-red-default", "active": true, "console": "false", "complete": "true", "x": 661, "y": 147, "wires": [] },
+        {
+          "id": "1388f5d1.48faba",
+          "type": "tab",
+          "label": "Flow 1"
+        },
+        {
+          "id": "41994cff.247214",
+          "type": "inject",
+          "z": "1388f5d1.48faba",
+          "name": "",
+          "topic": "",
+          "payload": "",
+          "payloadType": "date",
+          "repeat": "",
+          "crontab": "",
+          "once": false,
+          "x": 87,
+          "y": 160,
+          "wires": [
+            [
+              "9d3a81bb.5e327"
+            ]
+          ]
+        },
+        {
+          "id": "9d3a81bb.5e327",
+          "type": "execute-remote-method",
+          "z": "1388f5d1.48faba",
+          "name": "execute remote",
+          "modelname": "BaseUser",
+          "methodname": "login",
+          "usecontext": true,
+          "contextposition": "2",
+          "callback": true,
+          "data": "{\"username\" : \"admin\", \"password\" :\"admin\" }",
+          "x": 299,
+          "y": 151,
+          "wires": [
+            [
+              "7cda67e8.decf48"
+            ]
+          ]
+        },
+        {
+          "id": "7cda67e8.decf48",
+          "type": "function",
+          "z": "1388f5d1.48faba",
+          "name": "f",
+          "func": "var loopback = global.get('loopback');\nvar model=loopback.findModel('Literal');\nmodel.emit('node-red-test', msg.payload);\nreturn msg;",
+          "outputs": 1,
+          "noerr": 0,
+          "x": 428,
+          "y": 250,
+          "wires": [
+            [
+              "7f11ee34.e5895"
+            ]
+          ]
+        },
+        {
+          "id": "7f11ee34.e5895",
+          "type": "debug",
+          "z": "1388f5d1.48faba",
+          "name": "",
+          "active": true,
+          "console": "false",
+          "complete": "false",
+          "x": 614,
+          "y": 178,
+          "wires": []
+        }
+      ];
 
-        var api = defaults(supertest(bootstrap.app));
-        //console.log(accessToken);
-        var postUrl = '/red' + '/flows?access_token=' + adminAccessToken;
+      var api = defaults(supertest(bootstrap.app));
+      //console.log(accessToken);
+      var postUrl = '/red' + '/flows?access_token=' + adminAccessToken;
 
-        api.set('Accept', 'application/json')
-            .post(postUrl)
-            .set('accessToken', adminAccessToken)
-          .send({ flows: flows })
-            .end(function (err, resp) {
-                expect(resp.status).to.be.equal(200);
-                done(err);
-            });
+      api.set('Accept', 'application/json')
+        .post(postUrl)
+        .set('accessToken', adminAccessToken)
+        .send({ flows: flows })
+        .end(function (err, resp) {
+          expect(resp.status).to.be.equal(200);
+          done(err);
+        });
     });
 
 
@@ -201,7 +274,7 @@ describe(chalk.blue('Node-red test'), function () {
             .get(url)
             .end(function (err, resp) {
                 expect(resp.status).to.be.equal(200);
-                expect(resp.body.flows.length).to.be.equal(4);
+                expect(resp.body.flows.length).to.be.equal(9);
                 expect(resp.body.flows[0].label).to.be.equal('node-red-default');
                 expect(resp.body.flows[3].name).to.be.equal('node-red-default');
                 return done();
@@ -209,6 +282,32 @@ describe(chalk.blue('Node-red test'), function () {
     });
 
 
+    it('Node-Red Test - execute remote method test', function (done) {
+      var api = defaults(supertest(bootstrap.app));
+      //console.log(accessToken);
+      var url = '/red/inject/41994cff.247214' + '?access_token=' + adminAccessToken;
+      //var url = '/red' + '/flows?access_token=' + adminAccessToken;
+      var model = loopback.findModel('Literal');
+      models["Literal"].on('node-red-test', function (payload) {
+        console.log(typeof (payload), payload);
+        expect(payload[1].tenantId).to.be.equal('default');
+        expect(payload[1].username).to.be.equal('admin');
+        //var obj = JSON.parse(payload);
+        //expect(obj.userId).to.be.equal('admin');
+        return done();
+      });
+
+      api.set('Accept', 'application/json')
+        .set('accessToken', adminAccessToken)
+        .post(url)
+        .end(function (err, resp) {
+          expect(resp.status).to.be.equal(200);
+          //return done();
+        });
+    });
+
+	
+	
     it('Node-Red Test - Should able to execute flow when accessing Literal model by tenant user - this will cause both the flows to execute - one set by user and one set by admin', function (done) {
         var flag = true;
         var flag2 = true;
