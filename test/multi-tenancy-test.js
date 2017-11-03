@@ -9,6 +9,7 @@
 // to avoid jshint errors for expect
 
 var bootstrap = require('./bootstrap');
+var app = bootstrap.app;
 var chalk = require('chalk');
 var chai = require('chai');
 var expect = chai.expect;
@@ -35,7 +36,7 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     tenantId: 'tenant2',
     tenantName: 'tenant2'
   }];
-
+var dsname = 'db';
   var datasources = [{
     'host': mongoHost,
     'port': 27017,
@@ -97,6 +98,11 @@ describe(chalk.blue('multi-tenancy-test'), function () {
       });
     });
   }
+  
+   var dataSource = app.datasources[dsname];
+   if (dataSource.name !== 'mongodb') {
+   return;
+   }
 
   before('setup', function (done) {
     cleandb(done);

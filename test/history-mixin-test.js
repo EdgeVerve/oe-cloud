@@ -70,7 +70,7 @@ describe('history-mixin tests	Programmatically', function () {
 
   it('should insert data to TestModel, check if version is set and history model is empty ---programmatically',
     function (done) {
-      this.timeout(5000);
+      this.timeout(50000);
       var postData = {
         'name': 'TestCaseOne'
       };
