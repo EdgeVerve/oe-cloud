@@ -135,6 +135,7 @@ describe(chalk.blue('update-test'), function () {
       .put(postUrl)
       .send(wrongRecord)
       .end(function (err, response) {
+	    if( err ) return done(err);
         expect(response.status).to.be.equal(422);
         expect(response.body.error).to.be.defined;
         done();
@@ -149,6 +150,7 @@ describe(chalk.blue('update-test'), function () {
       .delete(postUrl)
       .send(record)
       .end(function (err, response) {
+	  if( err ) return done(err);
         expect(response.status).to.be.equal(200);
         done();
       });
@@ -165,7 +167,9 @@ describe(chalk.blue('update-test'), function () {
     api.set('Accept', 'application/json')
       .post(postUrl)
       .send(postData)
-      .expect(200).end(function (err, response) {
+      .end(function (err, response) {
+	  if( err ) return done(err);
+	  expect(response.status).to.be.equal(200);
         done();
       });
   });
@@ -178,7 +182,7 @@ describe(chalk.blue('update-test'), function () {
       .put(postUrl)
       .send(record)
       .end(function (err, response) {
-        done();
+        done(err);
       });
   });
 

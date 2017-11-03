@@ -75,8 +75,9 @@ describe(chalk.blue('Node-red test'), function () {
             .set('accessToken', accessToken)
           .send({ flows: flows } )
             .end(function (err, resp) {
+				if ( err ) return done(err);
                 expect(resp.status).to.be.equal(200);
-                done(err);
+                done();
             });
     });
 
@@ -89,6 +90,7 @@ describe(chalk.blue('Node-red test'), function () {
             .set('accessToken', accessToken)
             .get(url)
             .end(function (err, resp) {
+				if(err) return done(err);
                 expect(resp.status).to.be.equal(200);
                 expect(resp.body.flows.length).to.be.equal(4);
                 _version = resp.body.rev; //resp.req.res.headers['set-cookie'];
@@ -116,6 +118,7 @@ describe(chalk.blue('Node-red test'), function () {
             //.set('Cookie', [_version])
           .send({ flows: flows, rev: _version })
             .end(function (err, resp) {
+				if(err) return done(err);
                 expect(resp.status).to.be.equal(200);
                 _version = resp.body.rev;
                 console.log('version2 : ', _version);
@@ -162,6 +165,7 @@ describe(chalk.blue('Node-red test'), function () {
             .set('accessToken', adminAccessToken)
             .get(url)
             .end(function (err, resp) {
+				if(err) return done(err);
                 expect(resp.status).to.be.equal(200);
                 expect(resp.body.flows.length).to.be.equal(0);
                 return done();
@@ -273,6 +277,7 @@ describe(chalk.blue('Node-red test'), function () {
             .set('accessToken', adminAccessToken)
             .get(url)
             .end(function (err, resp) {
+				if(err) return done(err);
                 expect(resp.status).to.be.equal(200);
                 expect(resp.body.flows.length).to.be.equal(9);
                 expect(resp.body.flows[0].label).to.be.equal('node-red-default');
@@ -301,6 +306,7 @@ describe(chalk.blue('Node-red test'), function () {
         .set('accessToken', adminAccessToken)
         .post(url)
         .end(function (err, resp) {
+			if(err) return done(err);
           expect(resp.status).to.be.equal(200);
           //return done();
         });
@@ -479,6 +485,7 @@ describe(chalk.blue('Access control to node-red test'), function () {
             .set('accessToken', accessToken_admin)
             .get(url)
             .end(function (err, resp) {
+			if(err) return done(err);
                 expect(resp.status).to.be.equal(200);
                 return done();
             });
@@ -492,6 +499,7 @@ describe(chalk.blue('Access control to node-red test'), function () {
             .set('accessToken', accessToken_developer)
             .get(url)
             .end(function (err, resp) {
+			if(err) return done(err);
                 expect(resp.status).to.be.equal(401);
                 return done();
             });
@@ -512,6 +520,7 @@ describe(chalk.blue('Access control to node-red test'), function () {
             .set('accessToken', accessToken_developer)
             .send({ flows: flows })
             .end(function (err, resp) {
+			if(err) return done(err);
                 expect(resp.status).to.be.equal(401);
                 done(err);
             });
