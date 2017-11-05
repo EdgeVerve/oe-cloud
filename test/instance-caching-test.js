@@ -110,7 +110,7 @@ function mongoDeleteById(id, newModelName, cb) {
   } else if (dataSource.name === 'oracle') {
     var oracledb = require('oracledb');
     oracledb.autoCommit = true;
-    var loopbackModelNoCache = loopback.getModel(modelName, bootstrap.defaultContext);
+    var loopbackModelNoCache = loopback.getModel(newModelName, bootstrap.defaultContext);
     var idFieldName = loopbackModelNoCache.definition.idName();
     oracledb.getConnection({
       "password": oraclePassword,
@@ -131,7 +131,7 @@ function mongoDeleteById(id, newModelName, cb) {
         });
     });
   } else {
-    var loopbackModelNoCache = loopback.getModel(modelName, bootstrap.defaultContext);
+    var loopbackModelNoCache = loopback.getModel(newModelName, bootstrap.defaultContext);
     var idFieldName = loopbackModelNoCache.definition.idName();
     var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
     var client = new pg.Client(connectionString);
