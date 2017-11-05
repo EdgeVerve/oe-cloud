@@ -16,7 +16,6 @@ chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
-//var loopback = require('loopback');
 
 describe(chalk.blue('update-test'), function () {
 
