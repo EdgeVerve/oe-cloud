@@ -191,7 +191,7 @@ describe('Instance Caching Test', function () {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
         queryCacheSize: 2000,
-        queryCacheExpiration: 100,
+        queryCacheExpiration: 1000,
         disableManualPersonalization: true,
         disableInstanceCache: false
       },
@@ -229,7 +229,7 @@ describe('Instance Caching Test', function () {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
         queryCacheSize: 2000,
-        queryCacheExpiration: 100,
+        queryCacheExpiration: 1000,
         disableManualPersonalization: true,
         disableInstanceCache: true
       },
@@ -307,7 +307,7 @@ describe('Instance Caching Test', function () {
         instanceCacheSize: 2000,
         instanceCacheExpiration: 100000,
         queryCacheSize: 2000,
-        queryCacheExpiration: 100,
+        queryCacheExpiration: 1000,
         disableManualPersonalization: true,
         disableInstanceCache: false,
         cacheable: true
@@ -1068,7 +1068,7 @@ describe('Instance Caching Test', function () {
                 expect(data.length).to.be.equal(0);
                 return done();
               });
-            }, 100);
+            }, 1000);
           });
         });
       });
@@ -1090,7 +1090,7 @@ describe('Instance Caching Test', function () {
           instanceCacheSize: 2000,
           instanceCacheExpiration: 100000,
           queryCacheSize: 2000,
-          queryCacheExpiration: 100,
+          queryCacheExpiration: 1000,
           disableManualPersonalization: true,
           disableInstanceCache: false
         },
