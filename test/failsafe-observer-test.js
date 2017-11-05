@@ -61,18 +61,20 @@ describe('failsafe-observer-mixin', function () {
         backupConstants.eventReliabilityReplayThreshold = app.get('eventReliabilityReplayThreshold');
         backupConstants.eventReliabilityReplayInterval = app.get('eventReliabilityReplayInterval');
         backupConstants.eventReliabilityDbPersistenceInterval = app.get('eventReliabilityDbPersistenceInterval');
+        backupConstants.eventReliabilityMaxRetry = app.get('eventReliabilityMaxRetry');
         app.set('eventReliabilityReplayThreshold', 100);
         app.set('eventReliabilityReplayInterval', 1000);
         app.set('eventReliabilityDbPersistenceInterval', 2000);
         app.set('eventReliabilityMaxRetry', 4);
-        eventHistoryManager.init(app);
+        eventHistoryManager.config(app);
         done();
     });
     after('restore event history manager constants', function (done) {
         app.set('eventReliabilityReplayThreshold', backupConstants.eventReliabilityReplayThreshold);
         app.set('eventReliabilityReplayInterval', backupConstants.eventReliabilityReplayInterval);
         app.set('eventReliabilityDbPersistenceInterval', backupConstants.eventReliabilityDbPersistenceInterval);
-        eventHistoryManager.init(app);
+        app.set('eventReliabilityMaxRetry', backupConstants.eventReliabilityMaxRetry);
+        eventHistoryManager.config(app);
         done();
     });
 
@@ -354,7 +356,7 @@ describe('failsafe-observer-mixin', function () {
                                 }
                             });
                         }
-                    }); 
+                    });
                 }
         });}, 5000);
     });
