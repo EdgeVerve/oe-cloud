@@ -96,11 +96,13 @@ module.exports = function GruntConfig(grunt) {
       coverage: {
         src: 'test',
         options: {
-          excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js'],
+          excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js', 'lib/common/broadcaster-client.js'],
           timeout: 60000,
           check: {
             lines: 80,
-            statements: 80
+            statements: 80,
+            branches: 65,
+            functions: 85
           },
           reportFormats: ['lcov']
         }
