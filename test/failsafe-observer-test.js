@@ -61,7 +61,6 @@ describe('failsafe-observer-mixin', function () {
         backupConstants.eventReliabilityReplayThreshold = app.get('eventReliabilityReplayThreshold');
         backupConstants.eventReliabilityReplayInterval = app.get('eventReliabilityReplayInterval');
         backupConstants.eventReliabilityDbPersistenceInterval = app.get('eventReliabilityDbPersistenceInterval');
-        backupConstants.eventReliabilityMaxRetry = app.get('eventReliabilityMaxRetry');
         app.set('eventReliabilityReplayThreshold', 100);
         app.set('eventReliabilityReplayInterval', 1000);
         app.set('eventReliabilityDbPersistenceInterval', 2000);
@@ -73,7 +72,6 @@ describe('failsafe-observer-mixin', function () {
         app.set('eventReliabilityReplayThreshold', backupConstants.eventReliabilityReplayThreshold);
         app.set('eventReliabilityReplayInterval', backupConstants.eventReliabilityReplayInterval);
         app.set('eventReliabilityDbPersistenceInterval', backupConstants.eventReliabilityDbPersistenceInterval);
-        app.set('eventReliabilityMaxRetry', backupConstants.eventReliabilityMaxRetry);
         eventHistoryManager.config(app);
         done();
     });
