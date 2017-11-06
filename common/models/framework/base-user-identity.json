@@ -1,0 +1,13 @@
+{
+  "name": "BaseUserIdentity",
+  "plural": "BaseUserIdentities",
+  "base": "UserIdentity",
+  "description": "3rd party provider user details",
+  "relations": {
+    "user": {
+      "type": "belongsTo",
+      "model": "BaseUser",
+      "foreignKey": "userId"
+    }
+  }
+}
