@@ -208,6 +208,7 @@ retry-service:
     - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
     - docker service logs -f ${STACK_NAME}_web &
     - docker service logs -f ${RETRY_STACK_NAME}_server &
+    - docker service logs -f ${RETRY_STACK_NAME}_processor &
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
