@@ -50,10 +50,10 @@ var altContext = {
   }
 };
 var modelName = 'InstanceCachingTest';
-var modelNameNoInstanceCache = 'InstanceCachingTestNoInstanceCache';
-var modelNameQueryAndInstanceCache = 'InstanceCachingTestQueryAndInstanceCache';
-var modelNameQueryAndInstanceCacheShortExp = 'InstanceCachingTestQueryAndInstanceCacheShortExp';
-var consistentHashModelName = 'InstanceCachingTestConsistentHashOff';
+var modelNameNoInstanceCache = 'ICTNoInstanceCache';
+var modelNameQueryAndInstanceCache = 'ICTQueryAndInstanceCache';
+var modelNameQueryAndInstanceCacheShortExp = 'ICTQueryAndInstanceCacheShortExp';
+var consistentHashModelName = 'ICTConsistentHashFalse';
 var dsName = 'db';
 var dbname = process.env.DB_NAME || 'db';
 var dataSource;
