@@ -14,7 +14,7 @@ var expect = chai.expect;
 var loopback = require('loopback');
 chai.use(require('chai-things'));
 
-describe(chalk.blue('relation-references-many'), function () {
+describe(chalk.blue('relation-references-many-recursive-relation'), function () {
 
   var modelName = 'RefMany2';
   var ids;
