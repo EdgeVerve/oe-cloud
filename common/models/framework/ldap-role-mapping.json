@@ -1,0 +1,19 @@
+
+{
+  "name": "LdapRoleMapping",
+  "base": "BaseEntity",
+  "description": "LDAP group to role mappings",
+  "autoscope": [
+    "tenantId"
+  ],
+  "properties": {
+    "groupName": {
+      "type": "string",
+      "description": "DN of the ldap group to be mapped to role array"
+    },
+    "roles": {
+        "type": "array",
+        "description": "Array of BaseRole ids"
+    }
+  }
+}
