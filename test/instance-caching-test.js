@@ -285,7 +285,7 @@ describe('Instance Caching Test', function () {
         return done(err);
       } else {
         TestModelQueryAndInstanceCache = loopback.getModel(modelNameQueryAndInstanceCache, bootstrap.defaultContext);
-        TestModelQueryAndInstanceCache.destroyAll({}, defaultContext, function (err, info) {
+        TestModelQueryAndInstanceCache.destroyAll({}, bootstrap.defaultContext, function (err, info) {
           if (err) {
             return done(err);
           } else {
@@ -324,7 +324,7 @@ describe('Instance Caching Test', function () {
         return done(err);
       } else {
         TestModelQueryAndInstanceCacheShortExp = loopback.getModel(modelNameQueryAndInstanceCacheShortExp, bootstrap.defaultContext);
-        TestModelQueryAndInstanceCacheShortExp.destroyAll({}, defaultContext, function (err, info) {
+        TestModelQueryAndInstanceCacheShortExp.destroyAll({}, bootstrap.defaultContext, function (err, info) {
           if (err) {
             return done(err);
           } else {
@@ -899,6 +899,7 @@ describe('Instance Caching Test', function () {
                 return done(err);
               }
               expect(data.length).to.be.equal(0);
+              delete defaultContext.noInstanceCache;
               TestModelQueryAndInstanceCache.find({ "where": { "id": id } }, defaultContext, function (err, data) {
                 if (err) {
                   return done(err);
@@ -917,11 +918,11 @@ describe('Instance Caching Test', function () {
       TestModelQueryAndInstanceCache.create({
         name: "noInstanceCacheTestRest",
         id: id
-      }, defaultContext, function (err, data) {
+      }, bootstrap.defaultContext, function (err, data) {
         if (err) {
           return done(err);
         }
-        TestModelQueryAndInstanceCache.find({ "where": { "id": id } }, defaultContext, function (err, data) {
+        TestModelQueryAndInstanceCache.find({ "where": { "id": id } }, bootstrap.defaultContext, function (err, data) {
           if (err) {
             return done(err);
           }
@@ -932,24 +933,23 @@ describe('Instance Caching Test', function () {
             }
             var url = '/' + TestModelQueryAndInstanceCache.pluralModelName;
             var filter = {where: {id: id}};
-
             api
             .set('Accept', 'application/json')
+            .set('x-evproxy-db-lock', '0')
             .get(bootstrap.basePath + url + '?filter='+JSON.stringify(filter)+'&noInstanceCache=' + 1 + '&access_token=' + accessToken)
             .send()
             .end(function (err, res) {
               if (err || res.body.error) {
                 return done(err || (new Error(JSON.stringify(res.body.error))));
-              } else {
-                expect(res.body.length).to.be.equal(0);
-                TestModelQueryAndInstanceCache.find({ "where": { "id": id } }, defaultContext, function (err, data) {
-                  if (err) {
-                    return done(err);
-                  }
-                  expect(data.length).to.be.equal(0);
-                  return done();
-                });
               }
+              expect(res.body.length).to.be.equal(0);
+              TestModelQueryAndInstanceCache.find({ "where": { "id": id } }, bootstrap.defaultContext, function (err, data) {
+                if (err) {
+                  return done(err);
+                }
+                expect(data.length).to.be.equal(0);
+                return done();
+              });
             });
           });
         });
@@ -958,7 +958,7 @@ describe('Instance Caching Test', function () {
   });
 
   describe('noQueryCache option on request test', function () {
-    it('Programatically - Should bring data from db on an ordinary query when noQueryCache is on and insert the new value to quey cache', function (done) {
+    it('Programatically - Should bring data from db on an ordinary query when noQueryCache is on and insert the new value to query cache', function (done) {
       var id = uuid.v4();
       TestModelQueryAndInstanceCache.create({
         name: "noQueryCacheTest",
@@ -983,6 +983,7 @@ describe('Instance Caching Test', function () {
                 return done(err);
               }
               expect(data.length).to.be.equal(0);
+              delete defaultContext.noQueryCache;
               TestModelQueryAndInstanceCache.find({ "where": { "name": "noQueryCacheTest" } }, defaultContext, function (err, data) {
                 if (err) {
                   return done(err);
@@ -1001,11 +1002,11 @@ describe('Instance Caching Test', function () {
       TestModelQueryAndInstanceCache.create({
         name: "noQueryCacheTestRest",
         id: id
-      }, defaultContext, function (err, data) {
+      }, bootstrap.defaultContext, function (err, data) {
         if (err) {
           return done(err);
         }
-        TestModelQueryAndInstanceCache.find({ "where": { "name": "noQueryCacheTestRest" } }, defaultContext, function (err, data) {
+        TestModelQueryAndInstanceCache.find({ "where": { "name": "noQueryCacheTestRest" } }, bootstrap.defaultContext, function (err, data) {
           if (err) {
             return done(err);
           }
@@ -1016,9 +1017,9 @@ describe('Instance Caching Test', function () {
             }
             var url = '/' + TestModelQueryAndInstanceCache.pluralModelName;
             var filter = {where: {name: "noQueryCacheTestRest"}};
-
             api
             .set('Accept', 'application/json')
+            .set('x-evproxy-db-lock', '0')
             .get(bootstrap.basePath + url + '?filter='+JSON.stringify(filter)+'&noQueryCache=' + 1 + '&access_token=' + accessToken)
             .send()
             .end(function (err, res) {
@@ -1026,7 +1027,7 @@ describe('Instance Caching Test', function () {
                 return done(err || (new Error(JSON.stringify(res.body.error))));
               } else {
                 expect(res.body.length).to.be.equal(0);
-                TestModelQueryAndInstanceCache.find({ "where": { "name":  "noQueryCacheTestRest"} }, defaultContext, function (err, data) {
+                TestModelQueryAndInstanceCache.find({ "where": { "name":  "noQueryCacheTestRest"} }, bootstrap.defaultContext, function (err, data) {
                   if (err) {
                     return done(err);
                   }
@@ -1047,11 +1048,11 @@ describe('Instance Caching Test', function () {
       TestModelQueryAndInstanceCacheShortExp.create({
         name: "shortExpirationTest",
         id: id
-      }, defaultContext, function (err, data) {
+      }, bootstrap.defaultContext, function (err, data) {
         if (err) {
           return done(err);
         }
-        TestModelQueryAndInstanceCacheShortExp.find({ "where": { "name": "shortExpirationTest" } }, defaultContext, function (err, data) {
+        TestModelQueryAndInstanceCacheShortExp.find({ "where": { "name": "shortExpirationTest" } }, bootstrap.defaultContext, function (err, data) {
           if (err) {
             return done(err);
           }
@@ -1061,7 +1062,7 @@ describe('Instance Caching Test', function () {
               return done(err);
             }
             setTimeout(function() {
-              TestModelQueryAndInstanceCacheShortExp.find({ "where": { "name": "shortExpirationTest" } }, defaultContext, function (err, data) {
+              TestModelQueryAndInstanceCacheShortExp.find({ "where": { "name": "shortExpirationTest" } }, bootstrap.defaultContext, function (err, data) {
                 if (err) {
                   return done(err);
                 }
@@ -1121,7 +1122,7 @@ describe('Instance Caching Test', function () {
                   process.env.CONSISTENT_HASH = originalConsistentHash;
                   return done(err);
                 }
-                TestModelConsistentHashOff.find({ "where": { "name": "consistentHashOffTest" } }, defaultContext, function (err, data) {
+                TestModelConsistentHashOff.find({ "where": { "id": id } }, defaultContext, function (err, data) {
                   if (err) {
                     process.env.CONSISTENT_HASH = originalConsistentHash;
                     return done(err);
@@ -1132,7 +1133,7 @@ describe('Instance Caching Test', function () {
                       process.env.CONSISTENT_HASH = originalConsistentHash;
                       return done(err);
                     }
-                    TestModelConsistentHashOff.find({ "where": { "name": "consistentHashOffTest" } }, defaultContext, function (err, data) {
+                    TestModelConsistentHashOff.find({ "where": { "id": id } }, defaultContext, function (err, data) {
                       if (err) {
                         process.env.CONSISTENT_HASH = originalConsistentHash;
                         return done(err);
