@@ -234,7 +234,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
   var marksListDef = {
     "name": "StudentsMarksList",
     "Base": "BaseEntity",
-    "plural": "MarksLists",
+    "plural": "StudentsMarksLists",
     "properties": {
       "name": "string",
       "maths": "number",
