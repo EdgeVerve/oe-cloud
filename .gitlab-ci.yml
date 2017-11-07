@@ -275,6 +275,7 @@ job-scheduler-service:
     - mv -f test/job-scheduler-service-tests/oe-cloud2.yml test/job-scheduler-service-tests/oe-cloud.yml
     - docker stack deploy -c test/job-scheduler-service-tests/oe-cloud.yml ${STACK_NAME}
     - docker service logs -f ${STACK_NAME}_web &
+    - docker service logs -f ${STACK_NAME}_scheduler &
     - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - echo "${HAPROXY} ${SCHEDULER_NAME}.${DOMAIN_NAME}" >> /etc/hosts
     - isSchedulerStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${SCHEDULER_NAME}.${DOMAIN_NAME}/)
