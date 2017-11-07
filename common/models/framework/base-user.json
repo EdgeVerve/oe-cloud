@@ -40,7 +40,7 @@
     },
     "identities": {
       "type": "hasMany",
-      "model": "userIdentity",
+      "model": "BaseUserIdentity",
       "foreignKey": "userId"
     },
     "credentials": {
