@@ -41,7 +41,7 @@
     ],
     "tenantsource": "HEADER",
     "tenantkey": "tenant_id",
-    "disableNodered": true,
+    "disableNodered": false,
     "nodeRedUserDir": "nodered/",
     "useDefaultNodeRedStorage": false,
     "nodeRedSplitToFiles": false,

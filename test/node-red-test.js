@@ -37,7 +37,7 @@ var defaultContext = {
 
 
 describe(chalk.blue('Node-red test'), function () {
-    this.timeout(90000);
+    this.timeout(200000);
     var accessToken;
     var adminAccessToken;
 
@@ -100,6 +100,73 @@ describe(chalk.blue('Node-red test'), function () {
                 return done();
             });
     });
+
+    it('Node-Red Test - able to lock flow', function (done) {
+
+      var api = defaults(supertest(bootstrap.app));
+      //console.log(accessToken);
+      var postUrl = '/red' + '/lock?access_token=' + accessToken;
+      api.set('Accept', 'application/json')
+        .post(postUrl)
+        .set('accessToken', accessToken)
+        .send({ locked: true, rev: _version })
+        .end(function (err, resp) {
+          if (err) {
+            console.log(resp);
+            return done(err);
+          };
+          expect(resp.status).to.be.equal(200);
+          _version = resp.body.rev;
+          return done(err);
+        });
+    });
+
+    it('Node-Red Test - Should NOT able to update existing node red flow as it is locked', function (done) {
+
+      var flows = [{ "id": "5b4e055c.3134cc", "type": "tab", "label": "node-red-test-tenant-updated" },
+      { "id": "f2978c55.016ab", "type": "async-observer", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant-updated", "modelname": "Literal", "method": "access", "x": 162, "y": 191, "wires": [["f5c48f2.d0e007"]] },
+      { "id": "f5c48f2.d0e007", "type": "function", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant", "func": "console.log('******* test-tenant ********');\nvar loopback = global.get('loopback');\nvar literalModel = loopback.findModel('" + "Literal" + "');\nliteralModel.emit(\"notifyLiteral\", msg.callContext);\n\nreturn msg;", "outputs": 1, "noerr": 0, "x": 439, "y": 165, "wires": [["9a0d6af6.7e8ec8"]] },
+      { "id": "9a0d6af6.7e8ec8", "type": "debug", "z": "5b4e055c.3134cc", "name": "node-red-test-tenant", "active": true, "console": "false", "complete": "true", "x": 661, "y": 147, "wires": [] }];
+
+      var api = defaults(supertest(bootstrap.app));
+      //console.log(accessToken);
+      var postUrl = '/red' + '/flows?access_token=' + accessToken;
+
+      api.set('Accept', 'application/json')
+        .post(postUrl)
+        .set('accessToken', accessToken)
+        //.set('Cookie', [_version])
+        .send({ flows: flows, rev: _version })
+        .end(function (err, resp) {
+          if (err) return done(err);
+          expect(resp.status).to.be.equal(403);
+          //_version = resp.body.rev;
+          //console.log('version2 : ', _version);
+          done();
+        });
+    });
+
+
+    it('Node-Red Test - able to unlock flow', function (done) {
+
+      var api = defaults(supertest(bootstrap.app));
+      //console.log(accessToken);
+      var postUrl = '/red' + '/lock?access_token=' + accessToken;
+      api.set('Accept', 'application/json')
+        .post(postUrl)
+        .set('accessToken', accessToken)
+        .send({ locked: false, rev: _version })
+        .end(function (err, resp) {
+          if (err) {
+            console.log(resp);
+            return done(err);
+          };
+          expect(resp.status).to.be.equal(200);
+          _version = resp.body.rev;
+          return done(err);
+        });
+    });
+
 
     it('Node-Red Test - Should able to update existing node red flow', function (done) {
 

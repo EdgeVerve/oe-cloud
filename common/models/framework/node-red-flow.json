@@ -13,9 +13,12 @@
             "required": true
         },
         "flow": {
-            "type": [
-                "object"
-            ]
+          "type": [
+            "object"
+          ]
+        },
+        "locked": {
+          "type" :  "boolean"
         }
     },
     "validations": [],
