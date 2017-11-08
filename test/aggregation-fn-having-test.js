@@ -14,7 +14,7 @@ var models = bootstrap.models;
 var loopback = require('loopback');
 var app = bootstrap.app;
 
-describe(chalk.blue('Aggregation Functions with group filter test'), function () {
+describe(chalk.blue('Aggregation Functions with Having filter test'), function () {
   this.timeout(20000);
   var marksList;
   var studentsData = [
@@ -433,7 +433,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for having clause "inq" operator', function (done) {
-      var filter = '{"group":{"groupBy":["section","gender"],"max":{"maths":"maxMaths"}},"order":["section ASC"],"having":{"max":{"maths":{"in":[60,50,80]}}}}';
+      var filter = '{"group":{"groupBy":["section","gender"],"max":{"maths":"maxMaths"}},"order":["section ASC"],"having":{"max":{"maths":{"inq":[60,50,80]}}}}';
       var url = path + '?filter=' + filter;
       api
         .get(url)
@@ -651,7 +651,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for having clause "inq" operator', function (done) {
-      var filter = { "group": { "groupBy": ["section", "gender"], "max": { "maths": "maxMaths" } }, "order": ["section ASC"], "having": { "max": { "maths": { "in": [60, 50, 80] } } } };
+      var filter = { "group": { "groupBy": ["section", "gender"], "max": { "maths": "maxMaths" } }, "order": ["section ASC"], "having": { "max": { "maths": { "inq": [60, 50, 80] } } } };
       marksList.find(filter, bootstrap.defaultContext, function (err, res) {
         if (err) {
           done(err);
