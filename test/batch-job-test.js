@@ -162,7 +162,7 @@ describe(chalk.blue('batch-job-test'), function () {
         return stateObj;
       };
 
-      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, monitoringId, version, callback) {
+      accountDefinition.prototype.calculateFeesPerAccount = function (interestCoefficient, ctx, callback) {
 
         accountModel.find({}, ctx, (err, accounts)=> {
           async.each(accounts, function(account, cb) {
@@ -175,7 +175,7 @@ describe(chalk.blue('batch-job-test'), function () {
               retryUpdateAttributes(account, intrest, ctx, cb);
             });
           }, function(err) {
-            callback(err, monitoringId, version);
+            callback(err);
           });
         });
       };    
@@ -250,7 +250,7 @@ describe(chalk.blue('batch-job-test'), function () {
     msg.jobFnName = 'calculateFeesPerAccount';
     msg.jobFnParams = [0.5];
 
-    BatchJobRunner.processMsg(msg);
+    BatchJobRunner.processMsg(msg, ()=> msg.status = 'succsseful');
 
     function checkResults (tryouts, done) {      
       accountModel.find({}, bootstrap.defaultContext, function(err, accounts) {

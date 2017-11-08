@@ -266,6 +266,14 @@
         "public": true,
         "dataSource": "db"
     },
+    "LdapRoleMapping": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "BaseUserIdentity": {
+        "public": false,
+        "dataSource": "db"
+    },
     "Lock": {
         "public": false,
         "dataSource": "db"

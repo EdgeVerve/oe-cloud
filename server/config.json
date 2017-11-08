@@ -110,5 +110,6 @@
         "<input",
         "<iframe",
         "<link"
-    ]
+    ],
+    "serverMonitor": {}
 }

@@ -37,7 +37,7 @@ services:
 
   scheduler:
     entrypoint: ["node", "."]
-    image: registry.oecloud.local/oe-scheduler:latest
+    image: registry.oecloud.local/oecloudio-oescheduler:latest
     depends_on:
       - mongo
       - rabbitmq
