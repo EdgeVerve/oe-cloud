@@ -14,6 +14,7 @@ var assert = require('assert');
 var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('decision-table');
+var getError = require('../../../lib/common/error-utils').getValidationError;
 var delimiter = '&SP';
 jsFeel.use(feelRelationsPlugin);
 const dTable = jsFeel.decisionTable;
@@ -244,17 +245,23 @@ module.exports = function decisionTableFn(decisionTable) {
                   err,
                   results
                 ) {
+                  results = results || [];
                   if (rules.hitPolicy === 'V') {
                     if (err) {
-                      results.push(err);
+                      getError('JS_FEEL_ERR', {options: options, name: 'JS_FEEL'}, function validateMaxGetErrCb(error) {
+                        error.errMessage = err;
+                        results.push(error);
+                        callback(null, results);
+                      });
+                    } else {
+                      callback(null, results);
                     }
-                    return callback(null, results);
+                  } else if (err) {
+                    callback(err, null);
+                  } else {
+                    data = processPayload(results, data);
+                    callback(null, data);
                   }
-                  if (err) {
-                    return callback(err, null);
-                  }
-                  data = processPayload(results, data);
-                  callback(null, data);
                 });
               }
             }
