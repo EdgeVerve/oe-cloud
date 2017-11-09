@@ -302,7 +302,7 @@ module.exports = function (BaseActorEntity) {
         var updatedActor = self.atomicInstructions(stateObj.__data.stateObj, context.activity);
         cb(null, updatedActor);
       });
-    }; 
+    };
   };
 
   var sendNonAtomicMesssage = function (context, self, options, cb) {
