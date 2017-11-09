@@ -5,6 +5,7 @@
   "validations": [],
   "relations": {},
   "strict": false,
+  "disableInstanceCache": false,
   "properties": 
   {
     "stateId": {

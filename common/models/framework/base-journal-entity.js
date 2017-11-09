@@ -30,6 +30,9 @@ module.exports = function (BaseJournalEntity) {
         }
         operationContext.activity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
+        if (validationObj.updatedActor) {
+          operationContext.activity.updatedActor = validationObj.updatedActor;
+        }
         return callback();
       });
     }, function (err) {
@@ -56,6 +59,9 @@ module.exports = function (BaseJournalEntity) {
       }
       operationContext.activity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
+      if (validationObj.updatedActor) {
+        operationContext.activity.updatedActor = validationObj.updatedActor;
+      }
       return next(null, startup);
     });
   };
