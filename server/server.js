@@ -302,6 +302,7 @@ if (require.main === module) {
   // When any application uses this framework, it must set apphome variable in its boot directory
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
+  process.env.CONSISTENT_HASH = 'true';
 
   // Checking for app-list.json in app home directory and setting providerJson using
   // value provided by loadAppProviders function in merge-util
