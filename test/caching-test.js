@@ -87,7 +87,7 @@ describe('Caching Test', function () {
 
     function stage2_find(result, done) {
         apiGetRequest('/' + modelName + 's/' + id, stage3_updateDB, done);
-    };
+    }
 
     function stage3_updateDB(result, done) {
         result1 = result;
@@ -133,7 +133,6 @@ describe('Caching Test', function () {
             client.connect(function (err) {
                 if (err) done(err);
                 else {
-                    //var query = client.query("DELETE from " + modelName.toLowerCase(), function(err,result){
                     var query = client.query("UPDATE " + modelName.toLowerCase() + " SET name = 'value2' WHERE " + idFieldName + " = '" + id + "'", function (err, result) {
                         if (err) {
                             return done(err);
@@ -148,7 +147,7 @@ describe('Caching Test', function () {
 
     function stage4_find(result, done) {
         apiGetRequest('/' + modelName + 's/' + id, stage5_saveResult, done);
-    };
+    }
 
     function stage5_saveResult(result, done) {
         result2 = result;
@@ -171,7 +170,8 @@ describe('Caching Test', function () {
             strict: true,
             plural: modelName + "s",
             base: 'BaseEntity',
-            cacheable: true
+            cacheable: true,
+            queryCacheExpiration : 5000,
         };
 
         // Create a TestModel and attache it to the dataSource

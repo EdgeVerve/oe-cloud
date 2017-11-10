@@ -144,7 +144,7 @@ module.exports = function startNodeRed(server, callback) {
         if (!msg) {
           msg = {};
         }
-        msg.callback = this.callContext;
+        msg.callContext = this.callContext;
         this._receive(msg);
       };
       node.constructor.super_.prototype._on_ = node.constructor.super_.prototype._on;
@@ -298,6 +298,43 @@ module.exports = function startNodeRed(server, callback) {
       });
     }
   });
+
+  // Atul : Following end point is used to lock or unlock the flows.
+  // Flow would be locked/unlocked per autoscope - tenant
+  // user needs to pass {"locked":true, "rev" : <version>} to lock the flow
+  // once flow is locked, noone can deploy/change flows. it needs to be unlocked with locked = false flag with same end point
+  app.post(settings.httpAdminRoot + '/lock', function postFlowsCb(req, res) {
+    if (!req.accessToken) {
+      return res.status(401).json({ error: 'unauthorized' });
+    }
+    var autoscopeField = getAutoscopeField(flowModel, req.callContext);
+    if (req && req.body && (req.body.locked || req.body.locked === false)) {
+      flowModel.find({ where: { name: autoscopeField } }, req.callContext, function flowModelFindCb(err, results) {
+        if (err || !results || !results[0]) {
+          console.log(err);
+          return res.status(500).json({ error: 'Internal server error', message: 'flow not found.' });
+        }
+        if (results.length > 1) {
+          return res.status(500).json({ error: 'Internal server error', message: 'There were more flows found for a unique context.' });
+        }
+        var version = results[0]._version;
+        if (version !== req.body.rev) {
+          return res.status(400).json({ error: 'version mismatched' });
+        }
+        var locked = req.body.locked ? true : false;
+        results[0].updateAttributes({locked: locked, _version: version}, req.callContext, function (err, r) {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({ error: 'Internal server error', message: 'flow not found.' });
+          }
+          res.cookie('_version', r._version, { httpOnly: true, secure: (process.env.PROTOCOL && process.env.PROTOCOL === 'https' ? true : false) });
+          return res.status(200).json({ rev: r._version });
+        });
+      });
+    } else {
+      return res.status(400).json({error: 'Invalid request' });
+    }
+  });
   // Atul/Ori : Handle POST /red/flows request here. It will store flows posted by client to database
   // this will bypass default api handling of node-red. This will ensure context specific data is stored.
   // It does following in order
@@ -423,6 +460,9 @@ module.exports = function startNodeRed(server, callback) {
           version = results[0]._version;
           if (version !== req.body.rev) {
             return res.status(409).json({ code: 'version_mismatch' });
+          }
+          if (results[0].locked) {
+            return res.status(403).json({ error: 'flow is locked. please unlock it first', message: 'Flow is locked'});
           }
         } else {
           version = uuid.v4();
