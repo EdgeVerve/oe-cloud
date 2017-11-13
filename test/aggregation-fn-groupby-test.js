@@ -242,7 +242,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
       "section": "string",
       "gender": "string"
     },
-    "strict": false
+    "strict": true
   };
 
   before('Create Test model and upload test data', function (done) {
@@ -650,7 +650,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
   });
 
 
-  describe(chalk.green('Aggregation Functions Test --Programmatic'), function () {
+  describe(chalk.green('Aggregation Functions Test --Programatic'), function () {
 
     it('Test for GROUP BY clause', function (done) {
       var filter = { "group": { "groupBy": ["section"] } };
@@ -960,8 +960,5 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
   });
-
-
-
 
 });
