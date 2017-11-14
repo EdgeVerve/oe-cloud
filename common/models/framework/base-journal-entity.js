@@ -183,14 +183,16 @@ module.exports = function (BaseJournalEntity) {
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
-          if (err && err.retriable === false) {
+          if (err) {
+            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
+              var actor = ctx.hookState.actorInstancesMap[key];
+              if (actor.constructor.settings.noBackgroundProcess) {
+                actor.clearActorMemory(actor, ctx.options, function () {
+
+                });
+              }
+            });
             next(err);
-          } else if (err) {
-            if (instance.fromPending === true) {
-              return next(err);
-            }
-            // return writePending(ctx, next);
-            return next(err);
           } else {
             return next();
           }

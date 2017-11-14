@@ -143,16 +143,6 @@ module.exports = function (BaseActorEntity) {
     });
 
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
-    /*
-    actorPool.destroy(this.constructor.modelName, this.id);
-
-    options.ctx.noInstanceCache = true;
-    this.constructor.find({ where: { id: this.id } }, options.ctx, function (err, instance) {
-      if (err) {
-        return cb(err);
-      }
-    });
-    */
     var context = {
       actorEntity: this
     };
