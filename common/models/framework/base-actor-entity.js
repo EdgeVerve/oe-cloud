@@ -127,7 +127,7 @@ module.exports = function (BaseActorEntity) {
         root: true
       }
     });
-  /*
+
   BaseActorEntity.remoteMethod(
     'clearActorMemory', {
       http: {
@@ -143,16 +143,13 @@ module.exports = function (BaseActorEntity) {
     });
 
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
-    var context = {
-      actorEntity: this
-    };
-    context.activity = {
-      modelName: this._type,
-      entityId: this.id
-    };
-    context.journalEntity = {
-      id: ''
-    };
+    var context = {};
+    context.actorEntity = this;
+    context.activity = {};
+    context.activity.modelName = this._type;
+    context.activity.entityId = this.id;
+    context.journalEntity = {};
+    context.journalEntity.id = '';
     options.ctx.noInstanceCache = true;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
@@ -161,8 +158,6 @@ module.exports = function (BaseActorEntity) {
       return cb(null, ctx.envelope.noCacheTime);
     });
   };
-  */
-
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
     this.calculatePendingBalance(envelope, options, function (err, actorData) {
@@ -281,19 +276,6 @@ module.exports = function (BaseActorEntity) {
 
     var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
-  };
-
-  BaseActorEntity.prototype.processAmount = function (context, options, cb) {
-    if (this.constructor.settings.noBackgroundProcess) {
-      var stateModel = getStateModel();
-      stateModel.findById(this.stateId, options, function (err, stateObj) {
-        if (err) {
-          return cb(err);
-        }
-        var updatedActor = self.atomicInstructions(stateObj.__data.stateObj, context.activity);
-        cb(null, updatedActor);
-      });
-    }
   };
 
   var sendNonAtomicMesssage = function (context, self, options, cb) {
