@@ -127,7 +127,7 @@ module.exports = function (BaseActorEntity) {
         root: true
       }
     });
-
+  /*
   BaseActorEntity.remoteMethod(
     'clearActorMemory', {
       http: {
@@ -141,7 +141,7 @@ module.exports = function (BaseActorEntity) {
         root: true
       }
     });
-
+  
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
     var context = {
       actorEntity: this
@@ -161,6 +161,7 @@ module.exports = function (BaseActorEntity) {
       return cb(null, ctx.envelope.noCacheTime);
     });
   };
+  */
 
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
