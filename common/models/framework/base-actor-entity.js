@@ -141,7 +141,7 @@ module.exports = function (BaseActorEntity) {
         root: true
       }
     });
-  
+
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
     var context = {
       actorEntity: this
