@@ -692,8 +692,8 @@ function dataPersonalizationAfterAccess(ctx, next) {
               score = Math.max(score, parseInt(weights[element] || '1', 10));
               weight += parseInt(weights[element] || '1', 10);
             });
-            obj.score = score;
-            obj.weight = weight;
+            obj._score = score;
+            obj._weight = weight;
             resultData.push(obj);
           }
         });
@@ -702,10 +702,10 @@ function dataPersonalizationAfterAccess(ctx, next) {
       // Sort in descending order based on score .
       // resultData =_.orderBy(resultData, ['score', 'weight'], ['desc', 'desc']);  //Lodash v4.6.1
       // Lodash v3.10.1
-      resultData = _.sortByOrder(resultData, ['score', 'weight'], ['desc', 'desc']);
+      resultData = _.sortByOrder(resultData, ['_score', '_weight'], ['desc', 'desc']);
       resultData.forEach((obj) => {
-        delete obj.score;
-        delete obj.weight;
+        delete obj._score;
+        delete obj._weight;
       });
       if (ctx.query.scope && Object.keys(ctx.query.scope).length !== 0) {
         ctx.accdata = resultData;
@@ -792,8 +792,8 @@ var calculateScoreMongo = function calcScoreMongo(result, weights) {
       score = Math.max(score, parseInt(weights[element] || '1', 10));
       weight += parseInt(weights[element] || '1', 10);
     });
-    obj.score = score;
-    obj.weight = weight;
+    obj._score = score;
+    obj._weight = weight;
   });
   return result;
 };
