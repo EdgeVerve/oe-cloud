@@ -35,8 +35,8 @@
     "_tenantId",
     "_scope",
     "_autoScope",
-    "score",
-    "weight",
+    "_score",
+    "_weight",
     "__oldVersion"
   ],
   "validations": [],
