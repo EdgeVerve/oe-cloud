@@ -37,7 +37,7 @@ var defaultContext = {
 
 
 describe(chalk.blue('Node-red test'), function () {
-    this.timeout(90000);
+    this.timeout(200000);
     var accessToken;
     var adminAccessToken;
 
