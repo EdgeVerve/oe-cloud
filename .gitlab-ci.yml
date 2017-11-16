@@ -70,6 +70,7 @@ mongotest:
     - export DB_NAME=${CI_PIPELINE_ID}_mongo
     - npm run grunt-cover
     - npm install mongodb pg chai --no-optional
+    - time npm install --no-optional
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
@@ -84,12 +85,13 @@ postgrestest:
     - export DB_NAME=${CI_PIPELINE_ID}_pg
     - npm run grunt-cover
     - npm install mongodb pg chai --no-optional
+    - time npm install --no-optional
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
     
 oracletest:
-  image: registry.oecloud.local/debian-node-oracle-docker
+  image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
     - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
@@ -104,6 +106,7 @@ oracletest:
     - npm install nan async --no-optional
     - mv /oracledb node_modules/
     #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
+    - time npm install --no-optional
     - export CI_PROJECT_NAMESPACE=${group}
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
@@ -128,6 +131,7 @@ consistenthashtest:
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
     - mocha test/consistenthash/server.js 3100 &
@@ -141,6 +145,7 @@ buildjob:
   script: 
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile   
+    - time npm install --no-optional
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
@@ -162,6 +167,7 @@ swarm-actor-pattern:
     #- export HAPROXY=10.73.96.214
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
+    - time npm install --no-optional
     - cd test/actor-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
@@ -203,6 +209,7 @@ retry-service:
     - docker stack rm ${STACK_NAME}
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - cd test/async-service-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
@@ -248,6 +255,7 @@ ldap-auth:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/ldap-auth-tests/oe-cloud.yml > test/ldap-auth-tests/oe-cloud2.yml
     - mv -f test/ldap-auth-tests/oe-cloud2.yml test/ldap-auth-tests/oe-cloud.yml
     - docker stack deploy -c test/ldap-auth-tests/oe-cloud.yml ${STACK_NAME}
@@ -277,6 +285,7 @@ job-scheduler-service:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - node test/job-scheduler-service-tests/prepare-test.js
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
