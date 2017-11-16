@@ -256,24 +256,27 @@ module.exports = function (BaseActorEntity) {
       }, function (err) {
         if (err) {
           log.error(options, err);
-          return actorCb(err);
         }
-        stateObj.__data.seqNum = envelope.processedSeqNum;
-        self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-          stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
-            if (error) {
-              log.error(options, 'error while persisting actor ', error);
-              return releaseLockCb(error);
+        if (stateObj.__data.seqNum < envelope.processedSeqNum ) {
+          stateObj.__data.seqNum = envelope.processedSeqNum;
+          self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+            stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
+              if (error) {
+                log.error(options, 'error while persisting actor ', error);
+                return releaseLockCb(error);
+              }
+              envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
+              return releaseLockCb();
+            });
+          }, function (err, ret) {
+            if (err) {
+              return actorCb(err);
             }
-            envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
-            return releaseLockCb();
+            return actorCb();
           });
-        }, function (err, ret) {
-          if (err) {
-            return actorCb(err);
-          }
+        } else {
           return actorCb();
-        });
+        }
       });
     });
   };
@@ -307,7 +310,6 @@ module.exports = function (BaseActorEntity) {
     if (message.isProcessed === true) {
       return cb();
     }
-
     var self = this;
 
     var actualProcess = function (cb) {
@@ -333,14 +335,12 @@ module.exports = function (BaseActorEntity) {
         log.error(options, 'error in processMessage: ', err);
         return cb(err);
       } else if (!result) {
-        if (!message.isProcessed) {
-          message.retryCount += 1;
-          if (message.retryCount > self.MAX_RETRY_COUNT) {
-            log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
-            message.isProcessed = true;
-          }
-          return cb();
+        message.retryCount += 1;
+        if (message.retryCount > self.MAX_RETRY_COUNT) {
+          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
+          message.isProcessed = true;
         }
+        return cb(new Error('no transaction for message:' + message.seqNum));
       } else if (result) {
         actualProcess(cb);
       }
