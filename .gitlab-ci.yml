@@ -106,7 +106,6 @@ oracletest:
     - npm install nan async --no-optional
     - mv /oracledb node_modules/
     #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
-    - time npm install --no-optional
     - export CI_PROJECT_NAMESPACE=${group}
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
