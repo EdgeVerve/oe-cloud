@@ -24,7 +24,8 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
-var batchJobConsumer = require('../lib/queue-consumer.js');
+var serverMonitor = require('../lib/server-monitor.js');
+var queueConsumer = require('../lib/queue-consumer.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
@@ -189,9 +190,11 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
+
       var disableJobRunner = process.env.DISABLE_JOB_RUNNER;
       if (!disableJobRunner) {
-        batchJobConsumer.init();
+        serverMonitor.init();
+        queueConsumer.init(serverMonitor.eventEmitter);
       }
       var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
       if (!disableEventHistoryManager || disableEventHistoryManager !== 'true') {
@@ -299,6 +302,7 @@ if (require.main === module) {
   // When any application uses this framework, it must set apphome variable in its boot directory
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
+  process.env.CONSISTENT_HASH = 'true';
 
   // Checking for app-list.json in app home directory and setting providerJson using
   // value provided by loadAppProviders function in merge-util
