@@ -186,19 +186,11 @@
         "public": true,
         "dataSource": "db"
     },
-    "DesignerPage": {
-        "public": true,
-        "dataSource": "db"
-    },
     "ModelView": {
         "public": true,
         "dataSource": "db"
     },
     "UIManager": {
-        "public": true,
-        "dataSource": "db"
-    },
-    "DesignerRule": {
         "public": true,
         "dataSource": "db"
     },
@@ -242,6 +234,14 @@
         "public": true,
         "dataSource": "db"
     },
+    "DecisionGraph": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DecisionService": {
+        "public": true,
+        "dataSource": "db"
+    },
     "DecisionTable": {
         "public": true,
         "dataSource": "db"
@@ -264,6 +264,14 @@
     },
     "TrustedApp": {
         "public": true,
+        "dataSource": "db"
+    },
+    "LdapRoleMapping": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "BaseUserIdentity": {
+        "public": false,
         "dataSource": "db"
     },
     "Lock": {

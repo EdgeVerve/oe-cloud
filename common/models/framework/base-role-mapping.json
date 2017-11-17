@@ -2,7 +2,12 @@
     "name": "BaseRoleMapping",
     "plural": "BaseRoleMappings",
     "base": "RoleMapping",
-    "properties": {},
+    "properties": {
+        "providerRole": {
+            "type": "string",
+            "default": "none"
+        }
+    },
     "autoscope": [
         "tenantId"
     ],

@@ -1,3 +1,10 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
 var async = require('async');
 var logger = require('oe-logger');
 var log = logger('journal-entity');
@@ -23,6 +30,9 @@ module.exports = function (BaseJournalEntity) {
         }
         operationContext.activity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
+        if (validationObj.updatedActor) {
+          operationContext.activity.updatedActor = validationObj.updatedActor;
+        }
         return callback();
       });
     }, function (err) {
@@ -49,6 +59,9 @@ module.exports = function (BaseJournalEntity) {
       }
       operationContext.activity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
+      if (validationObj.updatedActor) {
+        operationContext.activity.updatedActor = validationObj.updatedActor;
+      }
       return next(null, startup);
     });
   };
@@ -70,17 +83,18 @@ module.exports = function (BaseJournalEntity) {
         } else if (actor.length === 0) {
           return callback(new Error('Invalid activity. No actor with id ' + activity.entityId));
         } else if (actor.length > 1) {
-          return callback(new Error('Something went wrong. Too many actors with id ' + activity.entityId));
+          return callback(new Error('Something went wrong. Too many ctors with id ' + activity.entityId));
         }
         operationContext.activity = activity;
-        operationContext.journalEntity = instance.toObject();
-        operationContext.journalEntity._type = ctx.Model.definition.name;
+        operationContext.journalEntityId = instance.id;
+        operationContext.journalEntityVersion = instance._version;
+        operationContext.journalEntityType = ctx.Model.definition.name;
         operationContext.activity = activity;
         operationContext.actorEntity = actor[0];
-        if (!options.actorInstancesMap) {
-          options.actorInstancesMap = {};
+        if (!ctx.hookState.actorInstancesMap) {
+          ctx.hookState.actorInstancesMap = {};
         }
-        options.actorInstancesMap[activity.entityId] = actor[0];
+        ctx.hookState.actorInstancesMap[activity.entityId] = actor[0];
         operationContext.options = options;
         return callback(null, operationContext);
       });
@@ -119,7 +133,7 @@ module.exports = function (BaseJournalEntity) {
         if (err) {
           return cb(err);
         }
-        return cb(null, results.join('$'));
+        return cb(null, results.join('$') );
       });
     };
 
@@ -132,7 +146,7 @@ module.exports = function (BaseJournalEntity) {
           if (err) {
             return next(err);
           }
-          instance.startup = (resAtomic + resNonAtomic).slice(0, -1);
+          instance.startup = (resAtomic + resNonAtomic);
           return next();
         });
       });
@@ -145,32 +159,6 @@ module.exports = function (BaseJournalEntity) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
-  /*
-  var writePending = function (ctx, next) {
-    var ignoreScopeOptions = {
-      ignoreAutoScope: true,
-      fetchAllScopes: true
-    };
-    var pendingModel = loopback.findModel('PendingJournal');
-    var pending = {};
-    pending.savedCtx = JSON.stringify(ctx.options);
-    pending.savedData = JSON.stringify(ctx.instance.__data);
-    pending.journalName = ctx.Model.modelName;
-    pending.instanceVersion = ctx.instance._version;
-    pending.status = 'pending';
-    pending.isFirstPending = true;
-
-    pendingModel.create(pending, ignoreScopeOptions, function (err, res) {
-      if (err) {
-        log.error(log.defaultContext(), err);
-      } else {
-        var error = new Error('Pending ' + res.id.toString());
-        error.status = 500;
-        next(error);
-      }
-    });
-  };
-  */
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
     if (ctx.isNewInstance === false || !(ctx.instance)) {
@@ -195,14 +183,16 @@ module.exports = function (BaseJournalEntity) {
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
-          if (err && err.retriable === false) {
+          if (err) {
+            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
+              var actor = ctx.hookState.actorInstancesMap[key];
+              if (actor.constructor.settings.noBackgroundProcess) {
+                actor.clearActorMemory(actor, ctx.options, function () {
+
+                });
+              }
+            });
             next(err);
-          } else if (err) {
-            if (instance.fromPending === true) {
-              return next(err);
-            }
-            // return writePending(ctx, next);
-            return next(err);
           } else {
             return next();
           }
@@ -223,9 +213,9 @@ module.exports = function (BaseJournalEntity) {
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
     async.each(activities, function (activity, cb) {
       var options = ctx.options;
-      var actor = options.actorInstancesMap[activity.entityId];
+      var actor = ctx.hookState.actorInstancesMap[activity.entityId];
       if (actor) {
-        actor.journalSaved(activity, options, function (err) {
+        actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {
             return cb(err);
           }

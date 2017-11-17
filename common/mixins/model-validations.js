@@ -145,7 +145,7 @@ module.exports = function ModelValidations(Model) {
             if (done) {
               log.trace(options, 'all validation rules executed');
               if (errArr && errArr.length > 0) {
-                log.warn(options, 'Data posted is not valid');
+                log.debug(options, 'Data posted is not valid');
                 // Add error to the response object
                 getError(self, errArr);
                 // done(valid);
@@ -195,7 +195,7 @@ module.exports = function ModelValidations(Model) {
           if (done) {
             log.trace(options, 'all validation rules executed');
             if (errArr && errArr.length > 0) {
-              log.warn(options, 'Data posted is not valid');
+              log.debug(options, 'Data posted is not valid');
               // Add error to the response object
               getError(self, errArr);
               // done(valid);

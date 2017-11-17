@@ -1,3 +1,10 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+
 var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
@@ -6,11 +13,11 @@ var os = require('os');
 var process = require('process');
 var currHostName = process.env.HOSTNAME || os.hostname();
 var eventHistroyManager;
-var enableEventHistoryManager = process.env.ENABLE_EVENT_HISTORY;
+var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
 
 module.exports = function failsafeObserverMixin(Model) {
-  if (!enableEventHistoryManager || enableEventHistoryManager !== 'true') {
+  if (disableEventHistoryManager && disableEventHistoryManager === 'true') {
     return;
   }
   eventHistroyManager = require('./../../lib/event-history-manager.js');
@@ -102,7 +109,10 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   Model.defineProperty('_fsCtx', {
-    type: String
+    type: 'string',
+    oracle: {
+      'dataType': 'CLOB'
+    }
   });
 
   if (Model.definition.settings.hidden) {

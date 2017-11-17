@@ -1,0 +1,17 @@
+{
+  "contexts": {
+    "default": {
+      "id": 0,
+      "tenantId": "default",
+      "remoteUser": "upload"
+    }
+  },
+  "files": [
+    {
+      "model": "ModelDefinition",
+      "enabled": true,
+      "file": "default/ModelDefinition.json",
+      "ctxId": "default"
+    }
+  ]
+}

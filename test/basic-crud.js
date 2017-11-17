@@ -29,10 +29,11 @@ describe('basic-crud', function () {
         id: uuid.v4()
     };
     var Note;
+    var noteModelName = 'NoteBasicCrud'
 
     before('Create Test Model and do cache test', function (done) {
         var modelDetails = {
-            "name": "Note",
+            "name": noteModelName,
             "base": "BaseEntity",
             "strict": false,
             "properties": {
@@ -49,7 +50,7 @@ describe('basic-crud', function () {
                 log.debug(bootstrap.defaultContext, 'unable to create Note model');
                 done(err);
             } else {
-                Note = loopback.getModel('Note', bootstrap.defaultContext);
+                Note = loopback.getModel(noteModelName, bootstrap.defaultContext);
                 done();
             }
         });

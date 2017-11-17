@@ -27,11 +27,16 @@ var MongoClient = require('mongodb').MongoClient;
 var debug = require('debug')('crypto-test');
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+var oracleHost = process.env.ORACLE_HOST || 'localhost';
+var oraclePort = process.env.ORACLE_PORT || 1521;
+var oracleService = process.env.ORACLE_SID || 'orclpdb.ad.infosys.com';
+var oracleUser = process.env.ORACLE_USERNAME || 'oeadmin';
+var oraclePassword = process.env.ORACLE_PASSWORD || 'oeadmin';
 
-describe('crypto Test', function() {
+describe('crypto Test', function () {
     var modelName = 'CryptoTest';
     var dsname = 'db';
-    var dbname = dsname;
+    var dbname = process.env.DB_NAME || dsname;
     var ccNo = "1234-5678-9012-3456";
 
     var TestModelSchema = {
@@ -57,7 +62,7 @@ describe('crypto Test', function() {
     var id;
 
 
-    before('Create Test Model and do crypto test', function(done) {
+    before('Create Test Model and do crypto test', function (done) {
         this.timeout(200000);
         // Get a datasource
         var dataSource = app.datasources[dsname];
@@ -70,7 +75,7 @@ describe('crypto Test', function() {
         app.model(TestModel, {
             dataSource: dsname
         });
-        TestModel.destroyAll({}, bootstrap.defaultContext, function(err, info) {
+        TestModel.destroyAll({}, bootstrap.defaultContext, function (err, info) {
             proceed(dataSourceName, done);
         });
     }
@@ -83,13 +88,13 @@ describe('crypto Test', function() {
         // Add a record
         TestModel.create({
             creditCardNo: ccNo
-        }, bootstrap.defaultContext, function(err, data) {
+        }, bootstrap.defaultContext, function (err, data) {
             if (err) {
                 done();
             } else {
                 id = data.id;
                 debug("id", id);
-                TestModel.findById(id, bootstrap.defaultContext, function(err1, data1) {
+                TestModel.findById(id, bootstrap.defaultContext, function (err1, data1) {
                     if (err1) {
                         done(err1);
                     } else {
@@ -109,14 +114,14 @@ describe('crypto Test', function() {
     function proceed2(dataSourceName, done) {
         if (dataSourceName === 'mongodb') {
             var url = 'mongodb://' + mongoHost + ':27017/' + dbname;
-            MongoClient.connect(url, function(err, db) {
+            MongoClient.connect(url, function (err, db) {
                 if (err) {
                     done(err);
                 } else {
                     var collection = db.collection(modelName);
                     collection.findOne({
                         _id: id
-                    }, function(err2, data2) {
+                    }, function (err2, data2) {
                         if (err2) {
                             done(err2);
                         } else {
@@ -128,16 +133,38 @@ describe('crypto Test', function() {
                     });
                 }
             });
+        } else if (dataSourceName === 'oe-connector-oracle') {
+            var oracledb = require('oracledb');
+            oracledb.getConnection({
+                "password": oraclePassword,
+                "user": oracleUser,
+                "connectString": oracleHost + ":" + oraclePort + "/" + oracleService
+            }, function (err, connection) {
+                if (err) {
+                    done(err);
+                }
+                connection.execute(
+                    "SELECT * from " + modelName.toLowerCase(),
+                    function (error, result) {
+                        if (error) {
+                            done(error);
+                        }
+                        debug('data2', result);
+                        result2 = result.rows && result.rows[0].creditcardno;
+                        debug('result2', result2);
+                        done();
+                    });
+            });
         } else {
             var connectionString = "postgres://postgres:postgres@" + postgresHost + ":5432/" + dbname;
             var pg = require('pg');
             var client = new pg.Client(connectionString);
-            client.connect(function(err) {
+            client.connect(function (err) {
                 if (err) {
                     done(err);
                 } else {
                     // console.log("Connected to Postgres server");
-                    var query = client.query("SELECT * from " + modelName.toLowerCase(), function(err2, data2) {
+                    var query = client.query("SELECT * from " + modelName.toLowerCase(), function (err2, data2) {
                         if (err2) {
                             done(err2);
                         } else {
@@ -153,8 +180,8 @@ describe('crypto Test', function() {
     }
 
 
-    after('Cleanup', function(done) {
-        TestModel.destroyAll({}, bootstrap.defaultContext, function(err, info) {
+    after('Cleanup', function (done) {
+        TestModel.destroyAll({}, bootstrap.defaultContext, function (err, info) {
             if (err) {
                 console.log(err, info);
             }
@@ -163,7 +190,7 @@ describe('crypto Test', function() {
     });
 
 
-    it('Should encrypt the creditCardNo field in TestModel when "encrypt" is set to "true"', function(done) {
+    it('Should encrypt the creditCardNo field in TestModel when "encrypt" is set to "true"', function (done) {
         expect(models[modelName]).not.to.be.null;
         expect(result1).not.to.be.null;
         expect(result2).not.to.be.null;

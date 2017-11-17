@@ -4,9 +4,7 @@
     "port": 3000,
     "cookieSecret": "cookie-secret",
     "remoting": {
-        "context": {
-            "enableHttpContext": true
-        },
+        "context": false,
         "rest": {
             "normalizeHttpPath": false,
             "xml": false
@@ -41,7 +39,7 @@
     ],
     "tenantsource": "HEADER",
     "tenantkey": "tenant_id",
-    "disableNodered": true,
+    "disableNodered": false,
     "nodeRedUserDir": "nodered/",
     "useDefaultNodeRedStorage": false,
     "nodeRedSplitToFiles": false,
@@ -110,5 +108,6 @@
         "<input",
         "<iframe",
         "<link"
-    ]
+    ],
+    "serverMonitor": {}
 }

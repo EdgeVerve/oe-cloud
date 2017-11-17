@@ -1,0 +1,21 @@
+FROM $REGISTRY/debian-node-oracle:latest
+
+#ARG http_proxy
+#ARG https_proxy
+#ARG no_proxy
+
+RUN mkdir -p /home/src
+
+ENV NODE_ENV oracle
+
+EXPOSE 3000
+
+WORKDIR /home/src
+
+CMD node .
+
+COPY . /home/src
+
+#RUN npm install oracledb --no-optional && \
+#    npm install git+http://10.73.97.24/atul/loopback-connector-oracle.git --no-optional && \
+#    npm cache clean

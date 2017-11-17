@@ -24,6 +24,8 @@ var log = logger('Server');
 var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
+var serverMonitor = require('../lib/server-monitor.js');
+var queueConsumer = require('../lib/queue-consumer.js');
 var secretsManager = require('../lib/secrets-manager.js');
 
 var mergeUtil = require('../lib/merge-util');
@@ -188,8 +190,14 @@ function finalBoot(appinstance, options, cb) {
       require('../lib/common/global-messaging');
       // init memory pool
       memoryPool.initPool(appinstance);
-      var enableEventHistoryManager = process.env.ENABLE_EVENT_HISTORY;
-      if (enableEventHistoryManager && enableEventHistoryManager === 'true') {
+
+      var disableJobRunner = process.env.DISABLE_JOB_RUNNER;
+      if (!disableJobRunner) {
+        serverMonitor.init();
+        queueConsumer.init(serverMonitor.eventEmitter);
+      }
+      var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
+      if (!disableEventHistoryManager || disableEventHistoryManager !== 'true') {
         eventHistroyManager = require('../lib/event-history-manager.js');
         eventHistroyManager.init(appinstance);
       }
@@ -213,20 +221,6 @@ function finalBoot(appinstance, options, cb) {
           next();
         });
 
-        appinstance.remotes().before('**', function appInstanceBeforeAll(ctx, next) {
-          if (err) {
-            return next(err);
-          }
-
-          var proxyKey = appinstance.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
-          if (ctx.req && ctx.req.headers && proxyKey) {
-            if (ctx.req.headers['x-evproxy-internal-key'] === proxyKey) {
-              return next();
-            }
-          }
-          var DataACL = loopback.getModelByType('DataACL');
-          DataACL.applyFilter(ctx, next);
-        });
         appinstance.remotes().after('**', function afterRemoteListner(ctx, next) {
           if (ctx.req.callContext && ctx.req.callContext.statusCode) {
             ctx.res.statusCode = ctx.req.callContext.statusCode;
@@ -248,37 +242,37 @@ function finalBoot(appinstance, options, cb) {
                                                 finalError.requestId = req.callContext ? req.callContext.requestId : '';
                                                 finalError.errors = errors;
                                                 log.error(options, 'error :', JSON.stringify(finalError));*/
-            log.error(options, 'error :', JSON.stringify(err));
+            log.error(req.callContext, 'error :', JSON.stringify(err));
             defaultHandler(err);
           }
         };
 
         /* appinstance.buildError = function appinstanceBuildError(err, context) {
-                                  var errors = [];
-                                  if (err instanceof Array) {
-                                    // concat all errors to form a single error array
-                                    Object.keys(err).forEach(function configLocalHandlerForEach(error) {
-                                      var errorObj = err[error];
-                                      if (errorObj.details && errorObj.details.messages.errs) {
-                                        errors = errors.concat(errorObj.details.messages.errs);
-                                      } else if (errorObj.details && errorObj.details.messages) {
-                                        errors = errors.concat(errorObj.details.messages);
-                                      } else {
-                                        errors = errors.concat(errorObj);
-                                      }
-                                    });
-                                  } else if (err.details && err.details.messages) {
-                                    errors = err.details.messages.errs ? err.details.messages.errs : err.details.messages;
-                                  } else {
-                                    // single server error convert it to array of single error
-                                    var errObj = {};
-                                    errObj.code = err.code || err.errCode;
-                                    errObj.message = err.message || err.errMessage;
-                                    errObj.path = err.path;
-                                    errors.push(errObj);
-                                  }
-                                  return errors;
-                                };*/
+                                          var errors = [];
+                                          if (err instanceof Array) {
+                                            // concat all errors to form a single error array
+                                            Object.keys(err).forEach(function configLocalHandlerForEach(error) {
+                                              var errorObj = err[error];
+                                              if (errorObj.details && errorObj.details.messages.errs) {
+                                                errors = errors.concat(errorObj.details.messages.errs);
+                                              } else if (errorObj.details && errorObj.details.messages) {
+                                                errors = errors.concat(errorObj.details.messages);
+                                              } else {
+                                                errors = errors.concat(errorObj);
+                                              }
+                                            });
+                                          } else if (err.details && err.details.messages) {
+                                            errors = err.details.messages.errs ? err.details.messages.errs : err.details.messages;
+                                          } else {
+                                            // single server error convert it to array of single error
+                                            var errObj = {};
+                                            errObj.code = err.code || err.errCode;
+                                            errObj.message = err.message || err.errMessage;
+                                            errObj.path = err.path;
+                                            errors.push(errObj);
+                                          }
+                                          return errors;
+                                        };*/
       });
     };
 
@@ -305,6 +299,7 @@ if (require.main === module) {
   // When any application uses this framework, it must set apphome variable in its boot directory
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
+  process.env.CONSISTENT_HASH = 'true';
 
   // Checking for app-list.json in app home directory and setting providerJson using
   // value provided by loadAppProviders function in merge-util

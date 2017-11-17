@@ -72,6 +72,19 @@ module.exports = function (BaseActorEntity) {
           root: true
         }
       });
+    BaseActor.remoteMethod(
+      'clearActorMemory', {
+        http: {
+          path: '/clearActorMemory',
+          verb: 'post'
+        },
+        isStatic: false,
+        returns: {
+          arg: 'response',
+          type: 'object',
+          root: true
+        }
+      });
   };
 
   BaseActorEntity.disableRemoteMethod('__get__state', false);
@@ -115,6 +128,36 @@ module.exports = function (BaseActorEntity) {
       }
     });
 
+  BaseActorEntity.remoteMethod(
+    'clearActorMemory', {
+      http: {
+        path: '/clearActorMemory',
+        verb: 'post'
+      },
+      isStatic: false,
+      returns: {
+        arg: 'response',
+        type: 'object',
+        root: true
+      }
+    });
+
+  BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
+    var context = {};
+    context.actorEntity = this;
+    context.activity = {};
+    context.activity.modelName = this._type;
+    context.activity.entityId = this.id;
+    context.journalEntity = {};
+    context.journalEntity.id = '';
+    options.ctx.noInstanceCache = true;
+    actorPool.getOrCreateInstance(context, options, function (err, ctx) {
+      if (err) {
+        return cb(err);
+      }
+      return cb(null, ctx.envelope.noCacheTime);
+    });
+  };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
     this.calculatePendingBalance(envelope, options, function (err, actorData) {
@@ -160,6 +203,7 @@ module.exports = function (BaseActorEntity) {
     var self = this;
     context.actorEntity = this;
     context.doNotDelete = true;
+    var actorCopy;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
         return cb(err, { validation: false });
@@ -174,7 +218,14 @@ module.exports = function (BaseActorEntity) {
           if (validation === true) {
             envelope.seqNum = envelope.seqNum + 1;
             ctx.activity.seqNum = envelope.seqNum;
-            self.reserveAmount(ctx);
+            actorCopy = JSON.parse(JSON.stringify(actorData));
+            if (self.constructor.settings.noBackgroundProcess) {
+              if (!envelope.updatedActor) {
+                envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
+              }
+              actorCopy = self.atomicInstructions(actorCopy, context.activity);
+            }
+            self.reserveAmount(ctx, options);
             envelope.doNotDelete--;
             return releaseLockCb(null, true);
           }
@@ -186,7 +237,10 @@ module.exports = function (BaseActorEntity) {
         } else if (!isValid) {
           return cb(null, { validation: false });
         }
-        return cb(null, { validation: true, seqNum: envelope.seqNum });
+        if (self.constructor.settings.noBackgroundProcess) {
+          return cb(null, { validation: true, seqNum: envelope.seqNum, updatedActor: actorCopy});
+        }
+        return cb(null, { validation: true, seqNum: envelope.seqNum});
       });
     });
   };
@@ -202,29 +256,66 @@ module.exports = function (BaseActorEntity) {
       var envelope = ctx.envelope;
       envelope.seqNum = envelope.seqNum + 1;
       ctx.activity.seqNum = envelope.seqNum;
-      self.nonAtomicAction(ctx, function () {
+      self.nonAtomicAction(ctx, options, function (err, updatedActor) {
+        if (err) {
+          return cb(err);
+        }
         envelope.doNotDelete--;
-        return cb(null, { validation: true, seqNum: envelope.seqNum });
+        if (updatedActor) {
+          var actorCopy = JSON.parse(JSON.stringify(updatedActor));
+          return cb(null, { validation: true, seqNum: envelope.seqNum, updatedActor: actorCopy});
+        }
+        return cb(null, { validation: true, seqNum: envelope.seqNum});
       });
     });
   };
   // should be async
-  BaseActorEntity.prototype.reserveAmount = function (context) {
-    var journalEntity = context.journalEntity;
-    var journalEntityType = journalEntity._type;
-    var journalEntityVersion = journalEntity._version;
+  BaseActorEntity.prototype.reserveAmount = function (context, options) {
+    var journalEntityType = context.journalEntityType;
+    var journalEntityVersion = context.journalEntityVersion;
 
     var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
     this.addMessage(message, context);
   };
 
-  BaseActorEntity.prototype.nonAtomicAction = function (context, cb) {
-    var journalEntity = context.journalEntity;
-    var journalEntityType = journalEntity._type;
-    var journalEntityVersion = journalEntity._version;
-    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
-    this.addMessage(message, context);
+  var sendNonAtomicMesssage = function (context, self, options, cb) {
+    var journalEntityType = context.journalEntityType;
+    var journalEntityVersion = context.journalEntityVersion;
+    var message = self.createMessage(context.activity, journalEntityType, journalEntityVersion);
+    self.addMessage(message, context);
     return cb();
+  };
+
+  BaseActorEntity.prototype.nonAtomicAction = function (context, options, cb) {
+    var self = this;
+    var envelope = context.envelope;
+    var actorCopy;
+    if (this.constructor.settings.noBackgroundProcess) {
+      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+          if (err) {
+            return releaseLockCb(err);
+          }
+          actorCopy = JSON.parse(JSON.stringify(actorData));
+          if (!envelope.updatedActor) {
+            envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
+          }
+          actorCopy = self.nonAtomicInstructions(actorCopy, context.activity);
+          return releaseLockCb(null, true);
+        });
+      }, function (err, isValid) {
+        if (err) {
+          return cb(err);
+        }
+        sendNonAtomicMesssage(context, self, options, function () {
+          return cb(null, actorCopy);
+        });
+      });
+    } else {
+      sendNonAtomicMesssage(context, self, options, function () {
+        return cb();
+      });
+    }
   };
 
   BaseActorEntity.prototype.removeMessage = function (message) {
@@ -234,12 +325,48 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
+  var actualBackgroundProcess = function (self, envelope, messages, stateObj, options, actorCb) {
+    async.eachSeries(messages, function (message, cb) {
+      self.processMessage(envelope, message, stateObj, options, cb);
+    }, function (err) {
+      if (err) {
+        log.error(options, err);
+        return actorCb(err);
+      }
+      if (self.constructor.settings.noBackgroundProcess) {
+        envelope.updatedActor = stateObj;
+        envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
+        return actorCb();
+      }
+      stateObj.__data.seqNum = envelope.processedSeqNum;
+      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+        stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
+          if (error) {
+            log.error(options, 'error while persisting actor ', error);
+            return releaseLockCb(error);
+          }
+          envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
+          return releaseLockCb();
+        });
+      }, function (err, ret) {
+        if (err) {
+          return actorCb(err);
+        }
+        return actorCb();
+      });
+    });
+  };
+
   BaseActorEntity.prototype.processMessagesBackground = function (envelope, options, actorCb) {
     var messages = envelope.msg_queue.slice(0);
     var self = this;
 
     if (messages.length === 0) {
       return actorCb();
+    }
+
+    if (self.constructor.settings.noBackgroundProcess && envelope.updatedActor) {
+      return actualBackgroundProcess(self, envelope, messages, envelope.updatedActor, options, actorCb);
     }
 
     var stateModel = getStateModel();
@@ -253,30 +380,7 @@ module.exports = function (BaseActorEntity) {
         log.error(options, err);
         return actorCb(err);
       }
-      async.eachSeries(messages, function (message, cb) {
-        self.processMessage(envelope, message, stateObj, options, cb);
-      }, function (err) {
-        if (err) {
-          log.error(options, err);
-          return actorCb(err);
-        }
-        stateObj.__data.seqNum = envelope.processedSeqNum;
-        self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-          stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
-            if (error) {
-              log.error(options, 'error while persisting actor ', error);
-              return releaseLockCb(error);
-            }
-            envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
-            return releaseLockCb();
-          });
-        }, function (err, ret) {
-          if (err) {
-            return actorCb(err);
-          }
-          return actorCb();
-        });
-      });
+      return actualBackgroundProcess(self, envelope, messages, stateObj, options, actorCb);
     });
   };
 
@@ -286,22 +390,30 @@ module.exports = function (BaseActorEntity) {
     return atomicAmount;
   };
 
+  var actualCalculate = function (envelope, actorData, self, options, cb) {
+    var messages = envelope.msg_queue;
+    for (var i = 0; i < messages.length; i++) {
+      var message = messages[i];
+      if (envelope.isCurrentlyProcessing || !message.isProcessed) {
+        actorData = self.processPendingMessage(message, actorData);
+      }
+    }
+    return cb(null, actorData);
+  };
+
   BaseActorEntity.prototype.calculatePendingBalance = function (envelope, options, cb) {
     var self = this;
+
+    if (self.constructor.settings.noBackgroundProcess && envelope.updatedActor) {
+      return actualCalculate(envelope, JSON.parse(JSON.stringify(envelope.updatedActor)), self, options, cb);
+    }
+
     var stateModel = getStateModel();
     stateModel.findById(this.stateId, options, function (err, state) {
       if (err) {
         return cb(err);
       }
-      var actorData = state.__data.stateObj;
-      var messages = envelope.msg_queue;
-      for (var i = 0; i < messages.length; i++) {
-        var message = messages[i];
-        if (envelope.isCurrentlyProcessing || !message.isProcessed) {
-          actorData = self.processPendingMessage(message, actorData);
-        }
-      }
-      return cb(null, actorData);
+      return actualCalculate(envelope, state.__data.stateObj, self, options, cb);
     });
   };
 
@@ -314,9 +426,17 @@ module.exports = function (BaseActorEntity) {
 
     var actualProcess = function (cb) {
       if (self.atomicTypes.indexOf(message.instructionType) !== -1) {
-        self.atomicInstructions(state.__data.stateObj, message.activity);
+        if (state.__data) {
+          self.atomicInstructions(state.__data.stateObj, message.activity);
+        } else {
+          self.atomicInstructions(state, message.activity);
+        }
       } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
-        self.nonAtomicInstructions(state.__data.stateObj, message.activity);
+        if (state.__data) {
+          self.nonAtomicInstructions(state.__data.stateObj, message.activity);
+        } else {
+          self.nonAtomicInstructions(state, message.activity);
+        }
       }
       envelope.processedSeqNum = Math.max(message.seqNum, envelope.processedSeqNum);
       message.isProcessed = true;
@@ -386,16 +506,16 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  function createFilterObj(envelope, state, currentJournalEntity) {
+  function createFilterObj(envelope, state, currentJournalEntityId) {
     var filterBy = {};
     filterBy.modelName = envelope.modelName;
     filterBy.entityId = envelope.actorId;
     filterBy.seqNum = state.seqNum;
-    filterBy.journalId = currentJournalEntity.id;
+    filterBy.journalId = currentJournalEntityId;
     return filterBy;
   }
 
-  BaseActorEntity.prototype.performStartOperation = function (currentJournalEntity, options, envelope, cb) {
+  BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
     var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
@@ -411,8 +531,13 @@ module.exports = function (BaseActorEntity) {
         return cb(err);
       }
       envelope.processedSeqNum = envelope.seqNum = state.__data.seqNum;
+
+      if (self.constructor.settings.noBackgroundProcess) {
+        return cb();
+      }
+
       var query = {};
-      if (self.getDataSource().name === 'evmongodb') {
+      if (self.getDataSource(options).name === 'mongodb') {
         query = {
           where: {
             or: [
@@ -433,7 +558,7 @@ module.exports = function (BaseActorEntity) {
             log.debug('did not find journal instances in startup');
             return asyncCb();
           }
-          var filterBy = createFilterObj(envelope, state, currentJournalEntity);
+          var filterBy = createFilterObj(envelope, state, currentJournalEntityId);
           returnedInstances = filterResults(returnedInstances, filterBy);
           for (var i = 0; i < returnedInstances.length; i++) {
             var startingObj = { stateObj: state.stateObj, seqNum: state.seqNum };

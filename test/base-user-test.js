@@ -30,6 +30,7 @@ var credentials = {
     password:  'basetestuser123'
 };
 describe(chalk.blue('BaseUser Test'), function () {
+    this.timeout(20000);
     before('Create User', function(done) {
         var testUser = {
             username: credentials.username,
@@ -323,7 +324,7 @@ describe(chalk.blue('BaseUser Test'), function () {
             baseUserModel.app.set('UNLOCK_USER_ACCOUNT_TIME', orgUserAccountTime);
             done();
         });
-        xit('Disable account with maxFailedLoginTries', function(done){
+        it('Disable account with maxFailedLoginTries', function(done){
             async.series(invalidLoginFns, function(err, responses){
                 // Get last response
                 var accountLockedResponse = responses[responses.length - 1];

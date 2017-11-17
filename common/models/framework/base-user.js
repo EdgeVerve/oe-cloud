@@ -13,14 +13,19 @@
 
 var loopback = require('loopback');
 var logger = require('oe-logger');
+// @jsonwebtoken is internal dependency of @passport-jwt
+var jwt = require('jsonwebtoken');
 var log = logger('BaseUser');
 var async = require('async');
 var debug = require('debug')('base-user');
 var utils = require('../../../lib/common/util.js');
+var jwtUtil = require('../../../lib/jwt-token-util');
 // 15 mins in seconds
 var DEFAULT_RESET_PW_TTL = 15 * 60;
 
 // var app = require('../../../server/server.js');
+
+var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
 
 module.exports = function BaseUser(BaseUser) {
   BaseUser.setup = function baseUserSetup() {
@@ -91,6 +96,9 @@ module.exports = function BaseUser(BaseUser) {
 
   BaseUser.login = function BaseUserLogin(credentials, include, options, fn) {
     var self = this;
+    // The first if clause is difficult to cover from test cases
+    // if we dont pass options and include both, options get initialized with {}
+    // which raises Trace: options is not being passed in datasource-juggler
     if (typeof options === 'undefined' && typeof fn === 'undefined') {
       if (typeof include === 'function') {
         fn = include;
@@ -232,6 +240,11 @@ module.exports = function BaseUser(BaseUser) {
    */
 
   BaseUser.logout = function baseUserLogout(tokenId, options, fn) {
+    // The if clause may not be covered in test cases
+    // if we manually call BaseUser.logout('accessToken', function(err) { });
+    // the test cases are getting crashed with
+    // Trace: options is not being passed
+    // at Function.findById loopback-datasource-juggler/lib/dao.js:1787:17
     if (typeof options === 'function' && typeof fn === 'undefined') {
       fn = options;
       options = {};
@@ -345,8 +358,52 @@ module.exports = function BaseUser(BaseUser) {
       accessToken.username = self.username;
       accessToken.ttl = userModel.app.get('accessTokenTTL') || Math.min(ttl || userModel.settings.ttl, userModel.settings.maxTTL);
       options = options || {};
-      self.accessTokens.create(accessToken, options, cb);
+      self.createAuthToken(accessToken, options, cb);
     });
+
+    return cb.promise;
+  };
+
+  /**
+   * Creating Authentication Token based on the Auth type..
+   * @param {object} accessToken - access token
+   * @param {object} options - options
+   * @returns {function} cb - callback to be called which will gives authentication token.
+  */
+
+  BaseUser.prototype.createAuthToken = function createAuthToken(accessToken, options, cb) {
+    if (typeof cb === 'undefined' && typeof options === 'function') {
+      // createAccessToken(ttl, cb)
+      cb = options;
+      options = null;
+    }
+
+    cb = cb || utils.createPromiseCallback();
+    var self = this;
+
+    if (jwtForAccessToken) {
+      var jwtConfig = jwtUtil.getJWTConfig();
+      var jwtOpts = {};
+      jwtOpts.issuer = jwtConfig.issuer;
+      jwtOpts.audience = jwtConfig.audience;
+      jwtOpts.expiresIn = accessToken.ttl;
+      var secretOrPrivateKey = jwtConfig.secretOrKey;
+      jwt.sign(accessToken, secretOrPrivateKey, jwtOpts, function jwtSignCb(err, token) {
+        if (err) {
+          log.error(options, 'JWT signing error ', err);
+          log.debug(options, 'Got JWT signing error, Defaulting to accessToken generation.');
+          return self.accessTokens.create(accessToken, options, cb);
+        }
+        var jwtToken = {};
+        jwtToken.id = token;
+        jwtToken.ttl = jwtOpts.expiresIn;
+        var loopback = BaseUser.app.loopback;
+        var AuthSession = loopback.getModelByType('AuthSession');
+        cb(null, new AuthSession(jwtToken));
+      });
+    } else {
+      self.accessTokens.create(accessToken, options, cb);
+    }
 
     return cb.promise;
   };
@@ -515,6 +572,11 @@ module.exports = function BaseUser(BaseUser) {
     * @param {function} cb -continuation callback function handle
     */
   BaseUser.switchTenant = function SwitchTenantFn(ctx, tenantId, options, cb) {
+    // The if clause may not be covered in test cases
+    // if we manually call BaseUser.switchTenant(ctx, switchTenantId, function(err, res) { });
+    // the test cases are getting crashed with
+    // Trace: options is not being passed
+    // at Function.findById loopback-datasource-juggler/lib/dao.js:1787:17
     if (!cb && typeof options === 'function') {
       cb = options;
       options = {};
@@ -543,6 +605,11 @@ module.exports = function BaseUser(BaseUser) {
         }
       });
     } else {
+      // This else case cannot covered from test cases
+      // To cover this ctx.req.accessToken to be not set(null or undefined), for that we
+      // should not pass access_token from query params and since /switch-tenant api is enabled
+      // for logged in users, it is returning authorization required, the control flow
+      // not even coming to this method itself.
       var err = new Error('not logged in');
       err.retriable = false;
       cb(err, data);
@@ -551,6 +618,9 @@ module.exports = function BaseUser(BaseUser) {
 
   BaseUser.session = function session(ctx, options, cb) {
     var data = {};
+    // Cannot cover below code with coverage without passing options
+    // since the next below if clause accesses options.ctx object which is undefined.
+    // Test cases crash with TypeError: Cannot read property 'userId' of undefined
     if (!cb && typeof options === 'function') {
       cb = options;
       options = {};

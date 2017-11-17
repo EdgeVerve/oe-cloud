@@ -19,11 +19,13 @@ var eventHistoryManager = require('../lib/event-history-manager');
 var debug = require('debug')('failsafe-observer-test');
 var uuid = require('node-uuid');
 var loopback = require('loopback');
+var os = require('os');
+var currHostName = os.hostname();
 
 chai.use(require('chai-datetime'));
 
 describe('failsafe-observer-mixin', function () {
-    this.timeout(20000);
+    this.timeout(90000);
     var modelName = 'FailSafeTestModel';
     var childModelName = 'FailSafeChildTestModel';
 
@@ -63,14 +65,14 @@ describe('failsafe-observer-mixin', function () {
         app.set('eventReliabilityReplayInterval', 1000);
         app.set('eventReliabilityDbPersistenceInterval', 2000);
         app.set('eventReliabilityMaxRetry', 4);
-        eventHistoryManager.init(app);
+        eventHistoryManager.config(app);
         done();
     });
     after('restore event history manager constants', function (done) {
         app.set('eventReliabilityReplayThreshold', backupConstants.eventReliabilityReplayThreshold);
         app.set('eventReliabilityReplayInterval', backupConstants.eventReliabilityReplayInterval);
         app.set('eventReliabilityDbPersistenceInterval', backupConstants.eventReliabilityDbPersistenceInterval);
-        eventHistoryManager.init(app);
+        eventHistoryManager.config(app);
         done();
     });
 
@@ -217,7 +219,7 @@ describe('failsafe-observer-mixin', function () {
         });
     });
 
-    it('should not rerun an after save observer if it finished executing without error for base model', function (done) {
+   it('should not rerun an after save observer if it finished executing without error for base model', function (done) {
         var model = loopback.getModel(modelName, defaultContext);
         var childModel = loopback.getModel(childModelName, defaultContext);
         var counter = 0;
@@ -300,6 +302,61 @@ describe('failsafe-observer-mixin', function () {
                 done(err);
             }
         });
+    });
+
+    it('recovery should end with RecoveryFinished in the db', function (done) {
+        var model = loopback.getModel(modelName, defaultContext);
+        var counter = 0;
+        model.observe('after save', function (ctx, next) {
+            if (counter < 2) {
+                counter++;
+                next(new Error('testError'));
+            } else if (counter === 2) {
+                counter++;
+                next();
+                //done();
+            } else {
+                next();
+            }
+        });
+        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+            if (err) {
+                return done(err);
+            }
+        });
+
+        setTimeout(function () {
+            var ev = loopback.getModel('EventHistory', defaultContext);
+
+            ev.find({ where: { hostName: currHostName } }, defaultContext, function (err, results) {
+                if (err) {
+                    done(err);
+                } else if (!results || results.length === 0) {
+                    done();
+                } else {
+                    results[0].updateAttribute('status',  'ToBeRecovered', defaultContext, function (err) {
+                        if (err) {
+                            done(err);
+                        } else {
+                            eventHistoryManager.recovery(currHostName, function (err) {
+                                 if (err) {
+                                    done(err);
+                                    // TO DO - error handling here
+                                } else {
+                                    ev.find({ where: { hostName: currHostName } }, defaultContext, function (err, results) {
+                                        if (err) {
+                                            done(err);
+                                        } else {
+                                            expect(results[0].status).to.be.equal('RecoveryFinished');
+                                        }
+                                    });
+                                    done();
+                                }
+                            });
+                        }
+                    });
+                }
+        });}, 5000);
     });
 
     it('should rerun an after save observer on base model untill it doesn\'t return an error', function (done) {

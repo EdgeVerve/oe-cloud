@@ -1,3 +1,5 @@
+# ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+#Bangalore, India. All Rights Reserved.
 version: "3"
 services:
   mongo:
@@ -42,9 +44,9 @@ services:
       FORCE_SSL: "yes"
       CONSISTENT_HASH: "true"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
+      DB_NAME: ${DB_NAME}
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
-      NETWORK_INTERFACE_NAME: "eth2"
       APP_URL: "https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/api"
       NODE_TLS_REJECT_UNAUTHORIZED: "0"
       ROUTER_HOST: ${ROUTER}

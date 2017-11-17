@@ -67,7 +67,7 @@ describe(chalk.blue('grid-meta-data'), function () {
   //var dataSource;
   //var tenantId_id;
   //var requestId;
-  this.timeout(10000);
+  this.timeout(60000);
 
   //fields to populate in fields
   var fields = [

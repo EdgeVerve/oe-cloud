@@ -4,9 +4,7 @@
   "port": 3000,
   "cookieSecret": "246bace2-9876-4321-1234-0ae8160b07c8",
   "remoting": {
-    "context": {
-      "enableHttpContext": true
-    },
+    "context": false,
     "rest": {
       "normalizeHttpPath": false,
       "xml": false
@@ -63,5 +61,13 @@
     "userName":"admin",
     "password":"admin",
     "email":"admin@mycompany.com"
+  },
+  "passwordComplexity": {
+    "regex": "",
+    "errMsg": "Password complexity not met. Password length should be minimum 8 and maximum 20.Password should contain atleast one capital, one small letter, one numaric and one special character(+$@$!%*#?&)."
+  },
+  "maxFailedLoginTries": 5,
+  "metadataModelList": {
+    "ModelDefinition": true
   }
 }

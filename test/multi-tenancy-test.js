@@ -9,6 +9,7 @@
 // to avoid jshint errors for expect
 
 var bootstrap = require('./bootstrap');
+var app = bootstrap.app;
 var chalk = require('chalk');
 var chai = require('chai');
 var expect = chai.expect;
@@ -17,6 +18,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
+var dbName = process.env.DB_NAME || 'db';
 
 // function GenerateModelName(model) {
 //    return model + Math.floor(Math.random() * (999));
@@ -24,7 +26,7 @@ var mongoHost = process.env.MONGO_HOST || 'localhost';
 
 describe(chalk.blue('multi-tenancy-test'), function () {
   var accessTokens = {};
-
+  this.timeout(60000);
   var productModelName = 'MyProducts';
 
   var tenants = [{
@@ -34,12 +36,12 @@ describe(chalk.blue('multi-tenancy-test'), function () {
     tenantId: 'tenant2',
     tenantName: 'tenant2'
   }];
-
+var dsname = 'db';
   var datasources = [{
     'host': mongoHost,
     'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/db1',
-    'database': 'db1',
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '1',
+    'database': dbName + '1',
     'password': 'admin',
     'name': 'db1',
     'connector': 'mongodb',
@@ -48,8 +50,8 @@ describe(chalk.blue('multi-tenancy-test'), function () {
   }, {
     'host': mongoHost,
     'port': 27017,
-    'url': 'mongodb://' + mongoHost + ':27017/db2',
-    'database': 'db2',
+    'url': 'mongodb://' + mongoHost + ':27017/' + dbName + '2',
+    'database': dbName + '2',
     'password': 'admin',
     'name': 'db2',
     'connector': 'mongodb',
@@ -96,6 +98,11 @@ describe(chalk.blue('multi-tenancy-test'), function () {
       });
     });
   }
+  
+   var dataSource = app.datasources[dsname];
+   if (dataSource.name !== 'mongodb') {
+   return;
+   }
 
   before('setup', function (done) {
     cleandb(done);

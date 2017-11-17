@@ -14,7 +14,10 @@
     },
     "decisionRules": {
       "type": "String",
-      "hidden": true
+      "hidden": true,
+      "oe-connector-oracle":{
+          "dataType":"CLOB"
+        }
     }
   },
   "oeValidations": [],
@@ -28,5 +31,8 @@
   },
   "cacheable": true,
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "mixins":{
+    "CacheMixin": false
+  }
 }

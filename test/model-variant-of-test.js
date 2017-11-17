@@ -22,7 +22,7 @@ function GenerateModelName(model) {
 }
 
 describe(chalk.blue('model-variant-of'), function () {
-
+  this.timeout(20000);
   var accessTokens = {};
 
   var tenantId = GenerateModelName('tenant');
@@ -263,7 +263,8 @@ describe(chalk.blue('model-variant-of'), function () {
           expect(response.statusCode).to.be.equal(200);
           var callContext = { ctx: {} };
           callContext.ctx.tenantId = tenantId;
-          var model = bootstrap.models[productModelName];
+          var model = bootstrap.app.loopback.findModel(productModelName, callContext);
+          //var model = bootstrap.models[productModelName];
           model.find({}, callContext, function (err, list) {
             expect(list[0]._autoScope.tenantId).to.be.equal(tenantId);
             done();

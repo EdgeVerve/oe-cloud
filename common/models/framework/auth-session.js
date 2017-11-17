@@ -4,6 +4,11 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
+// @jsonwebtoken is internal dependency of @passport-jwt
+var jwt = require('jsonwebtoken');
+var jwtUtil = require('../../../lib/jwt-token-util');
+
+var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
 
 module.exports = function AuthSessionFn(AuthSession) {
   AuthSession.findForRequest = function authSessionFindForRequestFn(req, options, cb) {
@@ -11,31 +16,58 @@ module.exports = function AuthSessionFn(AuthSession) {
       cb = options;
       options = {};
     }
-
     var id = tokenIdForRequest(req, options);
 
-    if (id) {
-      this.findById(id, req.callContext, function authSessionFindById(err, token) {
-        if (err) {
-          cb(err);
-        } else if (token) {
-          token.validate(function tokenValidate(err, isValid) {
-            if (err) {
-              cb(err);
-            } else if (isValid) {
-              cb(null, token);
-            } else {
-              var e = new Error('Invalid Access Token');
-              e.status = e.statusCode = 401;
-              e.code = 'INVALID_TOKEN';
-              e.retriable = false;
-              cb(e);
-            }
-          });
-        } else {
-          cb();
-        }
-      });
+    var proxyKey = options.model.app.get('evproxyInternalKey') || '97b62fa8-2a77-458b-87dd-ef64ff67f847';
+    if (req.headers && proxyKey) {
+      if (req.headers['x-evproxy-internal-key'] === proxyKey) {
+        var data = req.callContext.evproxyContext.accessTokenData;
+        var token = new AuthSession(data, {
+          applySetters: false,
+          persisted: true
+        });
+        return cb(null, token);
+      }
+    }
+
+    if (id && id !== 'undefined') {
+      // json web token contains 3 parts separated by .(dot)
+      if (jwtForAccessToken && id.split('.').length === 3) {
+        var jwtConfig = jwtUtil.getJWTConfig();
+        var jwtOpts = {};
+        jwtOpts.issuer = jwtConfig.issuer;
+        jwtOpts.audience = jwtConfig.audience;
+        var secretOrPrivateKey = jwtConfig.secretOrKey;
+        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, payload) {
+          if (err) {
+            cb(err);
+          } else {
+            cb(null, new AuthSession(payload));
+          }
+        });
+      } else {
+        this.findById(id, req.callContext, function authSessionFindById(err, token) {
+          if (err) {
+            cb(err);
+          } else if (token) {
+            token.validate(function tokenValidate(err, isValid) {
+              if (err) {
+                cb(err);
+              } else if (isValid) {
+                cb(null, token);
+              } else {
+                var e = new Error('Invalid Access Token');
+                e.status = e.statusCode = 401;
+                e.code = 'INVALID_TOKEN';
+                e.retriable = false;
+                cb(e);
+              }
+            });
+          } else {
+            cb();
+          }
+        });
+      }
     } else {
       process.nextTick(function tokenForRequestFn() {
         cb();

@@ -98,7 +98,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             collection: modeldefinition.variantOf
           };
         }
-      }      else {
+      } else {
         let ctxStr = util.createContextString(autoscopeFields, ctx.options.ctx);
         if (ctxStr === util.createDefaultContextString(autoscopeFields)) {
           modeldefinition.mongodb = {
@@ -135,7 +135,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     }
     modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
       modelDefinition.definition.settings.autoscope);
-
+    modeldefinition.clientModelName = modeldefinition.name;
     if (ctx.IsNewInstance && ctx.options.upsertWithNewRecord) {
       modeldefinition.filebased = false;
       modeldefinition.variantOf = modeldefinition.name;
@@ -164,6 +164,10 @@ module.exports = function ModelDefintionFn(modelDefinition) {
         var err1 = new Error('Specified base (\'' + modeldefinition.base + '\') does not exist');
         err1.retriable = false;
         return next(err1);
+      }
+      if (modeldefinition.variantOf) {
+        modeldefinition.plural = baseModel.pluralModelName;
+        modeldefinition.name = baseModel.modelName;
       }
       return mongoSpecificHandling(modeldefinition, ctx, next);
     });
@@ -466,6 +470,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
             }
           }
           propDetails.type = 'array';
+        }
+        if (propDetails.refcodetype) {
+          associations.push(loopback.findModel(propDetails.refcodetype, options));
         }
         if (propDetails.enumtype) {
           var enumModel = model.app.models[propDetails.enumtype];

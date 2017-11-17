@@ -15,7 +15,7 @@ var api = supertest(app);
 var apiV2 = bootstrap.api;
 var models = bootstrap.models;
 var logger = require('oe-logger');
-var log = logger('data-personalization-test');
+var log = logger('data-hierarchy-test');
 var loopback = require('loopback');
 var async = require('async');
 
@@ -698,6 +698,153 @@ describe(chalk.blue('Data Hierarchy Test --Programatic'), function () {
       }
     });
   });
+
+  it('Should throw an error if type of hierarchy key in model definition is not of type string (Create)', function (done) {
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'testuser',
+      'employeeHierarchy': ',principal,headMaster,teacher,'
+    };
+
+    var employeeModel = {
+      "name": "EmployeeModel",
+      "properties": {
+        "empName": "string"
+      },
+      'base': 'PersistedModel',
+      "mixins": {
+        'ObserverMixin': true,
+        'ModelValidations': true,
+        'HistoryMixin': true,
+        'DataPersonalizationMixin': true,
+        'DataHierarchyMixin': true,
+        'SoftDeleteMixin': false
+      },
+      'hierarchyScope': [{ employeeHierarchy: "test" }]
+    }
+
+    var newmodel = loopback.createModel(employeeModel);
+    newmodel.clientModelName = "EmployeeModel";
+    newmodel.clientPlural = "EmployeeModels";
+    app.model(newmodel, {
+      dataSource: 'db'
+    });
+    var myModel = loopback.findModel('EmployeeModel');
+
+    myModel.create({ empName: 'Mikasa' }, callContext, function (err, result) {
+      if (err) {
+        expect(err).not.to.be.null;
+        expect(err).not.to.be.empty;
+        expect(err).not.to.be.undefined;
+        expect(err.code).to.be.equal('DATA_HIERARCHY_ERROR_001');
+        expect(err.name).to.be.equal('Hierarchy Scope Definition Error');
+        expect(err.type).to.be.equal('Type mismatch in Declaration');
+        done();
+      } else {
+        done('Error: Should throw an error "Type mismatch in Declaration"');
+      }
+    });
+
+  });
+
+  it('Should throw an error if type of hierarchy key in model definition is not of type string (find)', function (done) {
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'testuser',
+      'employeeHierarchy': ',principal,headMaster,teacher,'
+    };
+    var myModel = loopback.findModel('EmployeeModel');
+
+    myModel.find({ where: { empName: 'Mikasa' } }, callContext, function (err, result) {
+      if (err) {
+        expect(err).not.to.be.null;
+        expect(err).not.to.be.empty;
+        expect(err).not.to.be.undefined;
+        expect(err.code).to.be.equal('DATA_HIERARCHY_ERROR_001');
+        expect(err.name).to.be.equal('Hierarchy Scope Definition Error');
+        expect(err.type).to.be.equal('Type mismatch in Declaration');
+        done();
+      } else {
+        done('Error: Should throw an error "Type mismatch in Declaration"');
+      }
+    });
+
+  });
+
+  it('Should throw an error if parent not found for given parentId (create)', function (done) {
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'testuser',
+      'staffmodelHierarchy': ',principal,headMaster,teacher,',
+      'studentinchargeHierarchy': ',root,'
+    };
+
+    var staffModel = {
+      "name": "StaffModel",
+      "properties": {
+        "name": "string"
+      },
+      "mixins": {
+        'HistoryMixin': true,
+        'DataHierarchyMixin': true,
+        'SoftDeleteMixin': false
+      },
+      autoscope: [
+        'tenantId'
+      ],
+      'hierarchyScope': ['staffmodelHierarchy', 'studentinchargeHierarchy']
+    }
+
+    models.ModelDefinition.create(staffModel, bootstrap.defaultContext, function (err, res) {
+      if (err) {
+        log.debug(bootstrap.defaultContext, 'unable to create dummyTestModel model');
+        done(err);
+      } else {
+        var myModel = loopback.getModel('StaffModel', bootstrap.defaultContext);
+        myModel.create({ name: 'Asuna', parentId: 'school' }, callContext, function (err, result) {
+          if (err) {
+            expect(err).not.to.be.null;
+            expect(err).not.to.be.empty;
+            expect(err).not.to.be.undefined;
+            expect(err.code).to.be.equal('DATA_HIERARCHY_ERROR_003');
+            expect(err.name).to.be.equal('Parent Not Found');
+            expect(err.type).to.be.equal('ParentNotFound');
+            done();
+          } else {
+            done('Error: Should throw an error "Parent Not Found"');
+          }
+        });
+      }
+    });
+  });
+
+  it('Should throw an error if hierarchy data not provided for defined hierarchy (create)', function (done) {
+    var callContext = {};
+    callContext.ctx = {
+      'tenantId': 'test-tenant',
+      'username': 'testuser',
+      'staffmodelHierarchy': ',principal,headMaster,teacher,'
+    };
+
+    var myModel = loopback.getModel('StaffModel', bootstrap.defaultContext);
+    myModel.create({ name: 'Kirito' }, callContext, function (err, result) {
+      if (err) {
+        expect(err).not.to.be.null;
+        expect(err).not.to.be.empty;
+        expect(err).not.to.be.undefined;
+        expect(err.code).to.be.equal('DATA_HIERARCHY_ERROR_002');
+        expect(err.name).to.be.equal('Hierarchy Personalization error');
+        expect(err.type).to.be.equal('Insufficient data');
+        done();
+      } else {
+        done('Error: Should throw an error "Insufficient data"');
+      }
+    });
+  });
+
 });
 // END of Describe
 
@@ -1467,5 +1614,103 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
         }
       });
   });
+
+  it('Should throw an error if type of hierarchy key in model definition is not of type string (Create)', function (done) {
+    var data = { empName: 'Erin' };
+    var url = bootstrap.basePath + '/EmployeeModels';
+    api
+      .post(url)
+      .send(data)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('employeeHierarchy', ',principal,headMaster,teacher,')
+      .end(function (err, res) {
+        if (err) {
+          done('Error: Should throw an error "Type mismatch in Declaration"');
+        } else {
+          expect(res.body.error).not.to.be.null;
+          expect(res.body.error).not.to.be.empty;
+          expect(res.body.error).not.to.be.undefined;
+          expect(res.body.error.code).to.be.equal('DATA_HIERARCHY_ERROR_001');
+          expect(res.body.error.name).to.be.equal('Hierarchy Scope Definition Error');
+          expect(res.body.error.type).to.be.equal('Type mismatch in Declaration');
+          done();
+        }
+      });
+
+  });
+
+  it('Should throw an error if type of hierarchy key in model definition is not of type string (find)', function (done) {
+    var url = bootstrap.basePath + '/EmployeeModels?filter={ "where": { "empName": "Erin" } }';
+    api
+      .get(url)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('employeeHierarchy', ',principal,headMaster,teacher,')
+      .end(function (err, res) {
+        if (err) {
+          done('Error: Should throw an error "Type mismatch in Declaration"');
+        } else {
+          expect(res.body.error).not.to.be.null;
+          expect(res.body.error).not.to.be.empty;
+          expect(res.body.error).not.to.be.undefined;
+          expect(res.body.error.code).to.be.equal('DATA_HIERARCHY_ERROR_001');
+          expect(res.body.error.name).to.be.equal('Hierarchy Scope Definition Error');
+          expect(res.body.error.type).to.be.equal('Type mismatch in Declaration');
+          done();
+        }
+      });
+
+  });
+
+  it('Should throw an error if parent not found for given parentId (Create)', function (done) {
+    var url = bootstrap.basePath + '/StaffModels';
+    var data = { name: 'Naruto', parentId: 'konaha' };
+    apiV2
+      .post(url)
+      .send(data)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('staffmodel-Hierarchy', ',principal,headMaster,teacher,')
+      .set('studentincharge-Hierarchy', ',root,')
+      .end(function (err, res) {
+        if (err) {
+          done('Error: Should throw an error "Parent Not Found"');
+        } else {
+          expect(res.body.error).not.to.be.null;
+          expect(res.body.error).not.to.be.empty;
+          expect(res.body.error).not.to.be.undefined;
+          expect(res.body.error.code).to.be.equal('DATA_HIERARCHY_ERROR_003');
+          expect(res.body.error.name).to.be.equal('Parent Not Found');
+          expect(res.body.error.type).to.be.equal('ParentNotFound');
+          done();
+        }
+      });
+  });
+
+  it('Should throw an error if hierarchy data not provided for defined hierarchy (Create)', function (done) {
+    var data = { name: 'Hinata' };
+    var url = bootstrap.basePath + '/StaffModels';
+    apiV2
+      .post(url)
+      .send(data)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .set('staffmodel-Hierarchy', ',principal,headMaster,teacher,')
+      .end(function (err, res) {
+        if (err) {
+          done('Error: Should throw an error "Insufficient data"');
+        } else {
+          expect(res.body.error).not.to.be.null;
+          expect(res.body.error).not.to.be.empty;
+          expect(res.body.error).not.to.be.undefined;
+          expect(res.body.error.code).to.be.equal('DATA_HIERARCHY_ERROR_002');
+          expect(res.body.error.name).to.be.equal('Hierarchy Personalization error');
+          expect(res.body.error.type).to.be.equal('Insufficient data');
+          done();
+        }
+      });
+  });
+
 });
 // END of Describe
