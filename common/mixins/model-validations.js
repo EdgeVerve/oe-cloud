@@ -51,10 +51,12 @@ module.exports = function ModelValidations(Model) {
      * @name modelValidationsIsValidFn
      */
 
-  Model.prototype.isValid = function modelValidationsIsValidFn(done, options, data, path, inst, callback) {
-    if (!options) {
-      options = {};
+  Model.prototype.isValid = function modelValidationsIsValidFn(done, context, data, path, inst, callback) {
+    var options;
+    if (!context) {
+      context = { options: {} };
     }
+    options = context.options;
     // check if validations are to be executed, if not simply return the done callback.
     if (options.skipValidations) {
       return process.nextTick(function skipValidationCb() {
@@ -115,7 +117,7 @@ module.exports = function ModelValidations(Model) {
       });
       /* prepare an array of functions which are nothing but the isValid method of the
                  properties which are of Model type*/
-      var recursionFns = getRecursiveModelFns(options, inst, data, path);
+      var recursionFns = getRecursiveModelFns(context, inst, data, path);
       if (inst.constructor.settings._isModelRuleExists) {
         fnArr.push(async.apply(executeDTValidationRulesFn, inst.constructor, inst.__data || inst, options));
       }
@@ -143,7 +145,7 @@ module.exports = function ModelValidations(Model) {
             if (done) {
               log.trace(options, 'all validation rules executed');
               if (errArr && errArr.length > 0) {
-                log.warn(options, 'Data posted is not valid');
+                log.debug(options, 'Data posted is not valid');
                 // Add error to the response object
                 getError(self, errArr);
                 // done(valid);
@@ -156,7 +158,7 @@ module.exports = function ModelValidations(Model) {
                 delete inst.__data.customValidations;
                 custValidations = custValidations.concat(Model.customValidations || []);
                 custValidations.forEach(function customValidationForEachCb(customValidation) {
-                  customValArr.push(async.apply(customValidation, inst.__data, options));
+                  customValArr.push(async.apply(customValidation, inst.__data, context));
                 });
                 async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                   if (err) {
@@ -193,7 +195,7 @@ module.exports = function ModelValidations(Model) {
           if (done) {
             log.trace(options, 'all validation rules executed');
             if (errArr && errArr.length > 0) {
-              log.warn(options, 'Data posted is not valid');
+              log.debug(options, 'Data posted is not valid');
               // Add error to the response object
               getError(self, errArr);
               // done(valid);
@@ -206,7 +208,7 @@ module.exports = function ModelValidations(Model) {
               delete inst.__data.customValidations;
               custValidations = custValidations.concat(Model.customValidations || []);
               custValidations.forEach(function customValidationForEachCb(customValidation) {
-                customValArr.push(async.apply(customValidation, inst.__data, options));
+                customValArr.push(async.apply(customValidation, inst.__data, context));
               });
               async.parallel(customValArr, function customModelValidationsAsyncParallelElseCb(err, customResults) {
                 if (err) {
@@ -295,7 +297,8 @@ module.exports = function ModelValidations(Model) {
      * @function getRecursiveModelFns
      */
 
-  function getRecursiveModelFns(options, modelinstance, instanceData, instancePath) {
+  function getRecursiveModelFns(context, modelinstance, instanceData, instancePath) {
+    var options = context.options;
     var properties = modelinstance.constructor.definition.properties;
     var modelfns = [];
     var model;
@@ -326,7 +329,7 @@ module.exports = function ModelValidations(Model) {
           instance = modelinstance.__data[property][i];
           if (validateEmbeddedModel && instance && data && model.settings.mixins && model.settings.mixins.ModelValidations) {
             log.debug(options, 'recursive validation rules added for : ', model.modelName);
-            modelfns.push(async.apply(model.prototype.isValid, null, options, data, path, instance));
+            modelfns.push(async.apply(model.prototype.isValid, null, context, data, path, instance));
           }
         }
       } else if (properties[property].type instanceof Function &&
@@ -344,7 +347,7 @@ module.exports = function ModelValidations(Model) {
         });
         if (validateEmbeddedModel && instance && data && model.settings.mixins && model.settings.mixins.ModelValidations) {
           log.debug(options, 'recursive validation rules added for : ', model.modelName);
-          modelfns.push(async.apply(model.prototype.isValid, null, options, data, path, instance));
+          modelfns.push(async.apply(model.prototype.isValid, null, context, data, path, instance));
         }
       }
     });

@@ -7,6 +7,9 @@
 /* eslint-disable no-console */
 var path = require('path');
 module.exports = function Explorer(server) {
+  if (process.env.DISABLE_EXPLORER && process.env.DISABLE_EXPLORER !== 'false') {
+    return;
+  }
   var explorer;
   var explorerPathName = '/explorer';
   try {
