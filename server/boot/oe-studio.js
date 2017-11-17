@@ -361,6 +361,7 @@ module.exports = function Designer(server) {
       templatePath: [],
       stylePath: []
     };
+    appconfig.designer.restApiRoot = appconfig.designer.restApiRoot || appconfig.restApiRoot;
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
 
