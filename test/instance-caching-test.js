@@ -107,7 +107,7 @@ function mongoDeleteById(id, newModelName, cb) {
         });
       }
     });
-  } else if (dataSource.name === 'oracle') {
+  } else if (dataSource.name === 'oe-connector-oracle') {
     var oracledb = require('oracledb');
     oracledb.autoCommit = true;
     var loopbackModelNoCache = loopback.getModel(newModelName, bootstrap.defaultContext);
@@ -799,7 +799,7 @@ describe('Instance Caching Test', function () {
               });
             }
           });
-        } else if (dataSource.name === 'oracle') {
+        } else if (dataSource.name === 'oe-connector-oracle') {
           var oracledb = require('oracledb');
           oracledb.autoCommit = true;
           var idFieldName = loopbackModelNoCache.definition.idName();

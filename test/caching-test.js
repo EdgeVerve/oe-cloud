@@ -101,7 +101,7 @@ describe('Caching Test', function () {
                     });
                 }
             });
-        } else if (dataSource.name === 'oracle') {
+        } else if (dataSource.name === 'oe-connector-oracle') {
             var oracledb = require('oracledb');
             oracledb.autoCommit = true;
             let loopbackModelNoCache = loopback.getModel(modelName);
