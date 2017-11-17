@@ -15,11 +15,11 @@ cache:
   paths: 
     - node_modules/
 
-image: registry.oecloud.local/evfoundation-executor-docker13:node8alpine36
+image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 
 variables:
   USER_BROADCASTER: "false"
-  DOMAIN_NAME: oecloud.local
+  #DOMAIN_NAME: oecloud.local
   REGISTRY: registry.${DOMAIN_NAME}
 
 before_script:
@@ -31,8 +31,8 @@ before_script:
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - npm config set registry $NPM_REGISTRY
   - npm config set fetch-retries 0
-  - export DOMAIN_NAME=oecloud.local
-  - export REGISTRY=registry.${DOMAIN_NAME}
+  #- export DOMAIN_NAME=oecloud.local
+  #- export REGISTRY=registry.${DOMAIN_NAME}
   - export NETWORK_NAME=${APP_IMAGE_NAME}
   - export APP_TAG=latest
   - export ROUTER=cep_router
@@ -50,6 +50,8 @@ npminstall:
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - time npm install --no-optional
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile
     - echo "Node Modules Installed"
   artifacts:
     untracked: true
@@ -68,6 +70,7 @@ mongotest:
     - export DB_NAME=${CI_PIPELINE_ID}_mongo
     - npm run grunt-cover
     - npm install mongodb pg chai --no-optional
+    - time npm install --no-optional
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
@@ -82,12 +85,13 @@ postgrestest:
     - export DB_NAME=${CI_PIPELINE_ID}_pg
     - npm run grunt-cover
     - npm install mongodb pg chai --no-optional
+    - time npm install --no-optional
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
     
 oracletest:
-  image: registry.oecloud.local/debian-node-oracle-docker
+  image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
     - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
@@ -105,7 +109,7 @@ oracletest:
     - export CI_PROJECT_NAMESPACE=${group}
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
-    - npm install git+http://10.73.97.24/oecloud.io/loopback-connector-oracle.git --no-optional
+    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     # Removing decision test cases which are frequently failing in oracle
     - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-belongsTo-relation-test.js test/decision-table-hasOne-relation-test.js test/decision-table-test.js
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
@@ -126,6 +130,7 @@ consistenthashtest:
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
     - mocha test/consistenthash/server.js 3100 &
@@ -136,7 +141,10 @@ consistenthashtest:
 
 buildjob:
   stage: build
-  script:    
+  script: 
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile   
+    - time npm install --no-optional
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
@@ -155,10 +163,13 @@ swarm-actor-pattern:
     - export exit_status="0"
     - export nameWebService=${STACK_NAME}"_web"
     - export nameDBService=${STACK_NAME}"_"${DB}
-    - export HAPROXY=10.73.96.214
+    #- export HAPROXY=10.73.96.214
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
+    - time npm install --no-optional
     - cd test/actor-tests/test-files
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
     - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:testing
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
@@ -184,7 +195,7 @@ retry-service:
   stage: retry-service
   script: 
     - export ROUTER="cep_router"
-    - export HAPROXY=10.73.96.214
+    #- export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
     - export STACK_NAME=${APP_IMAGE_NAME}
@@ -197,7 +208,10 @@ retry-service:
     - docker stack rm ${STACK_NAME}
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - cd test/async-service-tests/test-files
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
     - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
@@ -233,13 +247,14 @@ ldap-auth:
   stage: ldap-auth
   script:
     - export ROUTER="cep_router"
-    - export HAPROXY=10.73.96.214
+    #- export HAPROXY=10.73.96.214
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export STACK_NAME=${APP_IMAGE_NAME}-ldap
     - export NETWORK_NAME=${STACK_NAME}
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/ldap-auth-tests/oe-cloud.yml > test/ldap-auth-tests/oe-cloud2.yml
     - mv -f test/ldap-auth-tests/oe-cloud2.yml test/ldap-auth-tests/oe-cloud.yml
     - docker stack deploy -c test/ldap-auth-tests/oe-cloud.yml ${STACK_NAME}
@@ -260,7 +275,7 @@ job-scheduler-service:
   stage: job-scheduler-service
   script:
     - export ROUTER="cep_router"
-    - export HAPROXY=10.73.96.214
+    #- export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
     - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-s
     - export STACK_NAME=${APP_IMAGE_NAME}
@@ -269,7 +284,10 @@ job-scheduler-service:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${STACK_NAME}
     - sleep 10
+    - time npm install --no-optional
     - node test/job-scheduler-service-tests/prepare-test.js
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
+    - mv -f Dockerfile2 Dockerfile
     - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test .
     - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test
     - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/job-scheduler-service-tests/oe-cloud.yml > test/job-scheduler-service-tests/oe-cloud2.yml

@@ -44,6 +44,9 @@ describe(chalk.blue('Composite Model test'), function () {
                 'name': {
                     'type': 'string',
                     'required': true
+                },
+                'contact': {
+                    'type': 'object'
                 }
             },
             'relations': {
@@ -92,6 +95,9 @@ describe(chalk.blue('Composite Model test'), function () {
                         'city': {
                             'type': 'string',
                             'required': true
+                        },
+                        'state': {
+                            'type': 'object'
                         }
                     },
                     relations: {
@@ -630,6 +636,62 @@ describe(chalk.blue('Composite Model test'), function () {
             expect(err).not.null;
             done();
         });
+    });
+
+    it('implicit composit post should fail and throw the error when improper parent data is passed to parent model', function (done) {
+        var parentModel = loopback.getModel('Customer', callContext);
+        parentModel.observe('before save', function (ctx, next) {
+            var data = ctx.instance || ctx.data;
+            if (data.contact.mobile)
+                return next();
+            return next();
+        });
+
+        var postData = {
+            'name': 'Kirito',
+            'id': 'K7D3',
+            'address': [{
+                'city': 'MoonLand',
+                'id': 'X22'
+            }]
+        };
+        parentModel.create(postData, callContext, function (err, res) {
+            if (err) {
+                done();
+            } else {
+                done('should fail and throw the error when improper parent data is passed on parent model');
+            }
+        });
+
+    });
+
+    it('implicit composit post should fail and throw the error when improper child data is passed to parent model', function (done) {
+        var parentModel = loopback.getModel('Customer', callContext);
+        var childModel = loopback.getModel('CustomerAddress', callContext);
+        childModel.observe('before save', function (ctx, next) {
+            var data = ctx.instance || ctx.data;
+            if (data.state.capital)
+                return next();
+            return next();
+        });
+
+        var postData = {
+            'name': 'Asuna',
+            'contact': { 'mobile': 'HIDDEN_NUMBER' },
+            'id': 'K7D4',
+            'address': [{
+                'city': 'SkyWalk',
+                'id': 'X42'
+            }]
+        };
+        parentModel.create(postData, callContext, function (err, res) {
+            if (err) {
+                done();
+            } else {
+                done('should fail and throw the error when improper child data is passed on parent model');
+            }
+        });
+
     });
 
 });
