@@ -111,7 +111,7 @@ oracletest:
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
     - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     # Removing decision test cases which are frequently failing in oracle
-    - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-belongsTo-relation-test.js test/decision-table-hasOne-relation-test.js test/decision-table-test.js
+    - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-test.js
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
     - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
     - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')

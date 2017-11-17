@@ -99,8 +99,8 @@ module.exports = function GruntConfig(grunt) {
           excludes: ['lib/expression-language/expression-syntax-parser.js', 'lib/ev-tenant-util.js', 'common/models/framework/cache-manager.js', 'lib/common/broadcaster-client.js'],
           timeout: 60000,
           check: {
-            lines: 80,
-            statements: 80,
+            lines: 79,
+            statements: 79,
             branches: 65,
             functions: 85
           },
