@@ -13,7 +13,7 @@
         "documentData": {
             "type": "String",
             "required": true,
-            "oracle": {
+            "oe-connector-oracle": {
                 "dataType": "CLOB"
             }
         }

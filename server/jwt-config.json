@@ -1,6 +1,0 @@
-{
-    "issuer": "mycompany.com",
-    "audience": "mycompany.net",
-    "secretOrKey": "secret",
-    "keyToVerify": "client_id"
-}

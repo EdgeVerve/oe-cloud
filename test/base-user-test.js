@@ -262,6 +262,11 @@ describe(chalk.blue('BaseUser Test'), function () {
         var orgRegex;
         before('Set Valid Regex', function(done) {
             orgRegex = baseUserModel.app.get('passwordComplexity');
+            if (!orgRegex) {
+              orgRegex = {
+                errMsg: 'Password complexity not met'
+              }
+            }
             baseUserModel.app.set('passwordComplexity', {
                 regex: "/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,20}$/",
                 errMsg: orgRegex.errMsg

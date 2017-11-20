@@ -14,14 +14,16 @@ var chai = require('chai');
 chai.use(require('chai-things'));
 
 var parentModelName = 'Location';
-var childModelName = 'OrderModel';
+var orderModel = 'OrderModel';
+// Order Model with Static String for comparison in expression.
+var orderModel_SS = 'OrderModel_SS';
 
-describe(chalk.blue('EV Validation Custom test'), function () {
+describe(chalk.blue('oeCloud Validation Custom test'), function () {
 
   this.timeout(20000);
 
   before('setup test data', function (done) {
-    models.ModelDefinition.events.once('model-' + childModelName + '-available', function () {
+    models.ModelDefinition.events.once('model-' + orderModel_SS + '-available', function () {
       var parentModel = loopback.getModel(parentModelName, bootstrap.defaultContext);
       var data = [{
         "companyCode": "Company1",
@@ -65,11 +67,11 @@ describe(chalk.blue('EV Validation Custom test'), function () {
       }
     }, bootstrap.defaultContext, function (err, model) {
       if (err) {
-        console.log('EV Validation Custom test : Error in create model ', err);
+        console.log('oeCloud Validation Custom test : Error in create model ', err);
       } else {
         models.ModelDefinition.create({
-          "name": childModelName,
-          "plural": childModelName + "s",
+          "name": orderModel,
+          "plural": orderModel + "s",
           "base": "BaseEntity",
           "strict": false,
           "idInjection": false,
@@ -100,6 +102,43 @@ describe(chalk.blue('EV Validation Custom test'), function () {
         }, bootstrap.defaultContext, function (err, model) {
           if (err) {
             console.log('Error creating Order model definition', err);
+          } else {
+            models.ModelDefinition.create({
+              "name": orderModel_SS,
+              "plural": orderModel_SS + "s",
+              "base": "BaseEntity",
+              "strict": false,
+              "idInjection": false,
+              "options": {
+                "validateUpsert": true
+              },
+              "properties": {
+                "buyerCompanyCode": {
+                  "type": "string",
+                  "required": true
+                },
+                "requestedBillingLocation": {
+                  "type": "Location",
+                  "required": true
+                }
+              },
+              "validations": [],
+              "relations": {},
+              "acls": [],
+              "methods": {},
+              "oeValidations": {
+                "requestedBillingCompanyCheck": {
+                  "validateWhen": {},
+                  "type": "custom",
+                  "expression": "(@mLocation.companyCode where locationCode = @i.requestedBillingLocation.locationCode and companyCode = \"SellerCompany\") == @i.buyerCompanyCode"
+                }
+              }
+            }, bootstrap.defaultContext, function (err, model) {
+              if (err) {
+                console.log('Error creating Order model Static String definition', err);
+              }
+              expect(err).to.be.not.ok;
+            });
           }
           expect(err).to.be.not.ok;
         });
@@ -119,15 +158,26 @@ describe(chalk.blue('EV Validation Custom test'), function () {
       var model = loopback.getModel(parentModelName, bootstrap.defaultContext);
       model.destroyAll({}, bootstrap.defaultContext, function () {
         models.ModelDefinition.destroyAll({
-          name: childModelName
+          name: orderModel
         }, bootstrap.defaultContext, function (err, d) {
           if (err) {
-            console.log('Error - not able to delete modelDefinition entry for child Model Room');
+            console.log('Error - not able to delete modelDefinition entry for orderModel');
             return done();
           }
-          var model = loopback.getModel(childModelName, bootstrap.defaultContext);
+          var model = loopback.getModel(orderModel, bootstrap.defaultContext);
           model.destroyAll({}, bootstrap.defaultContext, function () {
-            done();
+            models.ModelDefinition.destroyAll({
+              name: orderModel_SS
+            }, bootstrap.defaultContext, function (err, d) {
+              if (err) {
+                console.log('Error - not able to delete modelDefinition entry for orderModel_SS');
+                return done();
+              }
+              var model = loopback.getModel(orderModel_SS, bootstrap.defaultContext);
+              model.destroyAll({}, bootstrap.defaultContext, function () {
+                done();
+              });
+            });
           });
         });
       });
@@ -135,9 +185,9 @@ describe(chalk.blue('EV Validation Custom test'), function () {
   });
 
 
-  it('Validation Test - Should insert data successfully', function (done) {
+  it('Validation Test orderModel - Should insert data successfully', function (done) {
 
-    var childModel = loopback.getModel(childModelName, bootstrap.defaultContext);
+    var childModel = loopback.getModel(orderModel, bootstrap.defaultContext);
 
     var data = [{
       "buyerCompanyCode": "SellerCompany",
@@ -158,9 +208,9 @@ describe(chalk.blue('EV Validation Custom test'), function () {
     });
   });
 
-  it('Validation Test - Should fail to insert data', function (done) {
+  it('Validation Test orderModel - Should fail to insert data', function (done) {
 
-    var childModel = loopback.getModel(childModelName, bootstrap.defaultContext);
+    var childModel = loopback.getModel(orderModel, bootstrap.defaultContext);
 
     var data = {
       "buyerCompanyCode": "Company1",
@@ -171,6 +221,58 @@ describe(chalk.blue('EV Validation Custom test'), function () {
     };
     childModel.create(data, bootstrap.defaultContext, function (err, results) {
       expect(err).not.to.be.null;
+      done();
+    });
+  });
+
+  // Test cases for allowing Static String comparison.
+  it('Validation Test Static String - Should fail to insert data when string equality returns false', function (done) {
+    
+    var childModel = loopback.getModel(orderModel_SS, bootstrap.defaultContext);
+
+    var data = {
+      "buyerCompanyCode": "Company1",
+      "requestedBillingLocation": {
+        "companyCode": "Company1",
+        "locationCode": "Branch1"
+      }
+    };
+    childModel.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err).not.to.be.null;
+      done();
+    });
+  });
+
+  it('Validation Test Static String - Should fail to insert data when string equality returns true, then fails at main expression.', function (done) {
+    
+    var childModel = loopback.getModel(orderModel_SS, bootstrap.defaultContext);
+
+    var data = {
+      "buyerCompanyCode": "Company1",
+      "requestedBillingLocation": {
+        "companyCode": "SellerCompany",
+        "locationCode": "BranchSeller1"
+      }
+    };
+    childModel.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err).not.to.be.null;
+      done();
+    });
+  });
+
+  it('Validation Test Static String - Should insert successfully.', function (done) {
+    
+    var childModel = loopback.getModel(orderModel_SS, bootstrap.defaultContext);
+
+    var data = {
+      "buyerCompanyCode": "SellerCompany",
+      "requestedBillingLocation": {
+        "companyCode": "SellerCompany",
+        "locationCode": "BranchSeller2"
+      }
+    };
+    childModel.create(data, bootstrap.defaultContext, function (err, results) {
+      expect(err).to.be.null;
       done();
     });
   });
