@@ -23,6 +23,7 @@ var expect = chai.expect;
 var app = evapp.loopback();
 process.env.JWT_CONFIG = "{\"issuer\": \"mycompany.com\",\"audience\": \"mycompany.net\",\"secretOrKey\":\"secret\",\"keyToVerify\":\"client_id\"}";
 app.locals.enableJwt = true;
+process.env.CONSISTENT_HASH = 'true';
 
 options.clientAppRootDir = __dirname;
 var basePath = app.get('restApiRoot');

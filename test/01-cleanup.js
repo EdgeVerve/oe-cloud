@@ -12,7 +12,7 @@ var Db = require('mongodb').Db;
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
 var dbName = process.env.DB_NAME || 'db';
-var postgresDBName = process.env.DB_NAME || 'postgres';
+var postgresDBName = process.env.DB_NAME || 'db';
 
 describe('ZZ Final Cleanup', function () {
 	this.timeout(120001);

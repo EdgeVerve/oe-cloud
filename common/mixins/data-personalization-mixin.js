@@ -402,7 +402,7 @@ function dataPersonalizationAccess(ctx, next) {
   // If callContext.defaults is true then query will be not be formed with manual scope parameters.
   let finalQuery = {};
   const dataSourceName = ctx.Model.dataSource.connector.name;
-  const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
+  const dataSourceTypes = ['mongodb', 'postgresql', 'oe-connector-oracle'];
   if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
     let exeContextArray = convertToKeyValueString(scopeVars);
     let autoscopeArray = [];
@@ -650,7 +650,7 @@ function dataPersonalizationAfterAccess(ctx, next) {
         });
       }
       const dataSourceName = ctx.Model.dataSource.connector.name;
-      const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
+      const dataSourceTypes = ['mongodb', 'postgresql', 'oe-connector-oracle'];
       if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
         resultData = calculateScoreMongo(result, weights);
       } else {
@@ -692,8 +692,8 @@ function dataPersonalizationAfterAccess(ctx, next) {
               score = Math.max(score, parseInt(weights[element] || '1', 10));
               weight += parseInt(weights[element] || '1', 10);
             });
-            obj.score = score;
-            obj.weight = weight;
+            obj._score = score;
+            obj._weight = weight;
             resultData.push(obj);
           }
         });
@@ -702,10 +702,10 @@ function dataPersonalizationAfterAccess(ctx, next) {
       // Sort in descending order based on score .
       // resultData =_.orderBy(resultData, ['score', 'weight'], ['desc', 'desc']);  //Lodash v4.6.1
       // Lodash v3.10.1
-      resultData = _.sortByOrder(resultData, ['score', 'weight'], ['desc', 'desc']);
+      resultData = _.sortByOrder(resultData, ['_score', '_weight'], ['desc', 'desc']);
       resultData.forEach((obj) => {
-        delete obj.score;
-        delete obj.weight;
+        delete obj._score;
+        delete obj._weight;
       });
       if (ctx.query.scope && Object.keys(ctx.query.scope).length !== 0) {
         ctx.accdata = resultData;
@@ -792,8 +792,8 @@ var calculateScoreMongo = function calcScoreMongo(result, weights) {
       score = Math.max(score, parseInt(weights[element] || '1', 10));
       weight += parseInt(weights[element] || '1', 10);
     });
-    obj.score = score;
-    obj.weight = weight;
+    obj._score = score;
+    obj._weight = weight;
   });
   return result;
 };

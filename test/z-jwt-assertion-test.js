@@ -28,6 +28,20 @@ var roleDetail = {
     "name": "manager"
 }
 
+var jwtEnvConfig = {
+    'issuer': 'mycompany.com',
+    'audience': 'mycompany.net',
+    'secretOrKey': 'secret',
+    'keyToVerify': 'client_id'
+}
+
+var jwtEnvConfig2 = {
+    'issuer': 'mycompany.com',
+    'audience': 'mycompany.net',
+    'secretOrKey': 'tokenKey'
+}
+
+
 var testModel = {
     "properties": {
         "name": { "type": "string" }
@@ -562,6 +576,120 @@ describe(chalk.blue('JWT assertion test'), function () {
                 }
             });
     });
+    it('Test - Authorized app - Should give app access to test model with access only to manager ', function(done) {
+        // JWT
+        var jwtOptions = {
+            'iss': 'mycompany.com',
+            'iat': 1489992854,
+            'exp': 1837148054,
+            'aud': 'mycompany.net',
+            'client_id': 'abc123'
+        };
+        var jwt = createToken(jwtOptions);
+
+        var api = defaults(supertest(app));
+        api.get(bootstrap.basePath + '/managerTables')
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .set('x-jwt-assertion', jwt)
+            .set('tenant_id', 'test-tenant')
+            .set('username', 'rocky')
+            .set('email', 'rocky@email.com')
+            .set('roles', '["manager"]')
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+    it('Test - Authorized app - Should not give app access if trusted app not found ', function(done) {
+        // JWT
+        var jwtOptions = {
+            'iss': 'mycompany.com',
+            'iat': 1489992854,
+            'exp': 1837148054,
+            'aud': 'mycompany.net',
+            'client_id': 'abc456'
+        };
+        var jwt = createToken(jwtOptions);
+
+        var api = defaults(supertest(app));
+        api.get(bootstrap.basePath + '/managerTables')
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .set('x-jwt-assertion', jwt)
+            .set('tenant_id', 'test-tenant')
+            .set('username', 'rocky')
+            .set('email', 'rocky@email.com')
+            .set('roles', '["manager"]')
+            .expect(401)
+            .end(function(err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+    it('Test - Authorized app - Should not give app access to test model with unsupported role passed ', function(done) {
+        // JWT
+        var jwtOptions = {
+            'iss': 'mycompany.com',
+            'iat': 1489992854,
+            'exp': 1837148054,
+            'aud': 'mycompany.net',
+            'client_id': 'abc123'
+        };
+        var jwt = createToken(jwtOptions);
+
+        var api = defaults(supertest(app));
+        api.get(bootstrap.basePath + '/managerTables')
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .set('x-jwt-assertion', jwt)
+            .set('tenant_id', 'test-tenant')
+            .set('username', 'rocky')
+            .set('email', 'rocky@email.com')
+            .set('roles', '["supplier"]')
+            .expect(401)
+            .end(function(err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
+    it('Test - Authorized app - Should not give app access if username email not given in header ', function(done) {
+        // JWT
+        var jwtOptions = {
+            'iss': 'mycompany.com',
+            'iat': 1489992854,
+            'exp': 1837148054,
+            'aud': 'mycompany.net',
+            'client_id': 'abc123'
+        };
+        var jwt = createToken(jwtOptions);
+
+        var api = defaults(supertest(app));
+        api.get(bootstrap.basePath + '/managerTables')
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .set('x-jwt-assertion', jwt)
+            .set('tenant_id', 'test-tenant')
+            .set('roles', '["manager"]')
+            .expect(401)
+            .end(function(err, res) {
+                if (err) {
+                    done(err);
+                } else {
+                    done();
+                }
+            });
+    });
 
     it('Test - Authorized User - Should give User access even if app details not present but jwt username matches', function(done) {
         // JWT
@@ -624,7 +752,6 @@ describe(chalk.blue('JWT assertion test'), function () {
                 }
             });
     });
-
 });
 
 describe(chalk.blue('JWT assertion inherited model test'), function () {
