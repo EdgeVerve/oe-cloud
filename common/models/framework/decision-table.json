@@ -15,7 +15,7 @@
     "decisionRules": {
       "type": "String",
       "hidden": true,
-      "oracle":{
+      "oe-connector-oracle":{
           "dataType":"CLOB"
         }
     }

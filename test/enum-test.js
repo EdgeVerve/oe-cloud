@@ -112,21 +112,27 @@ describe(chalk.green('Enum Test'), function () {
         var mymodeldata = {
             code: 'KKK'
         };
+        var context = {
+          options: bootstrap.defaultContext
+        };
         var mymodelobj = new mymodel(mymodeldata);
         mymodelobj.isValid(function (ret) {
             expect(ret).to.be.equal(false);
             done();
-        }, bootstrap.defaultContext);
+        }, context);
     });
     it('should should return valid model for valid enum', function (done) {
         var mymodel = loopback.findModel(parentModelName, bootstrap.defaultContext);
         var mymodeldata = {
             code: 'Qu'
         };
+        var context = {
+          options: bootstrap.defaultContext
+        };
         var mymodelobj = new mymodel(mymodeldata);
         mymodelobj.isValid(function (ret) {
             expect(ret).to.be.equal(true);
             done();
-        }, bootstrap.defaultContext);
+        }, context);
     });
 });

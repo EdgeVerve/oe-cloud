@@ -22,7 +22,7 @@ module.exports = {
   },
   'db': {
     'name': 'db',
-    'connector': 'oracle',
+    'connector': 'oe-connector-oracle',
     'database': oracleSID,
     'host': oracleHost,
     'port': oraclePort,
