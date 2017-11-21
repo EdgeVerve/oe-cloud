@@ -230,7 +230,7 @@
         "dataSource": "db",
         "public": false
     },
-    "EventHistory": {
+    "SavePoint": {
         "public": true,
         "dataSource": "db"
     },
