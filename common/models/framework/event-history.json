@@ -7,7 +7,8 @@
     "idInjection": false,
     "properties": {
         "hostName": {
-            "type": "string"
+            "type": "string",
+            "default": "DEFAULT_HOST_NAME"
         },
         "timestamp": {
             "type": "Date"
