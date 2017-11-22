@@ -15,8 +15,8 @@ var async = require('async');
 const serviceName = process.env.APP_IMAGE_NAME;
 const domainName = process.env.DOMAIN_NAME;
 
-//const serviceHost = serviceName + '.' + domainName;
-const baseUrl = 'http://localhost:3001' //'https://' + serviceHost;
+const serviceHost = serviceName + '.' + domainName;
+const baseUrl = 'https://' + serviceHost;
 
 const johnLoginData = {'username': 'john', 'password': 'johnpass'};
 
