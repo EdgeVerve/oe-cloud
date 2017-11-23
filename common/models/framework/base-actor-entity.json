@@ -10,7 +10,9 @@
   {
     "stateId": {
           "type": "String"          
-      }
+      },
+      "noBackgroundProcess": false,
+      "noCacheTime": 30000
   },
   "options": {
     "disableManualPersonalization": true,

@@ -63,38 +63,4 @@ describe(chalk.blue('misclaneous-test'), function() {
             }
         });
     });
-
-	
-    it('getinfo', function(done) {
-        var api = defaults(supertest(bootstrap.app));
-        var url = baseUrl + '/dev/getinfo?access_token='  + accessToken;
-        api.get(url)
-        .set('Accept', 'application/json')
-        .expect(200)
-        .end(function(err, result) {
-            if (err) {
-                done(err);
-            } else {
-                expect(result.body).not.to.be.undefined;
-                expect(result.body.callContext).not.to.be.undefined;
-                done();
-            }
-        });
-    });
-   
-    it('checkACL', function(done) {
-        var api = defaults(supertest(bootstrap.app));
-        var url = baseUrl + '/dev/checkACL/Literal/create?access_token='  + accessToken;
-        api.get(url)
-        .set('Accept', 'application/json')
-        .expect(200)
-        .end(function(err, result) {
-            if (err) {
-                done(err);
-            } else {
-                expect(result.body).not.to.be.undefined;
-                done();
-            }
-        });
-    });
 });
