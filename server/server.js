@@ -234,18 +234,15 @@ function finalBoot(appinstance, options, cb) {
         appinstance.get('remoting').errorHandler = {
           handler: function remotingErrorHandler(err, req, res, defaultHandler) {
             /* res.status(err.statusCode || err.status);
-                                                            var finalError = {};
-                                                            finalError.message = err.message || err.toString();
-                                                            var errors = [];
-                                                            errors = appinstance.buildError(err, req.callContext);
-                                                            finalError.txnId = req.callContext ? req.callContext.txnId : '';
-                                                            finalError.requestId = req.callContext ? req.callContext.requestId : '';
-                                                            finalError.errors = errors;
-                                                            log.error(options, 'error :', JSON.stringify(finalError));*/
-            var error = {};
-            error.message = err.message;
-            error.stack = err.stack;
-            log.error(options, 'error :', JSON.stringify(error));
+                                                var finalError = {};
+                                                finalError.message = err.message || err.toString();
+                                                var errors = [];
+                                                errors = appinstance.buildError(err, req.callContext);
+                                                finalError.txnId = req.callContext ? req.callContext.txnId : '';
+                                                finalError.requestId = req.callContext ? req.callContext.requestId : '';
+                                                finalError.errors = errors;
+                                                log.error(options, 'error :', JSON.stringify(finalError));*/
+            log.error(req.callContext, 'error :', JSON.stringify(err));
             defaultHandler(err);
           }
         };
@@ -302,6 +299,7 @@ if (require.main === module) {
   // When any application uses this framework, it must set apphome variable in its boot directory
   lbapp.locals.apphome = __dirname;
   lbapp.locals.standAlone = true;
+  process.env.CONSISTENT_HASH = 'true';
 
   // Checking for app-list.json in app home directory and setting providerJson using
   // value provided by loadAppProviders function in merge-util

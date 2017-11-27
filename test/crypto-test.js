@@ -133,7 +133,7 @@ describe('crypto Test', function () {
                     });
                 }
             });
-        } else if (dataSourceName === 'oracle') {
+        } else if (dataSourceName === 'oe-connector-oracle') {
             var oracledb = require('oracledb');
             oracledb.getConnection({
                 "password": oraclePassword,

@@ -30,6 +30,9 @@ module.exports = function (BaseJournalEntity) {
         }
         operationContext.activity.seqNum = validationObj.seqNum;
         startup = startup + operationContext.activity.modelName + operationContext.activity.entityId + '$';
+        if (validationObj.updatedActor) {
+          operationContext.activity.updatedActor = validationObj.updatedActor;
+        }
         return callback();
       });
     }, function (err) {
@@ -56,6 +59,9 @@ module.exports = function (BaseJournalEntity) {
       }
       operationContext.activity.seqNum = validationObj.seqNum;
       startup = operationContext.activity.modelName + operationContext.activity.entityId;
+      if (validationObj.updatedActor) {
+        operationContext.activity.updatedActor = validationObj.updatedActor;
+      }
       return next(null, startup);
     });
   };
@@ -177,14 +183,16 @@ module.exports = function (BaseJournalEntity) {
         }
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
-          if (err && err.retriable === false) {
+          if (err) {
+            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
+              var actor = ctx.hookState.actorInstancesMap[key];
+              if (actor.constructor.settings.noBackgroundProcess) {
+                actor.clearActorMemory(actor, ctx.options, function () {
+
+                });
+              }
+            });
             next(err);
-          } else if (err) {
-            if (instance.fromPending === true) {
-              return next(err);
-            }
-            // return writePending(ctx, next);
-            return next(err);
           } else {
             return next();
           }
