@@ -318,7 +318,7 @@ module.exports = function (BaseActorEntity) {
       } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
         self.nonAtomicInstructions(state.__data.stateObj, message.activity);
       }
-      envelope.processedSeqNum = Math.max(message.seqNum, envelope.processedSeqNum);
+      envelope.processedSeqNum = message.seqNum;
       message.isProcessed = true;
       return cb();
     };
@@ -337,10 +337,10 @@ module.exports = function (BaseActorEntity) {
       } else if (!result) {
         message.retryCount += 1;
         if (message.retryCount > self.MAX_RETRY_COUNT) {
-          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
+          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message,' after max retry');
           message.isProcessed = true;
         }
-        return cb(new Error('no transaction for message:' + message.seqNum));
+        return cb(new Error('no journal for message:' + message.seqNum));
       } else if (result) {
         actualProcess(cb);
       }
