@@ -25,10 +25,10 @@ module.exports = function JsFeelInit(app, cb) {
   jsFeel.init(settings);
   const jsFeelRelation = app.get('jsFeelRelation');
   const jsFeelExternalFunction = app.get('jsFeelExternalFunction');
-  if (!jsFeelRelation.disabled) {
+  if (jsFeelRelation && !jsFeelRelation.disabled) {
     jsFeel.use(jsFeelRelationsPlugin);
   }
-  if (!jsFeelExternalFunction.disabled) {
+  if (jsFeelExternalFunction && !jsFeelExternalFunction.disabled) {
     const path = jsFeelExternalFunction.path;
     const externalFns = path && require(`../../${path}`);
     externalFns && jsFeel.use(jsFeelExtFnPlugin(externalFns));
