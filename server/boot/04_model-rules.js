@@ -184,7 +184,7 @@ function executeDecisionTableRules(modelCtx, model, next) {
     if (err) {
       // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
       log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
-      next(err);
+      return next(err);
     }
     // Validating results is array and it contains the first element and defaultRules
     if (results && results instanceof Array && results[0] && results[0].defaultRules) {

@@ -383,6 +383,12 @@ module.exports = function uiComponent(UIComponent) {
             });
           });
         }
+        if (field.validateWhen) {
+          Object.keys(field.validateWhen).forEach(function (validationRule) {
+            delete field[validationRule];
+          });
+          delete field.validateWhen;
+        }
       });
 
       var relations = model.relations || {};
