@@ -519,15 +519,12 @@ module.exports = function (BaseActorEntity) {
   }
 
   var journalFind = function (model, ds, query, options, cb) {
-    /* */
     if (ds.name === 'loopback-connector-postgresql') {
       var modefiedQuery = query.replace(/TRANSMODEL/g, '\"' + model.modelName.toLowerCase() + '\"');
       ds.connector.query(modefiedQuery, [], options, cb);
     } else {
       model.find(query, options, cb);
     }
-    /* */
-    //model.find(query, options, cb);
   };
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
