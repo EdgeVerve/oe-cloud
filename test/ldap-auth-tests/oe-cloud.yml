@@ -49,7 +49,7 @@ services:
       ROUTER_HOST: ${ROUTER}
       NODE_ENV: "env"
       DATASOURCES: '{"db": {"host": "mongo","port": 27017,"url": "mongodb://mongo:27017/db","database": "db","name": "db","connector": "mongodb","connectionTimeout": 50000}}'
-      PROVIDERS: '{"ldap": {"provider": "ldap","module": "passport-ldapauth","authScheme": "ldap","server": {"url": "ldap://ldap:389","bindDN":"cn=admin,dc=example,dc=org","bindCredentials": "admin","searchBase":"cn=israel,ou=users,dc=example,dc=org","searchFilter": "(uid={{"{{username}}"}})"},"authPath": "/auth/ldap","setAccessToken": true,"json": true, "session":false}}'
+      PROVIDERS: '{"ldap": {"provider": "ldap","module": "passport-ldapauth","authScheme": "ldap","server": {"url": "ldap://ldap:389","bindDN":"cn=admin,dc=example,dc=org","bindCredentials": "admin","searchBase":"dc=example,dc=org","searchAttributes":["memberOf","cn","mail","givenName","sn","dn","uid"],"searchFilter": "(uid={{"{{username}}"}})"},"authPath": "/auth/ldap","setAccessToken": true,"json": true, "session":false}}'
 
     extra_hosts:
       - "${APP_IMAGE_NAME}.${DOMAIN_NAME}:${HAPROXY}"
@@ -58,7 +58,7 @@ services:
       - router_network
       
   ldap:
-    image: $REGISTRY/openldap:sample
+    image: $REGISTRY/openldap:cassibank
     networks:
       - ${NETWORK_NAME}
 
