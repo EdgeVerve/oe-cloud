@@ -39,3 +39,4 @@ out/
 .vimrc
 *.heapsnapshot
 *.zip
+/common/models/test

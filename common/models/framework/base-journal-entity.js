@@ -177,7 +177,6 @@ module.exports = function (BaseJournalEntity) {
       return next(err);
     }
 
-    ctx.options.journalProcessStartTime = new Date();
     var instance = ctx.instance;
     instance.performBusinessValidations(ctx.options, function (err) {
       if (err) {
