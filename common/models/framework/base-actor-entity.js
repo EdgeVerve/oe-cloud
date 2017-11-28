@@ -525,7 +525,7 @@ module.exports = function (BaseActorEntity) {
     } else {
       model.find(query, options, cb);
     }
-  }
+  };
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
     var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
