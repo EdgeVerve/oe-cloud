@@ -519,12 +519,15 @@ module.exports = function (BaseActorEntity) {
   }
 
   var journalFind = function (model, ds, query, options, cb) {
+    /*
     if (ds.name === 'loopback-connector-postgresql') {
       var modefiedQuery = query.replace(/TRANSMODEL/g, model.modelName.toLowerCase());
       ds.connector.query(modefiedQuery, [], options, cb);
     } else {
       model.find(query, options, cb);
     }
+    */
+    model.find(query, options, cb);
   };
 
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
@@ -559,6 +562,7 @@ module.exports = function (BaseActorEntity) {
             ]
           }
         };
+      /*
       } else if (ds.name === 'loopback-connector-postgresql') {
         query = 'select * from TRANSMODEL where id in ( select id from ' +
         '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s FROM ' +
@@ -567,6 +571,7 @@ module.exports = function (BaseActorEntity) {
         ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
         ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\'' +
         ')';
+      */
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
       }
