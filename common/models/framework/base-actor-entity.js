@@ -150,6 +150,9 @@ module.exports = function (BaseActorEntity) {
     context.activity.entityId = this.id;
     context.journalEntity = {};
     context.journalEntity.id = '';
+    if (!options.ctx) {
+      options.ctx = {};
+    }
     options.ctx.noInstanceCache = true;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
@@ -488,8 +491,8 @@ module.exports = function (BaseActorEntity) {
     for (var i = 0; i < array.length; i++) {
       var currJournal = array[i];
       if (currJournal.id !== filterBy.journalId) {
-        currJournal.atomicActivitiesList = filterActivities(currJournal.atomicActivitiesList, filterBy);
-        currJournal.nonAtomicActivitiesList = filterActivities(currJournal.nonAtomicActivitiesList, filterBy);
+        currJournal.atomicActivitiesList = filterActivities(currJournal.atomicActivitiesList ? currJournal.atomicActivitiesList : currJournal.atomicactivitieslist, filterBy);
+        currJournal.nonAtomicActivitiesList = filterActivities(currJournal.nonAtomicActivitiesList ? currJournal.nonAtomicActivitiesList : currJournal.nonatomicactivitieslist, filterBy);
         if (currJournal.atomicActivitiesList.length > 0 || currJournal.nonAtomicActivitiesList.length > 0) {
           filteredArray.push(currJournal);
         }
@@ -515,6 +518,15 @@ module.exports = function (BaseActorEntity) {
     return filterBy;
   }
 
+  var journalFind = function (model, ds, query, options, cb) {
+    if (ds.name === 'loopback-connector-postgresql') {
+      var modefiedQuery = query.replace(/TRANSMODEL/g, '\"' + model.modelName.toLowerCase() + '\"');
+      ds.connector.query(modefiedQuery, [], options, cb);
+    } else {
+      model.find(query, options, cb);
+    }
+  };
+
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
     var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
     envelope.msg_queue = [];
@@ -537,7 +549,8 @@ module.exports = function (BaseActorEntity) {
       }
 
       var query = {};
-      if (self.getDataSource(options).name === 'mongodb') {
+      var ds = self.getDataSource(options);
+      if (ds.name === 'mongodb') {
         query = {
           where: {
             or: [
@@ -546,12 +559,23 @@ module.exports = function (BaseActorEntity) {
             ]
           }
         };
+      } else if (ds.name === 'loopback-connector-postgresql') {
+        query = 'select * from TRANSMODEL where id in ( select id from ' +
+        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s FROM ' +
+        ' TRANSMODEL ) as i ' +
+        ' where cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
+        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\'' +
+        ')';
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
       }
       async.each(loopbackModelsCollection, function (model, asyncCb) {
-        model.find(query, options, function (err, returnedInstances) {
+        journalFind(model, ds, query, options, function (err, returnedInstances) {
           if (err) {
+            if (err.message.includes(' \"' + model.modelName.toLowerCase() + '\" does not exist')) {
+              return asyncCb();
+            }
             log.error(options, 'err in actor startup is ', err);
             return asyncCb(err);
           } else if (returnedInstances.length === 0) {
