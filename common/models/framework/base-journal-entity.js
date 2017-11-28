@@ -215,7 +215,10 @@ module.exports = function (BaseJournalEntity) {
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
     async.each(activities, function (activity, cb) {
       var options = ctx.options;
-      var actor = ctx.hookState.actorInstancesMap[activity.entityId];
+      var actor;
+      if (ctx.hookState && ctx.hookState.actorInstancesMap && ctx.hookState.actorInstancesMap[activity.entityId]) {
+        actor = ctx.hookState.actorInstancesMap[activity.entityId];
+      }
       if (actor) {
         actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {
