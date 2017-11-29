@@ -304,7 +304,7 @@ describe('failsafe-observer-mixin', function () {
         });
     });
 
-    it('recovery should end with RecoveryFinished in the db', function (done) {
+    xit('recovery should end with RecoveryFinished in the db', function (done) {
         var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
