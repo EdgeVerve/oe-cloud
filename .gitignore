@@ -37,3 +37,6 @@ out/
 /.vs/config/applicationhost.config
 /oe.njsperf
 .vimrc
+*.heapsnapshot
+*.zip
+/common/models/test

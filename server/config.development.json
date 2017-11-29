@@ -4,9 +4,7 @@
   "port": 3000,
   "cookieSecret": "246bace2-9876-4321-1234-0ae8160b07c8",
   "remoting": {
-    "context": {
-      "enableHttpContext": true
-    },
+    "context": false,
     "rest": {
       "normalizeHttpPath": false,
       "xml": false

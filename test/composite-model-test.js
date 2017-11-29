@@ -44,6 +44,9 @@ describe(chalk.blue('Composite Model test'), function () {
                 'name': {
                     'type': 'string',
                     'required': true
+                },
+                'contact': {
+                    'type': 'object'
                 }
             },
             'relations': {
@@ -92,6 +95,9 @@ describe(chalk.blue('Composite Model test'), function () {
                         'city': {
                             'type': 'string',
                             'required': true
+                        },
+                        'state': {
+                            'type': 'object'
                         }
                     },
                     relations: {
@@ -428,11 +434,11 @@ describe(chalk.blue('Composite Model test'), function () {
             }
             expect(results).to.have.property('name');
             expect(results).to.have.property('id');
-            expect(results).to.have.property('address');
+            expect(results.__data).to.have.property('address');
             expect(results.name).to.equal('Michael');
-            expect(results.address[0]).to.have.property('city');
-            expect(results.address[0].city).to.equal('San Jose');
-            expect(results.address[1].city).to.equal('New York');
+            expect(results.__data.address[0]).to.have.property('city');
+            expect(results.__data.address[0].city).to.equal('San Jose');
+            expect(results.__data.address[1].city).to.equal('New York');
             done();
         });
     });
@@ -494,16 +500,16 @@ describe(chalk.blue('Composite Model test'), function () {
             expect(results[0]).to.have.property('id');
             expect(results[0]).to.have.property('address');
             expect(results[0].name).to.equal('Tom');
-            expect(results[0].address[0]).to.have.property('city');
-            expect(results[0].address[0].city).to.equal('Denver');
-            expect(results[0].address[1].city).to.equal('Frankfort');
+            expect(results[0].__data.address[0]).to.have.property('city');
+            expect(results[0].__data.address[0].city).to.equal('Denver');
+            expect(results[0].__data.address[1].city).to.equal('Frankfort');
             expect(results[1]).to.have.property('name');
             expect(results[1]).to.have.property('id');
             expect(results[1]).to.have.property('address');
             expect(results[1].name).to.equal('Harry');
-            expect(results[1].address[0]).to.have.property('city');
-            expect(results[1].address[0].city).to.equal('London');
-            expect(results[1].address[1].city).to.equal('Paris');
+            expect(results[1].__data.address[0]).to.have.property('city');
+            expect(results[1].__data.address[0].city).to.equal('London');
+            expect(results[1].__data.address[1].city).to.equal('Paris');
             done();
         });
     });
@@ -606,9 +612,9 @@ describe(chalk.blue('Composite Model test'), function () {
             expect(results).to.have.property('id');
             expect(results).to.have.property('address');
             expect(results.name).to.equal('Bala');
-            expect(results.address[0]).to.have.property('city');
-            expect(results.address[0].city).to.equal('Brisbon');
-            expect(results.address[1].city).to.equal('Vatican');
+            expect(results.__data.address[0]).to.have.property('city');
+            expect(results.__data.address[0].city).to.equal('Brisbon');
+            expect(results.__data.address[1].city).to.equal('Vatican');
             done();
         });
     });
@@ -630,6 +636,62 @@ describe(chalk.blue('Composite Model test'), function () {
             expect(err).not.null;
             done();
         });
+    });
+
+    it('implicit composit post should fail and throw the error when improper parent data is passed to parent model', function (done) {
+        var parentModel = loopback.getModel('Customer', callContext);
+        parentModel.observe('before save', function (ctx, next) {
+            var data = ctx.instance || ctx.data;
+            if (data.contact.mobile)
+                return next();
+            return next();
+        });
+
+        var postData = {
+            'name': 'Kirito',
+            'id': 'K7D3',
+            'address': [{
+                'city': 'MoonLand',
+                'id': 'X22'
+            }]
+        };
+        parentModel.create(postData, callContext, function (err, res) {
+            if (err) {
+                done();
+            } else {
+                done('should fail and throw the error when improper parent data is passed on parent model');
+            }
+        });
+
+    });
+
+    it('implicit composit post should fail and throw the error when improper child data is passed to parent model', function (done) {
+        var parentModel = loopback.getModel('Customer', callContext);
+        var childModel = loopback.getModel('CustomerAddress', callContext);
+        childModel.observe('before save', function (ctx, next) {
+            var data = ctx.instance || ctx.data;
+            if (data.state.capital)
+                return next();
+            return next();
+        });
+
+        var postData = {
+            'name': 'Asuna',
+            'contact': { 'mobile': 'HIDDEN_NUMBER' },
+            'id': 'K7D4',
+            'address': [{
+                'city': 'SkyWalk',
+                'id': 'X42'
+            }]
+        };
+        parentModel.create(postData, callContext, function (err, res) {
+            if (err) {
+                done();
+            } else {
+                done('should fail and throw the error when improper child data is passed on parent model');
+            }
+        });
+
     });
 
 });
