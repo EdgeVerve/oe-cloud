@@ -388,6 +388,9 @@ module.exports = function BaseUser(BaseUser) {
       jwtOpts.audience = jwtConfig.audience;
       jwtOpts.expiresIn = accessToken.ttl;
       var secretOrPrivateKey = jwtConfig.secretOrKey;
+      // Adding userId information, which is used
+      // in adding Principal of type USER to AccessContext
+      accessToken.userId = self.id;
       jwt.sign(accessToken, secretOrPrivateKey, jwtOpts, function jwtSignCb(err, token) {
         if (err) {
           log.error(options, 'JWT signing error ', err);
