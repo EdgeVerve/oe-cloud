@@ -561,11 +561,15 @@ module.exports = function (BaseActorEntity) {
         };
       } else if (ds.name === 'loopback-connector-postgresql') {
         query = 'select * from TRANSMODEL where id in ( select id from ' +
-        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s FROM ' +
+        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s, ' +
+        ' nonatomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as t FROM ' +
         ' TRANSMODEL ) as i ' +
-        ' where cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' where (cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
         ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
-        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\'' +
+        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\') or ' +
+        ' (cast( nonatomicactivitieslist[t]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' and nonatomicactivitieslist[t]->>\'modelName\' = \'' + envelope.modelName + '\'' +
+        ' and nonatomicactivitieslist[t]->>\'entityId\' =  \'' + envelope.actorId + '\')' +
         ')';
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
