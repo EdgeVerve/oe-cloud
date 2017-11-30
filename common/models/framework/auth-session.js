@@ -42,6 +42,9 @@ module.exports = function AuthSessionFn(AuthSession) {
           if (err) {
             cb(err);
           } else {
+            // Setting "id" which will be retrieved in post-auth-context-populator
+            // for setting callContext.accessToken
+            payload.id = id;
             cb(null, new AuthSession(payload));
           }
         });

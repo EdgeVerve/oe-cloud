@@ -6,8 +6,7 @@
  */
 
 var XLSX = require('xlsx');
-var jsFeel = require('js-feel');
-var feelRelationsPlugin = require('../../../lib/feel-relations-plugin');
+var jsFeel = require('js-feel')();
 var request = require('request');
 var utils = require('../../../lib/common/util');
 var assert = require('assert');
@@ -16,7 +15,7 @@ var logger = require('oe-logger');
 var log = logger('decision-table');
 var getError = require('../../../lib/common/error-utils').getValidationError;
 var delimiter = '&SP';
-jsFeel.use(feelRelationsPlugin);
+
 const dTable = jsFeel.decisionTable;
 
 module.exports = function decisionTableFn(decisionTable) {

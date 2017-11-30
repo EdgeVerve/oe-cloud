@@ -18,7 +18,7 @@ cache:
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 
 variables:
-  USER_BROADCASTER: "false"
+  USE_BROADCASTER: "false"
   #DOMAIN_NAME: oecloud.local
   REGISTRY: registry.${DOMAIN_NAME}
 
