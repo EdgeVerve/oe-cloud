@@ -58,7 +58,7 @@ module.exports = function ModelValidations(Model) {
     }
     options = context.options;
     // check if validations are to be executed, if not simply return the done callback.
-    if (options.skipValidations) {
+    if (options && options.skipValidations) {
       return process.nextTick(function skipValidationCb() {
         done(true);
       });
