@@ -402,7 +402,7 @@ module.exports = function (BaseActorEntity) {
           actorData = self.atomicInstructions(actorData, message);
         } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
           actorData = self.nonAtomicInstructions(actorData, message);
-        }          
+        }
       }
     }
     return cb(null, actorData);
