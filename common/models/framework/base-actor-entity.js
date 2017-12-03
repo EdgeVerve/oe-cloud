@@ -163,7 +163,7 @@ module.exports = function (BaseActorEntity) {
   };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
-    this.calculatePendingBalance(envelope, options, function (err, actorData) {
+    this.processPendingStatus(envelope, options, function (err, actorData) {
       if (err) {
         return cb(err);
       }
@@ -213,7 +213,7 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = ctx.envelope;
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -295,7 +295,7 @@ module.exports = function (BaseActorEntity) {
     var actorCopy;
     if (this.constructor.settings.noBackgroundProcess) {
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -392,22 +392,23 @@ module.exports = function (BaseActorEntity) {
 
   BaseActorEntity.prototype.MAX_RETRY_COUNT = 10;
 
-  BaseActorEntity.prototype.processPendingMessage = function (message, atomicAmount) {
-    return atomicAmount;
-  };
 
   var actualCalculate = function (envelope, actorData, self, options, cb) {
     var messages = envelope.msg_queue;
     for (var i = 0; i < messages.length; i++) {
       var message = messages[i];
       if (envelope.isCurrentlyProcessing || !message.isProcessed) {
-        actorData = self.processPendingMessage(message, actorData);
+        if (self.atomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.atomicInstructions(actorData, message);
+        } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.nonAtomicInstructions(actorData, message);
+        }          
       }
     }
     return cb(null, actorData);
   };
 
-  BaseActorEntity.prototype.calculatePendingBalance = function (envelope, options, cb) {
+  BaseActorEntity.prototype.processPendingStatus = function (envelope, options, cb) {
     var self = this;
 
     if (self.constructor.settings.noBackgroundProcess && envelope.updatedActor) {
