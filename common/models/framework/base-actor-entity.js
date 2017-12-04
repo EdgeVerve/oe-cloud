@@ -362,13 +362,6 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  BaseActorEntity.prototype.removeMessage = function (message) {
-    var index = this.msg_queue.indexOf(message);
-    if (index > -1) {
-      this.msg_queue.splice(index, 1);
-    }
-  };
-
   var actualBackgroundProcess = function (self, envelope, messages, stateObj, options, actorCb) {
     async.eachSeries(messages, function (message, cb) {
       self.processMessage(envelope, message, stateObj, options, cb);
