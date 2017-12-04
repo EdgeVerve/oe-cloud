@@ -6,7 +6,7 @@
  */
 
 // var XLSX = require('xlsx');
-var feel = require('js-feel');
+var feel = require('js-feel')();
 // var DL = feel.decisionLogic;
 var DS = feel.decisionService;
 

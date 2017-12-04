@@ -18,7 +18,17 @@ module.exports = function (BaseJournalEntity) {
     }
     var startup = '';
 
-    async.eachSeries(operationContexts, function (operationContext, callback) {
+    var seen = {};
+    var hasDuplicates = operationContexts.some(function (currentObject) {
+      return seen.hasOwnProperty(currentObject.actorEntity.id) || (seen[currentObject.actorEntity.id] = false);
+    });
+
+    var asyncFunc  = async.each;
+    if (hasDuplicates) {
+      asyncFunc = async.eachSeries;
+    }
+    // async.eachSeries(operationContexts, function (operationContext, callback) {
+    asyncFunc(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
         if (err) {
@@ -167,20 +177,11 @@ module.exports = function (BaseJournalEntity) {
       return next(err);
     }
 
-    ctx.options.journalProcessStartTime = new Date();
     var instance = ctx.instance;
     instance.performBusinessValidations(ctx.options, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
-        if (err && err.retriable === false) {
-          next(err);
-        } else if (err) {
-          if (instance.fromPending === true) {
-            return next(err);
-          }
-          // return writePending(ctx, next);
-          return next(err);
-        }
+        next(err);
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
           if (err) {
@@ -213,7 +214,10 @@ module.exports = function (BaseJournalEntity) {
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
     async.each(activities, function (activity, cb) {
       var options = ctx.options;
-      var actor = ctx.hookState.actorInstancesMap[activity.entityId];
+      var actor;
+      if (ctx.hookState && ctx.hookState.actorInstancesMap && ctx.hookState.actorInstancesMap[activity.entityId]) {
+        actor = ctx.hookState.actorInstancesMap[activity.entityId];
+      }
       if (actor) {
         actor.journalSaved(activity.toObject(), options, function (err) {
           if (err) {

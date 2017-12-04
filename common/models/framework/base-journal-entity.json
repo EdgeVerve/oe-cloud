@@ -4,9 +4,6 @@
   "idInjection": true,
   "description": "Enable to perform several activities togather in a way that all will succeed or fail",
   "properties": {
-    "fromPending": {
-      "type": "boolean"
-    },
     "startup": {
       "type": "string",
       "index": true
