@@ -40,7 +40,7 @@
     "session:after": {},
     "auth": {
         "./middleware/jwt-assertion": {
-            "enabled": true
+            "enabled": false
         }
     },
     "auth:after": {

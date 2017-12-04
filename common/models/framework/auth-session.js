@@ -89,7 +89,8 @@ module.exports = function AuthSessionFn(AuthSession) {
     // https://github.com/strongloop/loopback/issues/1326
     if (options.searchDefaultTokenKeys !== false) {
       params = params.concat(['access_token']);
-      headers = headers.concat(['X-Access-Token', 'authorization']);
+      // Adding 'x-jwt-assertion' to headers for supporting JWT Assertion.
+      headers = headers.concat(['X-Access-Token', 'authorization', 'x-jwt-assertion']);
       cookies = cookies.concat(['access_token', 'authorization']);
     }
 
