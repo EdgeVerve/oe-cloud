@@ -192,7 +192,7 @@ module.exports = function (BaseActorEntity) {
           if (err) {
             return releaseLockCb(err);
           }
-          return releaseLockCb();
+          return releaseLockCb(null, result);
         });
       }, function (err, ret) {
         if (err) {
