@@ -188,7 +188,7 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = newContext.envelope;
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        this.getActorFromMemory(envelope, options, function (err, result) {
+        self.getActorFromMemory(envelope, options, function (err, result) {
           if (err) {
             return releaseLockCb(err);
           }
