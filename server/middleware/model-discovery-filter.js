@@ -34,7 +34,6 @@ module.exports = function ModelDiscoveryFilter(options) {
     if (model) {
       req.url = req.url.replace(savedName, model.pluralModelName);
       req.originalUrl = req.originalUrl.replace(savedName, model.pluralModelName);
-      return next();
     }
     return next();
   };

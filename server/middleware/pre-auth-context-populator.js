@@ -7,7 +7,6 @@
 var log = require('oe-logger')('context-populator-filter');
 var camelCase = require('camelcase');
 var uuid = require('node-uuid');
-
 /**
  * This middleware sets callContext into Request Object
  *
@@ -89,8 +88,8 @@ module.exports = function preAuthContextPopulator(options) {
 
     // From Query Parameters only few things should be overridable
     // on top of headers, so have a positive list for these
-    var queryKeys = Object.keys(queryStringContext);
-    queryKeys.map(function queryKeysMapFn(key, index) {
+    // var queryKeys = Object.keys(queryStringContext);
+    queryStringContext.map(function queryKeysMapFn(key, index) {
       if (req.query && req.query[key]) {
         setContextValue(callContext, key, req.query);
       }
@@ -105,10 +104,10 @@ module.exports = function preAuthContextPopulator(options) {
     if (!callContext.ctx.requestId && req.headers[requestKey]) {
       callContext.ctx.requestId = req.headers[requestKey];
     }
-
-    Object.keys(callContext.ctx).map(function callcontextKeysMapFn(key, index) {
-      callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
-    });
+    // this check happens in data personalization, default is taken 1
+    // Object.keys(callContext.ctx).map(function callcontextKeysMapFn(key, index) {
+    //     callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
+    // });
 
     req.callContext = callContext;
     log.debug(req.callContext, 'context setting as  = ', callContext);
