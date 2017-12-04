@@ -161,6 +161,47 @@ module.exports = function (BaseActorEntity) {
       return cb(null, ctx.envelope.noCacheTime);
     });
   };
+  BaseActorEntity.prototype.getEnvelopeState = function getEnvelopeState(id, options, cb) {
+    var self = this;
+    self.getById(id, options, function (err, actor) {
+      if (err) {
+        return cb(err);
+      }
+      actor.balanceProcess(options, cb);
+    });
+  };
+  BaseActorEntity.prototype.balanceProcess = function balanceProcess(options, cb) {
+    var self = this;
+    var context = {};
+    context.actorEntity = self;
+    context.activity = {};
+    context.activity.modelName = self._type;
+    context.activity.entityId = self.id;
+    context.journalEntity = {};
+    context.journalEntity.id = '';
+    if (!options.ctx) {
+      options.ctx = {};
+    }
+    actorPool.getOrCreateInstance(context, options, function (err, newContext) {
+      if (err) {
+        return cb(err);
+      }
+      var envelope = newContext.envelope;
+      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+        this.getActorFromMemory(envelope, options, function (err, result) {
+          if (err) {
+            return releaseLockCb(err);
+          }
+          return releaseLockCb();
+        });
+      }, function (err, ret) {
+        if (err) {
+          return cb(err);
+        }
+        return cb(null, ret);
+      });
+    });
+  };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
     this.calculatePendingBalance(envelope, options, function (err, actorData) {
