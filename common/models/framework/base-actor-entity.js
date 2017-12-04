@@ -419,11 +419,10 @@ module.exports = function (BaseActorEntity) {
       if (err) {
         return cb(err);
       }
-      var actorResult = actualCalculate(envelope, state.__data.stateObj, self, options, cb);
+      actualCalculate(envelope, state.__data.stateObj, self, options, cb);
       if (self.constructor.settings.noBackgroundProcess && !envelope.updatedActor) {
-        envelope.updatedActor = JSON.parse(JSON.stringify(actorResult));
+        envelope.updatedActor = JSON.parse(JSON.stringify(state.__data.stateObj));
       }
-      return actorResult;
     });
   };
 
