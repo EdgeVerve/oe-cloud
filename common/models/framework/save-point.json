@@ -1,5 +1,6 @@
 {
   "name": "SavePoint",
+  "plural": "SavePoints",    
   "base": "PersistedModel",
   "description": "Represents a point in time where all after save operations finished successfully for current host",
   "idInjection": true,
