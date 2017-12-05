@@ -8,7 +8,7 @@
 const mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 const toRegExp = require('loopback-datasource-juggler/lib/utils').toRegExp;
 const _ = require('lodash');
-const uuid = require('node-uuid');
+const uuidv4 = require('uuid/v4');
 const async = require('async');
 const ROOT_PATH = ',root,';
 module.exports = function DataHierarchyMixin(Model) {
@@ -352,7 +352,7 @@ function setValueToHierarchyScope(ctx, context, data, _hierarchyScope, key, cb) 
   if (modelName.toLowerCase().concat('Hierarchy') === key) {
     if (ctx.isNewInstance && data.id !== 'root') {
       if (!data.id) {
-        data.id = uuid.v4();
+        data.id = uuidv4();
       }
       if (data.parentId) {
         ctx.Model.findById(data.parentId, ctx.options, (err, parent) => {

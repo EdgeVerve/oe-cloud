@@ -17,7 +17,7 @@
 
 var bootstrap = require('./bootstrap');
 var chai = bootstrap.chai;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var expect = chai.expect;
 var app = bootstrap.app;
 var models = bootstrap.models;
@@ -47,7 +47,7 @@ describe('Caching Test', function () {
 
 
     function apiPostRequest(url, postData, callback, done) {
-        var version = uuid.v4();
+        var version = uuidv4();
         postData._version = version;
         api
             .set('Accept', 'application/json')
@@ -63,7 +63,7 @@ describe('Caching Test', function () {
     }
 
     function apiGetRequest(url, callback, done) {
-        var version = uuid.v4();
+        var version = uuidv4();
         api
             .set('Accept', 'application/json')
             .get(bootstrap.basePath + url + '?access_token=' + accessToken)
@@ -81,7 +81,7 @@ describe('Caching Test', function () {
     // fetch the inserted record using standard framework API,
     // so that it gets cached
     function stage1_creat(done) {
-        id = uuid.v4();
+        id = uuidv4();
         apiPostRequest('/' + modelName + 's/', { "name": "Ajith" + i++, "id": id }, stage2_find, done);
     }
 

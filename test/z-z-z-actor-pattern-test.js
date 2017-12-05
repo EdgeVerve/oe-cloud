@@ -13,7 +13,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
@@ -24,7 +24,7 @@ var async = require('async');
 var accessToken;
 
 function apiRequest(url, postData, callback, done) {
-  var version = uuid.v4();
+  var version = uuidv4();
   postData._version = version;
   api
     .set('Accept', 'application/json')

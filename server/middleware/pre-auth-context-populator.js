@@ -6,7 +6,7 @@
  */
 var log = require('oe-logger')('context-populator-filter');
 var camelCase = require('camelcase');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 /**
  * This middleware sets callContext into Request Object
