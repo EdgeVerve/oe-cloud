@@ -44,6 +44,7 @@ module.exports = function AuthSessionFn(AuthSession) {
         var secretOrPrivateKey = jwtConfig.secretOrKey;
         jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, user) {
           if (err) {
+            err.statusCode = 401;
             cb(err);
           } else {
             var trustedApp = user[jwtConfig.keyToVerify];
@@ -165,7 +166,9 @@ module.exports = function AuthSessionFn(AuthSession) {
         createAccessTokenAndNext(u, req, null, callback);
       } else {
         log.error(req.callContext, 'User not found!!!');
-        return callback(new Error('User not found!!'));
+        const error = new Error('User not found!!');
+        error.statusCode = 401;
+        return callback(error);
       }
     });
   }

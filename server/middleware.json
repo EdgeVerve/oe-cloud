@@ -39,9 +39,6 @@
     "session": {},
     "session:after": {},
     "auth": {
-        "./middleware/jwt-assertion": {
-            "enabled": false
-        }
     },
     "auth:after": {
         "./middleware/post-auth-context-populator": {}, 

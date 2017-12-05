@@ -11,6 +11,7 @@
  *  Author: Praveen
  */
 
+var _ = require('lodash');
 var loopback = require('loopback');
 var logger = require('oe-logger');
 // @jsonwebtoken is internal dependency of @passport-jwt
@@ -397,7 +398,7 @@ module.exports = function BaseUser(BaseUser) {
           log.debug(options, 'Got JWT signing error, Defaulting to accessToken generation.');
           return self.accessTokens.create(accessToken, options, cb);
         }
-        var jwtToken = {};
+        var jwtToken = _.cloneDeep(accessToken);
         jwtToken.id = token;
         jwtToken.ttl = jwtOpts.expiresIn;
         var loopback = BaseUser.app.loopback;
