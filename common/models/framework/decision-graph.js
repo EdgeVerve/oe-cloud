@@ -22,7 +22,8 @@ DecisionGraph.remoteMethod('execute', {
 		description: 'Executes a Decision Service Payload Posted from the Rule Designer',
 		accessType: 'WRITE',
 		isStatic: true,
-		accepts: [{ arg: 'inputData', type: 'object', http: { source: 'body' }, required: true, description: "The JSON containing the graph data and payload to execute" }
+    accepts: [{ arg: 'inputData', type: 'object', http: { source: 'body' }, 
+      required: true, description: "The JSON containing the graph data and payload to execute" }
 		],
 		http: {
 			verb: 'POST',
@@ -58,6 +59,7 @@ DecisionGraph.remoteMethod('execute', {
   ) {
     var dataObj = ctx.instance || ctx.data;
     var document = ctx.options.graphDocument;
+    if(!document) return next();
     var base64String = document.documentData.split(',')[1];
     // var binaryData = Buffer.from(base64String, 'base64').toString('binary');
     var binaryData = new Buffer(base64String, 'base64').toString('binary');
