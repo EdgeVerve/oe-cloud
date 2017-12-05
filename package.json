@@ -40,7 +40,7 @@
     "gelf-stream": "^1.1.1",
     "helmet": "^2.1.1",
     "inflection": "^1.10.0",
-    "js-feel": "git+http://evgit/oecloud.io/feel.git#master",
+    "js-feel": "git+http://evgit/oecloud.io/feel.git#f8aab3a5bae7f14d968bb52eedacfe0710938418",
     "locks": "^0.2.2",
     "lodash": "3.10.1",
     "loopback": "2.25.0",
