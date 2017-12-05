@@ -44,7 +44,7 @@ function updateLogArray(err, model) {
     return;
   }
   log.debug('found model was ', model);
-  var defaultLevel = model.data.default || 50;
+  var defaultLevel = model.data.default || 30;
   var data = model.data;
   if (!data) {
     log.error('data cannot be empty');

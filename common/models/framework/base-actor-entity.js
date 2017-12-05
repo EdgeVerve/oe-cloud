@@ -161,6 +161,47 @@ module.exports = function (BaseActorEntity) {
       return cb(null, ctx.envelope.noCacheTime);
     });
   };
+  BaseActorEntity.prototype.getEnvelopeState = function getEnvelopeState(id, options, cb) {
+    var self = this;
+    self.getById(id, options, function (err, actor) {
+      if (err) {
+        return cb(err);
+      }
+      actor.balanceProcess(options, cb);
+    });
+  };
+  BaseActorEntity.prototype.balanceProcess = function balanceProcess(options, cb) {
+    var self = this;
+    var context = {};
+    context.actorEntity = self;
+    context.activity = {};
+    context.activity.modelName = self._type;
+    context.activity.entityId = self.id;
+    context.journalEntity = {};
+    context.journalEntity.id = '';
+    if (!options.ctx) {
+      options.ctx = {};
+    }
+    actorPool.getOrCreateInstance(context, options, function (err, newContext) {
+      if (err) {
+        return cb(err);
+      }
+      var envelope = newContext.envelope;
+      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+        self.getActorFromMemory(envelope, options, function (err, result) {
+          if (err) {
+            return releaseLockCb(err);
+          }
+          return releaseLockCb(null, result);
+        });
+      }, function (err, ret) {
+        if (err) {
+          return cb(err);
+        }
+        return cb(null, ret);
+      });
+    });
+  };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
     this.calculatePendingBalance(envelope, options, function (err, actorData) {
@@ -321,13 +362,6 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  BaseActorEntity.prototype.removeMessage = function (message) {
-    var index = this.msg_queue.indexOf(message);
-    if (index > -1) {
-      this.msg_queue.splice(index, 1);
-    }
-  };
-
   var actualBackgroundProcess = function (self, envelope, messages, stateObj, options, actorCb) {
     async.eachSeries(messages, function (message, cb) {
       self.processMessage(envelope, message, stateObj, options, cb);
@@ -419,7 +453,10 @@ module.exports = function (BaseActorEntity) {
       if (err) {
         return cb(err);
       }
-      return actualCalculate(envelope, state.__data.stateObj, self, options, cb);
+      actualCalculate(envelope, state.__data.stateObj, self, options, cb);
+      if (self.constructor.settings.noBackgroundProcess && !envelope.updatedActor) {
+        envelope.updatedActor = JSON.parse(JSON.stringify(state.__data.stateObj));
+      }
     });
   };
 
@@ -561,11 +598,15 @@ module.exports = function (BaseActorEntity) {
         };
       } else if (ds.name === 'loopback-connector-postgresql') {
         query = 'select * from TRANSMODEL where id in ( select id from ' +
-        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s FROM ' +
+        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s, ' +
+        ' nonatomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as t FROM ' +
         ' TRANSMODEL ) as i ' +
-        ' where cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' where (cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
         ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
-        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\'' +
+        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\') or ' +
+        ' (cast( nonatomicactivitieslist[t]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' and nonatomicactivitieslist[t]->>\'modelName\' = \'' + envelope.modelName + '\'' +
+        ' and nonatomicactivitieslist[t]->>\'entityId\' =  \'' + envelope.actorId + '\')' +
         ')';
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
