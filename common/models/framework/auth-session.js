@@ -6,10 +6,14 @@
  */
 // @jsonwebtoken is internal dependency of @passport-jwt
 var jwt = require('jsonwebtoken');
+const loopback = require('loopback');
+const log = require('oe-logger')('auth-session');
+const uuidv4 = require('uuid/v4');
 var jwtUtil = require('../../../lib/jwt-token-util');
 
 var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
 
+const cachedTokens = {};
 module.exports = function AuthSessionFn(AuthSession) {
   AuthSession.findForRequest = function authSessionFindForRequestFn(req, options, cb) {
     if (typeof cb === 'undefined' && typeof options === 'function') {
@@ -38,14 +42,73 @@ module.exports = function AuthSessionFn(AuthSession) {
         jwtOpts.issuer = jwtConfig.issuer;
         jwtOpts.audience = jwtConfig.audience;
         var secretOrPrivateKey = jwtConfig.secretOrKey;
-        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, payload) {
+        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, user) {
           if (err) {
             cb(err);
           } else {
+            var trustedApp = user[jwtConfig.keyToVerify];
+            var userObj = loopback.getModelByType('BaseUser');
+            var username = '';
+            if (trustedApp) {
+              var rolesToAdd = [];
+              var appObj = loopback.getModelByType('TrustedApp');
+              var query = { appId: trustedApp };
+              appObj.findOne({
+                where: query
+              }, req.callContext, (err, trusted) => {
+                if (err) {
+                  log.error(req.callContext, 'Error while Querying TrustedApp', err);
+                  return cb();
+                }
+                if (trusted && req.headers.username && req.headers.email) {
+                  username = req.headers.username;
+                  var email = req.headers.email;
+                  // verify supported Roles
+                  if (req.headers.roles && trusted.supportedRoles) {
+                    JSON.parse(req.headers.roles).forEach(function (element) {
+                      if (trusted.supportedRoles.some(x => x === element)) {
+                        rolesToAdd.push({ 'id': element, 'type': 'ROLE' });
+                      }
+                    });
+                  }
+                  userObj.findOne({ where: { username } }, req.callContext, (err, u) => {
+                    if (err) {
+                      log.error(req.callContext, 'Error Querying User Information', err);
+                      return cb();
+                    }
+                    if (u) {
+                      if (cachedTokens[username]) {
+                        req.accessToken = cachedTokens[username];
+                        if (rolesToAdd && rolesToAdd.length > 0) {
+                          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                        }
+                        return cb();
+                      }
+                      createAccessTokenAndNext(u, req, rolesToAdd, cb);
+                    } else {
+                      userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
+                        if (err) {
+                          return cb();
+                        }
+                        if (newUser) {
+                          createAccessTokenAndNext(newUser, req, rolesToAdd, cb);
+                        } else {
+                          cb();
+                        }
+                      });
+                    }
+                  });
+                } else {
+                  checkUserExistence(user, req, userObj, cb);
+                }
+              });
+            } else {
+              checkUserExistence(user, req, userObj, cb);
+            }
             // Setting "id" which will be retrieved in post-auth-context-populator
             // for setting callContext.accessToken
-            payload.id = id;
-            cb(null, new AuthSession(payload));
+            // user.id = id;
+            // cb(null, new AuthSession(user));
           }
         });
       } else {
@@ -77,6 +140,54 @@ module.exports = function AuthSessionFn(AuthSession) {
       });
     }
   };
+
+  function checkUserExistence(user, req, userObj, callback) {
+    var username = user.username || user.email || '';
+    req.accessToken = cachedTokens[username];
+
+    if (req.accessToken) {
+      return callback(null, cachedTokens[username]);
+    }
+
+    userObj.findOne({
+      where: {
+        username
+      }
+    }, req.callContext, (err, u) => {
+      if (err) {
+        return callback(err);
+      }
+      if (u) {
+        if (cachedTokens[username]) {
+          req.accessToken = cachedTokens[username];
+          return callback(null, cachedTokens[username]);
+        }
+        createAccessTokenAndNext(u, req, null, callback);
+      } else {
+        log.error(req.callContext, 'User not found!!!');
+        return callback(new Error('User not found!!'));
+      }
+    });
+  }
+
+  function createAccessTokenAndNext(user, req, rolesToAdd, next) {
+    user.createAccessToken(user.constructor.DEFAULT_TTL, req.callContext, (err, token) => {
+      if (err) {
+        next(err);
+      }
+      if (token) {
+        req.accessToken = token;
+        cachedTokens[user.username] = token;
+        if (rolesToAdd && rolesToAdd.length > 0) {
+          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+        }
+        next(null, token);
+      } else {
+        log.error(req.callContext, 'could not create access token!!!!');
+        next();
+      }
+    });
+  }
 
   function tokenIdForRequest(req, options) {
     var params = options.params || [];
