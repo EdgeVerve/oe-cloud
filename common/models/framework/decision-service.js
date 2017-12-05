@@ -7,9 +7,6 @@
 
 // var XLSX = require('xlsx');
 var feel = require('js-feel')();
-// var DL = feel.decisionLogic;
-var DS = feel.decisionService;
-
 var logger = require('oe-logger');
 var log = logger('decision-service');
 var util = require('util');
@@ -81,19 +78,28 @@ module.exports = function (DecisionService) {
           if (err) {
             cb(err);
           } else {
-            var decisionMap = graph.data;
-            var ast = DS.createDecisionGraphAST(decisionMap);
-            var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
-            Promise.all(promises).then(answers => {
-              var final = answers.reduce((hash, answer) => {
-                return Object.assign({}, hash, answer);
-              }, {});
+            // var decisionMap = graph.data;
+            // var ast = DS.createDecisionGraphAST(decisionMap);
+            // var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
+            // Promise.all(promises).then(answers => {
+            //   var final = answers.reduce((hash, answer) => {
+            //     return Object.assign({}, hash, answer);
+            //   }, {});
 
-              cb(null, final);
-            })
-              .catch(err => {
-                cb(err);
-              });
+            //   cb(null, final);
+            // })
+            //   .catch(err => {
+            //     cb(err);
+            //   });
+            feel.executeDecisionGraph(graph, decisions, payload)
+              .then(answers => {
+                var result = answers.reduce((hash, ans, idx) => {
+                  var r = { [decisions[idx]]: ans };
+                  return Object.assign({}, hash, r);
+                }, {});
+                cb(null, result);
+              })
+              .catch(cb);
           }
         });
       }
