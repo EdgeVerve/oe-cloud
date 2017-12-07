@@ -34,7 +34,6 @@ var models = bootstrap.models;
 var chai = require('chai');
 chai.use(require('chai-things'));
 var uTxnId = 1234;
-//var uuid = require('node-uuid');
 //var debug = require('debug')('model-transaction-test');
 
 

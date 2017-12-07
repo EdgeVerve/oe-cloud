@@ -60,7 +60,6 @@
     "node-async-locks": "^1.0.1",
     "node-docker-api": "^1.1.16",
     "node-red": "0.16.2",
-    "node-uuid": "1.4.7",
     "oe-explorer": "^1.0.0",
     "oe-logger": "^1.0.0",
     "oe-swagger-ui": "^0.9.0",
@@ -74,6 +73,7 @@
     "restler": "^3.4.0",
     "strong-error-handler": "^2.1.0",
     "ua-parser-js": "^0.7.10",
+    "uuid": "^3.1.0",
     "ws": "^3.0.0"
   },
   "devDependencies": {
