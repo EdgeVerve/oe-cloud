@@ -12,7 +12,7 @@ chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('basic-crud');
@@ -26,7 +26,7 @@ describe('basic-crud', function () {
     var data = {
         title: 'my note',
         content: 'Hello word',
-        id: uuid.v4()
+        id: uuidv4()
     };
     var Note;
     var noteModelName = 'NoteBasicCrud'
@@ -89,8 +89,8 @@ describe('basic-crud', function () {
         var data = {
             title: 'with _version',
             content: 'asdasd',
-            id: uuid.v4(),
-            _version: uuid.v4()
+            id: uuidv4(),
+            _version: uuidv4()
         };
         Note.create(data, bootstrap.defaultContext, function (err, rec) {
             expect(err).to.be.null;
@@ -105,8 +105,8 @@ describe('basic-crud', function () {
         var data = {
             title: 'with _version',
             content: 'asdasd',
-            id: uuid.v4(),
-            _newVersion: uuid.v4()
+            id: uuidv4(),
+            _newVersion: uuidv4()
         };
         Note.create(data, bootstrap.defaultContext, function (err, rec) {
             expect(err).to.be.null;
@@ -121,9 +121,9 @@ describe('basic-crud', function () {
         var data = {
             title: 'with _version',
             content: 'asdasd',
-            id: uuid.v4(),
-            _version: uuid.v4(),
-            _newVersion: uuid.v4()
+            id: uuidv4(),
+            _version: uuidv4(),
+            _newVersion: uuidv4()
         };
         Note.create(data, bootstrap.defaultContext, function (err, rec) {
             expect(err).to.be.null;

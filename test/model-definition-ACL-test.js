@@ -48,7 +48,6 @@ var app = bootstrap.app;
 var supertest = require('supertest');
 var api1 = supertest(app);
 
-//var uuid = require('node-uuid');
 var debug = require('debug')('model-definition-ACL-test');
 
 describe(chalk.blue('model-definition-ACL'), function () {

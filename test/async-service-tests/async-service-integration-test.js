@@ -6,7 +6,6 @@
  */
 var request = require('request');
 
-// var uuid = require('node-uuid');
 var chai = require('chai');
 var expect = chai.expect;
 var chalk = require('chalk');
