@@ -707,12 +707,21 @@ module.exports = function (BaseActorEntity) {
   };
 
 
+  BaseActorEntity.observe('before save', function (ctx, next) {
+    if (ctx.instance && ctx.isNewInstance === true) {
+      ctx.hookState.stateObj = ctx.instance.stateObj;
+      delete ctx.instance.__data.stateObj;
+      delete ctx.instance.stateObj;
+    }
+    return next();
+  });
+
   BaseActorEntity.observe('after save', function (ctx, next) {
     if ((ctx.instance && ctx.instance._isDeleted) || (ctx.data && ctx.data._isDeleted)) {
       next();
     } else if (ctx.instance && ctx.isNewInstance === true) {
       var stateData = {};
-      stateData.stateObj = ctx.instance.stateObj;
+      stateData.stateObj = ctx.hookState.stateObj;
       var stateModel = getStateModel();
       stateModel.create(stateData, ctx.options, function (err, instance) {
         if (err) {
