@@ -9,7 +9,7 @@ var loopback = require('loopback');
 var loggingModule = require('oe-logger');
 var log = loggingModule('logger-config');
 var msgService = require('../../../lib/common/global-messaging');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 msgService.subscribe('LoggerConfig', dataUpdater);
 
@@ -44,7 +44,7 @@ function updateLogArray(err, model) {
     return;
   }
   log.debug('found model was ', model);
-  var defaultLevel = model.data.default || 50;
+  var defaultLevel = model.data.default || 30;
   var data = model.data;
   if (!data) {
     log.error('data cannot be empty');
@@ -98,7 +98,7 @@ module.exports = function LoggerConfig(loggerConfig) {
 
   loggerConfig.observe('after save', function loggerConfigAfterSave(ctx, next) {
     updateLogArray(null, ctx.instance);
-    msgService.publish('LoggerConfig', uuid.v4());
+    msgService.publish('LoggerConfig', uuidv4());
     return next();
   });
 

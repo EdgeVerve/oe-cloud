@@ -12,7 +12,7 @@ chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var loopback = require('loopback');
 
 describe('basic-idempotency', function () {
@@ -59,7 +59,7 @@ describe('basic-idempotency', function () {
     var data = {
       title: 'my note',
       content: 'Hello word',
-      _newVersion: uuid.v4()
+      _newVersion: uuidv4()
     };
     Note.create(data, options, function (err, rec1) {
       expect(err).to.be.null;
@@ -76,7 +76,7 @@ describe('basic-idempotency', function () {
     var data = {
       title: 'rose',
       content: 'content abcd',
-      _newVersion: uuid.v4()
+      _newVersion: uuidv4()
     };
     var url = baseurl + '/Note2s' + '?access_token=' + accessToken;
     var api = defaults(supertest(app));
@@ -89,7 +89,7 @@ describe('basic-idempotency', function () {
         var rec1 = response.body;
         var api = defaults(supertest(app));
         var url = baseurl + '/Note2s/' + rec1.id + '?access_token=' + accessToken;
-        rec1._newVersion = uuid.v4();
+        rec1._newVersion = uuidv4();
         rec1.content = 'update1';
         api.set('Accept', 'application/json')
           .put(url)

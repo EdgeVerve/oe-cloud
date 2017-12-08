@@ -150,12 +150,56 @@ module.exports = function (BaseActorEntity) {
     context.activity.entityId = this.id;
     context.journalEntity = {};
     context.journalEntity.id = '';
+    if (!options.ctx) {
+      options.ctx = {};
+    }
     options.ctx.noInstanceCache = true;
     actorPool.getOrCreateInstance(context, options, function (err, ctx) {
       if (err) {
         return cb(err);
       }
       return cb(null, ctx.envelope.noCacheTime);
+    });
+  };
+  BaseActorEntity.prototype.getEnvelopeState = function getEnvelopeState(id, options, cb) {
+    var self = this;
+    self.getById(id, options, function (err, actor) {
+      if (err) {
+        return cb(err);
+      }
+      actor.balanceProcess(options, cb);
+    });
+  };
+  BaseActorEntity.prototype.balanceProcess = function balanceProcess(options, cb) {
+    var self = this;
+    var context = {};
+    context.actorEntity = self;
+    context.activity = {};
+    context.activity.modelName = self._type;
+    context.activity.entityId = self.id;
+    context.journalEntity = {};
+    context.journalEntity.id = '';
+    if (!options.ctx) {
+      options.ctx = {};
+    }
+    actorPool.getOrCreateInstance(context, options, function (err, newContext) {
+      if (err) {
+        return cb(err);
+      }
+      var envelope = newContext.envelope;
+      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+        self.getActorFromMemory(envelope, options, function (err, result) {
+          if (err) {
+            return releaseLockCb(err);
+          }
+          return releaseLockCb(null, result);
+        });
+      }, function (err, ret) {
+        if (err) {
+          return cb(err);
+        }
+        return cb(null, ret);
+      });
     });
   };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
@@ -318,42 +362,38 @@ module.exports = function (BaseActorEntity) {
     }
   };
 
-  BaseActorEntity.prototype.removeMessage = function (message) {
-    var index = this.msg_queue.indexOf(message);
-    if (index > -1) {
-      this.msg_queue.splice(index, 1);
-    }
-  };
-
   var actualBackgroundProcess = function (self, envelope, messages, stateObj, options, actorCb) {
     async.eachSeries(messages, function (message, cb) {
       self.processMessage(envelope, message, stateObj, options, cb);
     }, function (err) {
       if (err) {
         log.error(options, err);
-        return actorCb(err);
       }
       if (self.constructor.settings.noBackgroundProcess) {
         envelope.updatedActor = stateObj;
         envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
         return actorCb();
       }
-      stateObj.__data.seqNum = envelope.processedSeqNum;
-      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
-          if (error) {
-            log.error(options, 'error while persisting actor ', error);
-            return releaseLockCb(error);
+      if (stateObj.__data.seqNum < envelope.processedSeqNum ) {
+        stateObj.__data.seqNum = envelope.processedSeqNum;
+        self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+          stateObj.updateAttributes(stateObj.__data, options, function (error, state) {
+            if (error) {
+              log.error(options, 'error while persisting actor ', error);
+              return releaseLockCb(error);
+            }
+            envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
+            return releaseLockCb();
+          });
+        }, function (err, ret) {
+          if (err) {
+            return actorCb(err);
           }
-          envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
-          return releaseLockCb();
+          return actorCb();
         });
-      }, function (err, ret) {
-        if (err) {
-          return actorCb(err);
-        }
+      } else {
         return actorCb();
-      });
+      }
     });
   };
 
@@ -413,7 +453,10 @@ module.exports = function (BaseActorEntity) {
       if (err) {
         return cb(err);
       }
-      return actualCalculate(envelope, state.__data.stateObj, self, options, cb);
+      actualCalculate(envelope, state.__data.stateObj, self, options, cb);
+      if (self.constructor.settings.noBackgroundProcess && !envelope.updatedActor) {
+        envelope.updatedActor = JSON.parse(JSON.stringify(state.__data.stateObj));
+      }
     });
   };
 
@@ -421,7 +464,6 @@ module.exports = function (BaseActorEntity) {
     if (message.isProcessed === true) {
       return cb();
     }
-
     var self = this;
 
     var actualProcess = function (cb) {
@@ -438,7 +480,7 @@ module.exports = function (BaseActorEntity) {
           self.nonAtomicInstructions(state, message.activity);
         }
       }
-      envelope.processedSeqNum = Math.max(message.seqNum, envelope.processedSeqNum);
+      envelope.processedSeqNum = message.seqNum;
       message.isProcessed = true;
       return cb();
     };
@@ -455,14 +497,12 @@ module.exports = function (BaseActorEntity) {
         log.error(options, 'error in processMessage: ', err);
         return cb(err);
       } else if (!result) {
-        if (!message.isProcessed) {
-          message.retryCount += 1;
-          if (message.retryCount > self.MAX_RETRY_COUNT) {
-            log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message);
-            message.isProcessed = true;
-          }
-          return cb();
+        message.retryCount += 1;
+        if (message.retryCount > self.MAX_RETRY_COUNT) {
+          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message, ' after max retry');
+          message.isProcessed = true;
         }
+        return cb(new Error('no journal for message:' + message.seqNum));
       } else if (result) {
         actualProcess(cb);
       }
@@ -488,8 +528,8 @@ module.exports = function (BaseActorEntity) {
     for (var i = 0; i < array.length; i++) {
       var currJournal = array[i];
       if (currJournal.id !== filterBy.journalId) {
-        currJournal.atomicActivitiesList = filterActivities(currJournal.atomicActivitiesList, filterBy);
-        currJournal.nonAtomicActivitiesList = filterActivities(currJournal.nonAtomicActivitiesList, filterBy);
+        currJournal.atomicActivitiesList = filterActivities(currJournal.atomicActivitiesList ? currJournal.atomicActivitiesList : currJournal.atomicactivitieslist, filterBy);
+        currJournal.nonAtomicActivitiesList = filterActivities(currJournal.nonAtomicActivitiesList ? currJournal.nonAtomicActivitiesList : currJournal.nonatomicactivitieslist, filterBy);
         if (currJournal.atomicActivitiesList.length > 0 || currJournal.nonAtomicActivitiesList.length > 0) {
           filteredArray.push(currJournal);
         }
@@ -515,6 +555,15 @@ module.exports = function (BaseActorEntity) {
     return filterBy;
   }
 
+  var journalFind = function (model, ds, query, options, cb) {
+    if (ds.name === 'loopback-connector-postgresql') {
+      var modefiedQuery = query.replace(/TRANSMODEL/g, '\"' + model.modelName.toLowerCase() + '\"');
+      ds.connector.query(modefiedQuery, [], options, cb);
+    } else {
+      model.find(query, options, cb);
+    }
+  };
+
   BaseActorEntity.prototype.performStartOperation = function (currentJournalEntityId, options, envelope, cb) {
     var loopbackModelsCollection = getAssociatedModels(this.constructor.modelName, options);
     envelope.msg_queue = [];
@@ -537,7 +586,8 @@ module.exports = function (BaseActorEntity) {
       }
 
       var query = {};
-      if (self.getDataSource(options).name === 'mongodb') {
+      var ds = self.getDataSource(options);
+      if (ds.name === 'mongodb') {
         query = {
           where: {
             or: [
@@ -546,12 +596,27 @@ module.exports = function (BaseActorEntity) {
             ]
           }
         };
+      } else if (ds.name === 'loopback-connector-postgresql') {
+        query = 'select * from TRANSMODEL where id in ( select id from ' +
+        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s, ' +
+        ' nonatomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as t FROM ' +
+        ' TRANSMODEL ) as i ' +
+        ' where (cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
+        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\') or ' +
+        ' (cast( nonatomicactivitieslist[t]->>\'seqNum\' as int)  >= ' + state.seqNum  +
+        ' and nonatomicactivitieslist[t]->>\'modelName\' = \'' + envelope.modelName + '\'' +
+        ' and nonatomicactivitieslist[t]->>\'entityId\' =  \'' + envelope.actorId + '\')' +
+        ')';
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
       }
       async.each(loopbackModelsCollection, function (model, asyncCb) {
-        model.find(query, options, function (err, returnedInstances) {
+        journalFind(model, ds, query, options, function (err, returnedInstances) {
           if (err) {
+            if (err.message.includes(' \"' + model.modelName.toLowerCase() + '\" does not exist')) {
+              return asyncCb();
+            }
             log.error(options, 'err in actor startup is ', err);
             return asyncCb(err);
           } else if (returnedInstances.length === 0) {

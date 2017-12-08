@@ -6,7 +6,7 @@
  */
 var log = require('oe-logger')('context-populator-filter');
 var camelCase = require('camelcase');
-var uuid = require('node-uuid');
+var uuidv1 = require('uuid/v1');
 
 /**
  * This middleware sets callContext into Request Object
@@ -65,7 +65,7 @@ module.exports = function preAuthContextPopulator(options) {
 
     // Generate a unique id and add to context as txnId
     // this is used in log utility
-    var txnId = uuid.v1();
+    var txnId = uuidv1();
     callContext.txnId = txnId;
 
     // is it really required? If yes then why not use getMethodByName
