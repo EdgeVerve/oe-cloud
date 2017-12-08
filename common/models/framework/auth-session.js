@@ -78,21 +78,23 @@ module.exports = function AuthSessionFn(AuthSession) {
                       return cb();
                     }
                     if (u) {
-                      if (cachedTokens[username]) {
-                        req.accessToken = cachedTokens[username];
-                        if (rolesToAdd && rolesToAdd.length > 0) {
-                          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
-                        }
-                        return cb();
+                      if (rolesToAdd && rolesToAdd.length > 0) {
+                        req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
                       }
-                      createAccessTokenAndNext(u, req, rolesToAdd, cb);
+                      user.id = id;
+                      user.userId = u.id;
+                      cb(null, new AuthSession(user));
                     } else {
                       userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
                         if (err) {
                           return cb();
                         }
                         if (newUser) {
-                          createAccessTokenAndNext(newUser, req, rolesToAdd, cb);
+                          // Setting "id" which will be retrieved in post-auth-context-populator
+                          // for setting callContext.accessToken
+                          user.id = id;
+                          user.userId = newUser.id;
+                          cb(null, new AuthSession(user));
                         } else {
                           cb();
                         }
@@ -100,16 +102,18 @@ module.exports = function AuthSessionFn(AuthSession) {
                     }
                   });
                 } else {
+                  // Setting "id" which will be retrieved in post-auth-context-populator
+                  // for setting callContext.accessToken
+                  user.id = id;
                   checkUserExistence(user, req, userObj, cb);
                 }
               });
             } else {
-              checkUserExistence(user, req, userObj, cb);
+              // Setting "id" which will be retrieved in post-auth-context-populator
+              // for setting callContext.accessToken
+              user.id = id;
+              cb(null, new AuthSession(user));
             }
-            // Setting "id" which will be retrieved in post-auth-context-populator
-            // for setting callContext.accessToken
-            // user.id = id;
-            // cb(null, new AuthSession(user));
           }
         });
       } else {
@@ -144,9 +148,8 @@ module.exports = function AuthSessionFn(AuthSession) {
 
   function checkUserExistence(user, req, userObj, callback) {
     var username = user.username || user.email || '';
-    req.accessToken = cachedTokens[username];
 
-    if (req.accessToken) {
+    if (cachedTokens[username]) {
       return callback(null, cachedTokens[username]);
     }
 
@@ -160,34 +163,16 @@ module.exports = function AuthSessionFn(AuthSession) {
       }
       if (u) {
         if (cachedTokens[username]) {
-          req.accessToken = cachedTokens[username];
           return callback(null, cachedTokens[username]);
         }
-        createAccessTokenAndNext(u, req, null, callback);
+        user.userId = u.id;
+        cachedTokens[username] = user;
+        callback(null, cachedTokens[username]);
       } else {
         log.error(req.callContext, 'User not found!!!');
         const error = new Error('User not found!!');
         error.statusCode = 401;
         return callback(error);
-      }
-    });
-  }
-
-  function createAccessTokenAndNext(user, req, rolesToAdd, next) {
-    user.createAccessToken(user.constructor.DEFAULT_TTL, req.callContext, (err, token) => {
-      if (err) {
-        next(err);
-      }
-      if (token) {
-        req.accessToken = token;
-        cachedTokens[user.username] = token;
-        if (rolesToAdd && rolesToAdd.length > 0) {
-          req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
-        }
-        next(null, token);
-      } else {
-        log.error(req.callContext, 'could not create access token!!!!');
-        next();
       }
     });
   }
