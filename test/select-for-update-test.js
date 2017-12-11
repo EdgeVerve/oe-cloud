@@ -14,7 +14,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var async = require('async');
 var baseUrl = bootstrap.basePath;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var loopback = require('loopback');
 var _ = require('lodash');
 if (!process.env.PERF_TEST ||

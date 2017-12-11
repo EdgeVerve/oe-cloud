@@ -9,14 +9,14 @@ var loopback = require('loopback');
 var async = require('async');
 var log = require('oe-logger')('create-Service-User');
 var app = require('../server').app;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 var serviceName = app.get('app');
 var serviceUser = {
   username: serviceName,
   email: serviceName + '@oecloud.com',
   id: serviceName,
-  password: uuid.v4()
+  password: uuidv4()
 };
 
 log.debug(log.defaultContext(), 'creating service user: ', serviceUser);
