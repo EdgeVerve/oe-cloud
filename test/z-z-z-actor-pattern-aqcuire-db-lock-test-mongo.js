@@ -14,7 +14,7 @@ var bootstrap = require('./bootstrap');
 var app = bootstrap.app;
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
@@ -28,7 +28,7 @@ var dbName = process.env.DB_NAME || 'db';
 var accessToken;
 
 function apiRequest(url, postData, callback, done) {
-  var version = uuid.v4();
+  var version = uuidv4();
   postData._version = version;
   api
     .set('Accept', 'application/json')

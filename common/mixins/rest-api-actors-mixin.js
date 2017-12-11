@@ -9,7 +9,6 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  * @mixin Change rest api calls to first check in memory pool and if it is not find - find in DB.
  * @author Karin Angel
  */
-var memoryPool = require('../../lib/actor-pool');
 var _ = require('lodash');
 
 module.exports = function RestApiActorsMixin(Model) {
@@ -49,47 +48,22 @@ module.exports = function RestApiActorsMixin(Model) {
       if (!actor) {
         return next();
       }
-      // loopback.getCurrentContext().active.callContext;
       var options = ctx.req.callContext;
-      var context = {
-        actorEntity: actor
-      };
-      context.activity = {
-        modelName: actor._type,
-        entityId: id
-      };
-      context.journalEntity = {
-        id: ''
-      };
-      memoryPool.getOrCreateInstance(context, options, function (err, newContext) {
+      actor.balanceProcess(options, function (err, res) {
         if (err) {
           return next(err);
         }
-        var envelope = newContext.envelope;
-        actor.constructor.instanceLocker().acquire(actor, options, actor._version, function (releaseLockCb) {
-          actor.getActorFromMemory(envelope, options, function (err, result) {
-            if (err) {
-              return releaseLockCb(err);
-            }
-            if (Array.isArray(ctx.result)) {
-              ctx.result = [result];
-            } else {
-              ctx.result = result;
-            }
-            return releaseLockCb();
-          });
-        }, function (err, ret) {
-          if (err) {
-            return next(err);
-          }
-          return next();
-        });
+        if (Array.isArray(ctx.result)) {
+          ctx.result = [res];
+        } else {
+          ctx.result = res;
+        }
+        next();
       });
     } else {
       return next();
     }
   });
-
 
   function getFields(data, arr) {
     _.forEach(data, function dataAccessGetKeysForEach(value, key) {

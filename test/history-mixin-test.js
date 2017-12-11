@@ -21,7 +21,7 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var loopback = require('loopback');
 var debug = require('debug')('history-mixin-test');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var api = bootstrap.api;
 
 describe('history-mixin tests	Programmatically', function () {
@@ -177,7 +177,7 @@ describe('history-mixin tests	Programmatically', function () {
 
     var postData = {
       'name': 'TestCaseFive',
-      '_version': uuid.v4()
+      '_version': uuidv4()
     };
     model.upsert(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
