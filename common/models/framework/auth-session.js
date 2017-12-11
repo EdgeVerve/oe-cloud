@@ -155,7 +155,7 @@ module.exports = function AuthSessionFn(AuthSession) {
 
     // If parsedJWT contains the userId information, no need to query the DB.
     if (parsedJWT.userId) {
-      cachedTokens[username] = parsedJWT;
+      cachedTokens[username] = new AuthSession(parsedJWT);
       return callback(null, cachedTokens[username]);
     }
 
@@ -169,7 +169,7 @@ module.exports = function AuthSessionFn(AuthSession) {
       }
       if (u) {
         parsedJWT.userId = u.id;
-        cachedTokens[username] = parsedJWT;
+        cachedTokens[username] = new AuthSession(parsedJWT);
         callback(null, cachedTokens[username]);
       } else {
         log.error(req.callContext, 'User not found!!!');
