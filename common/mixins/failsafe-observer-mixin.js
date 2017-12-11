@@ -95,7 +95,7 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model.defineProperty('currentUpdateTime', {
     type: 'timestamp',
-    default: new Date()
+    default: Date
   });
 
   Model.defineProperty('oldHostName', {
@@ -105,7 +105,7 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model.defineProperty('oldUpdateTime', {
     type: 'timestamp',
-    default: new Date()
+    default: Date
   });
 
   Model.defineProperty('_fsCtx', {
