@@ -11,8 +11,6 @@ const log = require('oe-logger')('auth-session');
 const uuidv4 = require('uuid/v4');
 var jwtUtil = require('../../../lib/jwt-token-util');
 
-var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
-
 const cachedTokens = {};
 module.exports = function AuthSessionFn(AuthSession) {
   AuthSession.findForRequest = function authSessionFindForRequestFn(req, options, cb) {
@@ -35,6 +33,7 @@ module.exports = function AuthSessionFn(AuthSession) {
     }
 
     if (id && id !== 'undefined') {
+      let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
       // json web token contains 3 parts separated by .(dot)
       if (jwtForAccessToken && id.split('.').length === 3) {
         var jwtConfig = jwtUtil.getJWTConfig();
@@ -42,12 +41,12 @@ module.exports = function AuthSessionFn(AuthSession) {
         jwtOpts.issuer = jwtConfig.issuer;
         jwtOpts.audience = jwtConfig.audience;
         var secretOrPrivateKey = jwtConfig.secretOrKey;
-        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, user) {
+        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, parsedJWT) {
           if (err) {
             err.statusCode = 401;
             cb(err);
           } else {
-            var trustedApp = user[jwtConfig.keyToVerify];
+            var trustedApp = parsedJWT[jwtConfig.keyToVerify];
             var userObj = loopback.getModelByType('BaseUser');
             var username = '';
             if (trustedApp) {
@@ -72,18 +71,18 @@ module.exports = function AuthSessionFn(AuthSession) {
                       }
                     });
                   }
+                  if (rolesToAdd && rolesToAdd.length > 0) {
+                    req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                  }
                   userObj.findOne({ where: { username } }, req.callContext, (err, u) => {
                     if (err) {
                       log.error(req.callContext, 'Error Querying User Information', err);
                       return cb();
                     }
                     if (u) {
-                      if (rolesToAdd && rolesToAdd.length > 0) {
-                        req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
-                      }
-                      user.id = id;
-                      user.userId = u.id;
-                      cb(null, new AuthSession(user));
+                      parsedJWT.id = id;
+                      parsedJWT.userId = u.id;
+                      cb(null, new AuthSession(parsedJWT));
                     } else {
                       userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
                         if (err) {
@@ -92,9 +91,9 @@ module.exports = function AuthSessionFn(AuthSession) {
                         if (newUser) {
                           // Setting "id" which will be retrieved in post-auth-context-populator
                           // for setting callContext.accessToken
-                          user.id = id;
-                          user.userId = newUser.id;
-                          cb(null, new AuthSession(user));
+                          parsedJWT.id = id;
+                          parsedJWT.userId = newUser.id;
+                          cb(null, new AuthSession(parsedJWT));
                         } else {
                           cb();
                         }
@@ -104,15 +103,15 @@ module.exports = function AuthSessionFn(AuthSession) {
                 } else {
                   // Setting "id" which will be retrieved in post-auth-context-populator
                   // for setting callContext.accessToken
-                  user.id = id;
-                  checkUserExistence(user, req, userObj, cb);
+                  parsedJWT.id = id;
+                  checkUserExistence(parsedJWT, req, userObj, cb);
                 }
               });
             } else {
               // Setting "id" which will be retrieved in post-auth-context-populator
               // for setting callContext.accessToken
-              user.id = id;
-              cb(null, new AuthSession(user));
+              parsedJWT.id = id;
+              checkUserExistence(parsedJWT, req, userObj, cb);
             }
           }
         });
@@ -146,10 +145,17 @@ module.exports = function AuthSessionFn(AuthSession) {
     }
   };
 
-  function checkUserExistence(user, req, userObj, callback) {
-    var username = user.username || user.email || '';
+  function checkUserExistence(parsedJWT, req, userObj, callback) {
+    var username = parsedJWT.username || parsedJWT.email || '';
 
+    // If token is available in cachedTokens, return from cachedTokens.
     if (cachedTokens[username]) {
+      return callback(null, cachedTokens[username]);
+    }
+
+    // If parsedJWT contains the userId information, no need to query the DB.
+    if (parsedJWT.userId) {
+      cachedTokens[username] = parsedJWT;
       return callback(null, cachedTokens[username]);
     }
 
@@ -162,11 +168,8 @@ module.exports = function AuthSessionFn(AuthSession) {
         return callback(err);
       }
       if (u) {
-        if (cachedTokens[username]) {
-          return callback(null, cachedTokens[username]);
-        }
-        user.userId = u.id;
-        cachedTokens[username] = user;
+        parsedJWT.userId = u.id;
+        cachedTokens[username] = parsedJWT;
         callback(null, cachedTokens[username]);
       } else {
         log.error(req.callContext, 'User not found!!!');
@@ -188,8 +191,12 @@ module.exports = function AuthSessionFn(AuthSession) {
     // https://github.com/strongloop/loopback/issues/1326
     if (options.searchDefaultTokenKeys !== false) {
       params = params.concat(['access_token']);
+      headers = headers.concat(['X-Access-Token', 'authorization']);
       // Adding 'x-jwt-assertion' to headers for supporting JWT Assertion.
-      headers = headers.concat(['X-Access-Token', 'authorization', 'x-jwt-assertion']);
+      let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
+      if (jwtForAccessToken) {
+        headers = headers.concat(['x-jwt-assertion']);
+      }
       cookies = cookies.concat(['access_token', 'authorization']);
     }
 
