@@ -45,7 +45,7 @@
     "lodash": "3.10.1",
     "loopback": "2.25.0",
     "loopback-boot": "git+http://evgit/oecloud.io/loopback-boot.git#v0.9.0",
-    "loopback-component-passport": "git+http://evgit/lior.schindler/loopback-component-passport.git#master",
+    "loopback-component-passport": "git+http://evgit/oecloud.io/loopback-component-passport.git#master",
     "loopback-component-push": "1.7.0",
     "loopback-component-storage": "git+http://evgit/oecloud.io/loopback-component-storage.git#v0.9.0",
     "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#v1.0.0",
