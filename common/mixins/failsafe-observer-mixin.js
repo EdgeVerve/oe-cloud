@@ -8,7 +8,7 @@
 var logger = require('oe-logger');
 var log = logger('failsafe-observer-mixin');
 var async = require('async');
-var UUID = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var os = require('os');
 var process = require('process');
 var currHostName = process.env.HOSTNAME || os.hostname();
@@ -57,7 +57,7 @@ module.exports = function failsafeObserverMixin(Model) {
       if (fn.getId && typeof fn.getId === 'function') {
         return fn.getId();
       }
-      return UUID.v4();
+      return uuidv4();
     }
     var _fn = fn;
     var _id = generateId(_fn);

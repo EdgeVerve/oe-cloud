@@ -16,7 +16,7 @@
 
 
 var bootstrap = require('./bootstrap');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = bootstrap.chai;
 var expect = chai.expect;
 var app = bootstrap.app;
@@ -60,7 +60,7 @@ var dataSource;
 var accessToken = null;
 
 function apiPostRequest(url, postData, callback, done) {
-  var version = uuid.v4();
+  var version = uuidv4();
   postData._version = version;
   api
     .set('Accept', 'application/json')
@@ -338,7 +338,7 @@ describe('Instance Caching Test', function () {
   describe('CRUD tests', function () {
     dataSource = app.datasources[dsName];
     it('Should NOT cache the Test instance after create', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: "Lior",
@@ -367,7 +367,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should cache the Test instance after findById', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: "Lior",
@@ -450,7 +450,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should cache the Test instance after upsert', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Lior',
@@ -491,7 +491,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should cache the Test instance after save', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Lior',
@@ -533,7 +533,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should cache the Test instance after updateAttributes', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Lior',
@@ -577,7 +577,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should clear instance cache after destroyAll', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Ori',
@@ -605,7 +605,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should delete the Test instance from cache after deleteByid', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Tamar',
@@ -633,7 +633,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should delete the Test instance from cache after deleteByid and version', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: 'Tamar',
@@ -661,7 +661,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should clear cache after update', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModel.create({
         name: "Praveen",
         id: id
@@ -687,7 +687,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should delete empty instance in cache after create', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.find({ "where": { "id": id } }, defaultContext, function (err, data) {
         if (err) {
@@ -736,8 +736,8 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should not cache id queries with operators', function (done) {
-      var id1 = uuid.v4();
-      var id2 = uuid.v4();
+      var id1 = uuidv4();
+      var id2 = uuidv4();
       var result1, result2;
       TestModel.create({
         name: "Atul",
@@ -779,7 +779,7 @@ describe('Instance Caching Test', function () {
        * 4. change the db directly in the DB.
        * 5. comper the record by quering again, at this point if the record is cached the result should e not updated.
        */
-      var id = uuid.v4();
+      var id = uuidv4();
 
       apiPostRequest('/' + modelNameNoInstanceCache + 's/', { "name": "value1", "id": id }, apiRequest_find, done);
 
@@ -849,7 +849,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Should not cache in instance cache if disableInstanceCache flag is on, test2', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelNoInstanceCache.create({ "name": modelNameNoInstanceCache, "id": id }, defaultContext, function (err, result) {
         if (err) {
           return done(err);
@@ -875,7 +875,7 @@ describe('Instance Caching Test', function () {
 
   describe('noInstanceCache option on request test', function () {
     it('Programatically - Should bring data from db on an instance query when noInstanceCache is on and insert the new value to instacne cache', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelQueryAndInstanceCache.create({
         name: "noInstanceCacheTest",
         id: id
@@ -914,7 +914,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Rest - Should bring data from db on an instance query when noInstanceCache is on and insert the new value to instacne cache', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelQueryAndInstanceCache.create({
         name: "noInstanceCacheTestRest",
         id: id
@@ -959,7 +959,7 @@ describe('Instance Caching Test', function () {
 
   describe('noQueryCache option on request test', function () {
     it('Programatically - Should bring data from db on an ordinary query when noQueryCache is on and insert the new value to query cache', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelQueryAndInstanceCache.create({
         name: "noQueryCacheTest",
         id: id
@@ -998,7 +998,7 @@ describe('Instance Caching Test', function () {
     });
 
     it('Rest - Should bring data from db on an ordinary query when noQueryCache is on and insert the new value to quey cache', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelQueryAndInstanceCache.create({
         name: "noQueryCacheTestRest",
         id: id
@@ -1044,7 +1044,7 @@ describe('Instance Caching Test', function () {
 
   describe('check short expiration on query cache', function () {
     it('Should bring data from db after item has expired in query cache', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       TestModelQueryAndInstanceCacheShortExp.create({
         name: "shortExpirationTest",
         id: id
@@ -1113,7 +1113,7 @@ describe('Instance Caching Test', function () {
               process.env.CONSISTENT_HASH = originalConsistentHash;
               return done(err);
             } else {
-              var id = uuid.v4();
+              var id = uuidv4();
               TestModelConsistentHashOff.create({
                 name: "consistentHashOffTest",
                 id: id
@@ -1154,7 +1154,7 @@ describe('Instance Caching Test', function () {
 
   describe('Personalization tests', function () {
     xit('Should create two instances with the same id and diffrenet scope, find from cache should still work', function (done) {
-      var id = uuid.v4();
+      var id = uuidv4();
       var result1, result2;
       TestModel.create({
         name: "limits",

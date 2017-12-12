@@ -163,9 +163,11 @@ module.exports = function (BaseActorEntity) {
   };
   BaseActorEntity.prototype.getEnvelopeState = function getEnvelopeState(id, options, cb) {
     var self = this;
-    self.getById(id, options, function (err, actor) {
+    self.constructor.findById(id, options, function (err, actor) {
       if (err) {
         return cb(err);
+      } else if (actor === null) {
+        return cb(new Error('no entity with id ' + id));
       }
       actor.balanceProcess(options, cb);
     });

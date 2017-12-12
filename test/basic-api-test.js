@@ -16,7 +16,7 @@ chai.use(require('chai-things'));
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var baseUrl = bootstrap.basePath;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 describe(chalk.blue('basic-test-api'), function() {
 
@@ -34,7 +34,7 @@ describe(chalk.blue('basic-test-api'), function() {
     };
 
     var accessToken = '';
-    var idValue = uuid.v4();
+    var idValue = uuidv4();
 
     before('create model', function(done) {
         bootstrap.createTestUser(user1, 'admin', done);
@@ -179,7 +179,7 @@ describe(chalk.blue('basic-test-api'), function() {
         var postUrl = url + '?access_token=' + accessToken;
         var data = [{
             name: 'abc1',
-            orgId: uuid.v4(),
+            orgId: uuidv4(),
             birthDate: '2016-01-18',
             fromTime: '2016-01-02T01:00:00.000Z',
             toTime: '2016-01-02T23:00:00.000Z',
@@ -187,7 +187,7 @@ describe(chalk.blue('basic-test-api'), function() {
             field1: 'vasad'
         }, {
             name: 'abc2',
-            orgId: uuid.v4(),
+            orgId: uuidv4(),
             birthDate: '2016-01-19',
             fromTime: '2016-01-02T01:00:00.000Z',
             toTime: '2016-01-02T23:00:00.000Z',

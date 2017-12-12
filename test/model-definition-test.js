@@ -24,7 +24,6 @@ var chai = require('chai');
 chai.use(require('chai-things'));
 var api = bootstrap.api;
 
-//var uuid = require('node-uuid');
 var debug = require('debug')('model-definition-test');
 
 describe(chalk.blue('model-definition-test'), function () {
