@@ -37,6 +37,10 @@ function apiPostRequest(url, postData, callback, done) {
     .end(function (err, res) {
       if (err || res.body.error) {
         log.error(log.defaultContext(), err || (new Error(JSON.stringify(res.body.error))));
+        // pktippa@gmail.com
+        // Not sure why we are looping it, it may lead to infinite loop
+        // and timeout set to 2 secs which is enough to trigger enough requests
+        // to log error to CI console fail the CI with Build log exceeded.
         apiPostRequest(url, postData, callback, done);
         //return done(err || (new Error( err.message || JSON.stringify(res.body.error))));
       } else {
@@ -64,10 +68,13 @@ function apiGetRequest(url, callback, done) {
 
 describe(chalk.blue('batch-job-test'), function () {
   this.timeout(20000);
-  before('login using admin', function fnLogin(done) {
+  // We should login as testuser since we created models using default context with testuser
+  // And if the req.callContext doesnt have testuser info, req.url will fail to update
+  // tenant specific url, resulting in 404 when accessing API's.
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
