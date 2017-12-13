@@ -13,7 +13,7 @@ var bootstrap = require('./bootstrap');
 var models = bootstrap.models;
 var logger = require('oe-logger');
 var log = logger('job-scheduler-test');
-var Uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var loopback = require('loopback');
 
 describe('job-scheduler test', function () {
@@ -27,7 +27,7 @@ describe('job-scheduler test', function () {
     }
   };
   var model;
-  modelDetails._version = Uuid.v4();
+  modelDetails._version = uuidv4();
   before('setup model', function (done) {
     models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function (err, instance) {
       if (err) {
@@ -64,10 +64,10 @@ describe('job-scheduler test', function () {
     var data4 = {
       name: 'test4'
     };
-    data1._version = Uuid.v4();
-    data2._version = Uuid.v4();
-    data3._version = Uuid.v4();
-    data4._version = Uuid.v4();
+    data1._version = uuidv4();
+    data2._version = uuidv4();
+    data3._version = uuidv4();
+    data4._version = uuidv4();
     model.create(data1, bootstrap.defaultContext, function () {
       model.create(data2, bootstrap.defaultContext, function () {
         model.create(data3, bootstrap.defaultContext, function () {
@@ -96,7 +96,7 @@ describe('job-scheduler test', function () {
       'payload': {},
       'enable': true
     };
-    jobConfig._version = Uuid.v4();
+    jobConfig._version = uuidv4();
     models.JobScheduler.create(jobConfig, bootstrap.defaultContext, function (err) {
       if (err) {
         done(err);
@@ -130,7 +130,7 @@ describe('job-scheduler test', function () {
 
         instance.forEach(function (job) {
           job.enable = false;
-          job._newVersion = Uuid.v4();
+          job._newVersion = uuidv4();
           console.log('call job upsert ', job.id, job._version, job._newVersion);
           models.JobScheduler.upsert(job, bootstrap.defaultContext, function (err, updateInstance) {
             if (err) {

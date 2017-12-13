@@ -6,7 +6,7 @@
  */
 /**
  * This mixin is to support version control of a record/instance it adds a new
- * property called _version and auto populate it with uuid.v4() which is a
+ * property called _version and auto populate it with uuidv4() which is a
  * unique number, new version for a record is generated, when a new instance is
  * created or updated.<br><br>
  *
@@ -18,7 +18,7 @@
  * @author Sivankar Jain
  */
 
-var Uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 module.exports = function VersionMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
@@ -63,7 +63,7 @@ module.exports = function VersionMixin(Model) {
     var data = ctx.data || ctx.instance;
     var error;
     if (ctx.isNewInstance) {
-      data._version = data._newVersion || data._version || Uuid.v4();
+      data._version = data._newVersion || data._version || uuidv4();
       delete data._oldVersion;
       delete data._newVersion;
     } else if (ctx.currentInstance) {
@@ -101,7 +101,7 @@ module.exports = function VersionMixin(Model) {
         return next(error);
       }
       data._oldVersion = version;
-      data._version = data._newVersion || Uuid.v4();
+      data._version = data._newVersion || uuidv4();
       delete data._newVersion;
     }
     // TODO replaceById will have ctx.instance, and not
