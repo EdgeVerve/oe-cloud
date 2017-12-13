@@ -110,7 +110,7 @@ describe(chalk.blue('Embed many test'), function () {
       } else {
         var id = res.id;
         var version = res._version;
-        var login = { 'username': 'admin', 'password': 'admin' };
+        var login = { 'username': 'testuser', 'password': 'testuser123' };
         api
           .post(bootstrap.basePath + '/BaseUsers/login')
           .send(login)
