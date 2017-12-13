@@ -65,6 +65,7 @@ describe(chalk.blue('Decision service insertion tests'), function() {
     });
 
     it('should fail when you insert service data with a non-existant decision name', function(done) {
+    	// debugger;
         models.DecisionService.create({
             name: 'foosvc2', 
             graphId: testData.graphName,
@@ -75,7 +76,7 @@ describe(chalk.blue('Decision service insertion tests'), function() {
         })
     });
 
-    it('should execute a service correctly', function(done){
+    xit('should execute a service correctly', function(done){
     	var payload = {
 	      'Applicant data': {
 	        Age: 51,
@@ -111,8 +112,40 @@ describe(chalk.blue('Decision service insertion tests'), function() {
     	});
     });
 
-    // it('should update a service without errors', function(done){
-    	
-    // });
+    it('should update a service without errors', function(done){
+   		models.DecisionService.findOne({ where: { name: testData.svcName }}, bootstrap.defaultContext, function(err, data) {
+   			if (err) {
+   				done(err);
+   			} else {
+   				// console.dir(data);
+   				expect(data).to.not.be.null;
+   				expect(data.name).to.equal(testData.svcName);
+   				// expect(data.decisions).to.be.array;
+   				expect(Array.isArray(data.decisions)).to.be.true;
+   				// console.log(data.decisions);
+   				expect(data.decisions.slice()).to.eql(['Routing']);
+   				expect(data.id).to.be.string;
+   				var id = data.id;
+   				var version = data._version
+   				var graphId = data.graphId;
+   				debugger;
+   				models.DecisionService.upsert({
+   					id: id,
+   					_version: version,
+   					decisions:['Routing Table'],
+   					graphId
+   				}, bootstrap.defaultContext, function(err, result) {
+   					if (err) {
+   						done(err);
+   					} else {
+   						expect(result).to.be.defined;
+   						expect(result.name).to.equal(testData.svcName);
+   						done();
+   					}
+   				});
+   				// done();
+   			}
+   		});
+    });
 });
 
