@@ -74,5 +74,45 @@ describe(chalk.blue('Decision service insertion tests'), function() {
             done();
         })
     });
+
+    it('should execute a service correctly', function(done){
+    	var payload = {
+	      'Applicant data': {
+	        Age: 51,
+	        MaritalStatus: 'M',
+	        EmploymentStatus: 'EMPLOYED',
+	        'ExistingCustomer': false,
+	        'Monthly': {
+	          'Income': 10000,
+	          'Repayments': 2500,
+	          'Expenses': 3000
+	        }
+	      },
+	      'Requested product': {
+	        ProductType: 'STANDARD LOAN',
+	        Rate: 0.08,
+	        Term: 36,
+	        Amount: 100000
+	      },
+	      'Bureau data': {
+	        Bankrupt: false,
+	        CreditScore: 600
+	      }
+	    };
+    	models.DecisionService.invoke('foosvc', payload, bootstrap.defaultContext, (err, result) => {
+    		if (err) {
+    			done(err)
+    		} else {
+    			expect(result).to.eql({
+    				Routing: 'ACCEPT'
+    			});
+    			done();
+    		}
+    	});
+    });
+
+    // it('should update a service without errors', function(done){
+    	
+    // });
 });
 
