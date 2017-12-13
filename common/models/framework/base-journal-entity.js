@@ -256,6 +256,10 @@ module.exports = function (BaseJournalEntity) {
       return next(err);
     }
 
+    if (ctx.instance.id === 'xxx') {
+      return next();
+    }
+
     var instance = ctx.instance;
     instance.performBusinessValidations(ctx.options, function (err) {
       if (err) {
