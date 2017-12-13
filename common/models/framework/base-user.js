@@ -26,8 +26,6 @@ var DEFAULT_RESET_PW_TTL = 15 * 60;
 
 // var app = require('../../../server/server.js');
 
-var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
-
 module.exports = function BaseUser(BaseUser) {
   BaseUser.setup = function baseUserSetup() {
     // We need to call the base class's setup method
@@ -382,6 +380,7 @@ module.exports = function BaseUser(BaseUser) {
     cb = cb || utils.createPromiseCallback();
     var self = this;
 
+    let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
     if (jwtForAccessToken) {
       var jwtConfig = jwtUtil.getJWTConfig();
       var jwtOpts = {};
