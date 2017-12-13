@@ -1,6 +1,6 @@
 var request = require('request');
 var async = require('async');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var chalk = require('chalk');
@@ -178,7 +178,7 @@ request.post(
   function budgetAdd(done) {
         var localTrans = JSON.parse(JSON.stringify(addTrans));
         var addBudgetUrl = baseurl + "InventoryTransactions?access_token=" + token;
-          localTrans._version = uuid.v4();
+          localTrans._version = uuidv4();
           request.post({
             url: addBudgetUrl,
             json: localTrans,
@@ -229,7 +229,7 @@ function deleteAmount() {
     function debit(done) {
         var localTrans = JSON.parse(JSON.stringify(addTransD));
         var addBudgetUrl = baseurl + "InventoryTransactions?access_token=" + token;
-        localTrans._version = uuid.v4();
+        localTrans._version = uuidv4();
         request.post(
               addBudgetUrl, {
                 json: localTrans
