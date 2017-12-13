@@ -63,7 +63,7 @@
             "paths": ["${restApiRoot}"]
         },
         "./middleware/otp-middleware": {
-            "enabled": false,
+            "enabled": true,
             "paths": ["${restApiRoot}"]
         },
         "./middleware/recaptcha-validate": {

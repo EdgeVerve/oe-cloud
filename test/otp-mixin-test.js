@@ -15,7 +15,7 @@ chai.use(require('chai-things'));
 var url = bootstrap.basePath;
 var modelName = 'OTPCountry';
 
-xdescribe(chalk.blue('otp mixin test (DISABLED)'), function() {
+describe(chalk.blue('otp mixin test'), function() {
     this.timeout(20000);
     before('setup test data', function(done) {
         models.ModelDefinition.create({
