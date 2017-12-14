@@ -76,7 +76,7 @@ describe(chalk.blue('Decision service insertion tests'), function() {
         })
     });
 
-    xit('should execute a service correctly', function(done){
+    it('should execute a service correctly', function(done){
     	var payload = {
 	      'Applicant data': {
 	        Age: 51,
@@ -105,7 +105,9 @@ describe(chalk.blue('Decision service insertion tests'), function() {
     			done(err)
     		} else {
     			expect(result).to.eql({
-    				Routing: 'ACCEPT'
+    				Routing: {
+    					Routing: 'ACCEPT'
+    				}
     			});
     			done();
     		}
@@ -132,7 +134,7 @@ describe(chalk.blue('Decision service insertion tests'), function() {
    				models.DecisionService.upsert({
    					id: id,
    					_version: version,
-   					decisions:['Routing Table'],
+   					decisions:['Routing Rules'],
    					graphId
    				}, bootstrap.defaultContext, function(err, result) {
    					if (err) {
