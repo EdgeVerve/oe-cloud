@@ -118,7 +118,7 @@ module.exports = function uiComponent(UIComponent) {
 
       if (rec.gridConfig.modelGrid.length < 4) {
         Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
-          if (key.startsWith('_') || key === 'scope' || key === 'id') {
+          if (key.startsWith('_') || key === 'scope' || key === 'id' || model.definition.rawProperties[key].required) {
             return;
           }
           if (rec.gridConfig.modelGrid.length < 5) {
@@ -513,7 +513,7 @@ module.exports = function uiComponent(UIComponent) {
 
         if (rec.gridConfig.modelGrid.length < 4) {
           Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
-            if (key.startsWith('_') || key === 'scope' || key === 'id') {
+            if (key.startsWith('_') || key === 'scope' || key === 'id' || model.definition.rawProperties[key].required) {
               return;
             }
             if (rec.gridConfig.modelGrid.length < 5) {
