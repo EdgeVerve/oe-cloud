@@ -10,6 +10,12 @@
     "payload": {
       "type": "object"
     },
+    "payloadTxt": {
+      "type": "string"
+    },
+    "atomic": {
+      "type": "boolean"
+    },
     "modelName": {
       "type": "string"
     },

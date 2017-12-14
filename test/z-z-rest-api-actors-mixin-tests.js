@@ -23,6 +23,7 @@ var log = logger('rest-api-actors-mixin-test');
 var api = bootstrap.api;
 
 var accessToken;
+var testAccountId;
 
 function apiRequest(url, postData, callback, done) {
   var version = uuidv4();
@@ -176,6 +177,7 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
 
     //make a transaction with account --> into memory pool
     function proceed(result) {
+      testAccountId = result.body.id;
       log.debug(log.defaultContext(), 'credit the account with 20 --> loading actor to memory and changes quantity in memory');
       var postData =
         {
@@ -210,6 +212,28 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
           }
         });
     }
+
+  });
+
+  it('Get actors balance not through REST', function (done) {
+
+    var defaultOptions = {
+      'ctx': {
+        'remoteUser': 'admin',
+        'tenantId': 'test-tenant'
+      }
+    };
+
+    var actorModel = loopback.findModel('TestAccount-test-tenant', defaultOptions);
+
+    actorModel.prototype.getEnvelopeState(testAccountId, defaultOptions, function (err, result) {
+      if (err) {
+        log.error(err);
+        return done(err);
+      }
+      expect(result.state.stateObj.quantity).to.be.equal(20);
+      return done();
+});
 
   });
 
