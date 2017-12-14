@@ -62,6 +62,19 @@ describe(chalk.blue('model-definition - Programmatic'), function () {
 
 describe(chalk.blue('model-definition - REST'), function () {
 
+  var testUserAccessToken;
+  
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
+
   after('cleaning up', function (done) {
     models.ModelDefinition.destroyAll({}, bootstrap.defaultContext, function (err, result) {
       console.log('Clean Up - Destroyed ModelDefinition');
@@ -85,7 +98,7 @@ describe(chalk.blue('model-definition - REST'), function () {
     };
 
     api
-      .post(modelDefitnionUrl)
+      .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
       .send(postData)
       .expect(200).end(function (err, res) {
         if (err) {
@@ -111,9 +124,21 @@ describe(chalk.blue('tenant-model-definition - REST'), function () {
   var plural = 'ShoppingCartTestRs';
 
   this.timeout(15000);
+  var testUserAccessToken;
+  
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
 
   before('setup --for tenant name added with model name', function (done) {
-    var url = bootstrap.basePath + '/Tenants';
+    var url = bootstrap.basePath + '/Tenants' + '?access_token='+ testUserAccessToken;
     var tenantDetails = {
       'tenantId': tenant,
       'tenantName': 'Testtenant',
@@ -182,7 +207,7 @@ describe(chalk.blue('tenant-model-definition - REST'), function () {
     };
 
     api
-      .post(modelDefitnionUrl)
+      .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
       .set('tenant_id', tenant)
       .send(postData)
       .expect(200).end(function (err, res) {
@@ -206,7 +231,7 @@ describe(chalk.blue('tenant-model-definition - REST'), function () {
     };
 
     api
-      .post(Url)
+      .post(Url + '?access_token=' + testUserAccessToken)
       .set('tenant_id', tenant)
       .send(postData)
       .expect(200).end(function (err, res) {
@@ -225,7 +250,7 @@ describe(chalk.blue('tenant-model-definition - REST'), function () {
     var Url = bootstrap.basePath + '/' + plural;
 
     api
-      .get(Url)
+      .get(Url + '?access_token=' + testUserAccessToken)
       .set('tenant_id', 'tenantTest')
       .send()
       .expect(200).end(function (err, res) {
