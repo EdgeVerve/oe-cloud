@@ -33,7 +33,7 @@
     "systemId": "temporaryId",
     "disablecaching": false,
     "modelstocache": [
-        "ACL",
+        "BaseACL",
         "ModelDefinition",
         "AppConfig"
     ],
