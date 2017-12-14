@@ -618,6 +618,7 @@ module.exports = function (BaseActorEntity) {
           }
           if (ds.name === 'loopback-connector-postgresql') {
             for (var x = 0; x < returnedInstances.length; x++) {
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
