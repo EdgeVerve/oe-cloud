@@ -233,9 +233,35 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
       }
       expect(result.state.stateObj.quantity).to.be.equal(20);
       return done();
-});
+    });
 
   });
+
+  it('clear actor memory', function (done) {
+    
+        var defaultOptions = {
+          'ctx': {
+            'remoteUser': 'admin',
+            'tenantId': 'test-tenant'
+          }
+        };
+    
+        var actorModel = loopback.findModel('TestAccount-test-tenant', defaultOptions);
+    
+        actorModel.findById(testAccountId, defaultOptions, function (err, result) {
+          if (err) {
+            log.error(err);
+            return done(err);
+          }
+          result.clearActorMemory(defaultOptions, function (err, cTime) {
+            if (err) {
+              log.error(err);
+              return done(err);
+            }
+            return done();
+          });
+        });
+      });
 
   it('Get actors with filter other than id --> actors from db', function (done) {
     log.debug(log.defaultContext(), 'get the actor and check the quantity is 0');
