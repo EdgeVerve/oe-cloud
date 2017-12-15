@@ -40,22 +40,20 @@ module.exports = function (DecisionService) {
     //       next(new Error(errStr));
     //     }
     //   }
-    
+
     // });
 
-    DecisionGraph.findById(dataObj.graphId, ctx.options, function(err, graph){
-      if (err) { 
+    DecisionGraph.findById(dataObj.graphId, ctx.options, function (err, graph) {
+      if (err) {
         next(err);
+      } else if (decisions.every(p => p in graph.data)) {
+        next();
       } else {
-        if (decisions.every(p => p in graph.data)) {
-          next();
-        } else {
-          var idx = decisions.findIndex(d => !(d in graph.data));
-          var item = decisions[idx];
-          var errStr = util.format('Decision "%s" does not belong to the decision graph: "%s"', item, graph.name);
-          log.error(errStr);
-          next(new Error(errStr));
-        }
+        var idx = decisions.findIndex(d => !(d in graph.data));
+        var item = decisions[idx];
+        var errStr = util.format('Decision "%s" does not belong to the decision graph: "%s"', item, graph.name);
+        log.error(errStr);
+        next(new Error(errStr));
       }
     });
   });
