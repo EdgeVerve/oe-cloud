@@ -14,7 +14,7 @@
 var _ = require('lodash');
 var loopback = require('loopback');
 var logger = require('oe-logger');
-// @jsonwebtoken is internal dependency of @passport-jwt
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var log = logger('BaseUser');
 var async = require('async');

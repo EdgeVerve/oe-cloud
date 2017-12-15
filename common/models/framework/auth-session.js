@@ -4,7 +4,7 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// @jsonwebtoken is internal dependency of @passport-jwt
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 const loopback = require('loopback');
 const log = require('oe-logger')('auth-session');

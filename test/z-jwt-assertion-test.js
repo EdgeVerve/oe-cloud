@@ -14,6 +14,7 @@ var loopback = require('loopback');
 var models = bootstrap.models;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var jwtUtil = require('../lib/jwt-token-util');
 var api = supertest(app);
