@@ -49,7 +49,8 @@ describe('JWT For Access Token', function(){
         expect(res.body).to.be.defined;
         expect(res.body.id).to.be.defined;
         expect(res.body.username).to.be.defined;
-        expect(res.body.id).to.be.equal(20);
+        // Converting to String & comparing the same, since id fields are string type in Postgres, Oracle.
+        expect(res.body.id.toString()).to.be.equal('20');
         expect(res.body.username).to.be.equal('testuser');
         done();
       });
@@ -71,7 +72,8 @@ describe('JWT For Access Token', function(){
         expect(res.body).to.be.defined;
         expect(res.body.id).to.be.defined;
         expect(res.body.username).to.be.defined;
-        expect(res.body.id).to.be.equal(20);
+        // Converting to String & comparing the same, since id fields are string type in Postgres, Oracle.
+        expect(res.body.id.toString()).to.be.equal('20');
         expect(res.body.username).to.be.equal('testuser');
         done();
       });
