@@ -347,16 +347,17 @@ describe('failsafe-observer-mixin', function () {
                                         if (err) {
                                             done(err);
                                         } else {
-                                            //expect(results[0].status).to.be.equal('RecoveryFinished');
+                                            expect(results[0].status).to.be.equal('RecoveryFinished');
                                         }
                                     });
-                                    done();
+                                    //done();
                                 }
                             });
+                            done();
                         }
                     });
                 }
-        });}, 1000);
+        });}, 5000);
     });
 
     it('should rerun an after save observer on base model untill it doesn\'t return an error', function (done) {
