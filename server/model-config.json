@@ -7,6 +7,7 @@
             "../common/models",
             "../common/models/ui",
             "../common/models/framework",
+            "../common/models/test",
             "./models",
             "loopback-component-passport/lib/models"
         ],
@@ -276,6 +277,15 @@
     },
     "Lock": {
         "public": false,
+        "dataSource": "db"
+    },"Note": {
+        "public": true,
+        "dataSource": "db"
+    }, "NoteFailSafeTest": {
+        "public": true,
+        "dataSource": "db"
+    }, "FailedObserverLog": {
+        "public": true,
         "dataSource": "db"
     }
 }

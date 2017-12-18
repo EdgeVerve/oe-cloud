@@ -1,0 +1,34 @@
+{
+  "name": "FailedObserverLog",
+  "plural": "FailedObserverLogs",    
+  "base": "PersistedModel",
+  "description": "Log of failed observer execution",
+  "idInjection": true,
+  "properties": {
+    "modelName": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    }, 
+    "timestamp": {
+      "type": "Date"
+    },
+    "hostName": {
+      "type": "string"
+   }, 
+   "hostUUID": {
+     "type": "string"
+   }, 
+   "updated": {
+     "type": "Date"
+   },
+   "retries": {
+     "type": "number"
+   }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

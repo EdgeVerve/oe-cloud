@@ -1,3 +1,4 @@
+
 /*
 ©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
 The EdgeVerve proprietary software program ("Program"), is protected by copyrights laws, international treaties and other pending or existing intellectual property rights in India, the United States and other countries.
@@ -60,18 +61,21 @@ describe('failsafe-observer-mixin', function () {
     before('change event history manager constants', function (done) {
         backupConstants.eventReliabilityReplayThreshold = app.get('eventReliabilityReplayThreshold');
         backupConstants.eventReliabilityReplayInterval = app.get('eventReliabilityReplayInterval');
-        backupConstants.eventReliabilityDbPersistenceInterval = app.get('eventReliabilityDbPersistenceInterval');
+        backupConstants.eventReliabilityMaxRetryInterval = app.get('eventReliabilityMaxRetryInterval');
         app.set('eventReliabilityReplayThreshold', 100);
         app.set('eventReliabilityReplayInterval', 1000);
-        app.set('eventReliabilityDbPersistenceInterval', 2000);
-        app.set('eventReliabilityMaxRetry', 4);
+        app.set('eventReliabilityMaxRetryInterval', 4000);
+        // backupConstants.eventReliabilityDbPersistenceInterval = app.get('eventReliabilityDbPersistenceInterval');
+        // app.set('eventReliabilityDbPersistenceInterval', 2000);
+        // app.set('eventReliabilityMaxRetry', 4);
         eventHistoryManager.config(app);
         done();
     });
     after('restore event history manager constants', function (done) {
         app.set('eventReliabilityReplayThreshold', backupConstants.eventReliabilityReplayThreshold);
         app.set('eventReliabilityReplayInterval', backupConstants.eventReliabilityReplayInterval);
-        app.set('eventReliabilityDbPersistenceInterval', backupConstants.eventReliabilityDbPersistenceInterval);
+        app.set('eventReliabilityMaxRetryInterval', backupConstants.eventReliabilityMaxRetryInterval);
+        // app.set('eventReliabilityDbPersistenceInterval', backupConstants.eventReliabilityDbPersistenceInterval);
         eventHistoryManager.config(app);
         done();
     });
@@ -283,6 +287,7 @@ describe('failsafe-observer-mixin', function () {
     });
 
     it('should rerun an after save observer untill it doesn\'t return an error', function (done) {
+        // maya
         var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         model.observe('after save', function (ctx, next) {
@@ -378,21 +383,30 @@ describe('failsafe-observer-mixin', function () {
         });
     });
 
-    it('should not rerun an after save observer after MAX_RETRY times (set to 4)', function (done) {
+    it('should not rerun an after save observer after RETRY_TIME_INTERVAL (set to 4000ms)', function (done) {
         var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
+        var startTime = Date.now();
+        var RETRY_TIME_INTERVAL = app.get('eventReliabilityMaxRetryInterval');
+        var REPLAY_TIME_INTERVAL = app.get('eventReliabilityReplayInterval');
+
         model.observe('after save', function (ctx, next) {
-            if (counter === 4) {
-                setTimeout(function () {
-                    done();
-                }, 5000);
-            }
-            if (counter < 5) {
-                counter++;
+            if (counter === 0) {
+                counter ++;
+                setTimeout(()=> {
+                    if (counter === 1){
+                        // next();
+                        done();
+                    } else {
+                        // next();
+                        done(new Error('observer ran too many times'));
+                    }
+                }, RETRY_TIME_INTERVAL * 2);
+                next(new Error('testError' + counter));
+            } else if (Date.now() < startTime + app.get('eventReliabilityMaxRetryInterval')){
                 next(new Error('testError' + counter));
             } else {
-                next();
-                done(new Error('observer ran too many times'));
+                counter++;
             }
         });
         model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
@@ -401,4 +415,38 @@ describe('failsafe-observer-mixin', function () {
             }
         });
     });
+
+
+    it('should create a log record for failed observer', function (done) {
+        var model = loopback.getModel(modelName, defaultContext);
+        var counter = 0;
+        var RETRY_TIME_INTERVAL = app.get('eventReliabilityMaxRetryInterval');
+        var version = uuid.v4();
+
+        model.observe('after save', function (ctx, next) {
+            if (counter === 0) {
+                counter ++;
+                setTimeout(()=> {
+                    var LogModel = loopback.getModel("FailedObserverLog", defaultContext);
+                    var query = { where: {'version': version}, fetchDeleted: true };
+                    LogModel.find(query, defaultContext, function (error, instance) {
+                        if (error || !instance){
+                            return done(new Error('A log record was not created for observer failed execution.'));
+                        }
+                        return done();
+                    });
+                }, RETRY_TIME_INTERVAL * 2);
+                next(new Error('testError' + counter));
+            } else {
+                counter++;
+                next(new Error('testError' + counter));
+            };
+        });
+        model.create({ name: 'test', _version: version }, defaultContext, function (err, res) {
+            if (err) {
+                done(err);
+            }
+        });
+    });
+
 });
