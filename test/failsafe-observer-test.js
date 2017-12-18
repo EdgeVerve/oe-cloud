@@ -134,7 +134,6 @@ describe('failsafe-observer-mixin', function () {
                 cb();
             }
         });
-
     }
 
     afterEach('delete model instances', function (done) {
