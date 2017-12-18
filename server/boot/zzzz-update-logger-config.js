@@ -9,9 +9,11 @@ var loggingModule = require('oe-logger');
 var log = loggingModule('update-logger-config');
 var config;
 var configStr = process.env.LOGGER_CONFIG;
+var foundValidConfigFromEnv;
 if (configStr) {
   try {
     config = JSON.parse(process.env.LOGGER_CONFIG);
+    foundValidConfigFromEnv = true;
   } catch (ex) {
     // console.error('Error parsing LOGGER_CONFIG environment variable.', ex.message);
     log.error(log.defaultContext(), 'Error parsing LOGGER_CONFIG environment variable.', ex.message);
@@ -29,7 +31,7 @@ if (!config) {
   };
 }
 
-function getModelFromConfig(callback) {
+function getModelFromConfig(saveToDb, callback) {
   var levelMap = {
     'trace': 10,
     'debug': 20,
@@ -49,14 +51,18 @@ function getModelFromConfig(callback) {
         actualConfig.data[key] = levelMap[levelInServerConfig];
       }
     });
-    var loggerConfig = loopback.findModel('LoggerConfig');
-    loggerConfig.create(actualConfig, { tenantId: 'default' }, function loggerConfigCreate(err) {
-      if (err) {
-        log.error(log.defaultContext(), 'couldn\'t create a loggerConfig instance in the db');
-        return callback(err);
-      }
+    if (saveToDb) {
+      var loggerConfig = loopback.findModel('LoggerConfig');
+      loggerConfig.create(actualConfig, { tenantId: 'default' }, function loggerConfigCreate(err) {
+        if (err) {
+          log.error(log.defaultContext(), 'couldn\'t create a loggerConfig instance in the db');
+          return callback(err);
+        }
+        return callback(null, actualConfig);
+      });
+    } else {
       return callback(null, actualConfig);
-    });
+    }
   } else {
     log.warn(log.defaultContext(), 'tried to fetch config from file - config was badly formatted');
     return callback(new Error('tried to fetch config from file - config was badly formatted'));
@@ -72,7 +78,7 @@ module.exports = function getLoggerConfig(app, done) {
     }
     if (!model || model === {}) {
       log.debug(log.defaultContext(), 'did not find any logger configuration in the db.');
-      getModelFromConfig(function getModelFromConfig(err, result) {
+      getModelFromConfig(true, function getModelFromConfig(err, result) {
         if (err) {
           return done(err);
         }
@@ -92,7 +98,7 @@ module.exports = function getLoggerConfig(app, done) {
     var currentLogger;
 
     log.debug(log.defaultContext(), 'found model was ', model);
-    var defaultLevel = model.data.default || 70;
+    var defaultLevel = model.data.default || 30;
     var data = model.data;
     if (!data) {
       log.error(log.defaultContext(), 'data cannot be empty');
@@ -130,8 +136,17 @@ module.exports = function getLoggerConfig(app, done) {
   }
 
   function dataUpdater() {
-    var loggerConfig = loopback.findModel('LoggerConfig');
-    loggerConfig.findOne({}, { tenantId: 'default' }, updateLogArray);
+    if (foundValidConfigFromEnv) {
+      getModelFromConfig(false, function getModelFromConfig(err, result) {
+        if (err) {
+          return done(err);
+        }
+        return updateConfigInMemory(result, done);
+      });
+    } else {
+      var loggerConfig = loopback.findModel('LoggerConfig');
+      loggerConfig.findOne({}, { tenantId: 'default' }, updateLogArray);
+    }
   }
   // loads logger config to/from the db depending on if it exists or not
   dataUpdater();

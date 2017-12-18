@@ -83,7 +83,8 @@
     "designer": {
         "installationPath": "client/bower_components",
         "mountPath": "/designer",
-        "templatePath": []
+        "templatePath": [],
+        "modules": []
     },
     "metadataModelList": {
         "ModelDefinition": true,

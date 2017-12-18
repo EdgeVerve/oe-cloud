@@ -9,7 +9,7 @@ const Passport = require('passport');
 const logger = require('oe-logger');
 const log = logger('JWT-Assertion');
 const app = require('../server').app;
-const uuid = require('node-uuid');
+const uuidv4 = require('uuid/v4');
 const jwtUtil = require('../../lib/jwt-token-util');
 /**
  * This Auth middleware is responsible for JWT authentication strategy.
@@ -111,7 +111,7 @@ module.exports = function JWTAssertionFn(options) {
                   }
                   createAccessTokenAndNext(u, req, rolesToAdd, next);
                 } else {
-                  userObj.create({ username: username, email: email, password: uuid.v4() }, req.callContext, (err, newUser) => {
+                  userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
                     if (err) {
                       return next();
                     }

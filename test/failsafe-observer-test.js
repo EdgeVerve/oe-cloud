@@ -18,7 +18,7 @@ var expect = chai.expect;
 var models = bootstrap.models;
 var eventHistoryManager = require('../lib/event-history-manager');
 var debug = require('debug')('failsafe-observer-test');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var loopback = require('loopback');
 var os = require('os');
 var currHostName = os.hostname();
@@ -190,7 +190,7 @@ describe('failsafe-observer-mixin', function () {
         });
         expect(model._fsObservers['after save'].observers.length).to.be.equal(observerLength + 1);
         expect(model._fsObservers['after save'].observerIds.length).to.be.equal(observerLength + 1);
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -216,7 +216,7 @@ describe('failsafe-observer-mixin', function () {
             }
             counter++;
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -240,7 +240,7 @@ describe('failsafe-observer-mixin', function () {
             }
             counter++;
         });
-        childModel.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        childModel.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -262,7 +262,7 @@ describe('failsafe-observer-mixin', function () {
             }
             counter++;
         });
-        childModel.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (error, res) {
+        childModel.create({ name: 'test', _version: uuidv4() }, defaultContext, function (error, res) {
             expect(error).to.be.equal(err);
         });
     });
@@ -281,7 +281,7 @@ describe('failsafe-observer-mixin', function () {
             }
             counter++;
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (error, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (error, res) {
             expect(error).to.be.equal(err);
         });
     });
@@ -302,7 +302,7 @@ describe('failsafe-observer-mixin', function () {
                 next();
             }
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -324,7 +324,7 @@ describe('failsafe-observer-mixin', function () {
                 next();
             }
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 return done(err);
             }
@@ -355,9 +355,10 @@ describe('failsafe-observer-mixin', function () {
                                             expect(results[0].status).to.be.equal('RecoveryFinished');
                                         }
                                     });
-                                    done();
+                                    //done();
                                 }
                             });
+                            done();
                         }
                     });
                 }
@@ -376,7 +377,7 @@ describe('failsafe-observer-mixin', function () {
                 done();
             }
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -409,7 +410,7 @@ describe('failsafe-observer-mixin', function () {
                 counter++;
             }
         });
-        model.create({ name: 'test', _version: uuid.v4() }, defaultContext, function (err, res) {
+        model.create({ name: 'test', _version: uuidv4() }, defaultContext, function (err, res) {
             if (err) {
                 done(err);
             }
@@ -421,7 +422,7 @@ describe('failsafe-observer-mixin', function () {
         var model = loopback.getModel(modelName, defaultContext);
         var counter = 0;
         var RETRY_TIME_INTERVAL = app.get('eventReliabilityMaxRetryInterval');
-        var version = uuid.v4();
+        var version = uuidv4();
 
         model.observe('after save', function (ctx, next) {
             if (counter === 0) {
