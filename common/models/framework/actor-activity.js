@@ -19,6 +19,13 @@ module.exports = function (ActorActivity) {
       Model.findOrCreate({where: {'modelName': 'xxx' }}, {'modelName': 'xxx'}, options, function (err, instance, created) {
         if (err) {
           log.debug('did not create dummy record ActorActivity');
+        } else if (created) {
+          var modelQuery = 'CREATE INDEX myindex ON public.actoractivity (modelname, entityid, seqnum)';
+          Model.dataSource.connector.query(modelQuery, [], options, function (err, result) {
+            if (err) {
+              log.debug('could not create index on actoractivity');
+            }
+          });
         }
       });
     }
