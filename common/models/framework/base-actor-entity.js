@@ -427,7 +427,9 @@ module.exports = function (BaseActorEntity) {
   };
 
   BaseActorEntity.prototype.MAX_RETRY_COUNT = 10;
-
+  BaseActorEntity.prototype.processPendingMessage = function (message, atomicAmount) {
+    return atomicAmount;
+  };
 
   var actualCalculate = function (envelope, actorData, self, options, cb) {
     var messages = envelope.msg_queue;
@@ -600,17 +602,8 @@ module.exports = function (BaseActorEntity) {
           }
         };
       } else if (ds.name === 'loopback-connector-postgresql') {
-        query = 'select * from TRANSMODEL where id in ( select id from ' +
-        '(SELECT id, atomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as s, ' +
-        ' nonatomicactivitieslist, generate_subscripts(atomicactivitieslist,1) as t FROM ' +
-        ' TRANSMODEL ) as i ' +
-        ' where (cast( atomicactivitieslist[s]->>\'seqNum\' as int)  >= ' + state.seqNum  +
-        ' and atomicactivitieslist[s]->>\'modelName\' = \'' + envelope.modelName + '\'' +
-        ' and atomicactivitieslist[s]->>\'entityId\' =  \'' + envelope.actorId + '\') or ' +
-        ' (cast( nonatomicactivitieslist[t]->>\'seqNum\' as int)  >= ' + state.seqNum  +
-        ' and nonatomicactivitieslist[t]->>\'modelName\' = \'' + envelope.modelName + '\'' +
-        ' and nonatomicactivitieslist[t]->>\'entityId\' =  \'' + envelope.actorId + '\')' +
-        ')';
+        query = 'select * from public.actoractivity where modelname = \'' + envelope.modelName + '\'' +
+        ' and entityid = \'' + envelope.actorId + '\' and seqnum > ' + envelope.seqNum + ' order by seqnum asc;';
       } else {
         query = { where: { startup: { regexp: '[0-9a-zA-Z]*' + envelope.modelName + envelope.actorId + '[0-9a-zA-Z]*' } } };
       }
@@ -626,13 +619,22 @@ module.exports = function (BaseActorEntity) {
             log.debug('did not find journal instances in startup');
             return asyncCb();
           }
-          var filterBy = createFilterObj(envelope, state, currentJournalEntityId);
-          returnedInstances = filterResults(returnedInstances, filterBy);
-          for (var i = 0; i < returnedInstances.length; i++) {
-            var startingObj = { stateObj: state.stateObj, seqNum: state.seqNum };
-            self.updateStateData(returnedInstances[i].atomicActivitiesList, startingObj, state, self.atomicInstructions);
-            self.updateStateData(returnedInstances[i].nonAtomicActivitiesList, startingObj, state, self.nonAtomicInstructions);
-            log.debug(options, self._type, ' ', self.id, ' Starting Balance ', self);
+          if (ds.name === 'loopback-connector-postgresql') {
+            for (var x = 0; x < returnedInstances.length; x++) {
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
+              var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
+              state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
+              state.seqNum = returnedInstances[x].seqNum;
+            }
+          } else {
+            var filterBy = createFilterObj(envelope, state, currentJournalEntityId);
+            returnedInstances = filterResults(returnedInstances, filterBy);
+            for (var i = 0; i < returnedInstances.length; i++) {
+              var startingObj = { stateObj: state.stateObj, seqNum: state.seqNum };
+              self.updateStateData(returnedInstances[i].atomicActivitiesList, startingObj, state, self.atomicInstructions);
+              self.updateStateData(returnedInstances[i].nonAtomicActivitiesList, startingObj, state, self.nonAtomicInstructions);
+              log.debug(options, self._type, ' ', self.id, ' Starting Balance ', self);
+            }
           }
           envelope.processedSeqNum = envelope.seqNum = state.seqNum;
           state.updateAttributes(state.__data, options, function (error, state) {
