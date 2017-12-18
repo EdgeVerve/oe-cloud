@@ -247,6 +247,7 @@ function invokeFailsafeObserver(ctx, operation, next) {
         }
         return next(err);
       }
+      eventHistroyManager.updateRanOnce(ctx.Model.modelName, version, operation);
       return next();
     });
   } else {
