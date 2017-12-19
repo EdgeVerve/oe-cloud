@@ -278,12 +278,6 @@
     "Lock": {
         "public": false,
         "dataSource": "db"
-    },"Note": {
-        "public": true,
-        "dataSource": "db"
-    }, "NoteFailSafeTest": {
-        "public": true,
-        "dataSource": "db"
     }, "FailedObserverLog": {
         "public": true,
         "dataSource": "db"
