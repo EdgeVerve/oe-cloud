@@ -24,6 +24,10 @@
     "validationRules": {
       "type": ["string"],
       "default": []
+    },
+    "isService" : {
+      "type" : "boolean",
+      "default": "false"
     }
   },
   "cacheable": true,

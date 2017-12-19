@@ -1,0 +1,1 @@
+{"Approve":"decision table(input expression list : ['amount','type','experience'],outputs : ['errMessage','isValid'],input values list : [[],[],[]],output values : [[],[]],rule list : [['<=1000','\"PERSONAL_LOAN\"','>6','-','True'],['-','-','-','\"NOT APPROVED\"','False']],id : 'Approve',hit policy : 'V')"}
