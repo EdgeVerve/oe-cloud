@@ -9,6 +9,9 @@ var log = logger('actor-activity');
 
 module.exports = function (ActorActivity) {
   ActorActivity.on('dataSourceAttached', function onAttach(Model) {
+    Model.prototype.initActorTable(Model);
+  });
+  ActorActivity.prototype.initActorTable = function (Model) {
     var options = {
       'ctx': {
         'remoteUser': 'admin',
@@ -29,5 +32,5 @@ module.exports = function (ActorActivity) {
         }
       });
     }
-  });
+  }
 };
