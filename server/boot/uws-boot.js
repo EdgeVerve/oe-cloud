@@ -15,18 +15,17 @@ module.exports = function (app, cb) {
   var ProxyContext = require('../../lib/proxy-context');
   var methods = {};
   var socket = c;
-  var counter = 0;
   socket.on('process', function (adata) {
     // var data = adata.data;
     var data = adata.msg;
-    ++counter;
-    if ( counter > 500 ) {
-      counter = 0;
-    }
+    var err = adata.err;
     var callback = function (err, result) {
       adata.msg = {error: err, result: result};
       socket.emit('processed', adata);
     };
+    if (err) {
+      return callback(err);
+    }
     var method = methods[data.fullMethodName];
     if (!method) {
       method = remotes.findMethod(data.fullMethodName);
