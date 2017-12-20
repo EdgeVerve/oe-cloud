@@ -45,10 +45,10 @@ describe(chalk.blue('actor-pattern-test'), function () {
   this.timeout(40000);
   var afterTest = {};
 
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
