@@ -45,10 +45,10 @@ function apiRequest(url, postData, callback, done) {
 describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
   this.timeout(30000);
 
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
@@ -262,6 +262,28 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
           });
         });
       });
+
+  it('check actor activity table for postgres', function (done) {
+    
+    var options = {
+      'ctx': {
+        'remoteUser': 'admin',
+        'tenantId': 'default'
+      }
+    };
+
+    var actorActivityModel = loopback.findModel('ActorActivity', options);
+
+    actorActivityModel.prototype.initActorTable(actorActivityModel);
+
+    actorActivityModel.findById('xxx', options, function (err, instance, created) {
+      if (err) {
+        log.error(err);
+        return done(err);
+      }
+      done();
+    });
+  });
 
   it('Get actors with filter other than id --> actors from db', function (done) {
     log.debug(log.defaultContext(), 'get the actor and check the quantity is 0');
