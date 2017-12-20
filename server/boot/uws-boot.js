@@ -8,7 +8,6 @@ module.exports = function (app, cb) {
   var c = new WSClient(cfg);
 
   c.open(()=>{
-    c.connected = true;
     app.set('oe-tx-router', c);
   });
   var remotes = app.remotes();
