@@ -158,11 +158,11 @@ describe('Instance Caching Test', function () {
   var TestModelQueryAndInstanceCache = null;
   var TestModelQueryAndInstanceCacheShortExp = null;
   this.timeout(20000);
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     dataSource = app.datasources[dsName];
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api

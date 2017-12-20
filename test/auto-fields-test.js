@@ -85,9 +85,12 @@ describe('Auto Fields Test', function() {
         expect(model).not.to.be.undefined;
         var data = {
         };
+        // Passing access_token as query param, rather than header, it was not used anywhere
+        // It was passing before since jwt-assertion.js middleware gets triggered by default
+        // and get it authenticated with x-jwt-assertion which was set in bootstrap.js
+        // , i.e. if we set the jwt-assertion to "enabled": false, the test case is getting failed.
         api.set('Accept', 'application/json')
-          .post(bootstrap.basePath + '/AutoFieldTestModels')
-          .set('accessToken', accessToken)
+          .post(bootstrap.basePath + '/AutoFieldTestModels?access_token='+ accessToken)
           .set('somekey', 'k')
           //.set('Cookie', [_version])
           .send(data)

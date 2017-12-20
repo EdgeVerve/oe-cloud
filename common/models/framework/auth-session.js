@@ -4,12 +4,14 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// @jsonwebtoken is internal dependency of @passport-jwt
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
+const loopback = require('loopback');
+const log = require('oe-logger')('auth-session');
+const uuidv4 = require('uuid/v4');
 var jwtUtil = require('../../../lib/jwt-token-util');
 
-var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
-
+const cachedTokens = {};
 module.exports = function AuthSessionFn(AuthSession) {
   AuthSession.findForRequest = function authSessionFindForRequestFn(req, options, cb) {
     if (typeof cb === 'undefined' && typeof options === 'function') {
@@ -31,6 +33,7 @@ module.exports = function AuthSessionFn(AuthSession) {
     }
 
     if (id && id !== 'undefined') {
+      let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
       // json web token contains 3 parts separated by .(dot)
       if (jwtForAccessToken && id.split('.').length === 3) {
         var jwtConfig = jwtUtil.getJWTConfig();
@@ -38,14 +41,78 @@ module.exports = function AuthSessionFn(AuthSession) {
         jwtOpts.issuer = jwtConfig.issuer;
         jwtOpts.audience = jwtConfig.audience;
         var secretOrPrivateKey = jwtConfig.secretOrKey;
-        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, payload) {
+        jwt.verify(id, secretOrPrivateKey, jwtOpts, function (err, parsedJWT) {
           if (err) {
+            err.statusCode = 401;
             cb(err);
           } else {
-            // Setting "id" which will be retrieved in post-auth-context-populator
-            // for setting callContext.accessToken
-            payload.id = id;
-            cb(null, new AuthSession(payload));
+            var trustedApp = parsedJWT[jwtConfig.keyToVerify];
+            var userObj = loopback.getModelByType('BaseUser');
+            var username = '';
+            if (trustedApp) {
+              var rolesToAdd = [];
+              var appObj = loopback.getModelByType('TrustedApp');
+              var query = { appId: trustedApp };
+              appObj.findOne({
+                where: query
+              }, req.callContext, (err, trusted) => {
+                if (err) {
+                  log.error(req.callContext, 'Error while Querying TrustedApp', err);
+                  return cb();
+                }
+                if (trusted && req.headers.username && req.headers.email) {
+                  username = req.headers.username;
+                  var email = req.headers.email;
+                  // verify supported Roles
+                  if (req.headers.roles && trusted.supportedRoles) {
+                    JSON.parse(req.headers.roles).forEach(function (element) {
+                      if (trusted.supportedRoles.some(x => x === element)) {
+                        rolesToAdd.push({ 'id': element, 'type': 'ROLE' });
+                      }
+                    });
+                  }
+                  if (rolesToAdd && rolesToAdd.length > 0) {
+                    req.callContext.principals = rolesToAdd ? rolesToAdd : req.callContext.principals;
+                  }
+                  userObj.findOne({ where: { username } }, req.callContext, (err, u) => {
+                    if (err) {
+                      log.error(req.callContext, 'Error Querying User Information', err);
+                      return cb();
+                    }
+                    if (u) {
+                      parsedJWT.id = id;
+                      parsedJWT.userId = u.id;
+                      cb(null, new AuthSession(parsedJWT));
+                    } else {
+                      userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
+                        if (err) {
+                          return cb();
+                        }
+                        if (newUser) {
+                          // Setting "id" which will be retrieved in post-auth-context-populator
+                          // for setting callContext.accessToken
+                          parsedJWT.id = id;
+                          parsedJWT.userId = newUser.id;
+                          cb(null, new AuthSession(parsedJWT));
+                        } else {
+                          cb();
+                        }
+                      });
+                    }
+                  });
+                } else {
+                  // Setting "id" which will be retrieved in post-auth-context-populator
+                  // for setting callContext.accessToken
+                  parsedJWT.id = id;
+                  checkUserExistence(parsedJWT, req, userObj, cb);
+                }
+              });
+            } else {
+              // Setting "id" which will be retrieved in post-auth-context-populator
+              // for setting callContext.accessToken
+              parsedJWT.id = id;
+              checkUserExistence(parsedJWT, req, userObj, cb);
+            }
           }
         });
       } else {
@@ -78,6 +145,41 @@ module.exports = function AuthSessionFn(AuthSession) {
     }
   };
 
+  function checkUserExistence(parsedJWT, req, userObj, callback) {
+    var username = parsedJWT.username || parsedJWT.email || '';
+
+    // If token is available in cachedTokens, return from cachedTokens.
+    if (cachedTokens[username]) {
+      return callback(null, cachedTokens[username]);
+    }
+
+    // If parsedJWT contains the userId information, no need to query the DB.
+    if (parsedJWT.userId) {
+      cachedTokens[username] = new AuthSession(parsedJWT);
+      return callback(null, cachedTokens[username]);
+    }
+
+    userObj.findOne({
+      where: {
+        username
+      }
+    }, req.callContext, (err, u) => {
+      if (err) {
+        return callback(err);
+      }
+      if (u) {
+        parsedJWT.userId = u.id;
+        cachedTokens[username] = new AuthSession(parsedJWT);
+        callback(null, cachedTokens[username]);
+      } else {
+        log.error(req.callContext, 'User not found!!!');
+        const error = new Error('User not found!!');
+        error.statusCode = 401;
+        return callback(error);
+      }
+    });
+  }
+
   function tokenIdForRequest(req, options) {
     var params = options.params || [];
     var headers = options.headers || [];
@@ -90,6 +192,11 @@ module.exports = function AuthSessionFn(AuthSession) {
     if (options.searchDefaultTokenKeys !== false) {
       params = params.concat(['access_token']);
       headers = headers.concat(['X-Access-Token', 'authorization']);
+      // Adding 'x-jwt-assertion' to headers for supporting JWT Assertion.
+      let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
+      if (jwtForAccessToken) {
+        headers = headers.concat(['x-jwt-assertion']);
+      }
       cookies = cookies.concat(['access_token', 'authorization']);
     }
 

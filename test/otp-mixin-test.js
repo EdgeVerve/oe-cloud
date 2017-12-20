@@ -17,6 +17,19 @@ var modelName = 'OTPCountry';
 
 describe(chalk.blue('otp mixin test'), function () {
   this.timeout(20000);
+  var testUsertoken;
+  
+  before('Create testuser Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUsertoken = returnedAccesstoken;
+      done();
+    });
+  });
+
   before('setup test data', function (done) {
     models.ModelDefinition.create(
       {
@@ -73,7 +86,7 @@ describe(chalk.blue('otp mixin test'), function () {
 
   xit('t2 should send otp to user loginOtp api is called', function (done) {
     var postData = { 'username': 'test', 'password': 'test' };
-    var loginUrl = bootstrap.basePath + '/BaseUsers/loginOTP';
+    var loginUrl = bootstrap.basePath + '/BaseUsers/loginOTP' + '?access_token=' + testUsertoken;
     api.post(loginUrl)
       .set('Accept', 'application/json')
       .send(postData)
@@ -101,7 +114,7 @@ describe(chalk.blue('otp mixin test'), function () {
           return done(err);
         }
         var postData = { 'username': 'test', 'otp': otp.token };
-        var verifyOtpUrl = bootstrap.basePath + '/BaseUsers/validateOTP';
+        var verifyOtpUrl = bootstrap.basePath + '/BaseUsers/validateOTP' + '?access_token=' + testUsertoken;
         api.post(verifyOtpUrl)
           .set('Accept', 'application/json')
           .send(postData)
@@ -119,7 +132,7 @@ describe(chalk.blue('otp mixin test'), function () {
 
   it('t4 should send otp to user if otp is not in request and OtpWhen condition is passing', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10000 };
-    var apiUrl = url + '/OTPCountries';
+    var apiUrl = url + '/OTPCountries' + '?access_token=' + testUsertoken;
     api.post(apiUrl)
       .set('Accept', 'application/json')
       .send(postData)
@@ -135,7 +148,7 @@ describe(chalk.blue('otp mixin test'), function () {
 
   it('should not apply otp authentication if OtpWhen condition not passed', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10 };
-    var Url = url + '/OTPCountries';
+    var Url = url + '/OTPCountries' + '?access_token=' + testUsertoken;
     api.post(Url)
       .set('Accept', 'application/json')
       .send(postData)
@@ -152,7 +165,7 @@ describe(chalk.blue('otp mixin test'), function () {
   it('t5 should verify otp and send response to user if otp is provided and correct', function (done) {
     var postData = { 'name': 'India', 'capital': 'delhi', 'population': 11000 };
 
-    var Url = url + '/OTPCountries';
+    var Url = url + '/OTPCountries' + '?access_token=' + testUsertoken;
     api.post(Url)
       .set('Accept', 'application/json')
       .send(postData)
@@ -166,7 +179,7 @@ describe(chalk.blue('otp mixin test'), function () {
         var condition = { 'where': { 'id': results.otpId } };
         OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
           var otpData = { 'otp': otp.token, 'otpId': results.otpId };
-          var Url = url + '/OTPCountries';
+          var Url = url + '/OTPCountries' + '?access_token=' + testUsertoken;
           api.post(Url)
             .set('Accept', 'application/json')
             .send(otpData)
@@ -185,7 +198,7 @@ describe(chalk.blue('otp mixin test'), function () {
 
   it('t6 should check otp and send err response to user if otp is provided but not correct', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 13000 };
-    var Url = url + '/OTPCountries';
+    var Url = url + '/OTPCountries' + '?access_token=' + testUsertoken;
     api.post(Url)
       .set('Accept', 'application/json')
       .send(postData)
@@ -200,7 +213,7 @@ describe(chalk.blue('otp mixin test'), function () {
         OTP.findOne(condition, bootstrap.defaultContext, function (err, otp) {
           otp.token = otp.token + 1;
           var otpData = { 'otp': otp.token, 'otpId': results.otpId };
-          var Url = url + '/OTPCountries';
+          var Url = url + '/OTPCountries' + '?access_token=' + testUsertoken;
           api.post(Url)
             .set('Accept', 'application/json')
             .send(otpData)
@@ -218,7 +231,7 @@ describe(chalk.blue('otp mixin test'), function () {
 
   it('t7 resend otp test', function (done) {
     var postData = { 'name': 'US', 'capital': 'Washington', 'population': 10000 };
-    var apiUrl = url + '/OTPCountries';
+    var apiUrl = url + '/OTPCountries' + '?access_token=' + testUsertoken;
     api.post(apiUrl)
       .set('Accept', 'application/json')
       .send(postData)
@@ -229,7 +242,7 @@ describe(chalk.blue('otp mixin test'), function () {
         var results = JSON.parse(resp.text);
         expect(results).keys('status', 'otpId');
 
-        var resendOtpUrl = url + '/OTPs/resendOtp';
+        var resendOtpUrl = url + '/OTPs/resendOtp' + '?access_token=' + testUsertoken;
         var resendData = { 'otpId': results.otpId };
 
         api.post(resendOtpUrl)
