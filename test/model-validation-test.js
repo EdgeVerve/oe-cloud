@@ -22,6 +22,19 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
   var starWarsModel;
   var startTrekModel;
 
+  var testUsertoken;
+  
+  before('Create testuser Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUsertoken = returnedAccesstoken;
+      done();
+    });
+  });
+
   before('setup test data', function (done) {
     models.ModelDefinition.events.once('model-' + starWarsModelName + '-available', function () {
       done();
@@ -379,7 +392,7 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
   });
 
   it('Validation Test - Should Fail to insert data by POST', function (done) {
-    var URL = url + "/StarWars";
+    var URL = url + '/StarWars' + '?access_token=' + testUsertoken;
 
     var postData = {
       'clan': 'Jedi123'
