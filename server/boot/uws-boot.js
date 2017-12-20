@@ -5,15 +5,17 @@ module.exports = function (app, cb) {
   // var cfg = {url: 'ws://127.0.0.1:8086'};
   var cfg = {url: socketurl};
 
-  var c = new WSClient(cfg);
+  var socket = new WSClient(cfg);
 
-  c.open(()=>{
-    app.set('oe-tx-router', c);
+  socket.on('open', ()=>{
+    app.set('oe-tx-router', socket);
+  });
+  socket.on('close', ()=>{
+    app.set('oe-tx-router', null);
   });
   var remotes = app.remotes();
   var ProxyContext = require('../../lib/proxy-context');
   var methods = {};
-  var socket = c;
   socket.on('process', function (adata) {
     // var data = adata.data;
     var data = adata.msg;
@@ -65,7 +67,7 @@ module.exports = function (app, cb) {
         });
       }
     } else {
-      var err = 'unknown method';
+      err = 'unknown method';
       callback(err, 'ok');
     }
   });
