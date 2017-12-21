@@ -61,11 +61,15 @@
     "node-docker-api": "^1.1.16",
     "node-red": "0.16.2",
     "oe-explorer": "^1.0.0",
+    "oe-jwt-generator": "^1.0.0",
     "oe-logger": "^1.0.0",
+<<<<<<< HEAD
     "oe-swagger-ui": "git+http://deostroll@10.73.97.24/oecloud.io/oe-swagger-ui.git#v0.9.2",
     "oe-jwt-generator": "^1.0.0",
+=======
+    "oe-swagger-ui": "^0.9.0",
+>>>>>>> ec305097d3a7f6fe979a25004ace1b82fe12c505
     "passport-google-oauth": "0.1.5",
-    "passport-jwt": "^2.0.0",
     "passport-local": "1.0.0",
     "passport-saml": "^0.15.0",
     "q": "^1.5.1",

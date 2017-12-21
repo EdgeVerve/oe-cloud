@@ -15,6 +15,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var loopback = require('loopback');
 var config = require('../server/config');
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var async = require('async');
 var fs = require('fs');

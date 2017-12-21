@@ -350,9 +350,10 @@ describe('failsafe-observer-mixin', function () {
                                             expect(results[0].status).to.be.equal('RecoveryFinished');
                                         }
                                     });
-                                    done();
+                                    //done();
                                 }
                             });
+                            done();
                         }
                     });
                 }
