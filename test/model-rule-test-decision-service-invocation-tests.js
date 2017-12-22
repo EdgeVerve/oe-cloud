@@ -103,7 +103,7 @@ describe(chalk.blue('model validations using decision service'), function () {
     it('should insert into model into model rules table to register for validation without errors', function(done){
         var modelRuleData = {
             modelName: testModelName,
-            valudationRules: ['ApproveValidation'], //this is a decision service
+            validationRules: ['ApproveValidation'], //this is a decision service
             isService: true
         };
 
@@ -114,10 +114,10 @@ describe(chalk.blue('model validations using decision service'), function () {
     it('should deny insertion of record to target model if record  data is incorrect', function(done){
         var incorrectRecordData = {
             amount: 1000,
-            type: 'PERSONAL_LOAD',
+            type: 'PERSONAL_LOAN',
             experience: 5
         };
-
+        debugger;
         testModel.create(incorrectRecordData, bootstrap.defaultContext, function(err) {
             if (err !== null) {
                 done(new Error('test model should not have inserted the record'));
