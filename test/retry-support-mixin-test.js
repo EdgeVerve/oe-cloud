@@ -44,10 +44,10 @@ function apiRequest(url, postData, callback, done) {
 describe(chalk.blue('retry-support-tests'), function() {
     this.timeout(30000);
 
-    before('login using admin', function fnLogin(done) {
+    before('login using testuser', function fnLogin(done) {
         var sendData = {
-            'username': 'admin',
-            'password': 'admin'
+            'username': 'testuser',
+            'password': 'testuser123'
         };
 
         api

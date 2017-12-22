@@ -178,7 +178,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
 
 
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + accessToken)
                 .send(postData)
                 .expect(200).end(function (err, res) {
                     debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -225,10 +225,10 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
 
 
                 api
-                    .post(modelDefitnionUrl)
+                    .post(modelDefitnionUrl + '?access_token=' + accessToken)
                     .send(postData)
                     .expect(200).end(function (err, res) {
-                        debug('response body : ' + JSON.stringify(res.body, null, 4));
+                        if (res && res.body) debug('response body : ' + JSON.stringify(res.body, null, 4));
                         if (err || res.body.error) {
                             done(err || (new Error(res.body.error.details.message.name[0])));
                         }
@@ -252,7 +252,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                     var modelId = modeldefinition[0].id;
 
                     api
-                        .del(modelDefitnionUrl + '/' + modelId)
+                        .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + accessToken)
                         .expect(200).end(function (err, res) {
                             debug('response body : ' + JSON.stringify(res.body, null, 4));
                             // after delete find same model with ID it should not be present.
@@ -289,7 +289,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                     //console.log('model details',modelDetails);
 
                     api
-                        .del(modelDefitnionUrl + '/' + modelId)
+                        .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + accessToken)
                         .expect(200).end(function (err, res) {
                             debug('response body : ' + JSON.stringify(res.body, null, 4));
                             // after delete find same model with ID it should not be present.
@@ -348,7 +348,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
 
 
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + accessToken)
                 .send(postData)
                 .expect(200).end(function (err, res) {
                     debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -396,10 +396,10 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
 
 
                 api
-                    .post(modelDefitnionUrl)
+                    .post(modelDefitnionUrl + '?access_token=' + accessToken)
                     .send(postData)
                     .expect(200).end(function (err, res) {
-                        debug('response body : ' + JSON.stringify(res.body, null, 4));
+                        if (res && res.body) debug('response body : ' + JSON.stringify(res.body, null, 4));
                         if (err || res.body.error) {
                             done(err || (new Error(res.body.error.details.message.name[0])));
                         }
@@ -423,7 +423,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                     var modelId = modeldefinition[0].id;
 
                     api
-                        .del(modelDefitnionUrl + '/' + modelId)
+                        .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + accessToken)
                         .expect(200).end(function (err, res) {
                             debug('response body : ' + JSON.stringify(res.body, null, 4));
                             // after delete find same model with ID it should not be present.
@@ -460,7 +460,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                     //console.log('model details',modelDetails);
 
                     api
-                        .del(modelDefitnionUrl + '/' + modelId)
+                        .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + accessToken)
                         .expect(200).end(function (err, res) {
                             debug('response body : ' + JSON.stringify(res.body, null, 4));
                             // after delete find same model with ID it should not be present.
@@ -494,7 +494,7 @@ describe(chalk.blue('REST APIs - model-definition-Inheritance'), function () {
                 properties: {}
             };
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + accessToken)
                 .send(postData)
                 .expect(500).end(function (err, res) {
                     debug('response body : ' + JSON.stringify(res.body, null, 4));

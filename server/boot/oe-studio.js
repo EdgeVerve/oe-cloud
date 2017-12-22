@@ -240,7 +240,7 @@ function setDesignerPath(DesignerPath, server) {
       return d.path.split('/')[1];
     });
     var baseModel = util.checkModelWithPlural(req.app, model);
-    var actualModel = loopback.findModel(baseModel);
+    var actualModel = loopback.findModel(baseModel, req.callContext);
     var result = actualModel ? modelEndPoints[actualModel.pluralModelName] : modelEndPoints;
     res.send(result);
   });
@@ -359,7 +359,43 @@ module.exports = function Designer(server) {
       templatePath: [],
       stylePath: []
     };
+    var modulesList = [{
+      'name': 'oe-model-manager',
+      'path': '',
+      'import': '/bower_components/oe-model-manager/oe-model-manager.html'
+    }, {
+      'name': 'oe-ui-designer',
+      'path': 'ui-designer',
+      'import': '/bower_components/oe-ui-designer/oe-ui-designer.html'
+    }, {
+      'name': 'oe-route-manager',
+      'path': 'route-manager',
+      'import': '/bower_components/oe-route-manager/oe-route-manager.html'
+    }, {
+      'name': 'oe-resource-manager',
+      'path': 'resource-manager',
+      'import': '/bower_components/oe-resource-manager/oe-resource-manager.html'
+    }, {
+      'name': 'oe-rule-manager',
+      'path': 'rule-manager',
+      'import': '/bower_components/oe-rule-manager/oe-rule-manager.html'
+    }, {
+      'name': 'workflow-designer',
+      'path': 'workflow-designer',
+      'import': '/bower_components/oe-workflow-modeler/workflow-designer.html'
+    }, {
+      'name': 'oe-component-manager',
+      'path': 'component-manager',
+      'import': '/bower_components/oe-component-manager/oe-component-manager.html'
+    }];
+
+    var modules = appconfig.designer.modules || [];
+    if (modules.length === 0) {
+      appconfig.designer.modules = modulesList;
+    }
+
     appconfig.designer.restApiRoot = appconfig.designer.restApiRoot || server.get('restApiRoot') || appconfig.restApiRoot;
+
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
 

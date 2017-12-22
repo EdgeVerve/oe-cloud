@@ -68,9 +68,8 @@ mongotest:
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
     - export DB_NAME=${CI_PIPELINE_ID}_mongo
-    - npm run grunt-cover
-    - npm install mongodb pg chai --no-optional
     - time npm install --no-optional
+    - npm run grunt-cover
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
@@ -83,9 +82,8 @@ postgrestest:
     - export MONGO_HOST="10.73.53.144"
     - export DB=postgres
     - export DB_NAME=${CI_PIPELINE_ID}_pg
-    - npm run grunt-cover
-    - npm install mongodb pg chai --no-optional
     - time npm install --no-optional
+    - npm run grunt-cover
     - mocha test/01-cleanup.js
   tags:
     - CEP_RUNNER
@@ -103,13 +101,14 @@ oracletest:
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
+    - time npm install --no-optional
     - npm install nan async --no-optional
+    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     - mv /oracledb node_modules/
     #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
     - export CI_PROJECT_NAMESPACE=${group}
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
-    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     # Removing decision test cases which are frequently failing in oracle
     - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-test.js
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
