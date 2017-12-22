@@ -47,7 +47,6 @@ var modelRuleId, modelRuleVersion;
 chai.use(chaiThings);
 
 describe(chalk.blue('model validations using decision service'), function () {
-    this.timeout(60000);
     before('create the temporary model.', function (done) {
         // Forming model metadata
         var data = [{
@@ -69,8 +68,8 @@ describe(chalk.blue('model validations using decision service'), function () {
     });
 
     before('creating the decision graph & service', function(done){
-        var graphData = JSON.parse(fs.readFileSync('model-rule-data/approve-graph.json', { encoding: 'utf8' }));
-        var feelData = JSON.parse(fs.readFileSync('model-rule-data/approve-feel.json', { encoding: 'utf8'}));
+        var graphData = JSON.parse(fs.readFileSync('test/model-rule-data/approve-graph.json', { encoding: 'utf8' }));
+        var feelData = JSON.parse(fs.readFileSync('test/model-rule-data/approve-feel.json', { encoding: 'utf8'}));
 
         var decisionGraphData = {
             name: 'ApproveDecision',
@@ -80,7 +79,7 @@ describe(chalk.blue('model validations using decision service'), function () {
             graph: graphData
         };
 
-        models.DecisionGraph.insertOne(decisionGraphData, bootstrap.defaultContext, function(err, data){
+        models.DecisionGraph.create(decisionGraphData, bootstrap.defaultContext, function(err, data){
             if (err) {
                 done(err)
             }
@@ -92,7 +91,7 @@ describe(chalk.blue('model validations using decision service'), function () {
                     graphId: decisionGraphData.name
                 };
 
-                models.DecisionService.insertOne(decisionServiceData, bootstrap.defaultContext, function(err, data) {
+                models.DecisionService.create(decisionServiceData, bootstrap.defaultContext, function(err, data) {
                     expect(data.name).to.equal(decisionServiceData.name);
                     done(err);
                 });
@@ -108,35 +107,35 @@ describe(chalk.blue('model validations using decision service'), function () {
             isService: true
         };
 
-        models.ModelRule.insertOne(modelRuleData, bootstrap.defaultContext, done);
+        models.ModelRule.create(modelRuleData, bootstrap.defaultContext, done);
 
     });
 
-    it('should deny insertion of record to target model if record  data is incorrect', function(){
+    it('should deny insertion of record to target model if record  data is incorrect', function(done){
         var incorrectRecordData = {
             amount: 1000,
             type: 'PERSONAL_LOAD',
             experience: 5
         };
 
-        testModel.insertOne(incorrectRecordData, bootstrap.defaultContext, function(err) {
+        testModel.create(incorrectRecordData, bootstrap.defaultContext, function(err) {
             if (err !== null) {
                 done(new Error('test model should not have inserted the record'));
             }
             else {
                 done();
             }
-        }
+        });
     });
 
-    it('should allow insertion of record to target model if record  data is valid', function(){
+    it('should allow insertion of record to target model if record  data is valid', function(done){
         var data = {
             amount: 1000,
             type: 'PERSONAL_LOAD',
             experience: 5
         };
 
-        testModel.insertOne(data, bootstrap.defaultContext, function(err, result) {
+        testModel.create(data, bootstrap.defaultContext, function(err, result) {
             if (err) {
                 done(err)
             }
@@ -145,12 +144,14 @@ describe(chalk.blue('model validations using decision service'), function () {
                 expect(result.amount).to.equal(data.amount);
                 done();
             }
-        }
+        });
     });
 
-    after('resetting model', function() {
+    after('resetting model', function(done) {
         testModelName = 'ServiceModelPropertyPopulationTest';
         testModelPlural = 'ServiceModelPropertyPopulationTests';
+        console.log("After of first Describe block");
+        done();
     });
 });
 
@@ -177,8 +178,8 @@ describe(chalk.blue('model data populators with decision services'), function(){
     });
 
     before('creating the decision graph & service', function(done){
-        var graphData = JSON.parse(fs.readFileSync('model-rule-data/category-graph.json', { encoding: 'utf8' }));
-        var feelData = JSON.parse(fs.readFileSync('model-rule-data/category-feel.json', { encoding: 'utf8'}));
+        var graphData = JSON.parse(fs.readFileSync('test/model-rule-data/category-graph.json', { encoding: 'utf8' }));
+        var feelData = JSON.parse(fs.readFileSync('test/model-rule-data/category-feel.json', { encoding: 'utf8'}));
 
         var decisionGraphData = {
             name: 'CategoryDecision',
@@ -188,7 +189,7 @@ describe(chalk.blue('model data populators with decision services'), function(){
             graph: graphData
         };
 
-        models.DecisionGraph.insertOne(decisionGraphData, bootstrap.defaultContext, function(err, data){
+        models.DecisionGraph.create(decisionGraphData, bootstrap.defaultContext, function(err, data){
             if (err) {
                 done(err)
             }
@@ -200,7 +201,7 @@ describe(chalk.blue('model data populators with decision services'), function(){
                     graphId: decisionGraphData.name
                 };
 
-                models.DecisionService.insertOne(decisionServiceData, bootstrap.defaultContext, function(err, data) {
+                models.DecisionService.create(decisionServiceData, bootstrap.defaultContext, function(err, data) {
                     expect(data.name).to.equal(decisionServiceData.name);
                     done(err);
                 });
@@ -209,6 +210,13 @@ describe(chalk.blue('model data populators with decision services'), function(){
 
     });
 
+
+    after('second after block', function(done) {
+        console.log("After of second Describe block");
+        done();
+    });
+
+
     it('should insert into model into model rules table to register for property population without errors', function(done){
         var modelRuleData = {
             modelName: testModelName,
@@ -216,7 +224,9 @@ describe(chalk.blue('model data populators with decision services'), function(){
             isService: true
         };
 
-        models.ModelRule.insertOne(modelRuleData, bootstrap.defaultContext, done);
+        models.ModelRule.create(modelRuleData, bootstrap.defaultContext, (err, res) =>{
+            done();
+        });
 
     });
 
@@ -227,7 +237,7 @@ describe(chalk.blue('model data populators with decision services'), function(){
             gender: 'M'
         };
 
-        testModel.insertOne(instanceData, bootstrap.defaultContext, function(err, result) {
+        testModel.create(instanceData, bootstrap.defaultContext, function(err, result) {
             if (err) {
                 done(err)
             }
@@ -238,4 +248,5 @@ describe(chalk.blue('model data populators with decision services'), function(){
             }
         });
     });
+
 });
