@@ -1,4 +1,6 @@
 var {WSClient} = require('../../lib/uws-client.js');
+var config = require('../config.js');
+var DB_LOCK_MODE = config.dbLockMode;
 module.exports = function (app, cb) {
   var sockethost = process.env.TX_ROUTER_HOST || 'localhost';
   var socketurl = 'ws://' + sockethost + ':3183';
@@ -45,6 +47,9 @@ module.exports = function (app, cb) {
       if (data.callContextHeader) {
         var str = new Buffer(data.callContextHeader, 'base64').toString('ascii');
         request.callContext = JSON.parse(str);
+      }
+      if (data.lock) {
+        request.callContext.lockMode = DB_LOCK_MODE;
       }
       request.callContext.evproxyModelPlural = data.modelPlural;
       request.callContext.evproxyModelId = data.id;
