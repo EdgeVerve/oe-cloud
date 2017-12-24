@@ -14,16 +14,19 @@
     "timestamp": {
       "type": "Date"
     },
+    "operation":{
+      "type": "string"
+    },
     "hostName": {
       "type": "string"
    }, 
    "hostUUID": {
      "type": "string"
-   }, 
-   "updated": {
-     "type": "Date"
    },
-   "retries": {
+   "status": {
+    "type": "string"
+   },
+   "retry": {
      "type": "number"
    }
   },
