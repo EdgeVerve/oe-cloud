@@ -55,26 +55,20 @@ module.exports = function failsafeObserverMixin(Model) {
   Model.prototype.createEventHistory = function (context, options, cb) {
     var modelName = this._type;
     var version = this._version;
-    // var trigger = context.trigger; => from context
-    // ctx.fromRecovery = true; => from context
+    var trigger = context.trigger;
+    // ctx.Model = Model; => not needed
 
     var ctx = {};
     ctx.instance = this;
-    // ctx.Model = Model;
-    
-    if (rec._fsCtx) {
+    ctx.fromRecovery = context.fromRecovery || false;
+    if (this._fsCtx) {
       try {
-        ctx.options = JSON.parse(rec._fsCtx);
+        ctx.options = JSON.parse(this._fsCtx);
       } catch (e) {
         log.debug(log.defaultContext(), 'failed to parse _fsCtx: ', e);
-        ctx.options = ignoreScopeOptions;
+        ctx.options = { fetchAllScopes: true, ctx: { tenantId: 'default' } };
       }
     }
-    var context = {};
-    context.modelName = rec._type;
-    context.version = rec._version;
-    context.trigger = 'after save';
-    context.ctx = ctx;
 
     eventHistroyManager.create(modelName, version, trigger, ctx);
     return cb();
