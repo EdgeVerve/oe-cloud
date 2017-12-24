@@ -52,6 +52,34 @@ module.exports = function failsafeObserverMixin(Model) {
     return cb();
   };
 
+  Model.prototype.createEventHistory = function (context, options, cb) {
+    var modelName = this._type;
+    var version = this._version;
+    // var trigger = context.trigger; => from context
+    // ctx.fromRecovery = true; => from context
+
+    var ctx = {};
+    ctx.instance = this;
+    // ctx.Model = Model;
+    
+    if (rec._fsCtx) {
+      try {
+        ctx.options = JSON.parse(rec._fsCtx);
+      } catch (e) {
+        log.debug(log.defaultContext(), 'failed to parse _fsCtx: ', e);
+        ctx.options = ignoreScopeOptions;
+      }
+    }
+    var context = {};
+    context.modelName = rec._type;
+    context.version = rec._version;
+    context.trigger = 'after save';
+    context.ctx = ctx;
+
+    eventHistroyManager.create(modelName, version, trigger, ctx);
+    return cb();
+  };
+
   var FailSafeObserver = function (fn) {
     function generateId(fn) {
       if (fn.getId && typeof fn.getId === 'function') {
