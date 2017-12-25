@@ -15,6 +15,7 @@ var currHostName = process.env.HOSTNAME || os.hostname();
 var eventHistroyManager;
 var disableEventHistoryManager = process.env.DISABLE_EVENT_HISTORY;
 var observerTypes = ['after save', 'after delete'];
+var loopback = require('loopback');
 
 module.exports = function failsafeObserverMixin(Model) {
   if (disableEventHistoryManager && disableEventHistoryManager === 'true') {
@@ -44,26 +45,19 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   Model.prototype.createEventHistory = function (context, options, cb) {
-    var modelName = context.modelName;
-    var version = context.version;
-    var trigger = context.trigger;
-    var ctx = context.ctx;
-    eventHistroyManager.create(modelName, version, trigger, ctx);
-    return cb();
-  };
-
-  Model.prototype.createEventHistory = function (context, options, cb) {
     var modelName = this._type;
     var version = this._version;
     var trigger = context.trigger;
-    // ctx.Model = Model; => not needed
 
     var ctx = {};
     ctx.instance = this;
+    ctx.Model = loopback.getModel(modelName);
     ctx.fromRecovery = context.fromRecovery || false;
     if (this._fsCtx) {
       try {
-        ctx.options = JSON.parse(this._fsCtx);
+        var fsCtx = JSON.parse(this._fsCtx);
+        Object.assign(ctx, fsCtx);
+        // ctx.options = JSON.parse(this._fsCtx);
       } catch (e) {
         log.debug(log.defaultContext(), 'failed to parse _fsCtx: ', e);
         ctx.options = { fetchAllScopes: true, ctx: { tenantId: 'default' } };
@@ -218,7 +212,11 @@ function failsafeObserverBeforeDelete(ctx, next) {
   var version;
   if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
-    ctx.instance._fsCtx = JSON.stringify(ctx.options);
+    var fsCtx = {};
+    fsCtx.isNewInstance = ctx.isNewInstance;
+    fsCtx.options = ctx.options;
+    fsCtx.hookState = ctx.hookState;
+    ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
   }
@@ -233,7 +231,11 @@ function failsafeObserverBeforeSave(ctx, next) {
   var version;
   if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
-    ctx.instance._fsCtx = JSON.stringify(ctx.options);
+    var fsCtx = {};
+    fsCtx.isNewInstance = ctx.isNewInstance;
+    fsCtx.options = ctx.options;
+    fsCtx.hookState = ctx.hookState;
+    ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
   }
