@@ -11,9 +11,10 @@
  *  Author: Praveen
  */
 
+var _ = require('lodash');
 var loopback = require('loopback');
 var logger = require('oe-logger');
-// @jsonwebtoken is internal dependency of @passport-jwt
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var log = logger('BaseUser');
 var async = require('async');
@@ -24,8 +25,6 @@ var jwtUtil = require('../../../lib/jwt-token-util');
 var DEFAULT_RESET_PW_TTL = 15 * 60;
 
 // var app = require('../../../server/server.js');
-
-var jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
 
 module.exports = function BaseUser(BaseUser) {
   BaseUser.setup = function baseUserSetup() {
@@ -381,6 +380,7 @@ module.exports = function BaseUser(BaseUser) {
     cb = cb || utils.createPromiseCallback();
     var self = this;
 
+    let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
     if (jwtForAccessToken) {
       var jwtConfig = jwtUtil.getJWTConfig();
       var jwtOpts = {};
@@ -397,7 +397,7 @@ module.exports = function BaseUser(BaseUser) {
           log.debug(options, 'Got JWT signing error, Defaulting to accessToken generation.');
           return self.accessTokens.create(accessToken, options, cb);
         }
-        var jwtToken = {};
+        var jwtToken = _.cloneDeep(accessToken);
         jwtToken.id = token;
         jwtToken.ttl = jwtOpts.expiresIn;
         var loopback = BaseUser.app.loopback;

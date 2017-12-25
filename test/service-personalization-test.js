@@ -28,6 +28,7 @@ describe(chalk.blue('service-personalization'), function () {
   var productOwnerUrl;
   this.timeout(30000);
 
+  var accessToken;
   function createModelsAndPopulateData(done) {
     //var price = {
     //    value: Number,
@@ -221,8 +222,31 @@ describe(chalk.blue('service-personalization'), function () {
 
   }
 
+  function createAccessToken(cb) {
+    var sendData = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+
+    api
+      .post(bootstrap.basePath + '/BaseUsers/login')
+      .send(sendData)
+      .expect(200).end(function (err, res) {
+        if (err) {
+          log.error(err);
+          return cb(err);
+        } else {
+          accessToken = res.body.id;
+          return cb();
+        }
+      });
+  }
+
   before('setup test data', function (done) {
-    createModelsAndPopulateData(done);
+    createAccessToken(function (err) {
+      if (err) return done(err);
+      createModelsAndPopulateData(done);
+    });    
   });
 
   // TODO: WARNING- this is important for clean consistent runs
@@ -266,7 +290,7 @@ describe(chalk.blue('service-personalization'), function () {
         throw new Error(err);
       }
       //var ruleId = rule.id;
-      api.get(productCatalogUrl)
+      api.get(productCatalogUrl + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -317,7 +341,7 @@ describe(chalk.blue('service-personalization'), function () {
         }
         //var ruleId = rule.id;
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -363,7 +387,7 @@ describe(chalk.blue('service-personalization'), function () {
       }
       //var ruleId = rule.id;
 
-      api.get(productCatalogUrl)
+      api.get(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -412,7 +436,7 @@ describe(chalk.blue('service-personalization'), function () {
         }
 
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -454,7 +478,7 @@ describe(chalk.blue('service-personalization'), function () {
       }
 
 
-      api.get(productCatalogUrl)
+      api.get(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -498,7 +522,7 @@ describe(chalk.blue('service-personalization'), function () {
         }
 
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -543,7 +567,7 @@ describe(chalk.blue('service-personalization'), function () {
         if (err) {
           throw new Error(err);
         }
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -593,7 +617,7 @@ describe(chalk.blue('service-personalization'), function () {
           throw new Error(err);
         }
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -642,7 +666,7 @@ describe(chalk.blue('service-personalization'), function () {
           throw new Error(err);
         }
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -683,7 +707,7 @@ describe(chalk.blue('service-personalization'), function () {
         throw new Error(err);
       }
 
-      api.get(productCatalogUrl + '?filter[order]=name ASC')
+      api.get(productCatalogUrl  + '?access_token=' + accessToken + '&filter[order]=name ASC')
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -724,7 +748,7 @@ describe(chalk.blue('service-personalization'), function () {
           throw new Error(err);
         }
 
-        api.get(productCatalogUrl + '?filter[order]=name DESC')
+        api.get(productCatalogUrl  + '?access_token=' + accessToken + '&filter[order]=name DESC')
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -762,7 +786,7 @@ describe(chalk.blue('service-personalization'), function () {
       if (err) {
         throw new Error(err);
       }
-      api.get(productCatalogUrl)
+      api.get(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -808,7 +832,7 @@ describe(chalk.blue('service-personalization'), function () {
         }
 
 
-        api.get(productCatalogUrl)
+        api.get(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -852,7 +876,7 @@ describe(chalk.blue('service-personalization'), function () {
         }
 
 
-        api.get(productCatalogUrl + '?filter[fields][name]=true')
+        api.get(productCatalogUrl  + '?access_token=' + accessToken + '&filter[fields][name]=true')
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -907,7 +931,7 @@ describe(chalk.blue('service-personalization'), function () {
         'isAvailable': true
       };
 
-      api.post(productCatalogUrl)
+      api.post(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -962,7 +986,7 @@ describe(chalk.blue('service-personalization'), function () {
           'isAvailable': true
         };
 
-        api.post(productCatalogUrl)
+        api.post(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -1041,7 +1065,7 @@ describe(chalk.blue('service-personalization'), function () {
         'isAvailable': true
       };
 
-      api.post(productCatalogUrl)
+      api.post(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -1056,7 +1080,7 @@ describe(chalk.blue('service-personalization'), function () {
           expect(results)
             .to.include.keys('product_name_ios', 'product_description_ios');
           expect(results.product_name_ios).to.be.equal('new_oven_ios');
-          api.post(productCatalogUrl)
+          api.post(productCatalogUrl  + '?access_token=' + accessToken)
             .set('Accept', 'application/json')
             .set('TENANT_ID', tenantId)
             .set('REMOTE_USER', 'testUser')
@@ -1125,7 +1149,7 @@ describe(chalk.blue('service-personalization'), function () {
         throw new Error(err);
       }
 
-      api.post(productCatalogUrl)
+      api.post(productCatalogUrl  + '?access_token=' + accessToken)
         .set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
@@ -1180,7 +1204,7 @@ describe(chalk.blue('service-personalization'), function () {
         throw new Error(err);
       }
 
-      api.get(productCatalogUrl).set('Accept', 'application/json')
+      api.get(productCatalogUrl  + '?access_token=' + accessToken).set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
         .set('device', 'android')
@@ -1236,7 +1260,7 @@ describe(chalk.blue('service-personalization'), function () {
         throw new Error(err);
       }
 
-      api.get(productCatalogUrl).set('Accept', 'application/json')
+      api.get(productCatalogUrl  + '?access_token=' + accessToken).set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
         .set('device', 'ios')
@@ -1282,7 +1306,7 @@ describe(chalk.blue('service-personalization'), function () {
       if (err) {
         throw new Error(err);
       }
-      api.get(productOwnerUrl).set('Accept', 'application/json')
+      api.get(productOwnerUrl  + '?access_token=' + accessToken).set('Accept', 'application/json')
         .set('TENANT_ID', tenantId)
         .set('REMOTE_USER', 'testUser')
         .set('device', 'android')
@@ -1332,7 +1356,7 @@ describe(chalk.blue('service-personalization'), function () {
           'id': 'watch1'
         };
 
-        api.post(productCatalogUrl)
+        api.post(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -1357,7 +1381,7 @@ describe(chalk.blue('service-personalization'), function () {
   it('t23 should replace field values on array datatype in response when fieldValueReplace personalization is configured ', function (done) {
     // Setup personalization rule
     var productWithId = productCatalogUrl + '/watch1';
-    api.get(productWithId)
+    api.get(productWithId  + '?access_token=' + accessToken)
       .set('Accept', 'application/json')
       .set('TENANT_ID', tenantId)
       .set('REMOTE_USER', 'testUser')
@@ -1412,7 +1436,7 @@ describe(chalk.blue('service-personalization'), function () {
           "modelNo": "1233567891"
         };
 
-        api.post(productCatalogUrl)
+        api.post(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -1437,7 +1461,7 @@ describe(chalk.blue('service-personalization'), function () {
   it('t25 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
     // Setup personalization rule
     var productWithId = productCatalogUrl + '/watch2';
-    api.get(productWithId)
+    api.get(productWithId  + '?access_token=' + accessToken)
       .set('Accept', 'application/json')
       .set('TENANT_ID', tenantId)
       .set('REMOTE_USER', 'testUser')
@@ -1492,7 +1516,7 @@ describe(chalk.blue('service-personalization'), function () {
           "modelNo": "9080706050"
         };
 
-        api.post(productCatalogUrl)
+        api.post(productCatalogUrl  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -1517,7 +1541,7 @@ describe(chalk.blue('service-personalization'), function () {
   it('t27 should get result in specific format on get when fieldMask personalization rule is applied', function (done) {
     // Setup personalization rule
     var productWithId = productCatalogUrl + '/watch3';
-    api.get(productWithId)
+    api.get(productWithId  + '?access_token=' + accessToken)
       .set('Accept', 'application/json')
       .set('TENANT_ID', tenantId)
       .set('REMOTE_USER', 'testUser')
@@ -1558,7 +1582,7 @@ describe(chalk.blue('service-personalization'), function () {
         done(err);
       } else {
         var productWithId = productCatalogUrl + '/watch3';
-        api.get(productWithId)
+        api.get(productWithId  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
@@ -1603,7 +1627,7 @@ describe(chalk.blue('service-personalization'), function () {
         done(err);
       } else {
         var productWithId = productCatalogUrl + '/watch3';
-        api.get(productWithId)
+        api.get(productWithId  + '?access_token=' + accessToken)
           .set('Accept', 'application/json')
           .set('TENANT_ID', tenantId)
           .set('REMOTE_USER', 'testUser')
