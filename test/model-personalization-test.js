@@ -63,6 +63,19 @@ describe(chalk.blue('Model Personalization test'), function () {
 
   var citiapi = defaults(supertest(bootstrap.app));
 
+  var testUsertoken;
+  
+  before('Create testuser Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUsertoken = returnedAccesstoken;
+      done();
+    });
+  });
+
   before('setup test data', function (done) {
     bootstrap.createTestUser(citiUser, 'ev-admin', function () {
 
@@ -536,7 +549,7 @@ describe(chalk.blue('Model Personalization test'), function () {
 
     api
       .set('Accept', 'application/json')
-      .post(bootstrap.basePath + '/ModelDefinitions')
+      .post(bootstrap.basePath + '/ModelDefinitions' + '?access_token='+ testUsertoken)
       .send(Employeemodel)
       .expect(200).end(function (err, res) {
         //console.log('response body : ' + JSON.stringify(res.body, null, 4));

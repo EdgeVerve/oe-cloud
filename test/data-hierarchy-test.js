@@ -858,10 +858,25 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
   var productModel = 'Product';
   var settingsModel = 'SystemSettings';
   this.timeout(50000);
+  var testUserAccessToken;
   var asiaUserAccessToken;
   var indiaUserAccessToken;
   var delhiUserAccessToken;
   var bangaloreUserAccessToken;
+
+  // Creating testuser access token since removed jwt-assertion middleware
+  // so that we can access the models which are created using bootstrap.defaultContext
+  // are based on testuesr and test-tenant.
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
 
   before('Create Test models and users', function (done) {
     var atModel = loopback.getModelByType('AccessToken');
@@ -1030,7 +1045,8 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
 
   it('Create region Hierarchy in region model', function (done) {
     this.timeout(60000);
-    var url = bootstrap.basePath + '/' + regionModel;
+    // Passing access_token query param
+    var url = bootstrap.basePath + '/' + regionModel + '?access_token='+testUserAccessToken;
     async.series([
       function (callback) {
         var testData = {
@@ -1664,7 +1680,8 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
   });
 
   it('Should throw an error if parent not found for given parentId (Create)', function (done) {
-    var url = bootstrap.basePath + '/StaffModels';
+    // Passing access_token query param
+    var url = bootstrap.basePath + '/StaffModels?access_token=' + testUserAccessToken;
     var data = { name: 'Naruto', parentId: 'konaha' };
     apiV2
       .post(url)
@@ -1690,7 +1707,8 @@ describe(chalk.blue('Data Hierarchy Test --REST'), function () {
 
   it('Should throw an error if hierarchy data not provided for defined hierarchy (Create)', function (done) {
     var data = { name: 'Hinata' };
-    var url = bootstrap.basePath + '/StaffModels';
+    // Passing access_token query param
+    var url = bootstrap.basePath + '/StaffModels?access_token=' + testUserAccessToken;
     apiV2
       .post(url)
       .send(data)

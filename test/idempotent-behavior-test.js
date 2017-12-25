@@ -23,6 +23,7 @@ var loopback = require('loopback');
 describe(chalk.blue('Idempotent behaviour --REST'), function () {
   this.timeout(300000);
   var state;
+  var testUserAccessToken;
   var modelName = 'TestState';
   var modelDetails = {
     name: modelName,
@@ -43,6 +44,19 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
     }
   };
 
+  // Creating testuser access token since removed jwt-assertion middleware
+  // so that we can access the models which are created using bootstrap.defaultContext
+  // are based on testuesr and test-tenant.
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
 
   before('Create Test model', function (done) {
     models.ModelDefinition.create(modelDetails, bootstrap.defaultContext, function (err, res) {
@@ -60,7 +74,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
       'name': 'Telangana',
       '_newVersion': 't1'
     };
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url = baseurl + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(testData)
@@ -91,7 +106,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                 expect(result1.body.name).to.be.equal('Telangana');
 
                 api
-                  .get(url + '/count')
+                  .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                   .set('Content-Type', 'application/json')
                   .set('Accept', 'application/json')
                   .expect(200).end(function (err, res) {
@@ -117,7 +132,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
       'name': 'Madras State',
       '_newVersion': 'm1'
     };
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url = baseurl + '?access_token=' + testUserAccessToken
     api
       .put(url)
       .send(testData)
@@ -169,7 +185,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                       expect(result2.body.name).to.be.equal('Tamil Nadu');
 
                       api
-                        .get(url + '/count')
+                        .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                         .set('Content-Type', 'application/json')
                         .set('Accept', 'application/json')
                         .expect(200).end(function (err, res) {
@@ -197,7 +213,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
       'name': 'Mysore',
       '_newVersion': 'ms1'
     };
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url = baseurl + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(testData)
@@ -212,7 +229,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
           expect(result.body).not.to.be.empty;
           expect(result.body).not.to.be.undefined;
           expect(result.body.name).to.be.equal('Mysore');
-          var url2 = bootstrap.basePath + '/' + modelName + '/' + result.body.id;
+          var url2 = baseurl + '/' + result.body.id + '?access_token=' + testUserAccessToken;
           api
             .del(url2)
             .set('Content-Type', 'application/json')
@@ -240,7 +257,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                       expect(result2.body).not.to.be.undefined;
                       expect(result2.body.count).to.be.equal(1);
                       api
-                        .get(url + '/count')
+                        .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                         .set('Content-Type', 'application/json')
                         .set('Accept', 'application/json')
                         .expect(200).end(function (err, res) {
@@ -268,7 +285,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
       'name': 'Madhya Bharat',
       '_newVersion': 'mb1'
     };
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url = baseurl + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(testData)
@@ -288,7 +306,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
           testData1._version = result.body._version;
           testData1.name = 'Madhya Pradesh';
           testData1.id = result.body.id;
-          var newUrl = url + '/' + result.body.id;
+          var newUrl = baseurl + '/' + result.body.id + '?access_token=' + testUserAccessToken;
           api
             .put(newUrl)
             .send(testData1)
@@ -320,7 +338,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                       expect(result2.body.name).to.be.equal('Madhya Pradesh');
 
                       api
-                        .get(url + '/count')
+                        .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                         .set('Content-Type', 'application/json')
                         .set('Accept', 'application/json')
                         .expect(200).end(function (err, res) {
@@ -362,7 +380,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
         '_newVersion': 'ut1'
       }
     ];
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url = baseurl + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(testData)
@@ -393,7 +412,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                 expect(result1.body.length).to.be.equal(4);
 
                 api
-                  .get(url + '/count')
+                  .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                   .set('Content-Type', 'application/json')
                   .set('Accept', 'application/json')
                   .expect(200).end(function (err, res) {
@@ -424,7 +443,8 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
 
 
     var model = loopback.getModel(modelName, bootstrap.defaultContext);
-    var url = bootstrap.basePath + '/' + modelName;
+    var baseurl = bootstrap.basePath + '/' + modelName;
+    var url =  baseurl + '?access_token=' + testUserAccessToken;
     model.find({
       'where': {
         'name': 'Uttaranchal'
@@ -471,7 +491,7 @@ describe(chalk.blue('Idempotent behaviour --REST'), function () {
                     expect(result2.body.length).to.be.equal(2);
 
                     api
-                      .get(url + '/count')
+                      .get(baseurl + '/count' + '?access_token=' + testUserAccessToken)
                       .set('Content-Type', 'application/json')
                       .set('Accept', 'application/json')
                       .expect(200).end(function (err, res) {

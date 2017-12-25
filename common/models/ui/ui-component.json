@@ -14,6 +14,10 @@
 			"max": 80,
       "unique" : true
 		},
+    "category":{
+      "type": "string",
+      "description": "Component category"
+    },
 		"templateName" : {
 			"type": "string",
 			"description" : "Based on templateName component is generatred"
