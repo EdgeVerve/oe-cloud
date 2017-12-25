@@ -5,7 +5,7 @@ var log = logger('base-user-identity');
 
 module.exports = function BaseUserIdentity(BaseUserIdentity) {
   BaseUserIdentity.observe('after save', function (ctx, next) {
-    if (ctx.instance.authScheme === 'ldap' || !ctx.instance.profile.data.memberOf) {
+    if (ctx.instance.authScheme === 'ldap' || (ctx.instance.profile.data && !ctx.instance.profile.data.memberOf)) {
       var currentRoles;
       var groups = [].concat(ctx.instance.profile.data.memberOf);
       log.debug(ctx.options, 'running for groups: ', groups);
@@ -75,6 +75,30 @@ module.exports = function BaseUserIdentity(BaseUserIdentity) {
           }
         });
       };
+    } else if (ctx.instance.provider === 'facebook-login') {
+      var BaseRole = loopback.getModelByType('BaseRole');
+      var baseRoleQuery = {where: {name: 'customer'}};
+      BaseRole.findOne(baseRoleQuery, ctx.options, (err, res) => {
+        if (err) {
+          log.error(ctx.options, err);
+          return next(err);
+        }
+        var BaseRoleMapping = loopback.getModelByType('BaseRoleMapping');
+        var roleMapping = {
+          principalType: 'USER',
+          principalId: ctx.instance.userId,
+          roleId: res.id,
+          providerRole: 'facebook'
+        };
+        BaseRoleMapping.create(roleMapping, ctx.options, (err, res) => {
+          if (err) {
+            log.error(ctx.options, err);
+            return next(err);
+          }
+          log.debug(ctx.options, 'created new role mapping for user:', res);
+          return next();
+        });
+      });
     } else {
       return next();
     }
