@@ -45,8 +45,7 @@ module.exports = function (app, cb) {
         method: 'GET'
       };
       if (data.callContextHeader) {
-        var str = new Buffer(data.callContextHeader, 'base64').toString('ascii');
-        request.callContext = JSON.parse(str);
+        request.callContext = data.callContextHeader;
       }
       if (data.lock) {
         request.callContext.lockMode = DB_LOCK_MODE;
