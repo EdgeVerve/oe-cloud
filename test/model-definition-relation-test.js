@@ -30,6 +30,17 @@ var debug = require('debug')('model-definition-relation-test');
 describe(chalk.blue('model-definition-relation     using REST APIs'), function () {
   this.timeout(20000);
 
+  var testUserAccessToken;
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
 
   after('destroy context', function (done) {
     var model = loopback.getModel('ModelDefinitionHistory');
@@ -87,7 +98,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
         });
 
         api
-          .post(modelDefitnionUrl)
+          .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
           .send(postData)
           .expect(200).end(function (err, res) {
             debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -137,7 +148,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
           });
 
           api
-            .post(modelDefitnionUrl)
+            .post(modelDefitnionUrl  + '?access_token=' + testUserAccessToken)
             .send(postData)
             .expect(200).end(function (err, res) {
               debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -158,7 +169,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
           };
           var postUrl = baseUrl + '/Categories';
           api
-            .post(postUrl)
+            .post(postUrl  + '?access_token=' + testUserAccessToken)
             .set('tenant_id', 'test-tenant')
             .set('remote_user', 'unitTest')
             .send(postData)
@@ -187,7 +198,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
           };
           //console.log('posturl', postUrl);
           api
-            .post(postUrl)
+            .post(postUrl  + '?access_token=' + testUserAccessToken)
             .set('tenant_id', 'test-tenant')
             .set('remote_user', 'unitTest')
             .send(postData)
@@ -213,7 +224,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
         if (subDataID && flag && flag === 4) {
           var postUrl = baseUrl + '/Categories/' + dataID + '/subCategories' + '/' + subDataID;
           api
-            .get(postUrl)
+            .get(postUrl  + '?access_token=' + testUserAccessToken)
             .set('tenant_id', 'test-tenant')
             .set('remote_user', 'unitTest')
             .send()
@@ -250,7 +261,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
           //console.log('model details',modelDetails);
 
           api
-            .del(modelDefitnionUrl + '/' + modelId)
+            .del(modelDefitnionUrl + '/' + modelId  + '?access_token=' + testUserAccessToken)
             .expect(200).end(function (err, res) {
               debug('response body : ' + JSON.stringify(res.body, null, 4));
               // after delete find same model with ID it should not be present.
@@ -288,7 +299,7 @@ describe(chalk.blue('model-definition-relation     using REST APIs'), function (
           //console.log('model details',modelDetails);
 
           api
-            .del(modelDefitnionUrl + '/' + modelId)
+            .del(modelDefitnionUrl + '/' + modelId  + '?access_token=' + testUserAccessToken)
             .expect(200).end(function (err, res) {
               debug('response body : ' + JSON.stringify(res.body, null, 4));
               // after delete find same model with ID it should not be present.

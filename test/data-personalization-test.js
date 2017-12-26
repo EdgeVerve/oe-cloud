@@ -24,6 +24,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var animeCharacterModel;
   var personalizedModelScope;
   var PersonalizedModelWithScopeAsModel;
+  var testUserAccessToken;
 
   // Testmodel has no autoscoped variable(not auto-scoped)
   var fiveKage = 'FiveKage';
@@ -359,6 +360,20 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
     }
   ];
 
+  // Creating testuser access token since removed jwt-assertion middleware
+  // so that we can access the models which are created using bootstrap.defaultContext
+  // are based on testuesr and test-tenant.
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
+
   before('Create Test model', function restBeforeAll(done) {
     async.parallel([
       function asyncModel(callback) {
@@ -463,7 +478,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should insert data into TestModel with and without any manual scope into non-autoscoped test model[Group of records]', function (done) {
-    var url = bootstrap.basePath + '/' + fiveKage;
+    var url = bootstrap.basePath + '/' + fiveKage + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(kageData)
@@ -482,7 +497,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should insert data into TestModel with and without any manual scope [Group of records]', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(characterData)
@@ -504,7 +519,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
     var postData = {
       'name': 'Kurama'
     };
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(postData)
@@ -529,7 +544,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
         'device': 'android'
       }
     };
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(postData)
@@ -554,7 +569,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
         'device': 'android'
       }
     };
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(postData)
@@ -574,7 +589,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
         'tenantId': 'test-tenant'
       }
     };
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(postData)
@@ -585,7 +600,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel without any manual scope contributors', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -601,7 +616,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel with context contributors', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -624,7 +639,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel without any autoscoped values defined on Model', function (done) {
-    var url = bootstrap.basePath + '/' + fiveKage;
+    var url = bootstrap.basePath + '/' + fiveKage + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -647,7 +662,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should not retrieve any data from TestModel with autoscoped values defined on Model but not provided by user', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -663,7 +678,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel in Descending order based on score calculated from context', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -688,7 +703,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel in Descending order based on score calculated from context', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -713,7 +728,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should retrieve data from TestModel without any scope when defaults is set', function (done) {
-    var url = bootstrap.basePath + '/' + animeCharacter;
+    var url = bootstrap.basePath + '/' + animeCharacter + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -732,7 +747,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able to post data with scope containing array of values', function (done) {
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     var postData = {
       'name': 'Son Goku',
       'scope': {
@@ -759,7 +774,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able retrieve all record with scope values in ignoreList', function (done) {
-    var url = bootstrap.basePath + '/' + tailedBeast;
+    var url = bootstrap.basePath + '/' + tailedBeast + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -780,7 +795,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able to write custom query on scope which will take higher precidence on manual scope query', function (done) {
-    var url = bootstrap.basePath + '/' + tailedBeast + '?filter={"where":{"scope.device": "android"}}';
+    var url = bootstrap.basePath + '/' + tailedBeast  + '?access_token=' + testUserAccessToken +  '&filter={"where":{"scope.device": "android"}}';
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -812,7 +827,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
         'device': 'android'
       }
     };
-    var url = bootstrap.basePath + '/' + myScopeModel1;
+    var url = bootstrap.basePath + '/' + myScopeModel1 + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(postData)
@@ -834,7 +849,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able to retrieve data from TestModel with manual scope being a another Model', function (done) {
-    var url = bootstrap.basePath + '/' + myScopeModel1;
+    var url = bootstrap.basePath + '/' + myScopeModel1 + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -858,7 +873,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able to update data in TestModel with manual scope being a another Model', function (done) {
-    var url = bootstrap.basePath + '/' + myScopeModel1;
+    var url = bootstrap.basePath + '/' + myScopeModel1 + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -901,8 +916,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
 
   it('- Should be able to delete data in TestModel with manual scope being a another Model', function (done) {
     var url = bootstrap.basePath + '/' + myScopeModel1;
+    var postUrl = url + '?access_token=' + testUserAccessToken;
     api
-      .get(url)
+      .get(postUrl)
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .set('tenant_id', 'test-tenant')
@@ -914,7 +930,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
           done(err);
         } else {
           // console.log("==============", res.body);
-          url = url + '/' + res.body[0].id;
+          url = url + '/' + res.body[0].id + '?access_token=' + testUserAccessToken;
           api
             .delete(url)
             .set('Content-Type', 'application/json')
@@ -983,7 +999,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
       dataSource: 'nullsrc'
     });
 
-    var url = bootstrap.basePath + '/NewMemDBModels';
+    var url = bootstrap.basePath + '/NewMemDBModels' + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(data)
@@ -1004,7 +1020,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Test for fetching data from a model connected to memory DB', function (done) {
-    var url = bootstrap.basePath + '/NewMemDBModels';
+    var url = bootstrap.basePath + '/NewMemDBModels' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -1067,7 +1083,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
       dataSource: 'nullsrc'
     });
 
-    var url = bootstrap.basePath + '/NewMemDBModelNoAutoScopes';
+    var url = bootstrap.basePath + '/NewMemDBModelNoAutoScopes'+ '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(data)
@@ -1087,7 +1103,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Test for fetching data from a model(no autoscope) connected to memory DB', function (done) {
-    var url = bootstrap.basePath + '/NewMemDBModelNoAutoScopes';
+    var url = bootstrap.basePath + '/NewMemDBModelNoAutoScopes' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -1110,7 +1126,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Test for fetching data from a model connected to memory DB with wrong contributor values', function (done) {
-    var url = bootstrap.basePath + '/NewMemDBModels';
+    var url = bootstrap.basePath + '/NewMemDBModels' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -1172,7 +1188,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
         log.debug(bootstrap.defaultContext, 'unable to create model');
         done(err);
       } else {
-        var url = bootstrap.basePath + '/NewModelWithOutMixins';
+        var url = bootstrap.basePath + '/NewModelWithOutMixins' + '?access_token=' + testUserAccessToken;
         api
           .post(url)
           .send(data)
@@ -1194,7 +1210,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Test for mixin applied property on model while getting data', function (done) {
-    var url = bootstrap.basePath + '/NewModelWithOutMixins';
+    var url = bootstrap.basePath + '/NewModelWithOutMixins' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -1294,7 +1310,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
       if (err) {
         done(err);
       } else {
-        var url = bootstrap.basePath + '/NewModelUniques';
+        var url = bootstrap.basePath + '/NewModelUniques'+ '?access_token=' + testUserAccessToken;
         api
           .post(url)
           .send(postData)
@@ -1318,7 +1334,7 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   });
 
   it('- Should be able to get unique records with unique validation on property with scope', function (done) {
-    var url = bootstrap.basePath + '/NewModelUniques';
+    var url = bootstrap.basePath + '/NewModelUniques' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3147,6 +3163,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   this.timeout(1000000);
   var modelName = 'OnlineGames';
   var personalizedModel;
+  var testUserAccessToken;
   var newModelDetails = {
     name: modelName,
     base: 'BaseEntity',
@@ -3183,6 +3200,20 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
     }
   ];
 
+  // Creating testuser access token since removed jwt-assertion middleware
+  // so that we can access the models which are created using bootstrap.defaultContext
+  // are based on testuesr and test-tenant.
+  before('Create Test User Accesstoken', function(done) {
+    var testUser = {
+      'username': 'testuser',
+      'password': 'testuser123'
+    };
+    bootstrap.login(testUser, function(returnedAccesstoken) {
+      testUserAccessToken = returnedAccesstoken;
+      done();
+    });
+  });
+
   before('Create Test model', function (done) {
     models.ModelDefinition.create(newModelDetails, bootstrap.defaultContext, function (err, res) {
       if (err) {
@@ -3218,7 +3249,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- POST', function (done) {
-    var url = bootstrap.basePath + '/' + modelName;
+    var url = bootstrap.basePath + '/' + modelName + '?access_token=' + testUserAccessToken;
     api
       .post(url)
       .send(testData)
@@ -3240,7 +3271,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- EXISTS', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/1a/exists';
+    var url = bootstrap.basePath + '/' + modelName + '/1a/exists' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3260,7 +3291,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- GET', function (done) {
-    var url = bootstrap.basePath + '/' + modelName;
+    var url = bootstrap.basePath + '/' + modelName + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3280,7 +3311,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- GET by ID', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/1a';
+    var url = bootstrap.basePath + '/' + modelName + '/1a' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3300,7 +3331,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- COUNT', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/count';
+    var url = bootstrap.basePath + '/' + modelName + '/count' + '?access_token=' + testUserAccessToken;
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3325,7 +3356,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
     postData.id = '4a';
     postData.name = 'Sword Art Online';
 
-    var url = bootstrap.basePath + '/' + modelName;
+    var url = bootstrap.basePath + '/' + modelName + '?access_token=' + testUserAccessToken;
     api
       .put(url)
       .send(postData)
@@ -3347,7 +3378,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- FINDONE', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/findOne?{"where":{"name":"Assasins Creed"}';
+    var url = bootstrap.basePath + '/' + modelName + '/findOne?' + '?access_token=' + testUserAccessToken + '&{"where":{"name":"Assasins Creed"}';
     api
       .get(url)
       .set('Content-Type', 'application/json')
@@ -3369,7 +3400,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   it('- PUT by ID', function (done) {
     var postData = testData[2];
     postData.name = 'Injustice 2';
-    var url = bootstrap.basePath + '/' + modelName + '/3a';
+    var url = bootstrap.basePath + '/' + modelName + '/3a' + '?access_token=' + testUserAccessToken;
     api
       .put(url)
       .send(postData)
@@ -3391,7 +3422,7 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   });
 
   it('- DELETE by ID', function (done) {
-    var url = bootstrap.basePath + '/' + modelName + '/1a';
+    var url = bootstrap.basePath + '/' + modelName + '/1a' + '?access_token=' + testUserAccessToken;
     api
       .del(url)
       .set('Content-Type', 'application/json')

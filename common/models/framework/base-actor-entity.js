@@ -427,7 +427,6 @@ module.exports = function (BaseActorEntity) {
   };
 
   BaseActorEntity.prototype.MAX_RETRY_COUNT = 10;
-
   BaseActorEntity.prototype.processPendingMessage = function (message, atomicAmount) {
     return atomicAmount;
   };
@@ -618,6 +617,7 @@ module.exports = function (BaseActorEntity) {
           }
           if (ds.name === 'loopback-connector-postgresql') {
             for (var x = 0; x < returnedInstances.length; x++) {
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
