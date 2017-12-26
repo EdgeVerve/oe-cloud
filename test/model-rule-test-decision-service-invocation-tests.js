@@ -100,7 +100,7 @@ describe(chalk.blue('model validations using decision service'), function () {
 
     });
 
-    it('should insert into model into model rules table to register for validation without errors', function(done){
+    xit('should insert into model into model rules table to register for validation without errors', function(done){
         var modelRuleData = {
             modelName: testModelName,
             validationRules: ['ApproveValidation'], //this is a decision service
@@ -111,7 +111,7 @@ describe(chalk.blue('model validations using decision service'), function () {
 
     });
 
-    it('should deny insertion of record to target model if record  data is incorrect', function(done){
+    xit('should deny insertion of record to target model if record  data is incorrect', function(done){
         var incorrectRecordData = {
             amount: 1000,
             type: 'PERSONAL_LOAN',
@@ -128,7 +128,7 @@ describe(chalk.blue('model validations using decision service'), function () {
         });
     });
 
-    it('should allow insertion of record to target model if record  data is valid', function(done){
+    xit('should allow insertion of record to target model if record  data is valid', function(done){
         var data = {
             amount: 1000,
             type: 'PERSONAL_LOAD',
