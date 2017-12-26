@@ -85,7 +85,7 @@ function modelRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('modelRuleAttachHook', data.modelName, ctx.options);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  if(!data.isService) attachBeforeSaveHookToModel(data.modelName, ctx.options);
+  if (!data.isService) attachBeforeSaveHookToModel(data.modelName, ctx.options);
   else attachBeforeSaveHookToModelForService(data.modelName, ctx.options);
   next();
 }
@@ -124,7 +124,7 @@ function attachBeforeSaveHookToModel(modelName, options) {
   model.settings._isModelRuleExists = true;
   // Checking whether before save observer hook is already attached or not.
   // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
-  if (!checkHookisAlreadyAttached(model, "_decsionTableBeforeSaveHook")) {
+  if (!checkHookisAlreadyAttached(model, '_decsionTableBeforeSaveHook')) {
     log.debug(log.defaultContext(), 'before save hook is for model :', modelName, ' is not present. Attaching now.');
     // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
     model.evObserve('before save', function _decsionTableBeforeSaveHook(modelCtx, next) {
@@ -144,7 +144,7 @@ function attachBeforeSaveHookToModelForService(modelName, options) {
   model.settings._isModelRuleExists = true;
   // Checking whether before save observer hook is already attached or not.
   // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
-  if (!checkHookisAlreadyAttached(model, "_decsionTableBeforeSaveHookForService")) {
+  if (!checkHookisAlreadyAttached(model, '_decsionTableBeforeSaveHookForService')) {
     log.debug(log.defaultContext(), 'before save hook for DecisionService-based defaultRules for model :', modelName, ' is not present. Attaching now.');
     // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
     model.observe('before save', function _decsionTableBeforeSaveHookForService(modelCtx, next) {
@@ -162,6 +162,7 @@ function attachBeforeSaveHookToModelForService(modelName, options) {
  * This function is to check the before save hook for a particular model with name is already attached or not.
  *
  * @param {object} model - Model Object
+ * @param {string} hookName - the name of the hook
  * @returns {string} - model name is attached or not.
  */
 function checkHookisAlreadyAttached(model, hookName) {
@@ -281,12 +282,12 @@ function executeDecisionServiceRules(modelCtx, model, next) {
           payload.options = modelCtx.options;
           payload.options.modelName = model.modelName;
           desicionServiceModel.invoke(defaultRule, payload, modelCtx.options, function (err, result) {
-            if (result && result.options) {
-              delete enrichedData.options;
-            }
-            Object.keys(result).forEach(function(node) {
+            // if (result && result.options) {
+            //   delete enrichedData.options;
+            // }
+            Object.keys(result).forEach(function (node) {
               var currentNodeValue = result[node];
-              Object.keys(currentNodeValue).forEach(function(enrichedKey) {
+              Object.keys(currentNodeValue).forEach(function (enrichedKey) {
                 payload[enrichedKey] = currentNodeValue[enrichedKey];
               });
             });
