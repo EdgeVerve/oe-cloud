@@ -127,7 +127,7 @@ function attachBeforeSaveHookToModel(modelName, options) {
   if (!checkHookisAlreadyAttached(model, '_decsionTableBeforeSaveHook')) {
     log.debug(log.defaultContext(), 'before save hook is for model :', modelName, ' is not present. Attaching now.');
     // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
-    model.evObserve('before save', function _decsionTableBeforeSaveHook(modelCtx, next) {
+    model.observe('before save', function _decsionTableBeforeSaveHook(modelCtx, next) {
       log.debug(log.defaultContext(), 'inside before save hook for model : ', modelName);
       log.debug(log.defaultContext(), 'Invoking executeDecisionTableRule');
       executeDecisionTableRules(modelCtx, model, next);

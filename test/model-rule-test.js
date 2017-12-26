@@ -135,6 +135,7 @@ describe(chalk.blue('model-rule-test'), function () {
             defaultRules: [],
             validationRules: []
         }]
+        // debugger;
         models.ModelRule.create(objs, bootstrap.defaultContext, function (err, modelRules) {
             modelRuleId = modelRules[0].id;
             modelRuleVersion = modelRules[0]._version;
@@ -159,6 +160,7 @@ describe(chalk.blue('model-rule-test'), function () {
                 husband_name: 'Robin'
             };
             // The default Rules enrich the data
+            // debugger;
             testModel.create(data, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     console.error("model-rule-test Error ", err);
@@ -355,6 +357,7 @@ describe(chalk.blue('model-rule-test'), function () {
                 defaultRules: [],
                 validationRules: []
             };
+            debugger;
             models.ModelRule.upsert(obj, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     log.error(log.defaultContext(), 'update model rule and POST data should work. Error: ', err);
@@ -372,6 +375,9 @@ describe(chalk.blue('model-rule-test'), function () {
                         .send(postData)
                         .expect(200)
                         .end(function (err, response) {
+                            if (err) {
+                                console.log(err);
+                            }
                             expect(response).not.to.be.null;
                             expect(response).not.to.be.undefined;
                             expect(response.body).not.to.be.null;

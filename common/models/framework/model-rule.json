@@ -27,7 +27,7 @@
     },
     "isService" : {
       "type" : "boolean",
-      "default": "false"
+      "default": false
     }
   },
   "cacheable": true,
