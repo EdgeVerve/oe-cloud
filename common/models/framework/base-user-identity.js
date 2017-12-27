@@ -2,6 +2,7 @@ var loopback = require('loopback');
 var async = require('async');
 var logger = require('oe-logger');
 var log = logger('base-user-identity');
+var config = require('../../../server/config.js');
 
 module.exports = function BaseUserIdentity(BaseUserIdentity) {
   BaseUserIdentity.observe('after save', function (ctx, next) {
@@ -77,7 +78,7 @@ module.exports = function BaseUserIdentity(BaseUserIdentity) {
       };
     } else if (ctx.instance.provider === 'facebook-login') {
       var BaseRole = loopback.getModelByType('BaseRole');
-      var baseRoleQuery = {where: {name: 'customer'}};
+      var baseRoleQuery = {where: {name: config.roleNameForSocialLogin}};
       BaseRole.findOne(baseRoleQuery, ctx.options, (err, res) => {
         if (err) {
           log.error(ctx.options, err);
@@ -101,7 +102,7 @@ module.exports = function BaseUserIdentity(BaseUserIdentity) {
       });
     } else if (ctx.instance.provider === 'google-login') {
       var BaseRoleModel = loopback.getModelByType('BaseRole');
-      var baseRoleQuery2 = {where: {name: 'customer'}};
+      var baseRoleQuery2 = {where: {name: config.roleNameForSocialLogin}};
       BaseRoleModel.findOne(baseRoleQuery2, ctx.options, (err, res) => {
         if (err) {
           log.error(ctx.options, err);
