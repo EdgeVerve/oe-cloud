@@ -84,13 +84,37 @@ module.exports = function BaseUserIdentity(BaseUserIdentity) {
           return next(err);
         }
         var BaseRoleMapping = loopback.getModelByType('BaseRoleMapping');
-        var roleMapping = {
+        var fbRoleMapping = {
           principalType: 'USER',
           principalId: ctx.instance.userId,
           roleId: res.id,
           providerRole: 'facebook'
         };
-        BaseRoleMapping.create(roleMapping, ctx.options, (err, res) => {
+        BaseRoleMapping.create(fbRoleMapping, ctx.options, (err, res) => {
+          if (err) {
+            log.error(ctx.options, err);
+            return next(err);
+          }
+          log.debug(ctx.options, 'created new role mapping for user:', res);
+          return next();
+        });
+      });
+    } else if (ctx.instance.provider === 'google-login') {
+      var BaseRoleModel = loopback.getModelByType('BaseRole');
+      var baseRoleQuery2 = {where: {name: 'customer'}};
+      BaseRoleModel.findOne(baseRoleQuery2, ctx.options, (err, res) => {
+        if (err) {
+          log.error(ctx.options, err);
+          return next(err);
+        }
+        var BaseRoleMappingModel = loopback.getModelByType('BaseRoleMapping');
+        var googleRoleMapping = {
+          principalType: 'USER',
+          principalId: ctx.instance.userId,
+          roleId: res.id,
+          providerRole: 'google'
+        };
+        BaseRoleMappingModel.create(googleRoleMapping, ctx.options, (err, res) => {
           if (err) {
             log.error(ctx.options, err);
             return next(err);
