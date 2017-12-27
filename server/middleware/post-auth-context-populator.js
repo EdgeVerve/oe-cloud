@@ -29,7 +29,7 @@ module.exports = function postAuthContextPopulator(options) {
       delete obj.id;
       delete obj.ttl;
       delete obj.created;
-      obj.roles = JSON.parse(JSON.stringify(req.accessToken.__data.roles));
+      obj.roles = req.accessToken.__data.roles ? JSON.parse(JSON.stringify(req.accessToken.__data.roles)) : null;
       Object.assign(callContext.ctx, obj);
 
       callContext.ctx.remoteUser = req.accessToken.username;
