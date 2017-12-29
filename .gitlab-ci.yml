@@ -88,7 +88,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
     
-oracletest:
+.oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
@@ -121,7 +121,7 @@ oracletest:
   tags:
     - CEP_RUNNER    
 
-consistenthashtest:
+.consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db

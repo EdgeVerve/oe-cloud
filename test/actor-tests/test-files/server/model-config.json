@@ -172,10 +172,6 @@
         "dataSource": "db",
         "public": true
     },
-    "JobScheduler": {
-        "public": true,
-        "dataSource": "db"
-    },
     "DataSourceMapping": {
         "public": true,
         "dataSource": "db"
