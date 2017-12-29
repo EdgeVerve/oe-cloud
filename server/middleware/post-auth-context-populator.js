@@ -34,11 +34,6 @@ module.exports = function postAuthContextPopulator(options) {
 
       callContext.ctx.remoteUser = req.accessToken.username;
 
-      // this check happens in data personalization, default is taken 1
-      // Object.keys(callContext.ctx).map(function callcontextForEachKeyFn(key, index) {
-      //     callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
-      // });
-      // callContext.accessTokenData = req.accessToken.__data;
       callContext.accessToken = req.accessToken.id;
       req.callContext = callContext;
 
@@ -53,12 +48,6 @@ module.exports = function postAuthContextPopulator(options) {
       req.callContext.noInstanceCache = true;
     }
     if (req.headers['x-evproxy-db-lock'] === '1') {
-      // log.debug(req.callContext, 'x-evproxy-db-lock header has value of 1');
-      // if (DB_LOCK_MODE === null) {
-      //     DB_LOCK_MODE = req.app.get('dbLockMode') || "dbLock";
-      // }
-
-      // DB_LOCK_MODE;
       req.callContext.lockMode = 'dbLock';
     }
     next();

@@ -204,17 +204,6 @@ function finalBoot(appinstance, options, cb) {
       }
       // start the web server
       return appinstance.listen(function serverBootAppInstanceListenCb() {
-        // appinstance.remotes().before('**', function appInstanceBeforeAll(ctx, next) {
-        //   var allowedMethodList = appinstance.get('allowedHTTPMethods');
-        //   var allowed = (!allowedMethodList || (allowedMethodList.indexOf(ctx.req.method) > -1));
-        //   if (allowed) {
-        //     next();
-        //   } else {
-        //     var err = new Error('Method not allowed');
-        //     next(err);
-        //   }
-        // });
-
         appinstance.remotes().before('**', function appInstanceBeforeAll(ctx, next) {
           if (ctx.instance) {
             ctx.instance.__remoteInvoked = true;
@@ -234,46 +223,10 @@ function finalBoot(appinstance, options, cb) {
 
         appinstance.get('remoting').errorHandler = {
           handler: function remotingErrorHandler(err, req, res, defaultHandler) {
-            /* res.status(err.statusCode || err.status);
-                                                            var finalError = {};
-                                                            finalError.message = err.message || err.toString();
-                                                            var errors = [];
-                                                            errors = appinstance.buildError(err, req.callContext);
-                                                            finalError.txnId = req.callContext ? req.callContext.txnId : '';
-                                                            finalError.requestId = req.callContext ? req.callContext.requestId : '';
-                                                            finalError.errors = errors;
-                                                            log.error(options, 'error :', JSON.stringify(finalError));*/
             log.error(req.callContext, 'error :', JSON.stringify(err));
             defaultHandler(err);
           }
         };
-
-        /* appinstance.buildError = function appinstanceBuildError(err, context) {
-                                                  var errors = [];
-                                                  if (err instanceof Array) {
-                                                    // concat all errors to form a single error array
-                                                    Object.keys(err).forEach(function configLocalHandlerForEach(error) {
-                                                      var errorObj = err[error];
-                                                      if (errorObj.details && errorObj.details.messages.errs) {
-                                                        errors = errors.concat(errorObj.details.messages.errs);
-                                                      } else if (errorObj.details && errorObj.details.messages) {
-                                                        errors = errors.concat(errorObj.details.messages);
-                                                      } else {
-                                                        errors = errors.concat(errorObj);
-                                                      }
-                                                    });
-                                                  } else if (err.details && err.details.messages) {
-                                                    errors = err.details.messages.errs ? err.details.messages.errs : err.details.messages;
-                                                  } else {
-                                                    // single server error convert it to array of single error
-                                                    var errObj = {};
-                                                    errObj.code = err.code || err.errCode;
-                                                    errObj.message = err.message || err.errMessage;
-                                                    errObj.path = err.path;
-                                                    errors.push(errObj);
-                                                  }
-                                                  return errors;
-                                                };*/
       });
     };
 
@@ -281,7 +234,6 @@ function finalBoot(appinstance, options, cb) {
       appinstance.on('started', function () {
         var createSwaggerObject = require('oe-explorer').createSwaggerObject;
         var swaggerObject = createSwaggerObject(appinstance, options);
-        // console.log('swagger:' + JSON.stringify(swaggerObject));
         var result = JSON.stringify(swaggerObject);
         require('fs').writeFileSync('swagger.json', result, { encoding: 'utf8' });
         process.exit(0);
