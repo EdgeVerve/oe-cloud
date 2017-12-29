@@ -284,7 +284,7 @@ describe(chalk.blue('transaction test'), function() {
 
     });
 
-    xit('should emit reconcile job with valid data', function(done) {
+    it('should emit reconcile job with valid data', function(done) {
         var dbT = models['DbTransaction'];
         if (!dbT.dataSource.isRelational()) {
             dbT.update({ "transactionId": uTxnId }, { "status": "changing" }, function(err, res) {
@@ -304,7 +304,7 @@ describe(chalk.blue('transaction test'), function() {
         }
     });
 
-    xit('should emit reconcile job with no data', function(done) {
+    it('should emit reconcile job with no data', function(done) {
         var dbtx = models['DbTransaction'];
         dbtx.emit('reconcile', {
             'transaction': '345',
