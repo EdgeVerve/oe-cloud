@@ -278,7 +278,8 @@
     "Lock": {
         "public": false,
         "dataSource": "db"
-    }, "FailedObserverLog": {
+    },
+    "FailedObserverLog": {
         "public": true,
         "dataSource": "db"
     }
