@@ -17,7 +17,6 @@ services:
     image: ${REGISTRY}/${APP_IMAGE_NAME}:testing
     depends_on:
       - mongo
-      - broadcaster
     deploy:
       mode: replicated
       replicas: 1
