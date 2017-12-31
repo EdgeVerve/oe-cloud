@@ -994,7 +994,8 @@ describe(chalk.blue('actor-pattern-test'), function () {
             log.error(log.defaultContext(), err);
             return done(err);
           } else {
-            expect(res.body.error.message).to.be.equal('Cannot update existing journal entry');
+            // expect(res.body.error.message).to.be.equal('Cannot update existing journal entry');
+            expect(res.body.error.message).to.deep.include('has no method handling PUT')
             return done();
           }
         });
