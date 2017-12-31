@@ -5,8 +5,7 @@
  *
  */
 var log = require('oe-logger')('context-populator-filter');
-var camelCase = require('camelcase');
-
+// var DB_LOCK_MODE = null;
 
 /**
  * This middleware sets callContext based on logged in user
@@ -17,38 +16,39 @@ var camelCase = require('camelcase');
  */
 
 module.exports = function postAuthContextPopulator(options) {
-  var excludeList = ['id', 'ttl', 'created'];
+  // var excludeList = ['id', 'ttl', 'created'];
 
   return function setRequestContext(req, res, next) {
     if (req.accessToken) {
       var callContext = req.callContext || {};
       callContext.ctx = callContext.ctx || {};
 
-      var instance = req.accessToken.__data;
-      if (instance) {
-        var keys = Object.keys(instance);
-        keys.map(function instanceKeysMapFn(key, index) {
-          if (excludeList.indexOf(key) === -1) {
-            // TODO will put generic check for Array
-            if (key === 'roles') {
-              callContext.ctx[camelCase(key)] = JSON.parse(JSON.stringify(instance[key]));
-            } else {
-              callContext.ctx[camelCase(key)] = instance[key];
-            }
-          }
-        });
-      }
+
+      var obj = Object.assign({}, req.accessToken.__data);
+      // remove properties that are not required
+      delete obj.id;
+      delete obj.ttl;
+      delete obj.created;
+      obj.roles = req.accessToken.__data.roles ? JSON.parse(JSON.stringify(req.accessToken.__data.roles)) : null;
+      Object.assign(callContext.ctx, obj);
 
       callContext.ctx.remoteUser = req.accessToken.username;
 
-      Object.keys(callContext.ctx).map(function callcontextForEachKeyFn(key, index) {
-        callContext.ctxWeights[key] = callContext.ctxWeights[key] || '1';
-      });
-      callContext.accessTokenData = req.accessToken.__data;
       callContext.accessToken = req.accessToken.id;
       req.callContext = callContext;
 
       log.debug(req.callContext, 'postAuthContextPopulator : context setting as  = ', callContext);
+    }
+
+    // set noquerycache and noinstancecache true if value set to 1
+    if (req.query.noQueryCache === '1') {
+      req.callContext.noQueryCache = true;
+    }
+    if (req.query.noInstanceCache === '1') {
+      req.callContext.noInstanceCache = true;
+    }
+    if (req.headers['x-evproxy-db-lock'] === '1') {
+      req.callContext.lockMode = 'dbLock';
     }
     next();
   };
