@@ -28,6 +28,20 @@ var debug = require('debug')('model-definition-test');
 
 describe(chalk.blue('model-definition-test'), function () {
     this.timeout(20000);
+
+    var testUserAccessToken;
+
+    before('Create Test User Accesstoken', function(done) {
+      var testUser = {
+        'username': 'testuser',
+        'password': 'testuser123'
+      };
+      bootstrap.login(testUser, function(returnedAccesstoken) {
+        testUserAccessToken = returnedAccesstoken;
+        done();
+      });
+    });
+
     after('destroy context', function (done) {
         var model = loopback.getModel('ModelDefinitionHistory');
         if (model) {
@@ -67,7 +81,7 @@ describe(chalk.blue('model-definition-test'), function () {
                 .set('Accept', 'application/json')
                 .set('TENANT_ID', tenantId)
                 .set('REMOTE_USER', 'testUser')
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .send(postData)
                 .expect(200).end(function (err, res) {
                     debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -89,7 +103,7 @@ describe(chalk.blue('model-definition-test'), function () {
 
             api
                 .set('TENANT_ID', tenantId)
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .send(postData)
                 .expect(422).end(function (err, res) {
                     if (err) {
@@ -115,7 +129,7 @@ describe(chalk.blue('model-definition-test'), function () {
 
             api
                 .set('TENANT_ID', tenantId)
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .send(postData)
                 .expect(422).end(function (err, res) {
                     debug('response body.error details : ' + JSON.stringify(res.body.error.details, null, 4));
@@ -161,7 +175,7 @@ describe(chalk.blue('model-definition-test'), function () {
 
                 api
                     .set('TENANT_ID', tenantId)
-                    .put(modelDefitnionUrl + '/' + modelId)
+                    .put(modelDefitnionUrl + '/' + modelId + '?access_token=' + testUserAccessToken)
                     .send(modelDetails)
                     .expect(200).end(function (err, res) {
                         //console.log(err,res.body);
@@ -188,7 +202,7 @@ describe(chalk.blue('model-definition-test'), function () {
                 //console.log('model details',modelDetails);
 
                 api
-                    .del(modelDefitnionUrl + '/' + modelId)
+                    .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + testUserAccessToken)
                     .expect(200).end(function (err, res) {
                         console.log('response body : ' + JSON.stringify(res.body, null, 4));
                         // after delete find same model with ID it should not be present.
@@ -218,7 +232,7 @@ describe(chalk.blue('model-definition-test'), function () {
             };
 
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .set('tenant_id', 'test-tenant')
                 .set('remote_user', 'unitTest')
                 .send(postData)
@@ -241,7 +255,7 @@ describe(chalk.blue('model-definition-test'), function () {
             };
 
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .set('tenant_id', 'test-tenant')
                 .set('remote_user', 'unitTest')
                 .send(postData)
@@ -289,7 +303,7 @@ describe(chalk.blue('model-definition-test'), function () {
             };
 
             api
-                .post(modelDefitnionUrl)
+                .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                 .send(postData)
                 .expect(200).end(function (err, res) {
                     debug('response body : ' + JSON.stringify(res.body, null, 4));
@@ -310,7 +324,7 @@ describe(chalk.blue('model-definition-test'), function () {
                 var modelId = modeldefinition[0].id;
 
                 api
-                    .del(modelDefitnionUrl + '/' + modelId)
+                    .del(modelDefitnionUrl + '/' + modelId + '?access_token=' + testUserAccessToken)
                     .expect(200).end(function (err, res) {
                         debug('response body : ' + JSON.stringify(res.body, null, 4));
                         // after delete find same model with ID it should not be present.
@@ -342,7 +356,7 @@ describe(chalk.blue('model-definition-test'), function () {
                 };
 
                 api
-                    .post(modelDefitnionUrl)
+                    .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
                     .send(postData)
                     .expect(422).end(function (err, res) {
                         debug('response body : ' + JSON.stringify(res.body, null, 4));

@@ -8,6 +8,8 @@ var chalk = require('chalk');
 var chai = require('chai');
 chai.use(require('chai-things'));
 //var expect = chai.expect;
+var middleware = require('../server/middleware');
+middleware['routes:before']['./middleware/otp-middleware']['enabled'] = true;
 var appRoot = require('app-root-path');
 var evapp = appRoot.require('/server/server');
 var options = evapp.options;
@@ -15,6 +17,7 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var loopback = require('loopback');
 var config = require('../server/config');
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var async = require('async');
 var fs = require('fs');

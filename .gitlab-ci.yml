@@ -88,7 +88,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
     
-oracletest:
+.oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
@@ -101,14 +101,14 @@ oracletest:
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
-    - npm install nan async --no-optional
     - time npm install --no-optional
+    - npm install nan async --no-optional
+    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     - mv /oracledb node_modules/
     #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
     - export CI_PROJECT_NAMESPACE=${group}
     - node server/oracle-utility.js
     #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
-    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     # Removing decision test cases which are frequently failing in oracle
     - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-test.js
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
@@ -121,7 +121,7 @@ oracletest:
   tags:
     - CEP_RUNNER    
 
-consistenthashtest:
+.consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db
