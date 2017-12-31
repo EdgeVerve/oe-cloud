@@ -216,6 +216,9 @@ function failsafeObserverBeforeDelete(ctx, next) {
     fsCtx.isNewInstance = ctx.isNewInstance;
     fsCtx.options = ctx.options;
     fsCtx.hookState = ctx.hookState;
+    if (ctx.where) fsCtx.where = ctx.where;
+    if (ctx.data) fsCtx.data = ctx.data;
+
     ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
@@ -235,6 +238,8 @@ function failsafeObserverBeforeSave(ctx, next) {
     fsCtx.isNewInstance = ctx.isNewInstance;
     fsCtx.options = ctx.options;
     fsCtx.hookState = ctx.hookState;
+    if (ctx.where) fsCtx.where = ctx.where;
+    if (ctx.data) fsCtx.data = ctx.data;
     ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
