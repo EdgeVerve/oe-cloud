@@ -8,7 +8,6 @@ var async = require('async');
 var loopback = require('loopback');
 var log = require('oe-logger')('BaseActorEntity');
 var actorPool = require('../../../lib/actor-pool');
-var config = require('../../../server/config');
 var StateModel;
 var associatedModelsMap = {};
 
