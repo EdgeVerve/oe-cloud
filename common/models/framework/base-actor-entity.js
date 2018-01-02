@@ -9,7 +9,6 @@ var loopback = require('loopback');
 var log = require('oe-logger')('BaseActorEntity');
 var actorPool = require('../../../lib/actor-pool');
 var config = require('../../../server/config');
-var DB_LOCK_MODE = config.dbLockMode;
 var StateModel;
 var associatedModelsMap = {};
 
