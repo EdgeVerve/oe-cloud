@@ -51,6 +51,10 @@ module.exports = function postAuthContextPopulator(options) {
       req.callContext.lockMode = 'dbLock';
       global.setDBLockMode();
     }
+    if (req.headers['x-ci-erase-cache'] === '1') {
+      req.callContext.lockMode = 'dbLock';
+      global.eraseCache();
+    }
     next();
   };
 };
