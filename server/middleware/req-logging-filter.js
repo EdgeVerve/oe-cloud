@@ -15,9 +15,8 @@ var log = require('oe-logger')('req-logging-filter');
 
 module.exports = function ReqLoggingFilter(options) {
   return function doLog(req, res, next) {
-    log.debug(req.callContext, req.method, ' ', req.url);
-    if (req._body) log.debug(req.callContext, 'Body: ', req.body);
-    log.debug(req.callContext, 'Headers: ', req.headers, ' Query: ', req.query);
+    log.debug(req.callContext, { Request: req.method + ' ' + req.url, Headers: req.headers, Query: req.query });
+    log.trace(req.callContext, { Body: req.body });
     next();
   };
 };

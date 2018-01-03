@@ -21,12 +21,6 @@ module.exports = function ModelDiscoveryFilter(options) {
 
     log.debug(req.callContext, 'url = ', req.url);
 
-    var restApiRoot = app.get('restApiRoot');
-    if (req.originalUrl.indexOf(restApiRoot) !== 0) {
-      log.debug(req.callContext, 'url = ', req.url, ' ---- skipping model discovery');
-      return next();
-    }
-
     var invokedPlural = url.split('/')[2].split('?')[0];
     var savedName = invokedPlural;
     var baseModel = util.checkModelWithPlural(app, invokedPlural);
@@ -34,7 +28,6 @@ module.exports = function ModelDiscoveryFilter(options) {
     if (model) {
       req.url = req.url.replace(savedName, model.pluralModelName);
       req.originalUrl = req.originalUrl.replace(savedName, model.pluralModelName);
-      return next();
     }
     return next();
   };

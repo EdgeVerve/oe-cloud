@@ -8,8 +8,6 @@ var async = require('async');
 var loopback = require('loopback');
 var log = require('oe-logger')('BaseActorEntity');
 var actorPool = require('../../../lib/actor-pool');
-var config = require('../../../server/config');
-var DB_LOCK_MODE = config.dbLockMode;
 var StateModel;
 var associatedModelsMap = {};
 
@@ -621,7 +619,7 @@ module.exports = function (BaseActorEntity) {
           }
           if (ds.name === 'loopback-connector-postgresql') {
             for (var x = 0; x < returnedInstances.length; x++) {
-              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadtxt);
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
@@ -689,7 +687,7 @@ module.exports = function (BaseActorEntity) {
       return cb();
     }
     setMessageStatus(envelope);
-    if (options.lockMode === DB_LOCK_MODE) {
+    if (global.inDBLockMode()) {
       processEnvelope();
     } else {
       return cb();
