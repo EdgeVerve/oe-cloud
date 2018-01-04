@@ -69,5 +69,12 @@
   "maxFailedLoginTries": 5,
   "metadataModelList": {
     "ModelDefinition": true
+  },
+  "jsFeelRelation": {
+    "disabled": false
+  },
+  "jsFeelExternalFunction": {
+    "disabled": false,
+    "path": ""
   }
 }
