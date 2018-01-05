@@ -116,7 +116,7 @@ describe(chalk.blue('model-rule-belongsTo-self-relation-test'), function() {
       managerId: 3,
       pid: 10
     };
-    debugger;
+    // debugger;
     People.create(data, bootstrap.defaultContext, function(err) {
       // debugger;
       expect(err).to.not.be.null;
@@ -130,6 +130,29 @@ describe(chalk.blue('model-rule-belongsTo-self-relation-test'), function() {
       expect(errMessage).to.be.string;
       expect(errMessage).to.equal('manager should not be: josie');
       done();
+    });
+  });
+
+  it('should allow the entry for a valid people record', function(done){
+    var data = {
+      name: 'Rijesh',
+      age: 26,
+      designation: 'manager',
+      department: 'hr',
+      managerId: 2,
+      pid: 10
+    };
+    // debugger;
+    People.create(data, bootstrap.defaultContext, function(err, result) {
+      // debugger;
+      // done(err);
+      if (err) {
+        done(err)
+      }
+      else {
+        expect(result.name).to.equal(data.name);
+        done();
+      }
     });
   });
 });
