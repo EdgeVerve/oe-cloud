@@ -65,6 +65,7 @@ describe(chalk.blue('Decision service insertion tests'), function() {
     });
 
     it('should fail when you insert service data with a non-existant decision name', function(done) {
+    	// debugger;
         models.DecisionService.create({
             name: 'foosvc2', 
             graphId: testData.graphName,
@@ -73,6 +74,80 @@ describe(chalk.blue('Decision service insertion tests'), function() {
             expect(err, 'it did not fail!').to.not.be.null;
             done();
         })
+    });
+
+    it('should execute a service correctly', function(done){
+    	var payload = {
+	      'Applicant data': {
+	        Age: 51,
+	        MaritalStatus: 'M',
+	        EmploymentStatus: 'EMPLOYED',
+	        'ExistingCustomer': false,
+	        'Monthly': {
+	          'Income': 10000,
+	          'Repayments': 2500,
+	          'Expenses': 3000
+	        }
+	      },
+	      'Requested product': {
+	        ProductType: 'STANDARD LOAN',
+	        Rate: 0.08,
+	        Term: 36,
+	        Amount: 100000
+	      },
+	      'Bureau data': {
+	        Bankrupt: false,
+	        CreditScore: 600
+	      }
+	    };
+    	models.DecisionService.invoke('foosvc', payload, bootstrap.defaultContext, (err, result) => {
+    		if (err) {
+    			done(err)
+    		} else {
+    			expect(result).to.eql({
+    				Routing: {
+    					Routing: 'ACCEPT'
+    				}
+    			});
+    			done();
+    		}
+    	});
+    });
+
+    it('should update a service without errors', function(done){
+   		models.DecisionService.findOne({ where: { name: testData.svcName }}, bootstrap.defaultContext, function(err, data) {
+   			if (err) {
+   				done(err);
+   			} else {
+   				// console.dir(data);
+   				expect(data).to.not.be.null;
+   				expect(data.name).to.equal(testData.svcName);
+   				// expect(data.decisions).to.be.array;
+   				expect(Array.isArray(data.decisions)).to.be.true;
+   				// console.log(data.decisions);
+   				expect(data.decisions.slice()).to.eql(['Routing']);
+   				expect(data.id).to.be.string;
+   				var id = data.id;
+   				var version = data._version
+   				var graphId = data.graphId;
+   				debugger;
+   				models.DecisionService.upsert({
+   					id: id,
+   					_version: version,
+   					decisions:['Routing Rules'],
+   					graphId
+   				}, bootstrap.defaultContext, function(err, result) {
+   					if (err) {
+   						done(err);
+   					} else {
+   						expect(result).to.be.defined;
+   						expect(result.name).to.equal(testData.svcName);
+   						done();
+   					}
+   				});
+   				// done();
+   			}
+   		});
     });
 });
 
