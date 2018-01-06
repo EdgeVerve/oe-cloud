@@ -110,6 +110,7 @@
         "email": "admin@mycompany.com"
     },
     "dbLockMode": "dbLock",
+    "dbLockDuration": 10000,
     "scriptTag": [
         "<img",
         "<a href",
