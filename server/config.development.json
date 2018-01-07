@@ -75,6 +75,6 @@
   },
   "jsFeelExternalFunction": {
     "disabled": false,
-    "path": ""
+    "path": "test/model-rule-data/data/functions"
   }
 }
