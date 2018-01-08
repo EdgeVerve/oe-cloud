@@ -198,6 +198,8 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     });
   });
   
+  // note: add the necessary external function config
+  // in the corresponding environment: server/config.whatever.json
   it('should execute the decision table correctly', function(done) {
     var DecisionTable = models.DecisionTable;
     var executor = function(payload) {
