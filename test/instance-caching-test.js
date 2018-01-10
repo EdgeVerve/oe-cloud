@@ -64,7 +64,7 @@ function apiPostRequest(url, postData, callback, done) {
   postData._version = version;
   api
     .set('Accept', 'application/json')
-    .set('x-evproxy-db-lock', '1')
+    .set('x-ci-erase-cache', '1')
     .post(bootstrap.basePath + url + '?access_token=' + accessToken)
     .send(postData)
     .end(function (err, res) {
@@ -79,7 +79,7 @@ function apiPostRequest(url, postData, callback, done) {
 function apiGetRequest(url, callback, done) {
   api
     .set('Accept', 'application/json')
-    .set('x-evproxy-db-lock', '1')
+    .set('x-ci-erase-cache', '1')
     .get(bootstrap.basePath + url + '?access_token=' + accessToken)
     .send()
     .end(function (err, res) {
@@ -166,7 +166,7 @@ describe('Instance Caching Test', function () {
     };
 
     api
-      .set('x-evproxy-db-lock', '1')
+      .set('x-ci-erase-cache', '1')
       .post(bootstrap.basePath + '/BaseUsers/login')
       .send(sendData)
       .expect(200).end(function (err, res) {
@@ -935,7 +935,7 @@ describe('Instance Caching Test', function () {
             var filter = {where: {id: id}};
             api
             .set('Accept', 'application/json')
-            .set('x-evproxy-db-lock', '0')
+            .set('x-ci-erase-cache', '0')
             .get(bootstrap.basePath + url + '?filter='+JSON.stringify(filter)+'&noInstanceCache=' + 1 + '&access_token=' + accessToken)
             .send()
             .end(function (err, res) {
@@ -1019,7 +1019,7 @@ describe('Instance Caching Test', function () {
             var filter = {where: {name: "noQueryCacheTestRest"}};
             api
             .set('Accept', 'application/json')
-            .set('x-evproxy-db-lock', '0')
+            .set('x-ci-erase-cache', '0')
             .get(bootstrap.basePath + url + '?filter='+JSON.stringify(filter)+'&noQueryCache=' + 1 + '&access_token=' + accessToken)
             .send()
             .end(function (err, res) {

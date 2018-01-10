@@ -1,4 +1,3 @@
-
 /**
  *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
@@ -26,15 +25,11 @@ function isAdmin(req) {
 
 module.exports = function nodeRedAccessControl(options) {
   return function (req, res, next) {
-    if (req.originalUrl.startsWith('/red/')) {
-      if (isAdmin(req)) {
-        next();
-      } else {
-        log.info('Admin users only has permission to access Node Red.');
-        res.status(401).send('Unauthorized. \n Please sign in as administrator, to access Node-Red.');
-      }
-    } else {
+    if (isAdmin(req)) {
       next();
+    } else {
+      log.info('Admin users only has permission to access Node Red.');
+      res.status(401).send('Unauthorized. \n Please sign in as administrator, to access Node-Red.');
     }
   };
 };

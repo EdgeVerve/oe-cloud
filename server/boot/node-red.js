@@ -9,6 +9,7 @@ var nodeRed = require('loopback-connector-nodes-for-Node-RED');
 var loopback = require('loopback');
 var _ = require('lodash');
 var messaging = require('../../lib/common/global-messaging');
+var broadcasterClient = require('../../lib/common/broadcaster-client.js');
 var uuidv4 = require('uuid/v4');
 var fs = require('fs');
 var path = require('path');
@@ -161,7 +162,11 @@ module.exports = function startNodeRed(server, callback) {
   };
   var flowModel = loopback.findModel('NodeRedFlow');
   flowModel.observe('after save', function flowModelAfterSave(ctx, next) {
-    messaging.publish('reloadNodeRedFlows', uuidv4());
+    if (!broadcasterClient.getUseBroadcaster()) {
+      reload(redNodes, function reloadFn() {});
+    } else {
+      messaging.publish('reloadNodeRedFlows', uuidv4());
+    }
     next();
   });
 
