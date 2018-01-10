@@ -54,7 +54,8 @@ describe(chalk.blue('EV Validation test'), function () {
       'strict': false,
       'idInjection': true,
       'options': {
-        'validateUpsert': true
+        'validateUpsert': true,
+        "disableManualPersonalization":false
       },
       'properties': {
         'fuel': {
@@ -77,7 +78,8 @@ describe(chalk.blue('EV Validation test'), function () {
           'strict': false,
           'idInjection': true,
           'options': {
-            'validateUpsert': true
+            'validateUpsert': true,
+            "disableManualPersonalization":false
           },
           'properties': {
             'name': {

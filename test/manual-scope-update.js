@@ -23,6 +23,9 @@ describe(chalk.blue('Manual Scope Update'), function () {
   var modelDetails = {
     name: modelName,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string',
