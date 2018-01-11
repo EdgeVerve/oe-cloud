@@ -326,6 +326,26 @@ describe(chalk.blue('data-acl-test'), function () {
             });
     });
 
+    it('fetch with filter', function (done) {
+        var api = defaults(supertest(bootstrap.app));
+        var filter = {where:{category:'book'}};
+
+        var url = bootstrap.basePath + '/' + modelName + 's?access_token=' + user1token + '&filter=' + JSON.stringify(filter);
+        api
+            .get(url)
+            .expect(200).end(function (err, res) {
+                var response = res.body;
+                expect(response).to.exist;
+                response.forEach(function (item) {
+                    expect((item.category === 'book') &&
+                        (item.department === 'd1' ||
+                            item.department === 'd2')).to.be.true;
+                });
+
+                done();
+            });
+    });
+
     it('login2', function (done) {
         var postData = {
             'username': user2.username,
