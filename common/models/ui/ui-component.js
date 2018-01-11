@@ -370,6 +370,12 @@ module.exports = function uiComponent(UIComponent) {
             field.type = 'tags';
           }
         }
+        if (field.validateWhen) {
+          Object.keys(field.validateWhen).forEach(function (validationRule) {
+            delete field[validationRule];
+          });
+          delete field.validateWhen;
+        }
         if (field.refcodetype) {
           subtasks.push(function subTaskPushCb(fetched) {
             var refCodeModel = loopback.findModel(field.refcodetype, options);
@@ -382,12 +388,6 @@ module.exports = function uiComponent(UIComponent) {
               fetched(err);
             });
           });
-        }
-        if (field.validateWhen) {
-          Object.keys(field.validateWhen).forEach(function (validationRule) {
-            delete field[validationRule];
-          });
-          delete field.validateWhen;
         }
       });
 
