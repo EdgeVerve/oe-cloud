@@ -370,15 +370,10 @@ module.exports = function uiComponent(UIComponent) {
             field.type = 'tags';
           }
         }
-        if (field.validateWhen) {
-          Object.keys(field.validateWhen).forEach(function (validationRule) {
-            delete field[validationRule];
-          });
-          delete field.validateWhen;
-        }
         if (field.refcodetype) {
+          var refCodeType = field.refcodetype;
           subtasks.push(function subTaskPushCb(fetched) {
-            var refCodeModel = loopback.findModel(field.refcodetype, options);
+            var refCodeModel = loopback.findModel(refCodeType, options);
             refCodeModel.find({}, options, function findCb(err, resp) {
               if (!err) {
                 field.listdata = resp;
@@ -388,6 +383,12 @@ module.exports = function uiComponent(UIComponent) {
               fetched(err);
             });
           });
+        }
+        if (field.validateWhen) {
+          Object.keys(field.validateWhen).forEach(function (validationRule) {
+            delete field[validationRule];
+          });
+          delete field.validateWhen;
         }
       });
 
