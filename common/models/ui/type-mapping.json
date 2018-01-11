@@ -1,28 +1,29 @@
 {
-	"name": "TypeMapping",
-	"base": "BaseEntity",
-	"idInjection": false,
-  "description" : "Type configuration or mapping to UI Type",
-	"options": {
-		"validateUpsert": true
-	},
+    "name": "TypeMapping",
+    "base": "BaseEntity",
+    "idInjection": false,
+    "description": "Type configuration or mapping to UI Type",
+    "options": {
+        "validateUpsert": true,
+        "disableManualPersonalization": false
+    },
     "properties": {
         "type": {
             "type": "string",
             "required": true
         },
-        "uiType":{
-            "type":"string",
+        "uiType": {
+            "type": "string",
             "required": true
         },
-        "attributes":{
-            "type": ["UIAttribute"]
+        "attributes": {
+            "type": [
+                "UIAttribute"
+            ]
         }
     },
     "validations": [],
-	"relations": {
-	},
-	"acls": [
-	],
-	"methods": {}
+    "relations": {},
+    "acls": [],
+    "methods": {}
 }

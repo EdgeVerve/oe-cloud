@@ -6,7 +6,8 @@
   "description": "This model stores application models metadata",
   "options": {
     "validateUpsert": true,
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization":false
   },
   "properties": {
     "properties": {
