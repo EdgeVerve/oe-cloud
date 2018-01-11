@@ -191,8 +191,17 @@ function checkHookisAlreadyAttached(model, hookName) {
 function executeDecisionTableRules(modelCtx, model, next) {
   // Not checking the model existence since it is a loopback feature.
   var desicionTableModel = loopback.findModel('DecisionTable');
-  var modelData = modelCtx.data || modelCtx.instance;
-  var payload = modelData.__data;
+  var modelData, payload;
+  if(modelCtx.data && modelCtx.currentInstance) {
+    payload = modelCtx.currentInstance.__data;
+    Object.keys(modelCtx.data).forEach(function(key) {
+      if(!key.startsWith("_")) payload[key] = modelCtx.data[key];
+    });
+  } else {
+    modelData = modelCtx.data || modelCtx.instance;
+    payload = modelData.__data;
+  }
+
   // Building filter query to find the modelRule
   // Is model.modelName is the right way to get model name or we have to use modelCtx, who is populating modelName to model constructor
   // does models with base PersistedModel also works.
