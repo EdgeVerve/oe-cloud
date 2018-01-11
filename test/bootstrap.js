@@ -8,6 +8,8 @@ var chalk = require('chalk');
 var chai = require('chai');
 chai.use(require('chai-things'));
 //var expect = chai.expect;
+var middleware = require('../server/middleware');
+middleware['routes:before']['./middleware/otp-middleware']['enabled'] = true;
 var appRoot = require('app-root-path');
 var evapp = appRoot.require('/server/server');
 var options = evapp.options;
