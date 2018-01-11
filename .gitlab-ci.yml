@@ -71,6 +71,12 @@ mongotest:
     - time npm install --no-optional
     - npm run grunt-cover
     - mocha test/01-cleanup.js
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - coverage/
+    when: on_failure
   tags:
     - CEP_RUNNER
 
@@ -85,10 +91,16 @@ postgrestest:
     - time npm install --no-optional
     - npm run grunt-cover
     - mocha test/01-cleanup.js
+  artifacts:
+    untracked: true
+    expire_in: 2h
+    paths:
+      - coverage/
+    when: on_failure
   tags:
     - CEP_RUNNER
     
-oracletest:
+.oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
@@ -121,7 +133,7 @@ oracletest:
   tags:
     - CEP_RUNNER    
 
-consistenthashtest:
+.consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db
