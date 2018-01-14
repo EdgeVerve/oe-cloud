@@ -307,7 +307,7 @@ module.exports = function (BaseJournalEntity) {
         actor = ctx.hookState.actorInstancesMap[activity.entityId];
       }
       if (actor) {
-        if (ctx.instance._connectorData && ctx.instance._connectorData.error 
+        if (ctx.instance._connectorData && ctx.instance._connectorData.error
         && actor.constructor.settings.noBackgroundProcess) {
           log.info(ctx.instance._type + ' Failed! Clearing Actor ' + activity.entityId);
           actor.clearActorMemory(ctx.options, function () {
