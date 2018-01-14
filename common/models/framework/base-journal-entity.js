@@ -275,6 +275,8 @@ module.exports = function (BaseJournalEntity) {
                   actor.clearActorMemory(ctx.options, function () {
                     cb();
                   });
+                } else {
+                  cb();
                 }
               }, function () {
                 return next(err);
