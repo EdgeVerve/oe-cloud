@@ -1,4 +1,5 @@
 
+
 /*
 ©2015-2016 EdgeVerve Systems Limited (a fully owned Infosys subsidiary), Bangalore, India. All Rights Reserved.
 The EdgeVerve proprietary software program ("Program"), is protected by copyrights laws, international treaties and other pending or existing intellectual property rights in India, the United States and other countries.
@@ -15,6 +16,7 @@ var bootstrap = require('./bootstrap');
 var app = bootstrap.app;
 var chai = bootstrap.chai;
 var expect = chai.expect;
+var async = require('async');
 var models = bootstrap.models;
 var eventHistoryManager = require('../lib/event-history-manager');
 var debug = require('debug')('failsafe-observer-test');
@@ -447,6 +449,105 @@ describe('failsafe-observer-mixin', function () {
                 done(err);
             }
         });
+    });
+
+    it('should update a failed-observer-log record on observer success', function (done) {
+        var model = loopback.getModel(modelName, defaultContext);
+        var counter = 0;
+        var RETRY_TIME_INTERVAL = app.get('eventReliabilityMaxRetryInterval');
+        var version = uuidv4();
+        var LogModel = loopback.getModel("FailedObserverLog", defaultContext);
+        var instance;
+
+        model.observe('after save', function (ctx, next) {
+            if (!ctx.fromRecovery) return next();
+            setTimeout(function statusCheck(i) {
+                var query = { where: {'version': version}, fetchDeleted: true };
+                LogModel.find(query, defaultContext, function (error, results) {
+                    if (error || !results || results.length != 1){
+                        return done(new Error('A log record was not created for observer failed execution.'));
+                    }
+                    if (results[0].status != 'SUCCESS'){
+                        if (i < 5)
+                            return setTimeout(statusCheck, RETRY_TIME_INTERVAL, i+1 );
+                        else 
+                            return done(new Error('The FailedObserverLog status wasn\'t changed.'));
+                    }
+                    return done();
+                });
+            }, RETRY_TIME_INTERVAL * 2, 0);
+            next();
+        });
+
+        async.series([
+            function(cb){
+                model.create({ name: 'test', _version: version }, defaultContext, (err, res) => {
+                    instance = res;
+                    cb(err)
+                });
+            },
+            function(cb){
+                var log = {};
+                log.modelName = model.modelName;
+                log.version = version;
+                log.operation = 'after save';
+                log.created = new Date();
+                log.status = 'EXCEED_MAX_RETRY';
+                LogModel.create(log, defaultContext, cb);
+            },
+            function(cb){
+                var ctx = {trigger: 'after save', fromRecovery: true, hasFailedObserverLog: true};
+                instance.createEventHistory(ctx, defaultContext, cb);
+            }
+        ])
+        
+        
+    });
+
+    it('should update _fsCtx', function (done) {
+        var model = loopback.getModel(modelName, defaultContext);
+        var counter = 0;
+        var RETRY_TIME_INTERVAL = app.get('eventReliabilityMaxRetryInterval');
+        var version = uuidv4();
+        var LogModel = loopback.getModel("FailedObserverLog", defaultContext);
+        var instance;
+
+        var i=0;
+        model.observe('after save', function (ctx, next){
+            var instance = ctx.instance || ctx.currentInstance;
+            var fsCtx = JSON.parse(instance._fsCtx);
+            expect(fsCtx.options).to.be.an('object');
+            expect(fsCtx.hookState).to.be.an('object');
+            if (i === 0){
+                expect(fsCtx.isNewInstance).to.be.true;
+                i++;
+            } else if (i === 1){
+                i++;
+                expect(fsCtx.isNewInstance).to.be.false;
+                expect(fsCtx.data).to.be.an('object');
+                done();
+            } else {
+                done(new Error('Observer ran too many times.')); 
+            }
+            next();
+        });
+
+        async.series([
+            function(cb){
+                model.create({ name: 'test', _version: version }, defaultContext, (err, res) => {
+                    instance = res;
+                    cb(err)
+                });
+            },
+            function(cb){
+                instance.updateAttribute( 'name', 'updated', defaultContext, (err, res) => {
+                    // instance = res;
+                    oldVersion = res._oldVersion;
+                    version = res._version;
+                    cb(err)
+                });
+            }
+        ])       
     });
 
 });

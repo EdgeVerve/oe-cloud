@@ -53,11 +53,11 @@ module.exports = function failsafeObserverMixin(Model) {
     ctx.instance = this;
     ctx.Model = loopback.getModel(modelName);
     ctx.fromRecovery = context.fromRecovery || false;
+    ctx.hasFailedObserverLog = context.hasFailedObserverLog || false;
     if (this._fsCtx) {
       try {
         var fsCtx = JSON.parse(this._fsCtx);
         Object.assign(ctx, fsCtx);
-        // ctx.options = JSON.parse(this._fsCtx);
       } catch (e) {
         log.debug(log.defaultContext(), 'failed to parse _fsCtx: ', e);
         ctx.options = { fetchAllScopes: true, ctx: { tenantId: 'default' } };
@@ -104,24 +104,9 @@ module.exports = function failsafeObserverMixin(Model) {
 
   Model._fsObservers = {};
 
-  Model.defineProperty('currentHostName', {
+  Model.defineProperty('_hostName', {
     type: String,
     default: currHostName
-  });
-
-  Model.defineProperty('currentUpdateTime', {
-    type: 'timestamp',
-    default: Date
-  });
-
-  Model.defineProperty('oldHostName', {
-    type: String,
-    default: currHostName
-  });
-
-  Model.defineProperty('oldUpdateTime', {
-    type: 'timestamp',
-    default: Date
   });
 
   Model.defineProperty('_fsCtx', {
@@ -132,9 +117,9 @@ module.exports = function failsafeObserverMixin(Model) {
   });
 
   if (Model.definition.settings.hidden) {
-    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime']);
+    Model.definition.settings.hidden = Model.definition.settings.hidden.concat(['_fsCtx', '_hostName']);
   } else {
-    Model.definition.settings.hidden = ['_fsCtx', 'currentHostName', 'currentUpdateTime', 'oldHostName', 'oldUpdateTime'];
+    Model.definition.settings.hidden = ['_fsCtx', '_hostName'];
   }
 
   Model.definition.options = Model.definition.options || {};
@@ -180,7 +165,7 @@ module.exports = function failsafeObserverMixin(Model) {
   }
 
   Model.evObserve('before save', failsafeObserverBeforeSave);
-  Model.evObserve('before save', updateHostNameAndTime);
+  Model.evObserve('before save', updateHostName);
   Model.evObserve('before delete', failsafeObserverBeforeDelete);
 
   observerTypes.forEach(type => converteObservers(type));
@@ -190,38 +175,25 @@ module.exports = function failsafeObserverMixin(Model) {
   Model.evObserve('after delete', _failsafeObserverAfterDelete);
 };
 
-function updateHostNameAndTime(ctx, next) {
-  var instance;
-  if (ctx.isNewInstance) {
-    instance = ctx.instance;
-    instance.currentUpdateTime = new Date();
-    instance.oldUpdateTime = instance.currentUpdateTime;
-  } else if (ctx.currentInstance) {
-    instance = ctx.data;
-    if (currHostName !== ctx.currentInstance.currentHostName) {
-      instance.oldUpdateTime = ctx.currentInstance.currentUpdateTime;
-      instance.oldHostName = ctx.currentInstance.currentHostName;
-      instance.currentHostName = currHostName;
-      instance.currentUpdateTime = new Date();
-    }
+function updateHostName(ctx, next) {
+  if (ctx.currentInstance && currHostName !== ctx.currentInstance._hostName) {
+    ctx.data._hostName = currHostName;
   }
   return next();
 }
 
 function failsafeObserverBeforeDelete(ctx, next) {
   var version;
+  var fsCtx = {};
+  fsCtx.options = ctx.options;
+  fsCtx.isNewInstance = ctx.isNewInstance ? ctx.isNewInstance : false;
   if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
-    var fsCtx = {};
-    fsCtx.isNewInstance = ctx.isNewInstance;
-    fsCtx.options = ctx.options;
-    fsCtx.hookState = ctx.hookState;
-    if (ctx.where) fsCtx.where = ctx.where;
-    if (ctx.data) fsCtx.data = ctx.data;
-
     ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
+    if (ctx.where) fsCtx.where = ctx.where;
+    ctx.data._fsCtx = JSON.stringify(fsCtx);
   }
   if (!version) {
     return next();
@@ -232,17 +204,16 @@ function failsafeObserverBeforeDelete(ctx, next) {
 
 function failsafeObserverBeforeSave(ctx, next) {
   var version;
+  var fsCtx = {};
+  fsCtx.options = ctx.options;
+  fsCtx.isNewInstance = ctx.isNewInstance ? ctx.isNewInstance : false;
   if (typeof ctx.instance !== 'undefined') {
     version = ctx.instance._version;
-    var fsCtx = {};
-    fsCtx.isNewInstance = ctx.isNewInstance;
-    fsCtx.options = ctx.options;
-    fsCtx.hookState = ctx.hookState;
-    if (ctx.where) fsCtx.where = ctx.where;
-    if (ctx.data) fsCtx.data = ctx.data;
     ctx.instance._fsCtx = JSON.stringify(fsCtx);
   } else if (typeof ctx.data !== 'undefined') {
     version = ctx.data._version;
+    if (ctx.where) fsCtx.where = ctx.where;
+    ctx.data._fsCtx = JSON.stringify(fsCtx);
   }
   if (!version) {
     return next();
