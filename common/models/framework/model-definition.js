@@ -339,6 +339,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     next();
   };
 
+  // TODO - Pradeep : Duplicate code in db-migration-helper.js
   function doAutoUpdate(app, modeldefinition, options) {
     var model = loopback.findModel(modeldefinition.name, options);
     var ds = model.getDataSource(options);
