@@ -268,15 +268,22 @@ module.exports = function (BaseJournalEntity) {
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
           if (err) {
-            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
-              var actor = ctx.hookState.actorInstancesMap[key];
-              if (actor.constructor.settings.noBackgroundProcess) {
-                actor.clearActorMemory(actor, ctx.options, function () {
-
-                });
-              }
-            });
-            next(err);
+            if (ctx.hookState && ctx.hookState.actorInstancesMap) {
+              async.each(Object.keys(ctx.hookState.actorInstancesMap), function (key, cb) {
+                var actor = ctx.hookState.actorInstancesMap[key];
+                if (actor.constructor.settings.noBackgroundProcess) {
+                  actor.clearActorMemory(ctx.options, function () {
+                    cb();
+                  });
+                } else {
+                  cb();
+                }
+              }, function () {
+                return next(err);
+              });
+            } else {
+              return next(err);
+            }
           } else {
             return next();
           }
@@ -302,12 +309,20 @@ module.exports = function (BaseJournalEntity) {
         actor = ctx.hookState.actorInstancesMap[activity.entityId];
       }
       if (actor) {
-        actor.journalSaved(activity.toObject(), options, function (err) {
-          if (err) {
-            return cb(err);
-          }
-          cb();
-        });
+        if (ctx.instance._connectorData && ctx.instance._connectorData.error
+        && actor.constructor.settings.noBackgroundProcess) {
+          log.info(ctx.instance._type + ' Failed! Clearing Actor ' + activity.entityId);
+          actor.clearActorMemory(ctx.options, function () {
+            cb();
+          });
+        } else {
+          actor.journalSaved(activity.toObject(), options, function (err) {
+            if (err) {
+              return cb(err);
+            }
+            cb();
+          });
+        }
       } else {
         var err = new Error('Invalid activity. No actor with id ' + activity.entityId);
         err.retriable = false;

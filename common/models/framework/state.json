@@ -18,7 +18,8 @@
     "cacheable": true,
     "disableInstanceCache": false,
     "mixins": {
-        "CacheMixin": true
+        "CacheMixin": true,
+        "FailsafeObserverMixin": false
       },
      "overridingMixins": {
         "ModelValidations": false,
