@@ -519,15 +519,13 @@ describe('failsafe-observer-mixin', function () {
             expect(fsCtx.options).to.be.an('object');
             if (i === 0){
                 expect(fsCtx.isNewInstance).to.be.true;
-                i++;
             } else if (i === 1){
-                i++;
                 expect(fsCtx.isNewInstance).to.be.false;
-                expect(fsCtx.data).to.be.an('object');
                 done();
             } else {
                 done(new Error('Observer ran too many times.')); 
             }
+            i++;
             next();
         });
 
