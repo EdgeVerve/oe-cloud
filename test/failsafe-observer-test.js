@@ -517,7 +517,6 @@ describe('failsafe-observer-mixin', function () {
             var instance = ctx.instance || ctx.currentInstance;
             var fsCtx = JSON.parse(instance._fsCtx);
             expect(fsCtx.options).to.be.an('object');
-            expect(fsCtx.hookState).to.be.an('object');
             if (i === 0){
                 expect(fsCtx.isNewInstance).to.be.true;
                 i++;
