@@ -16,7 +16,7 @@ describe(chalk.blue('RefCode Validation test'), function() {
 
     this.timeout(20000);
     var cType;
-    var hotel;
+    var motel;
     var serviceApt;
 
 
@@ -44,9 +44,9 @@ describe(chalk.blue('RefCode Validation test'), function() {
                 console.log(err);
             } else {
                 models.ModelDefinition.create({
-                    'name': 'Hotel',
+                    'name': 'Motel',
                     'base': 'BaseEntity',
-                    'plural': 'Hotels',
+                    'plural': 'Motels',
                     'strict': false,
                     'idInjection': true,
                     'options': {
@@ -97,7 +97,7 @@ describe(chalk.blue('RefCode Validation test'), function() {
                                 console.log(err);
                             }
                             cType = loopback.getModel('CountryType', bootstrap.defaultContext);
-                            hotel = loopback.getModel('Hotel', bootstrap.defaultContext);
+                            motel = loopback.getModel('Motel', bootstrap.defaultContext);
                             serviceApt = loopback.getModel('ServiceApt', bootstrap.defaultContext);
                             var data = [{
                                     'code': 'IN',
@@ -147,12 +147,12 @@ describe(chalk.blue('RefCode Validation test'), function() {
             }
             cType.destroyAll({}, bootstrap.defaultContext, function() {
                 models.ModelDefinition.destroyAll({
-                    name: 'Hotel'
+                    name: 'Motel'
                 }, bootstrap.defaultContext, function(err, d) {
                     if (err) {
-                        console.log('Error - not able to delete modelDefinition entry for Hotel');
+                        console.log('Error - not able to delete modelDefinition entry for motel');
                     }
-                    hotel.destroyAll({}, bootstrap.defaultContext, function() {
+                    motel.destroyAll({}, bootstrap.defaultContext, function() {
                         models.ModelDefinition.destroyAll({
                             name: 'ServiceApt'
                         }, bootstrap.defaultContext, function(err, d) {
@@ -179,7 +179,7 @@ describe(chalk.blue('RefCode Validation test'), function() {
             'name': 'Holiday Inn',
             'countryIn': ["IN", "US", "UK"]
         };
-        hotel.create(data, bootstrap.defaultContext, function(err, results) {
+        motel.create(data, bootstrap.defaultContext, function(err, results) {
             expect(err).to.be.null;
             done();
         });
@@ -201,7 +201,7 @@ describe(chalk.blue('RefCode Validation test'), function() {
             'name': 'Mariott',
             'countryIn': ['IN', 'US', 'PK']
         };
-        hotel.create(data, bootstrap.defaultContext, function(err, results) {
+        motel.create(data, bootstrap.defaultContext, function(err, results) {
             expect(err).not.to.be.null;
             expect(err.toString().indexOf('PK')).to.be.above(-1);
             done();
@@ -211,11 +211,11 @@ describe(chalk.blue('RefCode Validation test'), function() {
     it('refcode Test - Should fail to insert data as invalid ref code is given', function(done) {
         var data = {
             'name': 'Mane Homestey',
-            'countryIn': 'BD'
+            'countryIn': 'JP'
         };
         serviceApt.create(data, bootstrap.defaultContext, function(err, results) {
             expect(err).not.to.be.null;
-            expect(err.toString().indexOf('BD')).to.be.above(-1);
+            expect(err.toString().indexOf('JP')).to.be.above(-1);
             done();
         });
     });
@@ -224,7 +224,7 @@ describe(chalk.blue('RefCode Validation test'), function() {
         var data = {
             'name': 'Hilton'
         };
-        hotel.create(data, bootstrap.defaultContext, function(err, results) {
+        motel.create(data, bootstrap.defaultContext, function(err, results) {
             expect(err).to.be.null;
             done();
         });
