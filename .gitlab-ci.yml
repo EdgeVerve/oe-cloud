@@ -178,8 +178,8 @@ swarm-actor-pattern:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - time npm install --no-optional
+    - node test/actor-tests-tests//prepare-test.js
     - cd test/actor-tests/test-files
-    - node ../prepare-test.js
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
     - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
