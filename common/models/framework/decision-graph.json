@@ -15,8 +15,28 @@
     },
     "data": {
       "type": "object",
-      "hidden": true
+      "hidden": true,
+      "description": "The json feel data"
+    },
+    "decisions": {
+      "type": "Array",
+      "hidden": true,
+      "description": "The decisions to execute",
+      "required" : false
+    },
+    "graph": {
+      "type": "object",
+      "hidden": true,
+      "description": "The graph",
+      "required" : false
+    },
+    "payload": {
+      "type": "string",
+      "hidden": true,
+      "description": "The payload to execute the decisions on",
+      "required" : false
     }
+
   },
   "oeValidations": [],
   "validations": [],
