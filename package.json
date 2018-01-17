@@ -39,7 +39,7 @@
         "gelf-stream": "^1.1.1",
         "helmet": "^2.1.1",
         "inflection": "^1.10.0",
-        "js-feel": "git+file:///D:/work/evgit/feel2/.git",
+        "js-feel": "git+http://evgit/deostroll/feel.git#logging",
         "locks": "^0.2.2",
         "lodash": "3.10.1",
         "loopback": "2.25.0",
