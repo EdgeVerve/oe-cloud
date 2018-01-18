@@ -1,3 +1,9 @@
+/**
+*
+* ©2016-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+* Bangalore, India. All Rights Reserved.
+*
+*/
 
 var encryption = require('../../lib/encryption');
 var logger = require('oe-logger');
