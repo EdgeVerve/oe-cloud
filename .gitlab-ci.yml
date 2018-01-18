@@ -3,7 +3,11 @@
 
 stages:
   - pre-build
+  - pre-build-test
   - build
+  - swarm-actor-pattern
+  - retry-service
+  - ldap-auth
   - job-scheduler-service
 
 cache:
