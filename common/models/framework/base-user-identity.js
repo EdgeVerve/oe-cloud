@@ -1,3 +1,10 @@
+/**
+*
+* 2016-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+* Bangalore, India. All Rights Reserved.
+*
+*/
+
 var loopback = require('loopback');
 var async = require('async');
 var logger = require('oe-logger');
@@ -5,7 +12,7 @@ var log = logger('base-user-identity');
 
 module.exports = function BaseUserIdentity(BaseUserIdentity) {
   BaseUserIdentity.observe('after save', function (ctx, next) {
-    if (ctx.instance.authScheme === 'ldap' || !ctx.instance.profile.data.memberOf) {
+    if (ctx.instance.authScheme === 'ldap' || (ctx.instance.profile.data && !ctx.instance.profile.data.memberOf)) {
       var currentRoles;
       var groups = [].concat(ctx.instance.profile.data.memberOf);
       log.debug(ctx.options, 'running for groups: ', groups);
