@@ -145,7 +145,7 @@ describe(chalk.blue(''), function () {
                     }
                     if (retries < 10) {
                         retries = retries + 1;
-                        return setTimeout(continueLogic, 5000, jobId, done);
+                        return setTimeout(continueLogic, 3000, jobId, done);
                     }
                     var err = new Error('too many checks');
                     console.log(err);
@@ -220,7 +220,7 @@ describe(chalk.blue(''), function () {
                     }
                     if (retries < 10) {
                         retries = retries + 1;
-                        return setTimeout(continueLogic, 5000, jobId, done);
+                        return setTimeout(continueLogic, 3000, jobId, done);
                     }
                     var err = new Error('too many checks');
                     console.log(err);
