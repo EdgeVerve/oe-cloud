@@ -59,8 +59,8 @@ module.exports = function IdempotencyMixin(Model) {
           return cb(err);
         }
         if (result && result.length) {
-          if (ctx.currentInstant) {
-            return cb(null, ctx.currentInstant);
+          if (ctx.currentInstance) {
+            return cb(null, ctx.currentInstance);
           }
           var hinst = result[0];
           Model.findById(hinst._modelId, ctx.options, function modelFindByIdcb(err, latestInst) {
