@@ -14,6 +14,7 @@ var loopback = require('loopback');
 var models = bootstrap.models;
 var defaults = require('superagent-defaults');
 var supertest = require('supertest');
+// @jsonwebtoken is internal dependency of @oe-jwt-generator
 var jwt = require('jsonwebtoken');
 var jwtUtil = require('../lib/jwt-token-util');
 var api = supertest(app);
@@ -121,6 +122,7 @@ describe(chalk.blue('JWT assertion test'), function () {
                             } else {
                                 var role = loopback.getModelByType('BaseRole');
                                 role.create(roleDetail, bootstrap.defaultContext, function (err, role) {
+                                    process.env.JWT_FOR_ACCESS_TOKEN = 'true';
                                     if (err) {
                                         done(err);
                                     } else {
@@ -784,6 +786,8 @@ describe(chalk.blue('JWT assertion inherited model test'), function () {
     });
 
     after('Remove Test Model', function (done) {
+        process.env.JWT_FOR_ACCESS_TOKEN = 'false';
+        delete process.env.JWT_FOR_ACCESS_TOKEN;
         models.UserTestModel2.destroyById(100, bootstrap.defaultContext, function (err, res) {
             if (err) {
                 done(err);

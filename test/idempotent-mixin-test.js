@@ -12,7 +12,7 @@
 var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
@@ -80,10 +80,10 @@ function apiDelete(url, deleteData) {
 describe(chalk.blue('idempotent-mixin-test'), function () {
   this.timeout(30000);
 
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
@@ -157,8 +157,8 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
   describe(chalk.yellow('Create/Post tests'), function () {
     it('Create with id injection, id + _version supplied, _newVersion not supplied --> object saved, result._oldVersion===result._version===request._version, request.id===result.id', function () {
       var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-      var version = uuid.v4();
-      var id = uuid.v4();
+      var version = uuidv4();
+      var id = uuidv4();
       var createData = { 'id': id, '_version': version };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.be.equal(createData.id);
@@ -167,8 +167,8 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Post with id injection, id + _version supplied, _newVersion not supplied --> object saved, result._oldVersion===result._version===request._version, request.id===result.id', function () {
-      var version = uuid.v4();
-      var id = uuid.v4();
+      var version = uuidv4();
+      var id = uuidv4();
       var postData = { 'id': id, '_version': version };
       return apiPost('/' + pluralModelName, postData).then(function (result) {
         expect(result.id).to.be.equal(postData.id);
@@ -185,8 +185,8 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Create with id injection, id + _newVersion supplied, _version not supplied --> object saved, result._oldVersion===result._version===request._newVersion, request.id===result.id', function () {
       var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-      var newVersion = uuid.v4();
-      var id = uuid.v4();
+      var newVersion = uuidv4();
+      var id = uuidv4();
       var createData = { 'id': id, '_newVersion': newVersion };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.be.equal(createData.id);
@@ -194,8 +194,8 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Post with id injection, id + _newVersion supplied, _version not supplied --> object saved, result._oldVersion===result._version===request._newVersion, request.id===result.id', function () {
-      var newVersion = uuid.v4();
-      var id = uuid.v4();
+      var newVersion = uuidv4();
+      var id = uuidv4();
       var postData = { 'id': id, '_newVersion': newVersion };
       return apiPost('/' + pluralModelName, postData).then(function (result) {
         expect(result.id).to.be.equal(postData.id);
@@ -209,7 +209,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Create with id injection, id supplied, _version + _newVersion not supplied --> object saved, result._oldVersion===result._version and not empty, request.id===result.id', function () {
       var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-      var id = uuid.v4();
+      var id = uuidv4();
       var createData = { 'id': id };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.be.equal(createData.id);
@@ -218,7 +218,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Post with id injection, id supplied, _version + _newVersion not supplied --> object saved, result._oldVersion===result._version and not empty, request.id===result.id', function () {
-      var id = uuid.v4();
+      var id = uuidv4();
       var postData = { 'id': id };
       return apiPost('/' + pluralModelName, postData).then(function (result) {
         expect(result.id).to.be.equal(postData.id);
@@ -233,7 +233,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Create no id injection, _version supplied, id + _newVersion not supplied --> object saved, result._oldVersion===result._version===request._version, id not empty', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var version = uuid.v4();
+      var version = uuidv4();
       var createData = { '_version': version };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -242,7 +242,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Post no id injection, _version supplied, id + _newVersion not supplied --> object saved, result._oldVersion===result._version===request._version, id not empty', function () {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData = { '_version': version };
       return apiPost('/' + pluralModelNameNoInjection, postData).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -279,7 +279,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Create no id injection, _newVersion _version supplied and same --> object saved, result._oldVersion===result._version===request._newVersion', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var newVersion = uuid.v4();
+      var newVersion = uuidv4();
       var version = newVersion;
       var createData = { '_newVersion': newVersion, '_version': version };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
@@ -288,7 +288,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Post no id injection, _newVersion _version supplied and same --> object saved, result._oldVersion===result._version===request._newVersion', function () {
-      var newVersion = uuid.v4();
+      var newVersion = uuidv4();
       var version = newVersion;
       var postData = { '_newVersion': newVersion, '_version': version };
       return apiPost('/' + pluralModelNameNoInjection, postData).then(function (result) {
@@ -304,7 +304,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     xit('2 parallel creates, no id injection, _newVersion not supplied, _version supplied and same in both creates and the data is different --> one create succeeds, the second fails with error', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var version = uuid.v4();
+      var version = uuidv4();
       var createData1 = { '_version': version, 'color': 'blue' };
       var createData2 = { '_version': version, 'color': 'yellow' };
 
@@ -324,7 +324,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     xit('2 parallel Rest Posts, no id injection, _newVersion not supplied, _version supplied and same in both creates and the data is different --> one create succeeds, the second fails with error', function () {
-      var version = uuid.v4();
+      var version = uuidv4();
       var createData1 = { '_version': version, 'color': 'blue' };
       var createData2 = { '_version': version, 'color': 'yellow' };
 
@@ -346,7 +346,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('2 parallel creates, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var version = uuid.v4();
+      var version = uuidv4();
       var createData1 = { '_version': version, 'color': 'blue' };
       var createData2 = { '_version': version, 'color': 'blue' };
 
@@ -376,7 +376,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('2 parallel Rest Posts, no id injection, _newVersion not supplied, _version and data supplied and same in both creates --> one create succeeds, the second succeeds with version as the first result version', function () {
-      var version = uuid.v4();
+      var version = uuidv4();
       var createData1 = { '_version': version, 'color': 'blue' };
       var createData2 = { '_version': version, 'color': 'blue' };
 
@@ -408,7 +408,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
   describe(chalk.yellow('Upsert/Put tests'), function () {
     it('Upsert no id injection, id + _newVersion not supplied, _version supplied --> object saved, result._oldVersion===result._version===request._version, id not empty', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var version = uuid.v4();
+      var version = uuidv4();
       var upsertData = { '_version': version };
       return vehicleModel.upsert(upsertData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -418,7 +418,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Put no id injection, id + _newVersion not supplied, _version supplied --> object saved, result._oldVersion===result._version===request._version, id not empty', function () {
-      var version = uuid.v4();
+      var version = uuidv4();
       var putData = { '_version': version };
       return apiPut('/' + pluralModelNameNoInjection, putData).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -435,7 +435,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Upsert no id injection, id + _version not supplied, _newVersion supplied --> object saved, object saved, result._oldVersion===result._version===request._newVersion, id not empty', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var newVersion = uuid.v4();
+      var newVersion = uuidv4();
       var upsertData = { '_newVersion': newVersion };
       return vehicleModel.upsert(upsertData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -444,7 +444,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     });
 
     it('Rest Put no id injection, id + _version not supplied, _newVersion supplied --> object saved, object saved, result._oldVersion===result._version===request._newVersion, id not empty', function () {
-      var newVersion = uuid.v4();
+      var newVersion = uuidv4();
       var putData = { '_newVersion': newVersion };
       return apiPut('/' + pluralModelNameNoInjection, putData).then(function (result) {
         expect(result.id).to.not.equal(undefined);
@@ -538,7 +538,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
       var createData = { 'firm': 'Hyundai' };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
-        var newVersion = uuid.v4();
+        var newVersion = uuidv4();
         var upsertData = { 'id': result.id, '_version': result._version, '_newVersion': newVersion, 'firm': 'BMW' };
         return vehicleModel.upsert(upsertData, bootstrap.defaultContext).then(function (res) {
           expect(result.id).to.be.equal(res.id);
@@ -555,7 +555,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
       var createData = { 'firm': 'Hyundai' };
       return vehicleModel.create(createData, bootstrap.defaultContext).then(function (result) {
-        var newVersion = uuid.v4();
+        var newVersion = uuidv4();
         var putData = { 'id': result.id, '_version': result._version, '_newVersion': newVersion, 'firm': 'BMW' };
         return apiPut('/' + pluralModelNameNoInjection, putData).then(function (res) {
           expect(result.id.toString()).to.be.equal(res.id);
@@ -573,7 +573,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Upsert no id injection, object does not exist, id supplied --> object created with id given', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var id = uuid.v4();
+      var id = uuidv4();
       var upsertData = { 'id': id };
       return vehicleModel.upsert(upsertData, bootstrap.defaultContext).then(function (result) {
         expect(result.id).to.be.equal(id);
@@ -583,7 +583,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Rest Put no id injection, object does not exist, id supplied --> object created with id given', function () {
       var vehicleModel = loopback.getModel(modelNameNoInjection, bootstrap.defaultContext);
-      var id = uuid.v4();
+      var id = uuidv4();
       var putData = { 'id': id };
       return apiPut('/' + pluralModelNameNoInjection, putData).then(function (result) {
         expect(result.id).to.be.equal(id);
@@ -624,7 +624,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Upsert with id injection, object does not exist, id supplied --> object created with id generated', function () {
       var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-      var id = uuid.v4();
+      var id = uuidv4();
       var upsertData = { 'id': id };
       return vehicleModel.upsert(upsertData, bootstrap.defaultContext).then(function (result) {
         // interesting, Loopback 3 does not allow id to be generated
@@ -637,7 +637,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
     it('Rest Put with id injection, object does not exist, id supplied --> object created with id generated', function () {
       var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-      var id = uuid.v4();
+      var id = uuidv4();
       var putData = { 'id': id };
       return apiPut('/' + pluralModelName, putData).then(function (result) {
         // expect(result.id).to.not.equal(id);
@@ -683,7 +683,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     describe(chalk.green('Functional UpdateAttributes tests'), function () {
       it('Should succeed on functional updateAttributes with correct _version and new _newVersion ', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var inst;
         var v2;
@@ -692,7 +692,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
             inst = res;
             var data = res.toObject(true);
             data.color = 'yellow';
-            data._newVersion = v2 = uuid.v4();
+            data._newVersion = v2 = uuidv4();
             return data;
           })
           .then(function (data) {
@@ -710,7 +710,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       // PKGTODO fix this..
       xit('Should succeed on functional updateAttributes with _newVersion that is current _version in server but should not update data', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
@@ -732,13 +732,13 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       // PKGTODO unqiue check in hostory on _version should fail
       xit('Should succeed on functional updateAttributes with _newVersion that is in model history table but should not update data', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var afterUpdateVersion;
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
             res.color = 'yellow';
-            afterUpdateVersion = res._newVersion = uuid.v4();
+            afterUpdateVersion = res._newVersion = uuidv4();
             return res;
           })
           .then(updateAttributes)
@@ -764,20 +764,20 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       // this should be rest test case
       xit('Should fail on functional updateAttributes with _version that is not in model history table or in current instance', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var failVersion;
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
             res.color = 'yellow';
-            res._newVersion = uuid.v4();
+            res._newVersion = uuidv4();
             return res;
           })
           .then(updateAttributes)
           .then(function (res) {
             res.color = 'red';
-            res._version = uuid.v4();
-            failVersion = res._newVersion = uuid.v4();
+            res._version = uuidv4();
+            failVersion = res._newVersion = uuidv4();
             return res;
           })
           .then(updateAttributes)
@@ -794,7 +794,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
       xit('2 parallel updateAttributes, same id and version, diffrent newVersion one should succeed the other should fail', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
 
         return vehicleModel.create(createData, bootstrap.defaultContext)
@@ -842,7 +842,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
     describe(chalk.green('REST UpdateAttributes tests'), function () {
       it('Should fail on REST put without _version', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version };
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
@@ -864,13 +864,13 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
       it('Should succeed on REST put with correct _version and new _newVersion ', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var versionAfterPut;
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
             res.color = 'yellow';
-            versionAfterPut = res._newVersion = uuid.v4();
+            versionAfterPut = res._newVersion = uuidv4();
             return apiPut('/' + pluralModelName + '/' + res.id, res);
           })
           .then(function (res) {
@@ -884,7 +884,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
       // TODO actually it should be an error, as data is different
       it('Should succeed on REST put with _newVersion that is current _version in server but should not update data', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var data;
         var version2, version3;
@@ -893,7 +893,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
             version1 = res._version;
             data = res.toObject(true);
             data.color = 'yellow';
-            data._newVersion = uuid.v4();
+            data._newVersion = uuidv4();
             return apiPut('/' + pluralModelName + '/' + res.id, data);
           })
           .then(function (res) {
@@ -911,7 +911,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
       it('Should succeed on REST put with _newVersion that is in model history table but should not update data', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var afterUpdateVersion;
         var expectedRecord;
@@ -919,7 +919,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
           .then(function (res) {
             res.color = 'yellow';
             id = res.id;
-            afterUpdateVersion = res._newVersion = uuid.v4();
+            afterUpdateVersion = res._newVersion = uuidv4();
             return apiPut('/' + pluralModelName + '/' + res.id, res);
           })
           .then(function (res) {
@@ -942,22 +942,22 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
       it('Should fail on REST updateAttributes with _version that is not in model history table or in current instance', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
         var failVersion;
         var expectedRecord;
         return vehicleModel.create(createData, bootstrap.defaultContext)
           .then(function (res) {
             res.color = 'yellow';
-            res._newVersion = uuid.v4();
+            res._newVersion = uuidv4();
             return apiPut('/' + pluralModelName + '/' + res.id, res);
           })
           .then(function (res) {
             res.color = 'red';
             expectedRecord = res;
             // set wrong version
-            res._version = uuid.v4();
-            failVersion = res._newVersion = uuid.v4();
+            res._version = uuidv4();
+            failVersion = res._newVersion = uuidv4();
             return apiPut('/' + pluralModelName + '/' + res.id, res);
           })
           .then(function (res) {
@@ -971,7 +971,7 @@ describe(chalk.blue('idempotent-mixin-test'), function () {
 
       xit('2 parallel updateAttributes, same id and version, diffrent newVersion one should succeed the other should fail', function () {
         var vehicleModel = loopback.getModel(modelName, bootstrap.defaultContext);
-        var version = uuid.v4();
+        var version = uuidv4();
         var createData = { '_version': version, 'color': 'blue' };
 
         return vehicleModel.create(createData, bootstrap.defaultContext)

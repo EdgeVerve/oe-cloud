@@ -6,34 +6,54 @@
  */
 
 // var XLSX = require('xlsx');
-var feel = require('js-feel');
-// var DL = feel.decisionLogic;
-var DS = feel.decisionService;
-
+var feel = require('js-feel')();
 var logger = require('oe-logger');
 var log = logger('decision-service');
 var util = require('util');
+// var app = require('loopback')();
+var loopback = require('loopback');
+
 
 module.exports = function (DecisionService) {
+  var DecisionGraph;
   DecisionService.observe('before save', function (ctx, next) {
     var dataObj = ctx.instance || ctx.data;
     var decisions = dataObj.decisions;
+    // var app = loopback();
+    if (!DecisionGraph) {
+      DecisionGraph = loopback.findModel('DecisionGraph');
+    }
 
-    dataObj['decision-graph'](ctx.options, function (err, result) {
+    // dataObj['decision-graph'](ctx.options, function (err, result) {
+    //   if (err) {
+    //     next(err);
+    //   } else {
+    //     // var keys = result.data;
+    //     // eslint-disable-next-line
+    //     if (decisions.every(p => p in result.data)) {
+    //       next();
+    //     } else {
+    //       var idx = decisions.findIndex(d => !(d in result.data));
+    //       var item = decisions[idx];
+    //       var errStr = util.format('Decision %s does not belong to the decision graph: %s', item, result.name);
+    //       log.error(errStr);
+    //       next(new Error(errStr));
+    //     }
+    //   }
+
+    // });
+
+    DecisionGraph.findById(dataObj.graphId, ctx.options, function (err, graph) {
       if (err) {
         next(err);
+      } else if (decisions.every(p => p in graph.data)) {
+        next();
       } else {
-        // var keys = result.data;
-        // eslint-disable-next-line
-        if (decisions.every(p => p in result.data)) {
-          next();
-        } else {
-          var idx = decisions.findIndex(d => !(d in result.data));
-          var item = decisions[idx];
-          var errStr = util.format('Decision %s does not belong to the decision graph: %s', item, result.name);
-          log.error(errStr);
-          next(new Error(errStr));
-        }
+        var idx = decisions.findIndex(d => !(d in graph.data));
+        var item = decisions[idx];
+        var errStr = util.format('Decision "%s" does not belong to the decision graph: "%s"', item, graph.name);
+        log.error(errStr);
+        next(new Error(errStr));
       }
     });
   });
@@ -81,19 +101,28 @@ module.exports = function (DecisionService) {
           if (err) {
             cb(err);
           } else {
-            var decisionMap = graph.data;
-            var ast = DS.createDecisionGraphAST(decisionMap);
-            var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
-            Promise.all(promises).then(answers => {
-              var final = answers.reduce((hash, answer) => {
-                return Object.assign({}, hash, answer);
-              }, {});
+            // var decisionMap = graph.data;
+            // var ast = DS.createDecisionGraphAST(decisionMap);
+            // var promises = decisions.map(d => DS.executeDecisionService(ast, d, payload));
+            // Promise.all(promises).then(answers => {
+            //   var final = answers.reduce((hash, answer) => {
+            //     return Object.assign({}, hash, answer);
+            //   }, {});
 
-              cb(null, final);
-            })
-              .catch(err => {
-                cb(err);
-              });
+            //   cb(null, final);
+            // })
+            //   .catch(err => {
+            //     cb(err);
+            //   });
+            feel.executeDecisionGraph(graph, decisions, payload)
+              .then(answers => {
+                var result = answers.reduce((hash, ans, idx) => {
+                  var r = { [decisions[idx]]: ans };
+                  return Object.assign({}, hash, r);
+                }, {});
+                cb(null, result);
+              })
+              .catch(cb);
           }
         });
       }

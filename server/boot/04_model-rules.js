@@ -85,7 +85,8 @@ function modelRuleAfterSave(ctx, next) {
   // Publishing message to other nodes in cluster to attach the 'before save' hook for model.
   messaging.publish('modelRuleAttachHook', data.modelName, ctx.options);
   log.debug(log.defaultContext(), 'modelRuleAfterSave data is present. calling attachBeforeSaveHookToModel');
-  attachBeforeSaveHookToModel(data.modelName, ctx.options);
+  if (!data.isService) attachBeforeSaveHookToModel(data.modelName, ctx.options);
+  else attachBeforeSaveHookToModelForService(data.modelName, ctx.options);
   next();
 }
 
@@ -123,7 +124,7 @@ function attachBeforeSaveHookToModel(modelName, options) {
   model.settings._isModelRuleExists = true;
   // Checking whether before save observer hook is already attached or not.
   // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
-  if (!checkHookisAlreadyAttached(model)) {
+  if (!checkHookisAlreadyAttached(model, '_decsionTableBeforeSaveHook')) {
     log.debug(log.defaultContext(), 'before save hook is for model :', modelName, ' is not present. Attaching now.');
     // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
     model.observe('before save', function _decsionTableBeforeSaveHook(modelCtx, next) {
@@ -136,13 +137,35 @@ function attachBeforeSaveHookToModel(modelName, options) {
   }
 }
 
+// This function is called for Decision Service-based defaultRules
+function attachBeforeSaveHookToModelForService(modelName, options) {
+  var model = loopback.findModel(modelName, options);
+  // Setting the flag that Model Rule exists which will be used for validation rules
+  model.settings._isModelRuleExists = true;
+  // Checking whether before save observer hook is already attached or not.
+  // An example of after POST if the rules are updated with PUT with id, new observer hook should not get attached.
+  if (!checkHookisAlreadyAttached(model, '_decsionTableBeforeSaveHookForService')) {
+    log.debug(log.defaultContext(), 'before save hook for DecisionService-based defaultRules for model :', modelName, ' is not present. Attaching now.');
+    // The name of before save hook is unique, which will be verified in checkHookisAlreadyAttached
+    model.observe('before save', function _decsionTableBeforeSaveHookForService(modelCtx, next) {
+      log.debug(log.defaultContext(), 'inside before save hook for DecisionService-based defaultRules for model : ', modelName);
+      log.debug(log.defaultContext(), 'Invoking executeDecisionServiceRule');
+      executeDecisionServiceRules(modelCtx, model, next);
+    });
+  } else {
+    log.debug(log.defaultContext(), 'before save hook is already present for DecisionService-based defaultRules for model :', modelName);
+  }
+}
+
+
 /**
  * This function is to check the before save hook for a particular model with name is already attached or not.
  *
  * @param {object} model - Model Object
+ * @param {string} hookName - the name of the hook
  * @returns {string} - model name is attached or not.
  */
-function checkHookisAlreadyAttached(model) {
+function checkHookisAlreadyAttached(model, hookName) {
   var returnRes = false;
   // Checking of existence of model._observers is not required since these are populated by default by loopback.
   // Fetching all the before save hooks for the model.
@@ -150,7 +173,7 @@ function checkHookisAlreadyAttached(model) {
   if (beforeSaveObserversArray && beforeSaveObserversArray.length > 0) {
     // Using javascript array.find function.
     returnRes = beforeSaveObserversArray.find(function (observer) {
-      return observer.name === '_decsionTableBeforeSaveHook';
+      return observer.name === hookName;
     });
     return returnRes;
   }
@@ -214,6 +237,72 @@ function executeDecisionTableRules(modelCtx, model, next) {
       }
     } else {
       log.debug(log.defaultContext(), 'no model rule found for model ', model.modelName);
+      next();
+    }
+  });
+}
+
+
+/**
+ * This function is to execute decision service rules.
+ *
+ * @param {object} modelCtx - Model Context
+ * @param {object} model - Model data
+ * @param {Function} next - Callback Function
+ */
+function executeDecisionServiceRules(modelCtx, model, next) {
+  // Not checking the model existence since it is a loopback feature.
+  var desicionServiceModel = loopback.findModel('DecisionService');
+  var modelData = modelCtx.data || modelCtx.instance;
+  var payload = modelData.__data;
+  // Building filter query to find the modelRule
+  var filter = {
+    where: {
+      modelName: model.modelName,
+      disabled: false,
+      isService: true
+    }
+  };
+  // Querying the ModelRule model with model context options since it is from 'before save' hook.
+  modelRuleModel.find(filter, modelCtx.options, function (err, results) {
+    if (err) {
+      // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
+      log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
+      return next(err);
+    }
+    // Validating results is array and it contains the first element and defaultRules
+    if (results && results instanceof Array && results[0] && results[0].defaultRules) {
+      // Getting the defaultRules from the DB/cache results.
+      var defaultRules = results[0].defaultRules;
+      // Validating defaultRules is of type array and have some rules present in it.
+      if (defaultRules instanceof Array && defaultRules.length > 0) {
+        // Default rules need to be executed in sequence and enrich the payload data.
+        async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
+          log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
+          payload.options = modelCtx.options;
+          payload.options.modelName = model.modelName;
+          desicionServiceModel.invoke(defaultRule, payload, modelCtx.options, function (err, result) {
+            // if (result && result.options) {
+            //   delete enrichedData.options;
+            // }
+            Object.keys(result).forEach(function (node) {
+              var currentNodeValue = result[node];
+              Object.keys(currentNodeValue).forEach(function (enrichedKey) {
+                payload[enrichedKey] = currentNodeValue[enrichedKey];
+              });
+            });
+            ruleCb(err);
+          });
+        }, function (err) {
+          modelCtx.data = modelCtx.instance = payload;
+          next(err);
+        });
+      } else {
+        log.debug(log.defaultContext(), 'No DS-based default rules to execute.');
+        next();
+      }
+    } else {
+      log.debug(log.defaultContext(), 'no DS-based model rule found for model ', model.modelName);
       next();
     }
   });

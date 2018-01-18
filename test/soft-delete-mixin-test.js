@@ -43,14 +43,14 @@ var models = bootstrap.models;
 //var loopback = require ('loopback');
 //var debug = require('debug')('soft-delete-mixin-test');
 
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chalk = require('chalk');
 var softDeleteMixin = require('../common/mixins/soft-delete-mixin.js');
 
 
 describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
   this.timeout(20000);
-  var testDatasourceName = uuid.v4();
+  var testDatasourceName = uuidv4();
   var modelName = 'TestModel';
 
   var TestModelSchema = {
@@ -103,7 +103,7 @@ describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
   it('Should insert data to the TestModel and see if _isDelete is present and set to false ', function (done) {
     var postData = {
       'name': 'TestCaseOne',
-      '_version': uuid.v4()
+      '_version': uuidv4()
     };
     models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
@@ -119,7 +119,7 @@ describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
   it('Should delete record from TestModel using destroyById and find the same record ,should not return the record ', function (done) {
     var postData = {
       'name': 'TestCaseTwo',
-      '_version': uuid.v4()
+      '_version': uuidv4()
     };
     models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {
@@ -147,7 +147,7 @@ describe(chalk.blue('soft-delete-mixin tests	Programmatically'), function () {
 
     var postData = {
       'name': 'TestCaseThree',
-      '_version': uuid.v4()
+      '_version': uuidv4()
     };
     models[modelName].create(postData, bootstrap.defaultContext, function (err, res) {
       if (err) {

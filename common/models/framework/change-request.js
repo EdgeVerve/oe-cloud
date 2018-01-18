@@ -21,7 +21,7 @@
 var loopback = require('loopback');
 var logger = require('oe-logger');
 var log = logger('change-request');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 
 // const SUBMITTED = 'submitted';
 // const PENDING_APPROVAL = 'pending_approval';
@@ -234,7 +234,7 @@ function addMethods(Model) {
             // with the status send
 
             crInstance._status = status;
-            crInstance._newVersion = uuid.v4();
+            crInstance._newVersion = uuidv4();
             CrModel.upsert(crInstance, options, function changeRequestOriginalEntityFindUpdateUpsertCb(err, crInstance) {
               if (err) {
                 log.error(options, 'Error occured while updating the CR model');
@@ -249,7 +249,7 @@ function addMethods(Model) {
       } else {
         log.debug(options, 'No Action required for status [', status, ']');
         crInstance._status = status;
-        crInstance._newVersion = uuid.v4();
+        crInstance._newVersion = uuidv4();
         options.updatedByWorkflow = true;
         CrModel.upsert(crInstance, options, function changeRequestUpsertCb(err, crInstance) {
           if (err) {

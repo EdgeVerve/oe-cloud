@@ -13,7 +13,7 @@ var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
 var app = bootstrap.app;
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
@@ -24,7 +24,7 @@ var api = bootstrap.api;
 var accessToken;
 
 function apiRequest(url, postData, callback, done) {
-  var version = uuid.v4();
+  var version = uuidv4();
   postData._version = version;
   api
     .set('Accept', 'application/json')
@@ -75,10 +75,10 @@ function doAsynchronousActionsFail(cb) {
 describe(chalk.blue('business-validations-tests'), function () {
   this.timeout(30000);
 
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
@@ -258,7 +258,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -377,7 +377,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -414,7 +414,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -451,7 +451,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -563,7 +563,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -598,7 +598,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [
@@ -633,7 +633,7 @@ describe(chalk.blue('business-validations-tests'), function () {
     apiRequest('/TestAccounts/', { 'qqq': 0, 'stateObj': { 'quantity': 0 } }, postTransaction, done);
 
     function postTransaction(result) {
-      var version = uuid.v4();
+      var version = uuidv4();
       var postData =
         {
           'atomicActivitiesList': [

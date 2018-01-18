@@ -58,7 +58,7 @@ module.exports = function ModelValidations(Model) {
     }
     options = context.options;
     // check if validations are to be executed, if not simply return the done callback.
-    if (options.skipValidations) {
+    if (options && options.skipValidations) {
       return process.nextTick(function skipValidationCb() {
         done(true);
       });
@@ -243,6 +243,7 @@ module.exports = function ModelValidations(Model) {
 
   function executeDTValidationRulesFn(model, inst, options, callback) {
     var desicionTableModel = loopback.findModel('DecisionTable');
+    var desicionServiceModel = loopback.findModel('DecisionService');
     var modelRule = loopback.findModel('ModelRule');
     var filter = {
       where: {
@@ -259,16 +260,30 @@ module.exports = function ModelValidations(Model) {
         inst.options = options;
         inst.options.modelName = model.modelName;
         async.concat(rules, function (rule, cb) {
-          desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
-            if (err) {
-              return cb(err);
-            }
-            var errorArr = dataAfterValidationRule.map(function (obj) {
-              obj.fieldName = 'DecisionTable';
-              return obj;
+          if (!res[0].isService) {
+            desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
+              if (err) {
+                return cb(err);
+              }
+              var errorArr = dataAfterValidationRule.map(function (obj) {
+                obj.fieldName = 'DecisionTable';
+                return obj;
+              });
+              cb(null, errorArr);
             });
-            cb(null, errorArr);
-          });
+          } else {
+            desicionServiceModel.invoke(rule, inst, options, function (err, dataAfterValidationRule) {
+              if (err) {
+                return cb(err);
+              }
+              var allDataAfterValidationRule = Object.values(dataAfterValidationRule).reduce((arr, item) => arr.concat(item), []);
+              var errorArr = allDataAfterValidationRule.map(function (obj) {
+                obj.fieldName = 'DecisionService';
+                return obj;
+              });
+              cb(null, errorArr);
+            });
+          }
         }, function (err, results) {
           if (inst && inst.options) {
             delete inst.options;

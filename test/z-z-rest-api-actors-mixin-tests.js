@@ -14,7 +14,7 @@
 var loopback = require('loopback');
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var chai = require('chai');
 var expect = chai.expect;
 var logger = require('oe-logger');
@@ -23,9 +23,10 @@ var log = logger('rest-api-actors-mixin-test');
 var api = bootstrap.api;
 
 var accessToken;
+var testAccountId;
 
 function apiRequest(url, postData, callback, done) {
-  var version = uuid.v4();
+  var version = uuidv4();
   postData._version = version;
   api
     .set('Accept', 'application/json')
@@ -44,10 +45,10 @@ function apiRequest(url, postData, callback, done) {
 describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
   this.timeout(30000);
 
-  before('login using admin', function fnLogin(done) {
+  before('login using testuser', function fnLogin(done) {
     var sendData = {
-      'username': 'admin',
-      'password': 'admin'
+      'username': 'testuser',
+      'password': 'testuser123'
     };
 
     api
@@ -176,6 +177,7 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
 
     //make a transaction with account --> into memory pool
     function proceed(result) {
+      testAccountId = result.body.id;
       log.debug(log.defaultContext(), 'credit the account with 20 --> loading actor to memory and changes quantity in memory');
       var postData =
         {
@@ -211,6 +213,76 @@ describe(chalk.blue('rest-api-actors-mixin-tests'), function () {
         });
     }
 
+  });
+
+  it('Get actors balance not through REST', function (done) {
+
+    var defaultOptions = {
+      'ctx': {
+        'remoteUser': 'admin',
+        'tenantId': 'test-tenant'
+      }
+    };
+
+    var actorModel = loopback.findModel('TestAccount-test-tenant', defaultOptions);
+
+    actorModel.prototype.getEnvelopeState(testAccountId, defaultOptions, function (err, result) {
+      if (err) {
+        log.error(err);
+        return done(err);
+      }
+      expect(result.state.stateObj.quantity).to.be.equal(20);
+      return done();
+    });
+
+  });
+
+  it('clear actor memory', function (done) {
+    
+        var defaultOptions = {
+          'ctx': {
+            'remoteUser': 'admin',
+            'tenantId': 'test-tenant'
+          }
+        };
+    
+        var actorModel = loopback.findModel('TestAccount-test-tenant', defaultOptions);
+    
+        actorModel.findById(testAccountId, defaultOptions, function (err, result) {
+          if (err) {
+            log.error(err);
+            return done(err);
+          }
+          result.clearActorMemory(defaultOptions, function (err, cTime) {
+            if (err) {
+              log.error(err);
+              return done(err);
+            }
+            return done();
+          });
+        });
+      });
+
+  it('check actor activity table for postgres', function (done) {
+    
+    var options = {
+      'ctx': {
+        'remoteUser': 'admin',
+        'tenantId': 'default'
+      }
+    };
+
+    var actorActivityModel = loopback.findModel('ActorActivity', options);
+
+    actorActivityModel.prototype.initActorTable(actorActivityModel);
+
+    actorActivityModel.findById('xxx', options, function (err, instance, created) {
+      if (err) {
+        log.error(err);
+        return done(err);
+      }
+      done();
+    });
   });
 
   it('Get actors with filter other than id --> actors from db', function (done) {

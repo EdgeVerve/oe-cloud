@@ -48,7 +48,6 @@ var app = bootstrap.app;
 var supertest = require('supertest');
 var api1 = supertest(app);
 
-//var uuid = require('node-uuid');
 var debug = require('debug')('model-definition-ACL-test');
 
 describe(chalk.blue('model-definition-ACL'), function () {
@@ -87,6 +86,20 @@ describe(chalk.blue('model-definition-ACL'), function () {
     ' and check if ACLs are applied  --using REST APIs'), function () {
 
       this.timeout(20000);
+      var testUserAccessToken;
+      // Creating testuser access token since removed jwt-assertion middleware
+      // so that we can access the models which are created using bootstrap.defaultContext
+      // are based on testuesr and test-tenant.
+      before('Create Test User Accesstoken', function(done) {
+        var testUser = {
+          'username': 'testuser',
+          'password': 'testuser123'
+        };
+        bootstrap.login(testUser, function(returnedAccesstoken) {
+          testUserAccessToken = returnedAccesstoken;
+          done();
+        });
+      });
 
       var BaseUser = {
         'username': 'TestUser1',
@@ -213,7 +226,7 @@ describe(chalk.blue('model-definition-ACL'), function () {
         postData.acls.push(aclRole);
         postData.acls.push(aclDenyEveryone);
         api
-          .post(modelDefitnionUrl)
+          .post(modelDefitnionUrl + '?access_token=' + testUserAccessToken)
           .send(postData)
           .expect(200).end(function (err, res) {
             debug('response body : ' + JSON.stringify(res.body, null, 4));

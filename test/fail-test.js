@@ -64,10 +64,10 @@ describe(chalk.blue('fail-test'), function () {
         ]);
     });
 
-    before('login using admin', function fnLogin(done) {
+    before('login using testuser', function fnLogin(done) {
         var sendData = {
-            'username': 'admin',
-            'password': 'admin'
+            'username': 'testuser',
+            'password': 'testuser123'
         };
 
         bootstrap.api

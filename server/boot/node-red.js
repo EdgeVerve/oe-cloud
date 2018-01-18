@@ -9,7 +9,7 @@ var nodeRed = require('loopback-connector-nodes-for-Node-RED');
 var loopback = require('loopback');
 var _ = require('lodash');
 var messaging = require('../../lib/common/global-messaging');
-var uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var fs = require('fs');
 var path = require('path');
 var async = require('async');
@@ -161,7 +161,7 @@ module.exports = function startNodeRed(server, callback) {
   };
   var flowModel = loopback.findModel('NodeRedFlow');
   flowModel.observe('after save', function flowModelAfterSave(ctx, next) {
-    messaging.publish('reloadNodeRedFlows', uuid.v4());
+    messaging.publish('reloadNodeRedFlows', uuidv4());
     next();
   });
 
@@ -474,7 +474,7 @@ module.exports = function startNodeRed(server, callback) {
             return res.status(403).json({ error: 'flow is locked. please unlock it first', message: 'Flow is locked'});
           }
         } else {
-          version = uuid.v4();
+          version = uuidv4();
         }
         results.forEach(function resultsForEach(r) {
           r.flow.forEach(function prepareDbFlow(f) {

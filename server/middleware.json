@@ -39,34 +39,35 @@
     "session": {},
     "session:after": {},
     "auth": {
-        "./middleware/jwt-assertion": {
-            "enabled": true
-        }
     },
     "auth:after": {
-        "./middleware/post-auth-context-populator": {}, 
-        "./middleware/node-red-access-control": {}
+        "./middleware/post-auth-context-populator": {},
+        "./middleware/node-red-access-control": {
+            "paths": ["/red"]
+        }
     },
     "parse": {},
     "routes:before": {
-        "./middleware/http-method-overriding-filter": {},
+        "./middleware/http-method-overriding-filter": {
+            "enabled": false
+        },
         "./middleware/req-logging-filter": {},
-        "./middleware/useragent-populator-filter": {},
+        "./middleware/useragent-populator-filter": {
+            "enabled": false
+        },
         "./middleware/model-discovery-filter": {
             "enabled": true,
             "paths": ["${restApiRoot}"]
         },
         "./middleware/otp-middleware": {
-            "enabled": true,
+            "enabled": false,
             "paths": ["${restApiRoot}"]
         },
-        "./middleware/recaptcha-validate": {},
-        "./middleware/db-lock-contributor": {},
-        "./middleware/no-query-cache-contributor": {},
-        "./middleware/no-instance-cache-contributor": {}
+        "./middleware/recaptcha-validate": {
+            "enabled": false
+        }
     },
-    "routes": {
-    },
+    "routes": {},
     "files": {
         "loopback#static": {
             "params": "$!../client"
