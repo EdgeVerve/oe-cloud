@@ -48,39 +48,30 @@
  * @author Sivankar Jain
  */
 
-var logger = require('oe-logger');
-var log = logger('audit-fields-mixin');
-
 module.exports = function AuditFieldsMixin(Model) {
   if (Model.definition.name === 'BaseEntity') {
-    log.debug(log.defaultContext(), 'skipping mixin for - ', Model.definition.name);
     return;
   }
 
   Model.defineProperty('_type', {
     type: String,
-    length: 50,
-    required: true
+    length: 50
   });
   Model.defineProperty('_createdBy', {
     type: String,
-    length: 50,
-    required: true
+    length: 50
   });
   Model.defineProperty('_modifiedBy', {
     type: String,
-    length: 50,
-    required: true
+    length: 50
   });
 
   Model.defineProperty('_createdOn', {
-    type: 'timestamp',
-    required: true
+    type: 'timestamp'
   });
 
   Model.defineProperty('_modifiedOn', {
-    type: 'timestamp',
-    required: true
+    type: 'timestamp'
   });
 
   if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.AuditFieldsMixin) || !Model.settings.mixins.AuditFieldsMixin) {
@@ -104,12 +95,6 @@ module.exports = function AuditFieldsMixin(Model) {
  * @memberof Audit Mixin
  */
 function injectAuditFields(ctx, next) {
-  if (!ctx.Model.definition.settings.mixins.AuditFieldsMixin) {
-    log.debug(ctx.options, 'AuditFieldsMixin disabled for model - ', ctx.Model.modelName);
-    return next();
-  }
-  log.debug(ctx.options, 'Before save called. Model Name - ', ctx.Model.modelName);
-
   var context = ctx.options;
   var cctx = context.ctx || {};
 
@@ -119,38 +104,29 @@ function injectAuditFields(ctx, next) {
 
   var protectedFields = ['_type', '_createdBy', '_modifiedBy', '_createdOn', '_modifiedOn'];
   var postData = ctx.instance || ctx.data;
-  var currentInstance = ctx.currentInstance;
+  // var currentInstance = ctx.currentInstance;
   // if user provide data for any protectedField those data are removed, and
   // auto set.
+  var isInstance = ctx.instance;
   protectedFields.forEach(function AuditFieldsMixinProtectedFieldsForEachCb(field) {
-    if (currentInstance) {
-      postData[field] = currentInstance[field];
+    if (isInstance) {
+      postData.unsetAttribute(field);
     } else {
       delete postData[field];
-      if (postData[field]) {
-        postData.unsetAttribute(field);
-      }
     }
   });
-  if (ctx.instance) {
-    log.debug(ctx.options, 'isNewInstance = ', ctx.isNewInstance);
+  if (isInstance) {
     // full save.
     if (ctx.isNewInstance) {
       // Auto-populate entity type
-      ctx.instance._type = ctx.Model.definition.name;
+      postData._type = ctx.Model.definition.name;
 
       // Auto-populate created by user id and timestamp
-      ctx.instance._createdBy = remoteUser;
-      ctx.instance._createdOn = currentDateTime;
+      postData._createdBy = remoteUser;
+      postData._createdOn = currentDateTime;
     }
-
-    // Update modified by user id and timestamp
-    ctx.instance._modifiedBy = remoteUser;
-    ctx.instance._modifiedOn = currentDateTime;
-  } else {
-    // partial update of possibly multiple models.
-    ctx.data._modifiedBy = remoteUser;
-    ctx.data._modifiedOn = currentDateTime;
   }
+  postData._modifiedBy = remoteUser;
+  postData._modifiedOn = currentDateTime;
   return next();
 }

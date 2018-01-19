@@ -47,7 +47,8 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
         'strict': false,
         'idInjection': true,
         'options': {
-          'validateUpsert': true
+          'validateUpsert': true,
+          "disableManualPersonalization":false
         },
         'properties': {
           'name': {
@@ -62,7 +63,8 @@ describe(chalk.blue('model-validation PropertyLevel Validation test'), function 
         'strict': false,
         'idInjection': true,
         'options': {
-          'validateUpsert': true
+          'validateUpsert': true,
+          "disableManualPersonalization":false
         },
         'properties': {
           'name': {

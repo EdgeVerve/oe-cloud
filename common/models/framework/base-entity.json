@@ -9,7 +9,8 @@
   "options": {
     "validateUpsert": true,
     "trackChanges": false,
-    "dbLockRequired": false
+    "dbLockRequired": false,
+    "disableManualPersonalization":true
   },
   "mixins": {
     "ObserverMixin": true,
