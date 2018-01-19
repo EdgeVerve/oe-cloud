@@ -302,9 +302,24 @@ function setDesignerPath(DesignerPath, server) {
 
   // api to create default UI for model using default-form template and adding it to NavigationLink.
   server.post(appconfig.designer.mountPath + '/createDefaultUI', function (req, res) {
-    var modelName = req.body.modelName;
-    var modelNameLowerCase = req.body.modelName.toLowerCase();
     var options = req.callContext;
+    var modelName = req.body ? req.body.modelName : null;
+    var err;
+
+    if (!modelName) {
+      err = new Error();
+      err.message = 'Please provide model name';
+      return res.status(500).send(err);
+    }
+
+    var model = loopback.findModel(modelName, options);
+    if (!model) {
+      err = new Error();
+      err.message = 'Model not found';
+      return res.status(500).send(err);
+    }
+
+    var modelNameLowerCase = req.body.modelName.toLowerCase();
 
     var uiRouteData = {
       type: 'elem',

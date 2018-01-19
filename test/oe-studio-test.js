@@ -323,6 +323,26 @@ describe(chalk.blue('oe-studio-test'), function () {
       });
   });
 
+  it('error if model not present for default UI', function (done) {
+    var api = defaults(supertest(bootstrap.app));
+    var postUrl = appconfig.designer.mountPath + '/createDefaultUI';
+    api.set('Authorization', accessToken)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .post(postUrl)
+      .send({ modelName: "TestUIModel" })
+      .expect(500)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).to.exist;
+          expect(result.body.message).to.be.equal('Model not found');
+          done();
+        }
+      });
+  });
+
   it('create default UI', function (done) {
     var api = defaults(supertest(bootstrap.app));
     var postUrl = appconfig.designer.mountPath + '/createDefaultUI';
@@ -330,7 +350,7 @@ describe(chalk.blue('oe-studio-test'), function () {
       .set('Content-Type', 'application/json')
       .set('Accept', 'application/json')
       .post(postUrl)
-      .send({ modelName: "TestModel" })
+      .send({ modelName: "ModelDefinition" })
       .expect(200)
       .end(function (err, result) {
         if (err) {
@@ -342,7 +362,7 @@ describe(chalk.blue('oe-studio-test'), function () {
             .set('Content-Type', 'application/json')
             .set('Accept', 'application/json')
             .post(postUrl)
-            .send({ modelName: "TestModel" })
+            .send({ modelName: "ModelDefinition" })
             .expect(200)
             .end(function (err, result) {
               if (err) {
