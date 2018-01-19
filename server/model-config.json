@@ -7,6 +7,7 @@
             "../common/models",
             "../common/models/ui",
             "../common/models/framework",
+            "../common/models/test",
             "./models",
             "loopback-component-passport/lib/models"
         ],
@@ -226,7 +227,7 @@
         "dataSource": "db",
         "public": false
     },
-    "EventHistory": {
+    "SavePoint": {
         "public": true,
         "dataSource": "db"
     },
@@ -272,6 +273,10 @@
     },
     "Lock": {
         "public": false,
+        "dataSource": "db"
+    },
+    "FailedObserverLog": {
+        "public": true,
         "dataSource": "db"
     }
 }

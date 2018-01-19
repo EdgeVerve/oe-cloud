@@ -178,6 +178,8 @@ swarm-actor-pattern:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - time npm install --no-optional
+    - mkdir test/actor-tests/test-files/server
+    - node test/actor-tests/prepare-test.js
     - cd test/actor-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
@@ -220,6 +222,8 @@ retry-service:
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
     - time npm install --no-optional
+    - mkdir test/async-service-tests/test-files/server
+    - node test/async-service-tests/prepare-test.js
     - cd test/async-service-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
