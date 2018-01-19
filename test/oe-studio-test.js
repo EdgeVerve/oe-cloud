@@ -337,7 +337,7 @@ describe(chalk.blue('oe-studio-test'), function () {
           done(err);
         } else {
           expect(result.body).to.exist;
-          expect(result.body.message).to.be.equal('Model not found');
+          expect(result.body.error.message).to.be.equal('Model not found');
           done();
         }
       });
