@@ -308,14 +308,18 @@ function setDesignerPath(DesignerPath, server) {
 
     if (!modelName) {
       err = new Error();
-      err.message = 'Please provide model name';
+      err.error = {
+        message: 'Please provide model name'
+      };
       return res.status(500).send(err);
     }
 
     var model = loopback.findModel(modelName, options);
     if (!model) {
       err = new Error();
-      err.message = 'Model not found';
+      err.error = {
+        message: 'Model not found'
+      };
       return res.status(500).send(err);
     }
 
