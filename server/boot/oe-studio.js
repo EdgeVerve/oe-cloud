@@ -299,6 +299,49 @@ function setDesignerPath(DesignerPath, server) {
     });
   });
 
+
+  // api to create default UI for model using default-form template and adding it to NavigationLink.
+  server.post(appconfig.designer.mountPath + '/createDefaultUI', function (req, res) {
+    var modelName = req.body.modelName;
+    var modelNameLowerCase = req.body.modelName.toLowerCase();
+    var options = req.callContext;
+
+    var uiRouteData = {
+      type: 'elem',
+      name: modelNameLowerCase + '-default',
+      path: '/' + modelNameLowerCase + '-default',
+      import: appconfig.designer.restApiRoot + '/UIComponents/component/' + modelNameLowerCase + '-default.html'
+    };
+
+    var uiComponentData = {
+      name: modelNameLowerCase + '-default',
+      templateName: 'default-form.html',
+      modelName: modelName
+    };
+
+    var navigationLinkData = {
+      name: modelNameLowerCase + '-default',
+      url: '/' + modelNameLowerCase + '-default',
+      label: modelName,
+      group: 'root'
+    };
+
+    var arr = [];
+    arr.push(findAndCreate('UIRoute', uiRouteData, options));
+    arr.push(findAndCreate('UIComponent', uiComponentData, options));
+    arr.push(findAndCreate('NavigationLink', navigationLinkData, options));
+
+    Promise.all(arr).then(function (result) {
+      if (new Set(result).size === 1) {
+        res.json({ message: 'Default UI already exists' });
+      } else {
+        res.json({ message: 'Default UI created' });
+      }
+    }).catch(function (err) {
+      res.status(500).send(err);
+    });
+  });
+
   server.get(appconfig.designer.mountPath + '/assets', function designerStyles(req, res) {
     res.json(module.assetData);
   });
@@ -348,6 +391,27 @@ function ifDirectoryExist(dirname, cb) {
       status = false;
     }
     cb(dirname, status);
+  });
+}
+
+function findAndCreate(modelName, data, options) {
+  return new Promise(function (resolve, reject) {
+    var model = loopback.findModel(modelName, options);
+    model.findOne({ where: data }, options, function (err, res) {
+      if (err) {
+        reject(err);
+      } else if (!res) {
+        model.create(data, options, function (err, res) {
+          if (!err) {
+            resolve(res);
+          } else {
+            reject(err);
+          }
+        });
+      } else {
+        resolve(true);
+      }
+    });
   });
 }
 
