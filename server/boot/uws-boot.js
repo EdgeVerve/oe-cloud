@@ -1,3 +1,10 @@
+/**
+*
+* ©2016-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+* Bangalore, India. All Rights Reserved.
+*
+*/
+
 var {WSClient} = require('../../lib/uws-client.js');
 var config = require('../config.js');
 var DB_LOCK_MODE = config.dbLockMode;

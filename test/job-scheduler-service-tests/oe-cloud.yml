@@ -47,6 +47,7 @@ services:
       FORCE_SSL: "yes"
       DISABLE_JOB_RUNNER: "true"
       RABBITMQ_HOSTNAME: "rabbitmq"
+      JWT_FOR_ACCESS_TOKEN: "true"
     extra_hosts:
       - "${SCHEDULER_NAME}.${DOMAIN_NAME}:${HAPROXY}"
     networks:
