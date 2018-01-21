@@ -6,7 +6,8 @@
   "description": "This Model stores all the Customized error details",
   "options": {
     "validateUpsert": true,
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization":false
   },
   "properties": {
     "errCode": {

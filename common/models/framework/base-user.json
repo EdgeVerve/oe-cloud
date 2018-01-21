@@ -6,6 +6,9 @@
   "autoscope": [
     "tenantId"
   ],
+  "options": {
+    "disableManualPersonalization":true
+  },
   "mixins": {
     "ObserverMixin": true,
     "HistoryMixin": true,
