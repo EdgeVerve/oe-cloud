@@ -14,5 +14,4 @@ module.exports = function(Model) {
         counter = 0;
         return next();
     });
-}
-                                            
+};                                        

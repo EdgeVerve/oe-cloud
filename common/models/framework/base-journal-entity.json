@@ -21,7 +21,6 @@
       "type": "embedsMany",
       "model": "ActorActivity",
       "property": "nonAtomicActivitiesList"
-
     }
   },
   "mixins": {

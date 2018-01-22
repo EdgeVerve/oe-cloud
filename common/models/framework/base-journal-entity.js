@@ -68,12 +68,12 @@ module.exports = function (BaseJournalEntity) {
           ' BEGIN ' +
           ' FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s ' +
           ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
+          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
           ' VALUES(new.atomicactivitieslist[m]->>\'modelName\',new.atomicactivitieslist[m]->>\'entityId\',cast (new.atomicactivitieslist[m]->>\'seqNum\' as int),new.atomicactivitieslist[m]->>\'instructionType\',true,new.atomicactivitieslist[m]->>\'payload\'); ' +
           ' END LOOP; ' +
           ' FOR m IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
           ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
+          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
           '  VALUES(new.nonatomicactivitieslist[m]->>\'modelName\',new.nonatomicactivitieslist[m]->>\'entityId\',cast (new.nonatomicactivitieslist[m]->>\'seqNum\' as int),new.nonatomicactivitieslist[m]->>\'instructionType\',false,new.nonatomicactivitieslist[m]->>\'payload\'); ' +
           ' END LOOP; ' +
           ' return new; ' +
