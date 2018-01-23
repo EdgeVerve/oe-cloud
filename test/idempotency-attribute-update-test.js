@@ -16,7 +16,7 @@ var async = require('async');
 
 var options = JSON.parse(JSON.stringify(bootstrap.defaultContext));
 
-describe('create and get leonTest model', function () {
+describe('create and get "leonTest" model', function () {
     
     var leonTestData = {
         "name": "leonTest",
@@ -35,6 +35,7 @@ describe('create and get leonTest model', function () {
         },
         "cacheable": true
     };
+
     var modelId;
     var createNewModelDefinition = function (cb){
         bootstrap.api
@@ -51,7 +52,7 @@ describe('create and get leonTest model', function () {
     }
 
     var postData = function(cb){
-        console.log('post node instance to DB ')
+        console.log('post "leonTest" instance to DB')
         bootstrap.api
             .set('Accept', 'application/json')
             .post(bootstrap.basePath + '/leonTests/')
@@ -80,7 +81,8 @@ describe('create and get leonTest model', function () {
     
     after('after', function (done) {
         process.env.JWT_FOR_ACCESS_TOKEN = true;
-        var delData = function (cb){
+        var deleteData = function (cb){
+            console.log('in delete Data..');
             bootstrap.api
             .set('Accept', 'application/json')
             .delete(bootstrap.basePath + '/leonTests/' + 'n1')
@@ -93,8 +95,9 @@ describe('create and get leonTest model', function () {
                 }
             });
         }
-
-        var delModel = function (cb){
+        
+        var deleteModel = function (cb){
+            console.log('in delete Model..');
             bootstrap.api
             .set('Accept', 'application/json')
             .delete(bootstrap.basePath + '/ModelDefinitions/' + modelId)
@@ -107,78 +110,43 @@ describe('create and get leonTest model', function () {
             });
         }
 
-        var tasks = [delData, delModel];
-        async.series(tasks, done);
-    });
-
-
-    it('first get from DB', function (done) {
-        var filter = {where: {content: 'boom'}};
-        var leonTestModel = loopback.getModel('leonTest', bootstrap.defaultContext);
-        leonTestModel.find(filter, options, function(err, models){
-            var inv = models[0];
-            expect(inv.id).to.be.equal('n1');
-            
-            var updateAtr = function(asyncCB){
-                inv.title = "update";
-                inv.updateAttributes(inv, options, function(err, res){
-                    if(err){
-                        return asyncCB(err)
-                    }
-                    expect(res.title).to.equal("update");
-                    return asyncCB();
-                });
-            }
-
-            async.parallel([updateAtr, updateAtr], done);
-
-
+        var tasks = [deleteData, deleteModel];
+        async.series(tasks, function(err, res){
+            process.env.JWT_FOR_ACCESS_TOKEN = '';
+            return done(err);
         });
     });
-    
-    // it('second get from DB', function (done) {
-    //     findAndUpdate(done);
-    // });
 
-    // it('first get from DB', function (done) {
-        // var filter = {where: {content: 'boom'}};
-        // var inventoryModel = loopback.getModel('Note', bootstrap.defaultContext);
-        // inventoryModel.find(filter, options, function(err, inventories){
-        //     expect(inventories.length).to.be.equal(1);
-        //     var inv = inventories[0];
-        //     console.log("version 1: " + inv._version);
-        //     inv.title = "first update";
-        //     inv.updateAttributes(inv, options, function(err, res){
-        //         if(err){
-        //             return done(err)
-        //         }
-        //         else {
-        //             expect(res.title).to.equal("first update");
-        //             return done();
-        //         }
-        //     });
-        // });  
-    // });
-
-    // it('second get from DB', function (done) {
-        // var filter = {where: {content: 'boom'}};
-        // var inventoryModel = loopback.getModel('Note', bootstrap.defaultContext);
-        // inventoryModel.find(filter, options, function(err, inventories){
-        //     // console.log('@@' + inventories.length);
-        //     expect(inventories.length).to.be.equal(1);
-        //     var inv = inventories[0];
-        //     console.log("version 2: " + inv._version);
-        //     inv.title = "second update";
-        //     inv.updateAttributes(inv, options, function(err, res){
-        //         if(err){
-        //             return done(err)
-        //         }
-        //         else {
-        //             expect(res.title).to.equal("second update");
-        //             return done();
-        //         }
-        //     });
-        // });  
-    // });
-
+    it('update attributes on the same record should result with the same _version', function (done) {
+        var filter = {where: {id: 'n1'}};
+        var leonTestModel = loopback.getModel('leonTest', bootstrap.defaultContext);
+        var version1;
+        leonTestModel.find(filter, options, function(err, models){
+            var inv1 = models[0];
+            expect(inv1.id).to.be.equal('n1');
+            leonTestModel.find(filter, options, function(err, models2){
+                var inv2 = models2[0];
+                expect(inv2.id).to.be.equal('n1');
+                var updateAndCheckVersion = function(inv, check1, check2) {
+                    return function (asyncCB) {
+                        inv.title = check1;
+                        inv.updateAttributes(inv, options, function(err, res){
+                            if(err){
+                                return asyncCB(err)
+                            }
+                            expect(res.title).to.equal(check2);
+                            if(check1 === "update1") {
+                                version1 = res._version;
+                            }
+                            if(check1 === "update2") {
+                                expect(res._version).to.be.equal(version1);
+                            }
+                            return asyncCB();
+                        });
+                    }
+                }
+                async.series([updateAndCheckVersion(inv1, "update1", "update1"), updateAndCheckVersion(inv2, "update2", "update1")], done);
+            });
+        });
+    });
 });
