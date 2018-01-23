@@ -312,6 +312,7 @@ module.exports = function (BaseJournalEntity) {
         if (ctx.instance._connectorData && ctx.instance._connectorData.error
         && actor.constructor.settings.noBackgroundProcess) {
           log.info(ctx.instance._type + ' Failed! Clearing Actor ' + activity.entityId);
+          ctx.instance.startup = JSON.stringify(ctx.instance._connectorData.error);
           actor.clearActorMemory(ctx.options, function () {
             cb();
           });
