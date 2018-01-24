@@ -8,8 +8,6 @@ var async = require('async');
 var loopback = require('loopback');
 var log = require('oe-logger')('BaseActorEntity');
 var actorPool = require('../../../lib/actor-pool');
-var config = require('../../../server/config');
-var DB_LOCK_MODE = config.dbLockMode;
 var StateModel;
 var associatedModelsMap = {};
 
@@ -206,7 +204,7 @@ module.exports = function (BaseActorEntity) {
   };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
-    this.calculatePendingBalance(envelope, options, function (err, actorData) {
+    this.processPendingStatus(envelope, options, function (err, actorData) {
       if (err) {
         return cb(err);
       }
@@ -256,7 +254,7 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = ctx.envelope;
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -338,7 +336,7 @@ module.exports = function (BaseActorEntity) {
     var actorCopy;
     if (this.constructor.settings.noBackgroundProcess) {
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -436,13 +434,17 @@ module.exports = function (BaseActorEntity) {
     for (var i = 0; i < messages.length; i++) {
       var message = messages[i];
       if (envelope.isCurrentlyProcessing || !message.isProcessed) {
-        actorData = self.processPendingMessage(message, actorData);
+        if (self.atomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.atomicInstructions(actorData, message);
+        } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.nonAtomicInstructions(actorData, message);
+        }
       }
     }
     return cb(null, actorData);
   };
 
-  BaseActorEntity.prototype.calculatePendingBalance = function (envelope, options, cb) {
+  BaseActorEntity.prototype.processPendingStatus = function (envelope, options, cb) {
     var self = this;
 
     if (self.constructor.settings.noBackgroundProcess && envelope.updatedActor) {
@@ -617,7 +619,9 @@ module.exports = function (BaseActorEntity) {
           }
           if (ds.name === 'loopback-connector-postgresql') {
             for (var x = 0; x < returnedInstances.length; x++) {
-              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadtxt);
+              returnedInstances[x].instructionType = returnedInstances[x].instructiontype;
+              returnedInstances[x].instructiontype = undefined;
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
@@ -685,7 +689,7 @@ module.exports = function (BaseActorEntity) {
       return cb();
     }
     setMessageStatus(envelope);
-    if (options.lockMode === DB_LOCK_MODE) {
+    if (global.inDBLockMode()) {
       processEnvelope();
     } else {
       return cb();
@@ -707,12 +711,21 @@ module.exports = function (BaseActorEntity) {
   };
 
 
+  BaseActorEntity.observe('before save', function (ctx, next) {
+    if (ctx.instance && ctx.isNewInstance === true) {
+      ctx.hookState.stateObj = ctx.instance.stateObj;
+      delete ctx.instance.__data.stateObj;
+      delete ctx.instance.stateObj;
+    }
+    return next();
+  });
+
   BaseActorEntity.observe('after save', function (ctx, next) {
     if ((ctx.instance && ctx.instance._isDeleted) || (ctx.data && ctx.data._isDeleted)) {
       next();
     } else if (ctx.instance && ctx.isNewInstance === true) {
       var stateData = {};
-      stateData.stateObj = ctx.instance.stateObj;
+      stateData.stateObj = ctx.hookState.stateObj;
       var stateModel = getStateModel();
       stateModel.create(stateData, ctx.options, function (err, instance) {
         if (err) {

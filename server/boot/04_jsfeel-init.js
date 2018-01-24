@@ -15,14 +15,18 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 const logger = require('oe-logger');
 const log = logger('jsfeel-init');
 const jsFeel = require('js-feel')();
-const jsFeelRelationsPlugin = require('../../lib/js-feel-relations-plugin');
-const jsFeelExtFnPlugin = require('../../lib/js-feel-external-function-plugin');
+const {
+  jsFeelRelationsPlugin,
+  jsFeelExtFnPlugin,
+  jsFeelCachePlugin
+} = require('../../lib/js-feel-plugins');
 
 const settings = { logger };
 
 module.exports = function JsFeelInit(app, cb) {
   log.info('initializing js-feel');
   jsFeel.init(settings);
+  jsFeel.use(jsFeelCachePlugin);
   const jsFeelRelation = app.get('jsFeelRelation');
   const jsFeelExternalFunction = app.get('jsFeelExternalFunction');
   if (jsFeelRelation && !jsFeelRelation.disabled) {

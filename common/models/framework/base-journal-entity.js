@@ -68,12 +68,12 @@ module.exports = function (BaseJournalEntity) {
           ' BEGIN ' +
           ' FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s ' +
           ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
+          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
           ' VALUES(new.atomicactivitieslist[m]->>\'modelName\',new.atomicactivitieslist[m]->>\'entityId\',cast (new.atomicactivitieslist[m]->>\'seqNum\' as int),new.atomicactivitieslist[m]->>\'instructionType\',true,new.atomicactivitieslist[m]->>\'payload\'); ' +
           ' END LOOP; ' +
           ' FOR m IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
           ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
+          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
           '  VALUES(new.nonatomicactivitieslist[m]->>\'modelName\',new.nonatomicactivitieslist[m]->>\'entityId\',cast (new.nonatomicactivitieslist[m]->>\'seqNum\' as int),new.nonatomicactivitieslist[m]->>\'instructionType\',false,new.nonatomicactivitieslist[m]->>\'payload\'); ' +
           ' END LOOP; ' +
           ' return new; ' +
@@ -268,15 +268,22 @@ module.exports = function (BaseJournalEntity) {
       } else {
         BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
           if (err) {
-            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
-              var actor = ctx.hookState.actorInstancesMap[key];
-              if (actor.constructor.settings.noBackgroundProcess) {
-                actor.clearActorMemory(actor, ctx.options, function () {
-
-                });
-              }
-            });
-            next(err);
+            if (ctx.hookState && ctx.hookState.actorInstancesMap) {
+              async.each(Object.keys(ctx.hookState.actorInstancesMap), function (key, cb) {
+                var actor = ctx.hookState.actorInstancesMap[key];
+                if (actor.constructor.settings.noBackgroundProcess) {
+                  actor.clearActorMemory(ctx.options, function () {
+                    cb();
+                  });
+                } else {
+                  cb();
+                }
+              }, function () {
+                return next(err);
+              });
+            } else {
+              return next(err);
+            }
           } else {
             return next();
           }
@@ -302,12 +309,21 @@ module.exports = function (BaseJournalEntity) {
         actor = ctx.hookState.actorInstancesMap[activity.entityId];
       }
       if (actor) {
-        actor.journalSaved(activity.toObject(), options, function (err) {
-          if (err) {
-            return cb(err);
-          }
-          cb();
-        });
+        if (ctx.instance._connectorData && ctx.instance._connectorData.error
+        && actor.constructor.settings.noBackgroundProcess) {
+          log.info(ctx.instance._type + ' Failed! Clearing Actor ' + activity.entityId);
+          ctx.instance.startup = JSON.stringify(ctx.instance._connectorData.error);
+          actor.clearActorMemory(ctx.options, function () {
+            cb();
+          });
+        } else {
+          actor.journalSaved(activity.toObject(), options, function (err) {
+            if (err) {
+              return cb(err);
+            }
+            cb();
+          });
+        }
       } else {
         var err = new Error('Invalid activity. No actor with id ' + activity.entityId);
         err.retriable = false;

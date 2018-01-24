@@ -49,6 +49,11 @@ module.exports = function postAuthContextPopulator(options) {
     }
     if (req.headers['x-evproxy-db-lock'] === '1') {
       req.callContext.lockMode = 'dbLock';
+      global.setDBLockMode();
+    }
+    if (req.headers['x-ci-erase-cache'] === '1') {
+      req.callContext.lockMode = 'dbLock';
+      global.eraseCache();
     }
     next();
   };

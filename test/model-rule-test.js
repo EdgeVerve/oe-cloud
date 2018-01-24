@@ -16,7 +16,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
  */
 var fs = require('fs');
 var path = require('path');
-
+var http = require('http');
 var async = require('async');
 var chai = require('chai');
 var chaiThings = require('chai-things');
@@ -135,6 +135,7 @@ describe(chalk.blue('model-rule-test'), function () {
             defaultRules: [],
             validationRules: []
         }]
+        // debugger;
         models.ModelRule.create(objs, bootstrap.defaultContext, function (err, modelRules) {
             modelRuleId = modelRules[0].id;
             modelRuleVersion = modelRules[0]._version;
@@ -159,6 +160,7 @@ describe(chalk.blue('model-rule-test'), function () {
                 husband_name: 'Robin'
             };
             // The default Rules enrich the data
+            // debugger;
             testModel.create(data, bootstrap.defaultContext, function (err, res) {
                 if (err) {
                     console.error("model-rule-test Error ", err);
@@ -325,6 +327,7 @@ describe(chalk.blue('model-rule-test'), function () {
                         log.error(log.defaultContext(), 'data without mandatory property value defined in rule and ' +
                             'loopback validations throw combined validation errors - rest api Error: ', err);
                     }
+                   
                     expect(response).not.to.be.null;
                     expect(response).not.to.be.undefined;
                     expect(response.body).not.to.be.null;
@@ -365,21 +368,44 @@ describe(chalk.blue('model-rule-test'), function () {
                         age: 45
                     };
                     var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
-                    api
-                        .set('tenant_id', 'test-tenant')
-                        .set('Accept', 'application/json')
-                        .post(url)
-                        .send(postData)
-                        .expect(200)
-                        .end(function (err, response) {
+
+
+
+
+  // An object of options to indicate where to post to
+                    var post_options = {
+                        host: 'localhost',
+                        port: '3000',
+                        path: '/api/' + testModelPlural + '?access_token=' + accessToken,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'tenant_id': 'test-tenant',
+                            'Accept': 'application/json'
+                        }
+                    };
+
+                    // Set up the request
+                    var post_req = http.request(post_options, function(res) {
+                        res.setEncoding('utf8');
+                        var data = '';
+                        res.on('data', function (chunk) {
+                            data += chunk;
+                        });
+                        res.on('end', function(){
+                            var response = JSON.parse(data);
                             expect(response).not.to.be.null;
                             expect(response).not.to.be.undefined;
-                            expect(response.body).not.to.be.null;
-                            expect(response.body).not.to.be.undefined;
-                            expect(response.body.status).to.be.equal('reborn');
-                            expect(response.body.age).to.be.equal(45);
+                            expect(response.status).to.be.equal('reborn');
+                            expect(response.age).to.be.equal(45);
                             done();
                         });
+                    });
+
+                    // post the data
+                    post_req.write(JSON.stringify(postData));
+                    post_req.end();
+                    post_req.on('error', done);
                 }
             });
         });
@@ -396,24 +422,44 @@ describe(chalk.blue('model-rule-test'), function () {
                         age: 45
                     };
                     var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
-                    api
-                        .set('tenant_id', 'test-tenant')
-                        .set('Accept', 'application/json')
-                        .post(url)
-                        .send(postData)
-                        .expect(200)
-                        .end(function (err, response) {
+
+                    // An object of options to indicate where to post to
+                    var post_options = {
+                        host: 'localhost',
+                        port: '3000',
+                        path: '/api/' + testModelPlural + '?access_token=' + accessToken,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'tenant_id': 'test-tenant',
+                            'Accept': 'application/json'
+                        }
+                    };
+
+                    // Set up the request
+                    var post_req = http.request(post_options, function(res) {
+                        res.setEncoding('utf8');
+                        var data = '';
+                        res.on('data', function (chunk) {
+                            data += chunk;
+                        });
+                        res.on('end', function () {
+                            var response = JSON.parse(data);
                             expect(response).not.to.be.null;
                             expect(response).not.to.be.undefined;
-                            expect(response.body).not.to.be.null;
-                            expect(response.body).not.to.be.undefined;
-                            expect(response.body.error).not.to.be.undefined;
-                            expect(response.body.error).not.to.be.null;
-                            expect(response.body.error.details).not.to.be.undefined;
-                            expect(response.body.error.details).not.to.be.null;
-                            expect(response.body.error.details.codes.status[0]).to.be.equal('validation-err-002');
+                            expect(response.error).not.to.be.undefined;
+                            expect(response.error).not.to.be.null;
+                            expect(response.error.details).not.to.be.undefined;
+                            expect(response.error.details).not.to.be.null;
+                            expect(response.error.details.codes.status[0]).to.be.equal('validation-err-002');
                             done();
                         });
+                    });
+
+                    // post the data
+                    post_req.write(JSON.stringify(postData));
+                    post_req.end();
+                    post_req.on('error', done);                        
                 }
             });
         });
