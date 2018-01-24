@@ -322,5 +322,59 @@ describe(chalk.blue('oe-studio-test'), function () {
         }
       });
   });
-  
+
+  it('error if model not present for default UI', function (done) {
+    var api = defaults(supertest(bootstrap.app));
+    var postUrl = appconfig.designer.mountPath + '/createDefaultUI';
+    api.set('Authorization', accessToken)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .post(postUrl)
+      .send({ modelName: "TestUIModel" })
+      .expect(500)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).to.exist;
+          expect(result.body.error.message).to.be.equal('Model not found');
+          done();
+        }
+      });
+  });
+
+  it('create default UI', function (done) {
+    var api = defaults(supertest(bootstrap.app));
+    var postUrl = appconfig.designer.mountPath + '/createDefaultUI';
+    api.set('Authorization', accessToken)
+      .set('Content-Type', 'application/json')
+      .set('Accept', 'application/json')
+      .post(postUrl)
+      .send({ modelName: "ModelDefinition" })
+      .expect(200)
+      .end(function (err, result) {
+        if (err) {
+          done(err);
+        } else {
+          expect(result.body).to.exist;
+          expect(result.body.message).to.be.equal('Default UI created');
+          api.set('Authorization', accessToken)
+            .set('Content-Type', 'application/json')
+            .set('Accept', 'application/json')
+            .post(postUrl)
+            .send({ modelName: "ModelDefinition" })
+            .expect(200)
+            .end(function (err, result) {
+              if (err) {
+                done(err);
+              } else {
+                expect(result.body).to.exist;
+                expect(result.body.message).to.be.equal('Default UI already exists');
+                done();
+              }
+            });
+        }
+      });
+  });
+
 });

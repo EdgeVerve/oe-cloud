@@ -1,0 +1,22 @@
+{
+  "name": "SavePoint",
+  "plural": "SavePoints",    
+  "base": "PersistedModel",
+  "description": "Represents a point in time where all after save observers finished successfully for current host",
+  "idInjection": true,
+  "properties": {
+    "timestamp": {
+      "type": "Date"
+    },
+    "hostName": {
+      "type": "string"
+   }, 
+   "hostUUID": {
+     "type": "string"
+   }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

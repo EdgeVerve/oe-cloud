@@ -41,5 +41,15 @@
     },
     "isFrameworkModel": true,
     "acls": [],
-    "methods": {}
+    "methods": {},
+    "disableInstanceCache": false,
+    "options":{
+        "disableManualPersonalization": true,
+        "instanceCacheSize": 1000,
+        "instanceCacheExpiration": 180000
+    },
+    "mixins":{
+        "ObserverMixin": true,
+        "CacheMixin": true
+    }
 }
