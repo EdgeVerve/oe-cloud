@@ -207,7 +207,7 @@ function createHistoryData(ctx, next) {
   if (!ctx.Model.definition.settings.mixins.HistoryMixin) {
     return next();
   }
-  if (ctx.IsNewInstance) {
+  if (ctx.isNewInstance) {
     return next();
   }
   var historyModel = ctx.Model._historyModel;
