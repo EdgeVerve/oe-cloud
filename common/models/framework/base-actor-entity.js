@@ -140,7 +140,7 @@ module.exports = function (BaseActorEntity) {
       }
     });
 
-  BaseActorEntity.prototype.StateModel = 'State';
+  BaseActorEntity.prototype.stateModel = 'State';
 
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
     var context = {};
