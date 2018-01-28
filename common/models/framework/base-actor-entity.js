@@ -495,6 +495,7 @@ module.exports = function (BaseActorEntity) {
     var query = {
       where: { _version: message.version }
     };
+    log.error('Ohhhhh no..... LOOKING IN DB!!!!!!!!');
     model.findOne(query, options, function (err, result) {
       if (err) {
         log.error(options, 'error in processMessage: ', err);
@@ -721,9 +722,7 @@ module.exports = function (BaseActorEntity) {
   });
 
   BaseActorEntity.observe('after save', function (ctx, next) {
-    if ((ctx.instance && ctx.instance._isDeleted) || (ctx.data && ctx.data._isDeleted)) {
-      next();
-    } else if (ctx.instance && ctx.isNewInstance === true) {
+    if (ctx.instance && ctx.isNewInstance === true) {
       var stateData = {};
       stateData.stateObj = ctx.hookState.stateObj;
       var stateModel = getStateModel();
