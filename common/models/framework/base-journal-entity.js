@@ -35,8 +35,8 @@ module.exports = function (BaseJournalEntity) {
           Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
             if (err || result.length === 0) {
               modelQuery = 'CREATE TRIGGER \"onCreate\" BEFORE INSERT ' +
-              ' ON public.' + Model.modelName.toLowerCase() +
-              ' FOR EACH ROW ' +
+              ' ON public.\"' + Model.modelName.toLowerCase() +
+              '\" FOR EACH ROW ' +
               ' EXECUTE PROCEDURE public.create_activities(); ';
               Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
                 if (err) {
@@ -65,16 +65,18 @@ module.exports = function (BaseJournalEntity) {
           ' AS $BODY$ ' +
           ' DECLARE ' +
           ' m   integer; ' +
+          ' DECLARE ' +
+          ' n   integer; ' +
           ' BEGIN ' +
           ' FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s ' +
           ' LOOP ' +
           ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
           ' VALUES(new.atomicactivitieslist[m]->>\'modelName\',new.atomicactivitieslist[m]->>\'entityId\',cast (new.atomicactivitieslist[m]->>\'seqNum\' as int),new.atomicactivitieslist[m]->>\'instructionType\',true,new.atomicactivitieslist[m]->>\'payload\'); ' +
           ' END LOOP; ' +
-          ' FOR m IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
+          ' FOR n IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
           ' LOOP ' +
           ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
-          '  VALUES(new.nonatomicactivitieslist[m]->>\'modelName\',new.nonatomicactivitieslist[m]->>\'entityId\',cast (new.nonatomicactivitieslist[m]->>\'seqNum\' as int),new.nonatomicactivitieslist[m]->>\'instructionType\',false,new.nonatomicactivitieslist[m]->>\'payload\'); ' +
+          ' VALUES(new.nonatomicactivitieslist[n]->>\'modelName\',new.nonatomicactivitieslist[n]->>\'entityId\',cast (new.nonatomicactivitieslist[n]->>\'seqNum\' as int),new.nonatomicactivitieslist[n]->>\'instructionType\',false,new.nonatomicactivitieslist[n]->>\'payload\'); ' +
           ' END LOOP; ' +
           ' return new; ' +
           ' END ' +
