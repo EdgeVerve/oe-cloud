@@ -98,6 +98,7 @@ describe(chalk.blue('Node-red Nodes test'), function () {
                     } else if (resp.status === 422) {
                         done();
                     } else {
+                        console.log("@@@@@@@@@@@@@@@ the response is: " + JSON.stringify(resp));
                         expect(resp.status).to.be.equal(200);
                         expect(resp.body.statusCode).to.be.equal(422);
                         done();
