@@ -495,7 +495,6 @@ module.exports = function (BaseActorEntity) {
     var query = {
       where: { _version: message.version }
     };
-    log.error('Ohhhhh no..... LOOKING IN DB!!!!!!!!');
     model.findOne(query, options, function (err, result) {
       if (err) {
         log.error(options, 'error in processMessage: ', err);
