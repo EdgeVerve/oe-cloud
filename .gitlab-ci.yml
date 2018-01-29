@@ -133,7 +133,7 @@ postgrestest:
   tags:
     - CEP_RUNNER    
 
-.consistenthashtest:
+consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db
@@ -141,6 +141,11 @@ postgrestest:
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - git clone http://10.73.97.24/oecloud.io/oe-tx-router.git
+    - cd oe-tx-router
+    - time npm install --no-optional
+    - node . &
+    - cd ..
     - time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
