@@ -729,9 +729,7 @@ module.exports = function (BaseActorEntity) {
   });
 
   BaseActorEntity.observe('after save', function (ctx, next) {
-    if ((ctx.instance && ctx.instance._isDeleted) || (ctx.data && ctx.data._isDeleted)) {
-      next();
-    } else if (ctx.instance && ctx.isNewInstance === true) {
+    if (ctx.instance && ctx.isNewInstance === true) {
       var stateData = {};
       stateData.stateObj = ctx.hookState.stateObj;
       var stateModel = getStateModel(ctx.instance.constructor.modelName, ctx.options);
