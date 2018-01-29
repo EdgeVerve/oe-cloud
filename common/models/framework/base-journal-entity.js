@@ -301,7 +301,7 @@ module.exports = function (BaseJournalEntity) {
         log.error(ctx.options, err.message);
         return next(err);
       }
-      return instance.startTarnsactionFlow(instance, ctx, options, next);    
+      return instance.startTarnsactionFlow(instance, ctx, options, next);
     });
   });
 
