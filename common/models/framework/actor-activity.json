@@ -29,5 +29,14 @@
   "validations": [],
   "relations": {},
   "acls": [],
-  "methods": {}
+  "methods": {},
+  "indexes": {
+    "modelname_entityid_seqnum": {
+      "keys": {
+        "modelName": 1,
+        "entityId": 1,
+        "seqNum": 1
+      }
+    }
+  }
 }
