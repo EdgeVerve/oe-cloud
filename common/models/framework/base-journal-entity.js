@@ -311,7 +311,8 @@ module.exports = function (BaseJournalEntity) {
     next(err);
   });
 
-  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+
+  var doAfterSave = function (ctx) {
     var atomicActivitiesList = ctx.instance.atomicActivitiesList;
     var nonAtomicActivitiesList = ctx.instance.nonAtomicActivitiesList;
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
@@ -344,10 +345,16 @@ module.exports = function (BaseJournalEntity) {
       }
     }, function (err) {
       if (err) {
-        return next(err);
+        log.info('error in JournalSaved: ' + err);
       }
-      return next();
+      log.info('JournalSaved done');
+      return;
     });
+  };
+
+  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+    next();
+    return process.nextTick(doAfterSave, ctx);
   });
 
   function getActorModel(modelName, options) {
