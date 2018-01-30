@@ -265,8 +265,8 @@ module.exports = function (BaseActorEntity) {
           if (validation === true) {
             envelope.seqNum = envelope.seqNum + 1;
             ctx.activity.seqNum = envelope.seqNum;
-            actorCopy = JSON.parse(JSON.stringify(actorData));
             if (self.constructor.settings.noBackgroundProcess) {
+              actorCopy = JSON.parse(JSON.stringify(actorData));
               if (!envelope.updatedActor) {
                 envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
               }
