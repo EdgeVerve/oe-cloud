@@ -191,11 +191,12 @@ function checkHookisAlreadyAttached(model, hookName) {
 function executeDecisionTableRules(modelCtx, model, next) {
   // Not checking the model existence since it is a loopback feature.
   var desicionTableModel = loopback.findModel('DecisionTable');
-  var modelData, payload;
-  if(modelCtx.data && modelCtx.currentInstance) {
+  var modelData;
+  var payload;
+  if (modelCtx.data && modelCtx.currentInstance) {
     payload = modelCtx.currentInstance.__data;
-    Object.keys(modelCtx.data).forEach(function(key) {
-      if(!key.startsWith("_")) payload[key] = modelCtx.data[key];
+    Object.keys(modelCtx.data).forEach(function (key) {
+      if (!key.startsWith('_')) payload[key] = modelCtx.data[key];
     });
   } else {
     modelData = modelCtx.data || modelCtx.instance;
