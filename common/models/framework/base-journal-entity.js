@@ -249,19 +249,12 @@ module.exports = function (BaseJournalEntity) {
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
 
-  BaseJournalEntity.observe('before save', function (ctx, next) {
-    if (ctx.isNewInstance === false || !(ctx.instance)) {
-      var err = new Error('Cannot update existing journal entry');
-      err.retriable = false;
-      return next(err);
-    }
+  BaseJournalEntity.prototype.changeInstance = function (options, cb) {
+    return cb();
+  };
 
-    if (ctx.instance.id === 'xxx') {
-      return next();
-    }
-
-    var instance = ctx.instance;
-    instance.performBusinessValidations(ctx.options, function (err) {
+  BaseJournalEntity.prototype.startTarnsactionFlow = function (instance, ctx, options, next) {
+    instance.performBusinessValidations(options, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
         next(err);
@@ -290,6 +283,26 @@ module.exports = function (BaseJournalEntity) {
         });
       }
     });
+  };
+
+  BaseJournalEntity.observe('before save', function (ctx, next) {
+    if (ctx.isNewInstance === false || !(ctx.instance)) {
+      var err = new Error('Cannot update existing journal entry');
+      err.retriable = false;
+      return next(err);
+    }
+    if (ctx.instance.id === 'xxx') {
+      return next();
+    }
+    var instance = ctx.instance;
+    var options = ctx.options;
+    instance.changeInstance(options, function (err) {
+      if (err) {
+        log.error(ctx.options, err.message);
+        return next(err);
+      }
+      return instance.startTarnsactionFlow(instance, ctx, options, next);
+    });
   });
 
   BaseJournalEntity.observe('after delete', function (ctx, next) {
@@ -298,7 +311,8 @@ module.exports = function (BaseJournalEntity) {
     next(err);
   });
 
-  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+
+  var doAfterSave = function (ctx) {
     var atomicActivitiesList = ctx.instance.atomicActivitiesList;
     var nonAtomicActivitiesList = ctx.instance.nonAtomicActivitiesList;
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
@@ -331,10 +345,16 @@ module.exports = function (BaseJournalEntity) {
       }
     }, function (err) {
       if (err) {
-        return next(err);
+        log.info('error in JournalSaved: ' + err);
       }
-      return next();
+      log.info('JournalSaved done');
+      return;
     });
+  };
+
+  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+    next();
+    return process.nextTick(doAfterSave, ctx);
   });
 
   function getActorModel(modelName, options) {
