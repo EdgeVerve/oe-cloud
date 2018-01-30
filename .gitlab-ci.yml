@@ -133,7 +133,7 @@ postgrestest:
   tags:
     - CEP_RUNNER    
 
-.consistenthashtest:
+consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db
@@ -141,6 +141,11 @@ postgrestest:
     - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
     - export APP_URL=http://localhost:8080/api
     - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
+    - git clone http://10.73.97.24/oecloud.io/oe-tx-router.git
+    - cd oe-tx-router
+    - time npm install --no-optional
+    - node . &
+    - cd ..
     - time npm install --no-optional
     - mocha test/consistenthash/server.js &
     - sleep 60
@@ -178,6 +183,8 @@ swarm-actor-pattern:
     - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
     - docker stack rm ${APP_IMAGE_NAME}
     - time npm install --no-optional
+    - mkdir test/actor-tests/test-files/server
+    - node test/actor-tests/prepare-test.js
     - cd test/actor-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
@@ -220,6 +227,8 @@ retry-service:
     - docker stack rm ${RETRY_STACK_NAME}
     - sleep 10
     - time npm install --no-optional
+    - mkdir test/async-service-tests/test-files/server
+    - node test/async-service-tests/prepare-test.js
     - cd test/async-service-tests/test-files
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile

@@ -4,7 +4,8 @@
   "plural": "DataSourceMappings",
   "description": "Mapping between Data Sources and Model",
   "options": {
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization":false
   },
   "properties": {
     "modelName": {

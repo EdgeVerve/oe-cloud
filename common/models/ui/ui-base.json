@@ -5,7 +5,8 @@
   "description" :  "This is base Model for all UI related models",
   "idInjection": false,
   "options": {
-    "validateUpsert": true
+    "validateUpsert": true,
+    "disableManualPersonalization":false
   },
   "validations": [],
   "relations": {},

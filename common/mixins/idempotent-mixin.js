@@ -35,43 +35,45 @@ module.exports = function IdempotencyMixin(Model) {
 
     if (data._newVersion && ctx.isNewInstance) {
       // create case
-      return findInHistory();
+      return Model.findInHistory(ctx, cb);
     } else if (data._newVersion) {
       // update case by id
       if (ctx.currentInstance && ctx.currentInstance._version === data._newVersion) {
         return cb(null, ctx.currentInstance);
       }
-      return findInHistory();
+      return Model.findInHistory(ctx, cb);
     }
     return cb();
+  };
 
-    function findInHistory() {
-      if (!Model._historyModel) {
+  Model.findInHistory = function findInHistory(ctx, cb) {
+    var data = ctx.data || ctx.instance;
+    if (!Model._historyModel) {
+      return cb();
+    }
+    var whereClause = {
+      '_version': data._newVersion
+    };
+    Model._historyModel.find({
+      where: whereClause
+    }, ctx.options, function historyModelFindcb(err, result) {
+      if (err) {
+        return cb(err);
+      }
+      if (result && result.length) {
+        if (ctx.currentInstant) {
+          return cb(null, ctx.currentInstant);
+        }
+        var hinst = result[0];
+        Model.findById(hinst._modelId, ctx.options, function modelFindByIdcb(err, latestInst) {
+          return cb(err, latestInst);
+        });
+      } else {
         return cb();
       }
-      var whereClause = {
-        '_version': data._newVersion
-      };
-      Model._historyModel.find({
-        where: whereClause
-      }, ctx.options, function historyModelFindcb(err, result) {
-        if (err) {
-          return cb(err);
-        }
-        if (result && result.length) {
-          if (ctx.currentInstant) {
-            return cb(null, ctx.currentInstant);
-          }
-          var hinst = result[0];
-          Model.findById(hinst._modelId, ctx.options, function modelFindByIdcb(err, latestInst) {
-            return cb(err, latestInst);
-          });
-        } else {
-          return cb();
-        }
-      });
-    }
+    });
   };
+
   Model.checkIdempotencyAfter = function modelCheckIdempotencyAfter(err, ctx, cb) {
     var data = ctx.data || ctx.instance;
     if (ctx.isNewInstance && err) {
@@ -87,6 +89,13 @@ module.exports = function IdempotencyMixin(Model) {
           return cb(null, result[0]);
         }
         return cb(err);
+      });
+    } else if (!ctx.isNewInstance) {
+      Model.findInHistory(ctx, function (err, res) {
+        if (res === null) {
+          return cb(err);
+        }
+        return cb(null, res);
       });
     } else {
       return cb(err);

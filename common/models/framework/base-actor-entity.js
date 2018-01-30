@@ -140,6 +140,8 @@ module.exports = function (BaseActorEntity) {
       }
     });
 
+  BaseActorEntity.prototype.stateModel = 'State';
+
   BaseActorEntity.prototype.clearActorMemory = function (options, cb) {
     var context = {};
     context.actorEntity = this;
@@ -204,7 +206,7 @@ module.exports = function (BaseActorEntity) {
   };
   BaseActorEntity.prototype.getActorFromMemory = function getActorFromMemory(envelope, options, cb) {
     var self = this;
-    this.calculatePendingBalance(envelope, options, function (err, actorData) {
+    this.processPendingStatus(envelope, options, function (err, actorData) {
       if (err) {
         return cb(err);
       }
@@ -254,7 +256,7 @@ module.exports = function (BaseActorEntity) {
       }
       var envelope = ctx.envelope;
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -336,7 +338,7 @@ module.exports = function (BaseActorEntity) {
     var actorCopy;
     if (this.constructor.settings.noBackgroundProcess) {
       self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.calculatePendingBalance(envelope, options, function (err, actorData) {
+        self.processPendingStatus(envelope, options, function (err, actorData) {
           if (err) {
             return releaseLockCb(err);
           }
@@ -374,6 +376,7 @@ module.exports = function (BaseActorEntity) {
         envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
         return actorCb();
       }
+      envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
       if (stateObj.__data.seqNum < envelope.processedSeqNum ) {
         stateObj.__data.seqNum = envelope.processedSeqNum;
         self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
@@ -382,7 +385,6 @@ module.exports = function (BaseActorEntity) {
               log.error(options, 'error while persisting actor ', error);
               return releaseLockCb(error);
             }
-            envelope.msg_queue = envelope.msg_queue.filter(x => (!(x.isProcessed)));
             return releaseLockCb();
           });
         }, function (err, ret) {
@@ -409,7 +411,7 @@ module.exports = function (BaseActorEntity) {
       return actualBackgroundProcess(self, envelope, messages, envelope.updatedActor, options, actorCb);
     }
 
-    var stateModel = getStateModel();
+    var stateModel = getStateModel(this.constructor.modelName, options);
     stateModel.findById(this.stateId, options, function (err, stateObj) {
       if (err) {
         log.error(options, 'error in finding state: ', err);
@@ -434,20 +436,24 @@ module.exports = function (BaseActorEntity) {
     for (var i = 0; i < messages.length; i++) {
       var message = messages[i];
       if (envelope.isCurrentlyProcessing || !message.isProcessed) {
-        actorData = self.processPendingMessage(message, actorData);
+        if (self.atomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.atomicInstructions(actorData, message);
+        } else if (self.nonAtomicTypes.indexOf(message.instructionType) !== -1) {
+          actorData = self.nonAtomicInstructions(actorData, message);
+        }
       }
     }
     return cb(null, actorData);
   };
 
-  BaseActorEntity.prototype.calculatePendingBalance = function (envelope, options, cb) {
+  BaseActorEntity.prototype.processPendingStatus = function (envelope, options, cb) {
     var self = this;
 
     if (self.constructor.settings.noBackgroundProcess && envelope.updatedActor) {
       return actualCalculate(envelope, JSON.parse(JSON.stringify(envelope.updatedActor)), self, options, cb);
     }
 
-    var stateModel = getStateModel();
+    var stateModel = getStateModel(this.constructor.modelName, options);
     stateModel.findById(this.stateId, options, function (err, state) {
       if (err) {
         return cb(err);
@@ -487,25 +493,31 @@ module.exports = function (BaseActorEntity) {
     if (message.journalStatus === 'saved') {
       return actualProcess(cb);
     }
-    var model = loopback.getModel(message.journalEntityType, options);
-    var query = {
-      where: { _version: message.version }
-    };
-    model.findOne(query, options, function (err, result) {
-      if (err) {
-        log.error(options, 'error in processMessage: ', err);
-        return cb(err);
-      } else if (!result) {
-        message.retryCount += 1;
-        if (message.retryCount > self.MAX_RETRY_COUNT) {
-          log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message, ' after max retry');
-          message.isProcessed = true;
+
+    if (message.retryCount ===  self.MAX_RETRY_COUNT) {
+      var model = loopback.getModel(message.journalEntityType, options);
+      var query = {
+        where: { _version: message.version }
+      };
+      return model.findOne(query, options, function (err, result) {
+        if (err) {
+          log.error(options, 'error in processMessage: ', err);
+          return cb(err);
+        } else if (!result) {
+          message.retryCount += 1;
+          return cb(new Error('no journal for message:' + message.seqNum));
+        } else if (result) {
+          return actualProcess(cb);
         }
-        return cb(new Error('no journal for message:' + message.seqNum));
-      } else if (result) {
-        actualProcess(cb);
-      }
-    });
+      });
+    }
+    if (message.retryCount > self.MAX_RETRY_COUNT) {
+      log.error(options, 'did not find appropriate journal entry for ', message.instructionType, ' : ', message, ' after max retry');
+      message.isProcessed = true;
+      return cb();
+    }
+    message.retryCount += 1;
+    return cb();
   };
 
   function filterfunc(filter, entry) {
@@ -568,7 +580,7 @@ module.exports = function (BaseActorEntity) {
     envelope.msg_queue = [];
     envelope.isCurrentlyProcessing = false;
     var self = this;
-    var stateModel = getStateModel();
+    var stateModel = getStateModel(this.constructor.modelName, options);
     stateModel.findById(this.stateId, options, function (err, state) {
       if (err) {
         log.error(options, 'err in actor startup is ', err);
@@ -616,6 +628,8 @@ module.exports = function (BaseActorEntity) {
           if (ds.name === 'loopback-connector-postgresql') {
             for (var x = 0; x < returnedInstances.length; x++) {
               returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadtxt);
+              returnedInstances[x].instructionType = returnedInstances[x].instructiontype;
+              returnedInstances[x].instructiontype = undefined;
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
@@ -683,7 +697,7 @@ module.exports = function (BaseActorEntity) {
       return cb();
     }
     setMessageStatus(envelope);
-    if (global.inDBLockMode()) {
+    if (global.inDBLockMode && global.inDBLockMode()) {
       processEnvelope();
     } else {
       return cb();
@@ -705,13 +719,20 @@ module.exports = function (BaseActorEntity) {
   };
 
 
+  BaseActorEntity.observe('before save', function (ctx, next) {
+    if (ctx.instance && ctx.isNewInstance === true) {
+      ctx.hookState.stateObj = ctx.instance.stateObj;
+      delete ctx.instance.__data.stateObj;
+      delete ctx.instance.stateObj;
+    }
+    return next();
+  });
+
   BaseActorEntity.observe('after save', function (ctx, next) {
-    if ((ctx.instance && ctx.instance._isDeleted) || (ctx.data && ctx.data._isDeleted)) {
-      next();
-    } else if (ctx.instance && ctx.isNewInstance === true) {
+    if (ctx.instance && ctx.isNewInstance === true) {
       var stateData = {};
-      stateData.stateObj = ctx.instance.stateObj;
-      var stateModel = getStateModel();
+      stateData.stateObj = ctx.hookState.stateObj;
+      var stateModel = getStateModel(ctx.instance.constructor.modelName, ctx.options);
       stateModel.create(stateData, ctx.options, function (err, instance) {
         if (err) {
           return next(err);
@@ -734,7 +755,7 @@ module.exports = function (BaseActorEntity) {
       actorPool.destroy(ctx.Model.modelName, ctx.id);
     }
     if (ctx.instance && ctx.instance.stateId) {
-      var stateModel = getStateModel();
+      var stateModel = getStateModel(ctx.instance.constructor.modelName, ctx.options);
       stateModel.destroyById(ctx.instance.stateId, ctx.options, function (err, res) {
         if (err) {
           next(err);
@@ -747,9 +768,10 @@ module.exports = function (BaseActorEntity) {
     }
   });
 
-  function getStateModel() {
+  function getStateModel(actorType, options) {
     if (!StateModel) {
-      StateModel = loopback.getModel('State');
+      var instanceModel = loopback.getModel(actorType, options);
+      StateModel = loopback.getModel(instanceModel.prototype.stateModel, options);
     }
     return StateModel;
   }

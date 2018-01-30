@@ -4,7 +4,8 @@
   "description": "This model is used for storing decision graphs",
   "options": {
     "validateUpsert": true,
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization":false
   },
   "properties": {
     "name": {

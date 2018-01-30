@@ -31,6 +31,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var fiveKageDetails = {
     name: fiveKage,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string',
@@ -50,6 +53,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var tailedBeastsDetails = {
     name: tailedBeast,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string',
@@ -72,6 +78,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var animeCharacterDetails = {
     name: animeCharacter,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string',
@@ -93,6 +102,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var modelDetailsScope = {
     name: myScopeModel,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'device': {
         'type': 'string'
@@ -118,6 +130,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
   var modelDetailsScopeModel = {
     name: myScopeModel1,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string'
@@ -1235,6 +1250,9 @@ describe(chalk.blue('Data Personalization Test --REST'), function DataPersonaliz
     var modelDetailsUnique = {
       name: modelUnique,
       base: 'BaseEntity',
+      options: {
+        "disableManualPersonalization":false
+      },
       properties: {
         'a': {
           'type': 'string',
@@ -2600,6 +2618,9 @@ describe(chalk.blue('Data Personalization Test --Programatic'), function () {
     var modelDetailsUnique = {
       name: modelUnique,
       base: 'BaseEntity',
+      options: {
+        "disableManualPersonalization":false
+      },
       properties: {
         'a': {
           'type': 'string',
@@ -3167,6 +3188,9 @@ describe(chalk.blue('Data Personalization -Test for Persisted Model Static calls
   var newModelDetails = {
     name: modelName,
     base: 'BaseEntity',
+    options: {
+      "disableManualPersonalization":false
+    },
     properties: {
       'name': {
         'type': 'string',
