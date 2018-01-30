@@ -57,7 +57,6 @@
         "mustache": "^2.3.0",
         "mv": "^2.1.1",
         "node-async-locks": "^1.0.1",
-        "node-docker-api": "^1.1.16",
         "node-red": "0.16.2",
         "oe-explorer": "^1.0.0",
         "oe-jwt-generator": "^1.0.0",
