@@ -110,7 +110,7 @@ describe('Actor startUp Test', function () {
                 }
                 journalModelInstance = res;
                 journalModel = loopback.getModel('TestActivitiesJournal', options);
-                journalModel.prototype.performBusinessValidations = function (options, cb) {
+                journalModel.prototype.performBusinessValidations = function (options, ctx, cb) {
                   cb();
                 };
                 return asyncCB();
