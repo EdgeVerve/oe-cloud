@@ -171,7 +171,7 @@ describe(chalk.blue('business-validations-tests'), function () {
   it('trivial bussiness validation + atomic action pass --> transaction should pass', function (done) {
 
       var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options,ctx, cb) {
             log.debug(log.defaultContext(), 'trivial implementation');
             cb();
         };
