@@ -23,8 +23,24 @@
 			"description" : "Based on templateName component is generatred"
 		},
 		"resturl" : {
-			"type": "object",
+			"type": "string",
 			"description" : "url for form data handling"
+		},
+		"geturl" : {
+			"type": "string",
+			"description" : "url for GET"
+		},
+		"posturl" : {
+			"type": "string",
+			"description" : "url for POST"
+		},
+		"puturl" : {
+			"type": "string",
+			"description" : "url for PUT"
+		},
+		"deleteurl" : {
+			"type": "string",
+			"description" : "url for DELETE"
 		},
 		"filePath" : {
 			"type": "string",
