@@ -50,7 +50,7 @@ npminstall:
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - time npm install --no-optional
-    - echo Dockerfile
+    - cat Dockerfile
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile
     - echo "Node Modules Installed"
