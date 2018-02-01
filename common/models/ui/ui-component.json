@@ -23,7 +23,7 @@
 			"description" : "Based on templateName component is generatred"
 		},
 		"resturl" : {
-			"type": "string",
+			"type": "object",
 			"description" : "url for form data handling"
 		},
 		"filePath" : {
@@ -70,7 +70,7 @@
       "default" : true
     },
     "excludeFields" : {
-			"type": ["string"],
+			"type": "object",
 			"description" : "Fields which are to be excluded from injection"
     },
     "oeValidations": {
