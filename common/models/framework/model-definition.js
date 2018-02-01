@@ -70,7 +70,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   function mongoSpecificHandling(modeldefinition, ctx, next) {
     if (!modeldefinition.mongodb) {
       debug('Posted modeldefinition does not have the \'mongodb\' property');
-      var autoscopeFields = modelDefinition.definition.settings.autoscope;
+      var autoscopeFields = ctx.Model.definition.settings.autoscope;
       if (modeldefinition.filebased) {
         let ctxStr = util.createDefaultContextString(autoscopeFields);
         if (!modelDefinition.app.personalizedModels[modeldefinition.name]) {
@@ -129,9 +129,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     var modeldefinition = ctx.instance || ctx.currentInstance || ctx.data;
     var contextString;
     if (ctx.options.ignoreAutoscope || ctx.options.ignoreAutoScope) {
-      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, {});
+      contextString = util.createContextString(ctx.Model.definition.settings.autoscope, {});
     } else {
-      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
+      contextString = util.createContextString(ctx.Model.definition.settings.autoscope, ctx.options.ctx);
     }
     modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
       modelDefinition.definition.settings.autoscope);
@@ -152,9 +152,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           log.debug(ctx.options, 'Created plural ', modeldefinition.plural, 'for model', modeldefinition.name);
         }
         modeldefinition.clientPlural = modeldefinition.plural;
-        if (modeldefinition.variantOf) {
-          modeldefinition.base = modeldefinition.variantOf;
-        }
+      }
+      if (modeldefinition.variantOf) {
+        modeldefinition.base = modeldefinition.variantOf;
       }
       if (!modeldefinition.base) {
         modeldefinition.base = 'BaseEntity';
@@ -277,27 +277,27 @@ module.exports = function ModelDefintionFn(modelDefinition) {
                   base: modeldefinition.name
                 }
               }, ctx.options,
-              function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
-                if (err) {
-                  next();
-                  log.warn(ctx.options, {
-                    'message': 'WARNING',
-                    'cause': err,
-                    'details': ''
-                  });
-                  return;
-                }
-                if (modeldefinitions && modeldefinitions.length) {
-                  modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
-                    // For each Model defined in the DB which has the current model as base ...
-                    util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
-                      log.debug(ctx.options, 'emitting event model available ', md.name);
-                      modelDefinition.events.emit('model-' + md.name + '-available');
-                      doAutoUpdate(modelDefinition.app, md, ctx.options);
+                function dbModelsMdAfterSaveMdAfterSaveUtilCreateModelFindCb(err, modeldefinitions) {
+                  if (err) {
+                    next();
+                    log.warn(ctx.options, {
+                      'message': 'WARNING',
+                      'cause': err,
+                      'details': ''
                     });
-                  });
-                }
-              });
+                    return;
+                  }
+                  if (modeldefinitions && modeldefinitions.length) {
+                    modeldefinitions.forEach(function dbModelMdAfterSaveMdForEachFn(md) {
+                      // For each Model defined in the DB which has the current model as base ...
+                      util.createModel(modelDefinition.app, md, ctx.options, function dbModelMdAfterSaveMdForEachCreateModelCb() {
+                        log.debug(ctx.options, 'emitting event model available ', md.name);
+                        modelDefinition.events.emit('model-' + md.name + '-available');
+                        doAutoUpdate(modelDefinition.app, md, ctx.options);
+                      });
+                    });
+                  }
+                });
             });
           }
         }
