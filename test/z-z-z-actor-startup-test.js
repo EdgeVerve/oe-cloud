@@ -177,9 +177,13 @@ describe('Actor startUp Test', function () {
             });
         };
         
-        async.series([createActorModel, createActorInstance, createJournalModel, createJournalInstance], function(err, res) {
-            done(err);
-        });
+        if (app.dataSources.db.connector.name === "postgresql") {
+            async.series([createActorModel, createActorInstance, createJournalModel, createJournalInstance], function(err, res) {
+                done(err);
+            });
+        } else {
+            return done();
+        }
     });
 
     it('Check Strat Up', function(done) {
@@ -205,42 +209,50 @@ describe('Actor startUp Test', function () {
                 return done();
             });
         };
-        createJournalInstanceAndCheckBalance(done);
+        if (app.dataSources.db.connector.name === "postgresql") {
+            createJournalInstanceAndCheckBalance(done);
+        } else {
+            return done();
+        }
     });
 
     after('check state is updated against DB', function (done) {
-        var stateModel = loopback.getModel('State');
-        async.retry({ times: 5 }, function (retrycb) {
-          async.eachOf(afterTest, function (value, stateId, cb) {
-            var query = {
-              where: { id: stateId }
-            };
-            stateModel.find(query, bootstrap.defaultContext, function (err, res) {
-              if (err) {
-                log.error(log.defaultContext(), err);
-                return cb(err);
-              } else {
-                if (res[0].stateObj.quantity === value) {
-                  return cb();
+        if (app.dataSources.db.connector.name === "postgresql") {
+            var stateModel = loopback.getModel('State');
+            async.retry({ times: 5 }, function (retrycb) {
+              async.eachOf(afterTest, function (value, stateId, cb) {
+                var query = {
+                  where: { id: stateId }
+                };
+                stateModel.find(query, bootstrap.defaultContext, function (err, res) {
+                  if (err) {
+                    log.error(log.defaultContext(), err);
+                    return cb(err);
+                  } else {
+                    if (res[0].stateObj.quantity === value) {
+                      return cb();
+                    } else {
+                      log.error(log.defaultContext(), 'quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
+                      return cb(new Error('error in assertion against db'));
+                    }
+                  }
+                });
+              }, function (err) {
+                if (err) {
+                  return setTimeout(retrycb, 3000, err);
                 } else {
-                  log.error(log.defaultContext(), 'quantity is: ', res[0].stateObj.quantity, ' but value is: ', value);
-                  return cb(new Error('error in assertion against db'));
+                  return retrycb(null, true);
                 }
+              });
+            }, function (err, result) {
+              if (err) {
+                return done(err);
+              } else {
+                return done();
               }
             });
-          }, function (err) {
-            if (err) {
-              return setTimeout(retrycb, 3000, err);
-            } else {
-              return retrycb(null, true);
-            }
-          });
-        }, function (err, result) {
-          if (err) {
-            return done(err);
-          } else {
+        } else {
             return done();
-          }
-        });
-      });
+        }
+    });
 });
