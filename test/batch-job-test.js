@@ -132,7 +132,7 @@ describe(chalk.blue('batch-job-test'), function () {
     function addAllFunctions() {
 
       var transferDefinition = loopback.getModel(transactionModelName, bootstrap.defaultContext);
-      transferDefinition.prototype.performBusinessValidations = function (options, cb) {
+      transferDefinition.prototype.performBusinessValidations = function (options, ctx, cb) {
           cb();
       };
 
