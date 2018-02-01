@@ -629,12 +629,21 @@ module.exports = function (BaseActorEntity) {
             return asyncCb();
           }
           if (ds.name === 'loopback-connector-postgresql') {
+            var translatePropertyNames = function (origin) {
+              var originKeys = Object.keys(origin);
+              var modelKeys = Object.keys(loopback.getModel('ActorActivity', options)._ownDefinition.properties);
+              modelKeys.forEach(function (modelKey) {
+                originKeys.forEach(function (originKey) {
+                  if (modelKey.toLowerCase() === originKey) {
+                    origin[modelKey] = origin[originKey];
+                    delete origin[originKey];
+                  }
+                });
+              });
+            };
             for (var x = 0; x < returnedInstances.length; x++) {
-              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadtxt);
-              returnedInstances[x].instructionType = returnedInstances[x].instructiontype;
-              returnedInstances[x].instructiontype = undefined;
-              returnedInstances[x].seqNum = returnedInstances[x].seqnum;
-              returnedInstances[x].seqnum = undefined;
+              translatePropertyNames(returnedInstances[x]);
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;
