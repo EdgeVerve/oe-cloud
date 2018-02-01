@@ -12,4 +12,4 @@ WORKDIR /home/src
 
 COPY . /home/src
 
-CMD node .
+CMD node . -m
