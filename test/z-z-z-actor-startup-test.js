@@ -16,6 +16,7 @@ var app = bootstrap.app;
 var models = bootstrap.models;
 var loopback = require('loopback');
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+var host = process.env.HOSTNAME || os.hostname();
 var dsname = 'db';
 var dbName = process.env.DB_NAME || dsname;
 var dataSource;
@@ -152,7 +153,7 @@ describe('Actor startUp Test', function () {
                 var _autoscope = {
                     tenantId: "test-tenant"
                 };
-                var _hostname = "ENGPNYC0T9R";
+                var _hostname = host;
                 var _fsctx = {
                     options: {
                         ctx: {
