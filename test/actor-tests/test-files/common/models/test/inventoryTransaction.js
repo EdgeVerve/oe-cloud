@@ -5,7 +5,7 @@
  *
  */
 module.exports = function (InventoryTransaction) {
-  InventoryTransaction.prototype.performBusinessValidations = function (options, cb) {
+  InventoryTransaction.prototype.performBusinessValidations = function (options, ctx, cb) {
     cb();
   };
 };

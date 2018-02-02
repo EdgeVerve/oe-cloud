@@ -89,7 +89,7 @@ describe(chalk.blue('actor-pattern-db-lock-test'), function () {
     function addAllFunctions() {
 
       var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-      transferDefinition.prototype.performBusinessValidations = function (options, cb) {
+      transferDefinition.prototype.performBusinessValidations = function (options, ctx, cb) {
         cb();
       };
 
