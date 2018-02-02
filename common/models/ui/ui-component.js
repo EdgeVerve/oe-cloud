@@ -28,31 +28,41 @@ module.exports = function uiComponent(UIComponent) {
         templateMap = generateTemplateMap(app);
       }
       var templatePath = templateMap[template];
-      fs.readFile(templatePath, function read(err, data) {
-        if (err) {
-          glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
-            if (!err2 && files && files.length > 0) {
-              templatePath = files[0];
-              fs.readFile(templatePath, function read(err3, data2) {
-                if (err3) {
-                  callback(err3, '');
-                } else {
-                  templateMap[template] = templatePath;
-                  callback(err3, data2.toString());
-                }
-              });
-            } else {
-              var error = new Error();
-              error.message = 'Template ' + template + ' not found';
-              error.code = 'TEMPLATE_TYPE_MISSING';
-              error.statusCode = 422;
-              callback(error, '');
-            }
-          });
-        } else {
-          callback(err, data.toString());
-        }
-      });
+
+      function fullSearch(template, callback) {
+        glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
+          if (!err2 && files && files.length > 0) {
+            templatePath = files[0];
+            fs.readFile(templatePath, function read(err3, data2) {
+              if (err3) {
+                callback(err3, '');
+              } else {
+                templateMap[template] = templatePath;
+                callback(err3, data2.toString());
+              }
+            });
+          } else {
+            var error = new Error();
+            error.message = 'Template ' + template + ' not found';
+            error.code = 'TEMPLATE_TYPE_MISSING';
+            error.statusCode = 422;
+            callback(error, '');
+          }
+        });
+      }
+
+
+      if (typeof templatePath === 'string') {
+        fs.readFile(templatePath, function read(err, data) {
+          if (err) {
+            fullSearch(template, callback);
+          } else {
+            callback(err, data.toString());
+          }
+        });
+      } else {
+        fullSearch(template, callback);
+      }
     });
   }
 
