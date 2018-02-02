@@ -21,42 +21,32 @@ var path = require('path');
 var glob = require('glob');
 
 module.exports = function uiComponent(UIComponent) {
+  var templateMap = null;
   function loadTemplate(template, app, options, callback) {
     app.models.AppConfig.findOne({}, options, function AppConfigFindOneCb(err, data) {
-      var templatesDir;
-      if (!err && data && data.server && data.server.templateDir) {
-        templatesDir = data.server.templatesDir;
-      } else {
-        templatesDir = '../client/templates';
+      if (!templateMap) {
+        templateMap = generateTemplateMap(app);
       }
-
-      var templatePath = path.join(app.locals.apphome, templatesDir, template);
+      var templatePath = templateMap[template];
       fs.readFile(templatePath, function read(err, data) {
         if (err) {
-          templatesDir = '../client/bower_components/oe-studio/templates';
-          templatePath = path.join(app.locals.apphome, templatesDir, template);
-          fs.readFile(templatePath, function read(err1, data1) {
-            if (err1) {
-              glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
-                if (!err2 && files && files.length > 0) {
-                  templatePath = files[0];
-                  fs.readFile(templatePath, function read(err3, data2) {
-                    if (err3) {
-                      callback(err3, '');
-                    } else {
-                      callback(err3, data2.toString());
-                    }
-                  });
+          glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
+            if (!err2 && files && files.length > 0) {
+              templatePath = files[0];
+              fs.readFile(templatePath, function read(err3, data2) {
+                if (err3) {
+                  callback(err3, '');
                 } else {
-                  var error = new Error();
-                  error.message = 'Template ' + template + ' not found';
-                  error.code = 'TEMPLATE_TYPE_MISSING';
-                  error.statusCode = 422;
-                  callback(error, '');
+                  templateMap[template] = templatePath;
+                  callback(err3, data2.toString());
                 }
               });
             } else {
-              callback(err1, data1.toString());
+              var error = new Error();
+              error.message = 'Template ' + template + ' not found';
+              error.code = 'TEMPLATE_TYPE_MISSING';
+              error.statusCode = 422;
+              callback(error, '');
             }
           });
         } else {
@@ -456,6 +446,27 @@ module.exports = function uiComponent(UIComponent) {
     template = template.replace(/:plural/g, pluralName);
     return template;
   }
+
+  function generateTemplateMap(app) {
+    var designerName = 'oe-studio';
+    var designer = app.get('designer');
+    if (!designer.templatePath || designer.templatePath.length === 0) {
+      designer.templatePath = ['client/bower_components/' + designerName + '/templates'];
+    }
+    var templatesData = {};
+    designer.templatePath.forEach(function templatePathForEach(tPath) {
+      if (fs.existsSync(tPath)) {
+        var templateFiles = fs.readdirSync(tPath);
+        templateFiles.forEach(function templateFilesForEach(fileName) {
+          if (fileName.endsWith('.html')) {
+            templatesData[fileName] = path.join(tPath, fileName);
+          }
+        });
+      }
+    });
+    return templatesData;
+  }
+
 
   UIComponent.component = function fetchComponent(name, options, callback) {
     var fetchAsHtml = true;
