@@ -89,7 +89,6 @@ postgrestest:
     - export DB=postgres
     - export DB_NAME=${CI_PIPELINE_ID}_pg
     - time npm install --no-optional
-    - node . -m 
     - npm run grunt-cover
     - mocha test/01-cleanup.js
   artifacts:
