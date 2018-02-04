@@ -91,6 +91,20 @@ describe(chalk.blue('batch-job-test'), function () {
       });
   });
 
+  before('Add -m switch to command args', function(done) {
+    process.argv.push('-m');
+    done();
+  });
+
+  var enableMigrationSetting;
+  var appHome;
+  before('Set enableMigration, apphome', function(done) {
+    enableMigrationSetting = app.get('enableMigration');
+    app.set('enableMigration', true);
+    appHome = app.locals.apphome;
+    app.locals.apphome = path.join(__dirname, 'database-migration', 'test1', 'app');
+    done();
+  });
 
   before('create testAccount models', function createModels(done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
@@ -302,6 +316,17 @@ describe(chalk.blue('batch-job-test'), function () {
       if (err) done(err);
       else done();
       });
+    });
+
+    after('Remove -m switch to command args', function(done) {
+      process.argv.pop();
+      done();
+    });
+
+    after('Reset enableMigration, apphome', function(done) {
+      app.set('enableMigration', enableMigrationSetting || false);
+      app.locals.apphome = appHome;
+      done();
     });
 });
 

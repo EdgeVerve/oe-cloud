@@ -32,7 +32,6 @@ options.clientAppRootDir = __dirname;
 var basePath = app.get('restApiRoot');
 app.locals.apphome = __dirname;
 app.set('disableNodered', false);
-process.argv.push('-m');
 evapp.boot(app, options, function() {
     app.start();
     app.emit('EVstarted');
