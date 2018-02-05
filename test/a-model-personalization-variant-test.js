@@ -27,7 +27,7 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
     var modelDefinition = loopback.findModel('ModelDefinition');
     var options = {
       ctx: {
-        tenantId: "Wayne"
+        tenantId: "wayne"
       }
     }
     modelDefinition.find({ where: { name: "ModelDefinition" } }, options, function (err, def) {
@@ -60,8 +60,8 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
   it('Create personalized model for tenant wayne', function (done) {
     var options = {
       ctx: {
-        tenantId: "Wayne",
-        region: "DC"
+        tenantId: "wayne",
+        region: "dc"
       }
     }
     var modelDefinition = loopback.findModel('ModelDefinition', options);
@@ -81,7 +81,7 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
         expect(res).not.to.be.empty;
         expect(res).not.to.be.undefined;
         expect(res.name).to.be.equal('WayneEnterprize');
-        expect(res.modelId).to.be.equal('WayneEnterprize-Wayne-DC');
+        expect(res.modelId).to.be.equal('WayneEnterprize-wayne-dc');
         done();
       }
     });
@@ -90,7 +90,7 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
   it('Create personalized model for tenant stark', function (done) {
     var options = {
       ctx: {
-        tenantId: "Stark"
+        tenantId: "stark"
       }
     }
     var modelDefinition = loopback.findModel('ModelDefinition', options);
@@ -110,7 +110,7 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
         expect(res).not.to.be.empty;
         expect(res).not.to.be.undefined;
         expect(res.name).to.be.equal('StarkIndustries');
-        expect(res.modelId).to.be.equal('StarkIndustries-Stark');
+        expect(res.modelId).to.be.equal('StarkIndustries-stark');
         done();
       }
     });
