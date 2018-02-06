@@ -156,7 +156,7 @@ describe('Actor startUp Test', function () {
     it('Check activities in db', function(done) {
         var checkActivities = function(done) {
             var activitiesModel = loopback.getModel('ActorActivity', options);
-            activitiesModel.find({}, options, function (err, res) {
+            activitiesModel.find({"where": {"entityId": actorId}}, options, function (err, res) {
                 if (err) {
                     return done(err);
                 } else if (activitiesModel.getDataSource().connector.name === 'postgresql') {
