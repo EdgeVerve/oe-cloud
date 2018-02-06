@@ -30,29 +30,19 @@ describe(chalk.blue('Model Personalizaton Test VariantOf'), function () {
         tenantId: "wayne"
       }
     }
-    modelDefinition.find({ where: { name: "ModelDefinition" } }, options, function (err, def) {
+    var definition = {};
+    definition.name = "ModelDefinition";
+    definition.variantOf = "ModelDefinition";
+    definition.autoscope = ["region"];
+    modelDefinition.create(definition, options, function (err, res) {
       if (err) {
         done(err);
-      } else if (def.length) {
-        var definition = def[0].__data;
-        definition.variantOf = "ModelDefinition";
-        definition.autoscope = ["region"];
-        definition.filebased = false;
-        delete definition.id;
-        delete definition._version;
-        delete definition._newVersion;
-        delete definition.modelId;
-        modelDefinition.create(definition, options, function (err, res) {
-          if (err) {
-            done(err);
-          } else {
-            expect(res).not.to.be.null;
-            expect(res).not.to.be.empty;
-            expect(res).not.to.be.undefined;
-            expect(res.name).to.be.equal('ModelDefinition');
-            done();
-          }
-        });
+      } else {
+        expect(res).not.to.be.null;
+        expect(res).not.to.be.empty;
+        expect(res).not.to.be.undefined;
+        expect(res.name).to.be.equal('ModelDefinition');
+        done();
       }
     });
   });
