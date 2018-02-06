@@ -14,7 +14,9 @@ var logger = require('oe-logger');
 var log = logger('batch-job-tests');
 var api = bootstrap.api;
 var async = require('async');
-var BatchJobRunner = require('../lib/batchJob-runner')
+var BatchJobRunner = require('../lib/batchJob-runner');
+var dbm = require('../lib/db-migrate-helper');
+var app = bootstrap.app;
 
 var accessToken;
 var accountModel;
@@ -96,14 +98,10 @@ describe(chalk.blue('batch-job-test'), function () {
     done();
   });
 
-  var enableMigrationSetting;
-  var appHome;
-  before('Set enableMigration, apphome', function(done) {
-    enableMigrationSetting = app.get('enableMigration');
-    app.set('enableMigration', true);
-    appHome = app.locals.apphome;
-    app.locals.apphome = path.join(__dirname, 'database-migration', 'test1', 'app');
-    done();
+  before('Run autoupdate with dbm helper', function(done) {
+    dbm(app, bootstrap.options, true, function(err, data){
+      return done(err);
+    });
   });
 
   before('create testAccount models', function createModels(done) {
@@ -320,12 +318,6 @@ describe(chalk.blue('batch-job-test'), function () {
 
     after('Remove -m switch to command args', function(done) {
       process.argv.pop();
-      done();
-    });
-
-    after('Reset enableMigration, apphome', function(done) {
-      app.set('enableMigration', enableMigrationSetting || false);
-      app.locals.apphome = appHome;
       done();
     });
 });
