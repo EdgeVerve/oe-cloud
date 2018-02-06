@@ -70,7 +70,7 @@ module.exports = function ModelDefintionFn(modelDefinition) {
   function mongoSpecificHandling(modeldefinition, ctx, next) {
     if (!modeldefinition.mongodb) {
       debug('Posted modeldefinition does not have the \'mongodb\' property');
-      var autoscopeFields = modelDefinition.definition.settings.autoscope;
+      var autoscopeFields = ctx.Model.definition.settings.autoscope;
       if (modeldefinition.filebased) {
         let ctxStr = util.createDefaultContextString(autoscopeFields);
         if (!modelDefinition.app.personalizedModels[modeldefinition.name]) {
@@ -129,9 +129,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
     var modeldefinition = ctx.instance || ctx.currentInstance || ctx.data;
     var contextString;
     if (ctx.options.ignoreAutoscope || ctx.options.ignoreAutoScope) {
-      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, {});
+      contextString = util.createContextString(ctx.Model.definition.settings.autoscope, {});
     } else {
-      contextString = util.createContextString(modelDefinition.definition.settings.autoscope, ctx.options.ctx);
+      contextString = util.createContextString(ctx.Model.definition.settings.autoscope, ctx.options.ctx);
     }
     modeldefinition.modelId = modeldefinition.modelId || util.createModelId(modeldefinition.name, contextString,
       modelDefinition.definition.settings.autoscope);
@@ -152,9 +152,9 @@ module.exports = function ModelDefintionFn(modelDefinition) {
           log.debug(ctx.options, 'Created plural ', modeldefinition.plural, 'for model', modeldefinition.name);
         }
         modeldefinition.clientPlural = modeldefinition.plural;
-        if (modeldefinition.variantOf) {
-          modeldefinition.base = modeldefinition.variantOf;
-        }
+      }
+      if (modeldefinition.variantOf) {
+        modeldefinition.base = modeldefinition.variantOf;
       }
       if (!modeldefinition.base) {
         modeldefinition.base = 'BaseEntity';

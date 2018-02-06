@@ -115,7 +115,7 @@ describe(chalk.blue('JWT assertion test'), function () {
                     if (err) {
                         done(err);
                     } else {
-                        var modelDef = loopback.getModelByType('ModelDefinition');
+                        var modelDef = loopback.getModel('ModelDefinition');
                         modelDef.create(testModel, bootstrap.defaultContext, function (err, model) {
                             if (err) {
                                 done(err);
