@@ -38,7 +38,12 @@ module.exports = (app, cb) => {
   };
 
   const getPersonalizedModel = (modelName, ctx) => {
-    const modelDefinition = loopback.getModel('ModelDefinition');
+    let modelDefinition;
+    if (modelName === 'ModelDefinition') {
+      modelDefinition = loopback.getModel('ModelDefinition');
+    } else {
+      modelDefinition = loopback.getModel('ModelDefinition', { ctx: ctx });
+    }
     const autoscopeFields = modelDefinition.definition.settings.autoscope;
     const ctxStr = util.createContextString(autoscopeFields, ctx);
     const model = app.personalizedModels[modelName] && app.personalizedModels[modelName][ctxStr] ? app.personalizedModels[modelName][ctxStr] : null;
