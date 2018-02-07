@@ -11,7 +11,6 @@
 var bootstrap = require('./bootstrap');
 var chai = bootstrap.chai;
 var expect = chai.expect;
-var app = bootstrap.app;
 var loopback = require('loopback');
 var options = bootstrap.defaultContext;
 var async = require('async');
