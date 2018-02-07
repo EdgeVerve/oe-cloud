@@ -93,17 +93,6 @@ describe(chalk.blue('batch-job-test'), function () {
       });
   });
 
-  before('Add -m switch to command args', function(done) {
-    process.argv.push('-m');
-    done();
-  });
-
-  before('Run autoupdate with dbm helper', function(done) {
-    dbm(app, bootstrap.options, true, function(err, data){
-      return done(err);
-    });
-  });
-
   before('create testAccount models', function createModels(done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
     
@@ -314,11 +303,6 @@ describe(chalk.blue('batch-job-test'), function () {
       if (err) done(err);
       else done();
       });
-    });
-
-    after('Remove -m switch to command args', function(done) {
-      process.argv.pop();
-      done();
     });
 });
 
