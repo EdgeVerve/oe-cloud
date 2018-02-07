@@ -16,6 +16,7 @@ var app = bootstrap.app;
 var models = bootstrap.models;
 var loopback = require('loopback');
 var postgresHost = process.env.POSTGRES_HOST || 'localhost';
+var os = require('os');
 var host = process.env.HOSTNAME || os.hostname();
 var dsname = 'db';
 var dbName = process.env.DB_NAME || dsname;
@@ -30,11 +31,14 @@ describe('Actor startUp Test', function () {
     var actorModelInstance;
     var actorModel;
     var actorId;
+    var dummyActorId;
+    var dummyActorInstance;
     var journalModelInstance;
     var journalModel;
     var journal1Id;
     var journal2Id;
     var data;
+    var journal3Id;
     var actorInstance;
     var afterTest = {};
 
@@ -104,6 +108,18 @@ describe('Actor startUp Test', function () {
                 return asyncCB();
             });
         };
+        var createDummyActorInstance = function(asyncCB) {
+            data = {};
+            actorModel.create(data, options, function(err, res) {
+                if (err) {
+                    log.error(log.defaultContext(), err);
+                    return asyncCB(err);
+                }
+                dummyActorId = res.id;
+                dummyActorInstance = res;
+                return asyncCB();
+            });
+        };
         var createJournalModel = function(asyncCB) {
             data = {
                 'name': 'TestStartUpJournal',
@@ -119,6 +135,27 @@ describe('Actor startUp Test', function () {
                 journalModel.prototype.performBusinessValidations = function (options, ctx, cb) {
                   cb();
                 };
+                return asyncCB();
+            });
+        };
+        var postJournalInstanceThroughLoopback = function (asyncCB) {
+            data = {
+                "nonAtomicActivitiesList": [
+                    {
+                    "entityId": dummyActorId,
+                    "payload": {"value": 1000},
+                    "modelName": actorModel.clientModelName,
+                    "instructionType": "CREDIT"
+                    }
+                ],
+                "_version": uuidv4()
+            };
+            journalModel.create(data, options, function(err, res) {
+                if (err) {
+                    log.error(log.defaultContext(), err);
+                    return asyncCB(err);
+                }
+                journal3Id = res.id;
                 return asyncCB();
             });
         };
@@ -179,7 +216,7 @@ describe('Actor startUp Test', function () {
         };
         
         if (app.dataSources.db.connector.name === "postgresql") {
-            async.series([createActorModel, createActorInstance, createJournalModel, createJournalInstance], function(err, res) {
+            async.series([createActorModel, createActorInstance, createDummyActorInstance, createJournalModel, postJournalInstanceThroughLoopback, createJournalInstance], function(err, res) {
                 done(err);
             });
         } else {
