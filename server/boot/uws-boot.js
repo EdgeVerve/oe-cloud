@@ -56,6 +56,7 @@ module.exports = function (app, cb) {
       }
       if (data.lock) {
         request.callContext.lockMode = DB_LOCK_MODE;
+        global.setDBLockMode();
       }
       request.callContext.evproxyModelPlural = data.modelPlural;
       request.callContext.evproxyModelId = data.id;
