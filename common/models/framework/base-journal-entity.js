@@ -10,87 +10,8 @@ var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
 var actorModelsMap = {};
-var defaultOptions = {
-  'ctx': {
-    'remoteUser': 'admin',
-    'tenantId': 'default'
-  }
-};
 
 module.exports = function (BaseJournalEntity) {
-  BaseJournalEntity.setup = function () {
-    BaseJournalEntity.base.setup.call(this);
-    var BaseJournal = this;
-    BaseJournal.on('dataSourceAttached', function onAttach(Model) {
-      if (Model.dataSource.name === 'loopback-connector-postgresql') {
-        Model.findOrCreate({where: {'id': 'xxx' }}, {'id': 'xxx'}, defaultOptions, function (err, instance, created) {
-          if (err) {
-            log.debug('did not create dummy record ', Model.modeName);
-          }
-          if (!created) {
-            return;
-          }
-          var modelQuery = 'select tgname from pg_trigger where not tgisinternal and ' +
-          'tgrelid = \'' + BaseJournal.modelName + '\'::regclass';
-          Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
-            if (err || result.length === 0) {
-              modelQuery = 'CREATE TRIGGER \"onCreate\" BEFORE INSERT ' +
-              ' ON public.' + Model.modelName.toLowerCase() +
-              ' FOR EACH ROW ' +
-              ' EXECUTE PROCEDURE public.create_activities(); ';
-              Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
-                if (err) {
-                  log.debug('could not insert trigger function on model');
-                }
-              });
-            }
-          });
-        });
-      }
-    });
-  };
-  BaseJournalEntity.on('dataSourceAttached', function onAttach(Model) {
-    if (Model.dataSource.name === 'loopback-connector-postgresql') {
-      var modefiedQuery = 'select proname from pg_proc where proname = \'create_activities\'';
-      Model.dataSource.connector.query(modefiedQuery, [], defaultOptions, function (err, result) {
-        if (err) {
-          log.debug('could not read pg table');
-        }
-        if (result.length === 0) {
-          modefiedQuery = 'CREATE FUNCTION public.create_activities() ' +
-          ' RETURNS trigger ' +
-          ' LANGUAGE \'plpgsql\' ' +
-          ' COST 100 ' +
-          ' VOLATILE NOT LEAKPROOF ' +
-          ' AS $BODY$ ' +
-          ' DECLARE ' +
-          ' m   integer; ' +
-          ' BEGIN ' +
-          ' FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s ' +
-          ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
-          ' VALUES(new.atomicactivitieslist[m]->>\'modelName\',new.atomicactivitieslist[m]->>\'entityId\',cast (new.atomicactivitieslist[m]->>\'seqNum\' as int),new.atomicactivitieslist[m]->>\'instructionType\',true,new.atomicactivitieslist[m]->>\'payload\'); ' +
-          ' END LOOP; ' +
-          ' FOR m IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
-          ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) ' +
-          '  VALUES(new.nonatomicactivitieslist[m]->>\'modelName\',new.nonatomicactivitieslist[m]->>\'entityId\',cast (new.nonatomicactivitieslist[m]->>\'seqNum\' as int),new.nonatomicactivitieslist[m]->>\'instructionType\',false,new.nonatomicactivitieslist[m]->>\'payload\'); ' +
-          ' END LOOP; ' +
-          ' return new; ' +
-          ' END ' +
-          ' $BODY$; ' +
-          ' ALTER FUNCTION public.create_activities() ' +
-          ' OWNER TO postgres; ';
-          Model.dataSource.connector.query(modefiedQuery, [], defaultOptions, function (err, result) {
-            if (err) {
-              log.debug('could not insert trigger function');
-            }
-          });
-        }
-      });
-    }
-  });
-
   var performAtomicOperation = function (journalEntity, operationContexts, next) {
     if (operationContexts.length === 0) {
       return next();
@@ -106,7 +27,6 @@ module.exports = function (BaseJournalEntity) {
     if (hasDuplicates) {
       asyncFunc = async.eachSeries;
     }
-    // async.eachSeries(operationContexts, function (operationContext, callback) {
     asyncFunc(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
