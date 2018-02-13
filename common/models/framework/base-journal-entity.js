@@ -244,17 +244,17 @@ module.exports = function (BaseJournalEntity) {
     }
   };
 
-  BaseJournalEntity.prototype.performBusinessValidations = function (options, cb) {
+  BaseJournalEntity.prototype.performBusinessValidations = function (options, ctx, cb) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
   };
 
-  BaseJournalEntity.prototype.changeInstance = function (options, cb) {
+  BaseJournalEntity.prototype.changeInstance = function (options, ctx, cb) {
     return cb();
   };
 
   BaseJournalEntity.prototype.startTarnsactionFlow = function (instance, ctx, options, next) {
-    instance.performBusinessValidations(options, function (err) {
+    instance.performBusinessValidations(options, ctx, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
         next(err);
@@ -296,7 +296,7 @@ module.exports = function (BaseJournalEntity) {
     }
     var instance = ctx.instance;
     var options = ctx.options;
-    instance.changeInstance(options, function (err) {
+    instance.changeInstance(options, ctx, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
         return next(err);
