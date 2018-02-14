@@ -11,6 +11,8 @@ var fs = require('fs');
 var Admzip = require('adm-zip');
 var logger = require('oe-logger');
 var log = logger('admin');
+var jwt = require('jsonwebtoken');
+var jwtUtil = require('../../../lib/jwt-token-util');
 
 module.exports = function AppUser(admin) {
   admin.findAllModels = function adminFindAllModels(options, cb) {
@@ -144,8 +146,7 @@ module.exports = function AppUser(admin) {
   admin.remoteMethod('upload', {
     description: 'upload metadata models',
     accessType: 'READ',
-    accepts: [
-    ],
+    accepts: [],
     http: {
       verb: 'POST',
       path: '/upload'
@@ -173,32 +174,60 @@ module.exports = function AppUser(admin) {
   admin.remoteMethod('download', {
     description: 'download metadata models from file to db',
     accessType: 'READ',
-    accepts: [
-    ],
+    accepts: [],
     http: {
       verb: 'GET',
       path: '/download'
     },
-    returns: [
-      {
-        arg: 'body',
-        type: 'file',
-        root: true
-      },
-      {
-        arg: 'Content-Type',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
-      },
-      {
-        arg: 'content-disposition',
-        type: 'string',
-        http: {
-          target: 'header'
-        }
+    returns: [{
+      arg: 'body',
+      type: 'file',
+      root: true
+    },
+    {
+      arg: 'Content-Type',
+      type: 'string',
+      http: {
+        target: 'header'
       }
+    },
+    {
+      arg: 'content-disposition',
+      type: 'string',
+      http: {
+        target: 'header'
+      }
+    }
     ]
+  });
+
+  admin.checkLicense = function checkLicense(options, cb) {
+    var licensePublicKey = jwtUtil.sanitizePublicKey(process.env.LICENSE_PUBLICKEY);
+    var licenseKey = process.env.LICENSE_KEY;
+    if (licensePublicKey && licenseKey) {
+      var decoded = jwt.verify(licenseKey, licensePublicKey, {
+        algorithm: 'RS256'
+      });
+      if (decoded.endl) {
+        cb(null, { 'expired': (Date.now() > decoded.endl), 'expiryDate': new Date(decoded.endl) });
+      } else {
+        cb(null, { 'expired': false, 'expiryDate': 'License not set' });
+      }
+    }
+  };
+
+  admin.remoteMethod('checkLicense', {
+    description: 'check if license expiry',
+    accessType: 'READ',
+    accepts: [],
+    http: {
+      verb: 'GET',
+      path: '/checkLicense'
+    },
+    returns: [{
+      arg: 'body',
+      type: 'string',
+      root: true
+    }]
   });
 };

@@ -25,6 +25,8 @@ var passport = require('../lib/passport.js');
 var eventHistroyManager;
 var memoryPool = require('../lib/actor-pool.js');
 var secretsManager = require('../lib/secrets-manager.js');
+var jwtUtil = require('../lib/jwt-token-util');
+var jwt = require('jsonwebtoken');
 
 var mergeUtil = require('../lib/merge-util');
 var app = module.exports.loopback = loopback;
@@ -46,6 +48,31 @@ module.exports.options = options;
 preboot.injectOptions();
 secretsManager.populateSecrets();
 
+function checkLicense() {
+  var licensePublicKey = jwtUtil.sanitizePublicKey(process.env.LICENSE_PUBLICKEY);
+  var licenseKey = process.env.LICENSE_KEY;
+  if (licenseKey && licensePublicKey) {
+    try {
+      var decoded = jwt.verify(licenseKey, licensePublicKey, {
+        algorithm: 'RS256'
+      });
+    } catch (e) {
+      log.debug({}, e);
+      console.log('\x1b[33m***********************************************\n\x1b[31mINVALID LICENSE KEY INVALID LICENSE KEY INVALID LICENSE KEY\n\x1b[33m***********************************************\x1b[0m');
+      setTimeout(checkLicense, 60 * 60 * 1000);
+    }
+    if (decoded.endl && (Date.now() > decoded.endl)) {
+      log.debug({}, 'License Expired!');
+      console.log('\x1b[33m***********************************************\n\x1b[31mLICENSE EXPIRED LICENSE EXPIRED LICENSE EXPIRED\n\x1b[33m***********************************************\x1b[0m');
+      setTimeout(checkLicense, 60 * 60 * 1000);
+    } else {
+      var timeOut = decoded.endl - Date.now();
+      setTimeout(checkLicense, timeOut > 2147483647 ? 2147483646 : timeOut);
+    }
+  }
+}
+
+
 module.exports.boot = function serverBoot(appinstance, options, cb) {
   var env = options.env || process.env.NODE_ENV || 'development';
   // read the files from client and merge with files.
@@ -57,6 +84,7 @@ module.exports.boot = function serverBoot(appinstance, options, cb) {
   }
   var appListPath = path.resolve(path.join(appinstance.locals.apphome, 'app-list.json'));
   var appListExists = fs.existsSync(appListPath) ? true : false;
+
 
   // helmet removes x-powered-by and add xss filters for security purpose
   appinstance.use(helmet());
@@ -245,7 +273,10 @@ function finalBoot(appinstance, options, cb) {
 }
 
 module.exports.finalBootFn = finalBoot;
-
+// initial call for license check
+if (process.env.LICENSE_PUBLICKEY) {
+  checkLicense();
+}
 if (require.main === module) {
   var lbapp = app();
   // currently locals.apphome is used to know the location of providers.json configuration, same can be used for any other purpose
