@@ -132,7 +132,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     });
   });
 
-  xit('should execute the decision table rule correctly - test 1', function(done) {
+  it('should execute the decision table rule correctly - test 1', function(done) {
     var DecisionTable = models.DecisionTable;
     Customer.findOne({ where: { name: 'foo'}}, bootstrap.defaultContext, function(err, result) {
       expect(result.name).to.equal('foo');
@@ -166,7 +166,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
   });
 
 
-  xit('should fail to execute the decision table rule correctly - test 2 - because we are trying to fetch non-existent property on an object', function(done) {
+  it('should fail to execute the decision table rule correctly - test 2 - because we are trying to fetch non-existent property on an object', function(done) {
     var DecisionTable = models.DecisionTable;
     Customer.findOne({ where: { name: 'foo3'}}, bootstrap.defaultContext, function(err, result) {
       
