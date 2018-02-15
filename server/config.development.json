@@ -77,7 +77,7 @@
     "disabled": false,
     "path": "test/model-rule-data/data/functions"
   },
-  "jsFeelLexerLogging" : true,
+  "jsFeelLexerLogging" : false,
   "jsFeelExecutionLogging": false,
-  "jsFeelLogResult": true
+  "jsFeelLogResult": false
 }
