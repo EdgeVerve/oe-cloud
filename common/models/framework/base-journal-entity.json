@@ -32,6 +32,16 @@
         "HistoryMixin": false, 
         "ReadOnlyMixin": true
   },
+  "triggers": [{
+    "triggerName": "onCreate",
+    "triggerFunc": "create_activities",
+    "queryContext": {
+      "ctx": {
+        "remoteUser": "admin",
+        "tenantId": "default"
+      }
+    }
+    }],
   "acls": [],
   "methods": {}
 }

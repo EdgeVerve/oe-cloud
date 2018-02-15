@@ -146,7 +146,7 @@ module.exports = function AuthSessionFn(AuthSession) {
   };
 
   function checkUserExistence(parsedJWT, req, userObj, callback) {
-    var username = parsedJWT.username || parsedJWT.email || '';
+    var username = parsedJWT.username || parsedJWT.user_name || parsedJWT.email || '';
 
     // If token is available in cachedTokens, return from cachedTokens.
     if (cachedTokens[username]) {
