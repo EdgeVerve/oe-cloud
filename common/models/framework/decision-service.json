@@ -4,7 +4,8 @@
   "description": "This model is used to expose services from decision graphs stored in DecisionGraph model",
   "options": {
     "validateUpsert": true,
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization":false
   },
   "properties": {
     "name": {

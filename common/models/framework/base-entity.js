@@ -73,5 +73,59 @@ module.exports = function BaseEntityFn(BaseEntity) {
         return next();
       }
     });
+    if (Model.modelName !== 'BaseEntity' && Model.modelName !== 'DbTransaction' && Model.definition.settings.variantOf) {
+      Model.evObserve('after accesss', getDataFromBaseModels);
+    }
+
+    if (BaseEntity.modelName === 'BaseEntity') {
+      return;
+    }
   };
+};
+
+const getDataFromBaseModels = function getDataFromBaseModels(ctx, next) {
+  let result = ctx.accdata || [];
+  const modelSettings = ctx.Model.definition.settings;
+  if (modelSettings.variantOf) {
+    var variantModel = loopback.findModel(modelSettings.variantOf);
+    if (variantModel) {
+      if (isSameCollection(variantModel.definition.settings, modelSettings)) {
+        return next();
+      }
+      variantModel.find(ctx.query, ctx.options, function (err, variantData) {
+        if (err) {
+          return next(err);
+        }
+        if (variantData && variantData.length) {
+          result = result.concat(variantData);
+          ctx.accdata = result;
+        }
+        return next();
+      });
+    } else {
+      return next();
+    }
+  } else {
+    return next();
+  }
+};
+
+/**
+ * This function is used to find whether whether variant model use same collection.
+ *
+ * @param {object}settings1 - settings of first model
+ * @param {object}settings2 - settings of second model
+ * @returns {boolean} - returns true for same collection.
+ * @function
+ */
+const isSameCollection = function isSameCollection(settings1, settings2) {
+  if (!settings1.mongodb || !settings2.mongodb) {
+    return false;
+  }
+  var collection1 = settings1.mongodb.collection;
+  if (collection1) { collection1 = collection1.toLowerCase(); }
+  var collection2 = settings2.mongodb.collection;
+  if (collection2) { collection2 = collection2.toLowerCase(); }
+  if (collection1 === collection2) { return true; }
+  return false;
 };

@@ -1,3 +1,10 @@
+/**
+*
+* 2016-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+* Bangalore, India. All Rights Reserved.
+*
+*/
+
 var request = require('request');
 var async = require('async');
 var uuidv4 = require('uuid/v4');

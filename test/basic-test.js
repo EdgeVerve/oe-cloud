@@ -35,7 +35,6 @@ describe(chalk.blue('basic-test'), function () {
         dataSourceName: 'db'
     };
 
-
     var data = {
         "name": "Name1",
         "description": "OK"

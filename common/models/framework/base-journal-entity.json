@@ -21,7 +21,6 @@
       "type": "embedsMany",
       "model": "ActorActivity",
       "property": "nonAtomicActivitiesList"
-
     }
   },
   "mixins": {
@@ -30,7 +29,8 @@
         "ExpressionAstPopulatorMixin": false,
         "BusinessRuleMixin": false,
         "SoftDeleteMixin": false,
-        "HistoryMixin": false
+        "HistoryMixin": false, 
+        "ReadOnlyMixin": true
   },
   "acls": [],
   "methods": {}
