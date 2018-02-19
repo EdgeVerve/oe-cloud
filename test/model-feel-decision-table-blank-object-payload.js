@@ -242,7 +242,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
       else {
 
         // expect(results.length).to.equal(4);
-        console.log('records:', inspect(results));
+        // console.log('records:', inspect(results));
         var promises = results.map( r => {
           var pl = r.__data;
           pl.options = bootstrap.defaultContext;
