@@ -425,6 +425,7 @@ function loadClientDatasource(options, env, callback) {
 
     // Merge configs.
     mergeUtil.mergeDataSourcesObjects(datasource, clientdatasource);
+    mergeUtil.addTriggersToDatasources(datasource);
   }
 
   options.dataSources = datasource;
@@ -441,6 +442,7 @@ function loadClientDatasource(options, env, callback) {
  */
 function loadDatasource(options, env) {
   var datasource = mergeUtil.loadDataSources(options.appRootDir, env);
+  mergeUtil.addTriggersToDatasources(datasource);
   options.dataSources = datasource;
 }
 

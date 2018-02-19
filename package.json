@@ -95,7 +95,7 @@
         "grunt-mocha-istanbul": "^5.0.2",
         "grunt-mocha-test": "^0.13.2",
         "istanbul": "0.4.1",
-        "loopback-connector-postgresql": "git+http://evgit/oecloud.io/loopback-connector-postgresql.git#master",
+        "loopback-connector-postgresql": "git+http://evgit/karin/loopback-connector-postgresql.git#master",
         "mocha": "^3.4.2",
         "nock": "^7.2.2",
         "passport-ldapauth": "^2.0.0",
