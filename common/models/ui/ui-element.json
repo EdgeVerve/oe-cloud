@@ -43,6 +43,16 @@
 			"required": false,
 			"description": "target container for the field",
 			"max": 50
+		},
+		"order": {
+			"type": "number",
+			"required": false,
+			"description": "field order in the container"
+		},
+		"exclude": {
+			"type": "boolean",
+			"required": false,
+			"description": "set to true for removing the field."
 		}
 	},
 	"validations": [],
