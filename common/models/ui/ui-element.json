@@ -37,6 +37,12 @@
 			"required": false,
 			"description": "caption/label or its localise key",
 			"max": 50
+		},
+		"container": {
+			"type": "string",
+			"required": false,
+			"description": "target container for the field",
+			"max": 50
 		}
 	},
 	"validations": [],
