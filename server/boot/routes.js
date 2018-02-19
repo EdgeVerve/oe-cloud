@@ -18,31 +18,8 @@ var path = require('path');
 module.exports = function Routes(app) {
   var router = new app.loopback.Router();
 
-  // var path = require('path');
-
-  var ensureLoggedIn = require('connect-ensure-login').ensureLoggedIn;
-
   router.get('/', function routesGetDefaultCb(req, res) {
     res.sendFile('index.html', { root: path.join(__dirname, '../../client') });
-  });
-
-  router.get('/homepage', ensureLoggedIn('/login'), function routesGetHomepageCb(req, res) {
-    var obj = {};
-    obj.url = req.session.returnTo;
-    if (!obj.url) {
-      obj.url = '/home';
-    }
-    res.send(obj);
-  });
-
-  router.get('/login', function routesGetLoginCb(req, res) {
-    res.sendFile('login.html', { root: path.join(__dirname, '../../client') });
-  });
-
-  router.get('/debug', function routesGetLoginCb(req, res) {
-    var model = app.models.DataSourceDefinition;
-    var ret = model.getDataSource().settings;
-    res.send(JSON.stringify(ret));
   });
 
   app.use(router);
