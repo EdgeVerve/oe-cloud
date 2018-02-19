@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* jshint -W024 */
 /* jshint expr:true */
@@ -87,7 +87,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
   });
 
   before('create a decision table', function(done) {
-    // debugger;
+    debugger;
     var binData = fs.readFileSync(__dirname + '/model-rule-data/blank_object.xlsx');
     var docData = prefix + binData.toString('base64');
     var binData2 = fs.readFileSync(__dirname + '/model-rule-data/blank_object2.xlsx');
@@ -112,7 +112,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
         }
       },
       {
-        name: 'TestDecision4',
+        name: 'TestDecision4a',
         document: {
           documentName : 'blank_object3.xlsx',
           documentData: docData3
@@ -121,9 +121,11 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     ];
 
     var DecisionTable = models.DecisionTable;
+    // console.log(DecisionTable.modelName)
 
     DecisionTable.create(data, bootstrap.defaultContext, function(err) {
       if (err) {
+        // console.dir(err)
         done(err);
       }
       else {
@@ -157,10 +159,10 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
           // console.dir(dtResult);
           expect(dtResult).to.be.array;
           expect(dtResult[0].errMessage).to.be.true;
-          done();  
+          done();
         }
         // expect(dtResult)
-        
+
       });
     });
   });
@@ -169,7 +171,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
   it('should fail to execute the decision table rule correctly - test 2 - because we are trying to fetch non-existent property on an object', function(done) {
     var DecisionTable = models.DecisionTable;
     Customer.findOne({ where: { name: 'foo3'}}, bootstrap.defaultContext, function(err, result) {
-      
+
       expect(result.name).to.equal('foo3');
       var payload = result.__data;
       payload.options = bootstrap.defaultContext;
@@ -186,25 +188,25 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
           console.dir(dtResult);
           expect(dtResult).to.be.array;
           expect(dtResult[0].errCode).to.equal('JS_FEEL_ERR');
-          done();  
+          done();
 
-          // conclusion: we cannot find the presence/absence 
-          // like this we need an external function for this 
+          // conclusion: we cannot find the presence/absence
+          // like this we need an external function for this
           // use case.
         }
         // expect(dtResult)
-        
+
       });
     });
   });
-  
+
   // note: add the necessary external function config
   // in the corresponding environment: server/config.whatever.json
   it('should execute the decision table correctly', function(done) {
     var DecisionTable = models.DecisionTable;
     var executor = function(payload) {
       return new Promise((resolve, reject) => {
-        DecisionTable.exec('TestDecision4', payload, bootstrap.defaultContext, function(err, dtResult) {
+        DecisionTable.exec('TestDecision4a', payload, bootstrap.defaultContext, function(err, dtResult) {
           if (err) {
             // console.log('ValidationResult:', err);
             reject(err)
@@ -245,7 +247,12 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
           done(e);
         });
       }
-      
+
     });
+  });
+
+  after(function(){
+    //model-feel-decision-table-blank-object-payload-test.js
+    debugger;
   });
 });
