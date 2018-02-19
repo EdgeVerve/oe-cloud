@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* jshint -W024 */
 /* jshint expr:true */
@@ -54,7 +54,7 @@ describe(chalk.blue('model-feel-execution-logging'), function() {
     // debugger;
     var binData = fs.readFileSync(__dirname + '/model-rule-data/eligibilityUSA.xlsx');
     var docData = prefix + binData.toString('base64');
-   
+
     var data = [
       {
         name: 'Eligibility',
@@ -96,6 +96,8 @@ describe(chalk.blue('model-feel-execution-logging'), function() {
     });
   });
 
-
-  
+  // after(function(){
+  //   //model-feel-execution-logging.js
+  //   // debugger;
+  // })
 });

@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* jshint -W024 */
 /* jshint expr:true */
@@ -34,7 +34,7 @@ describe(chalk.blue('model-rule-belongsTo-self-relation-test'), function() {
         pid: {
           type: 'number',
           id: true
-        }        
+        }
       },
       relations: {
         manager: {
@@ -155,4 +155,8 @@ describe(chalk.blue('model-rule-belongsTo-self-relation-test'), function() {
       }
     });
   });
+  // after(function(){
+  //   //model-feel-belongs-to-self-relation.js
+  //   // debugger;
+  // });
 });

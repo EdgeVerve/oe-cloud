@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 /* jshint -W024 */
 /* jshint expr:true */
@@ -148,7 +148,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
   });
 
   it('should fetch the relation in the decision table correctly', function(done){
-    debugger;
+    // debugger;
     var DecisionTable = models.DecisionTable;
     Order.findOne({ gate: 'foo' }, bootstrap.defaultContext, function(err, orderRecord) {
       if (err) {
@@ -186,4 +186,9 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
       }
     });
   });
+
+  // after(function(){
+  //   //model-feel-belongs-to-relation.js
+  //   // debugger;
+  // });
 });

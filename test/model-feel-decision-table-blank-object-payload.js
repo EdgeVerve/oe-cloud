@@ -112,7 +112,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
         }
       },
       {
-        name: 'TestDecision4a',
+        name: 'TestDecision4',
         document: {
           documentName : 'blank_object3.xlsx',
           documentData: docData3
@@ -123,15 +123,28 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     var DecisionTable = models.DecisionTable;
     // console.log(DecisionTable.modelName)
 
-    DecisionTable.create(data, bootstrap.defaultContext, function(err) {
-      if (err) {
-        // console.dir(err)
-        done(err);
-      }
-      else {
-        done();
-      }
-    });
+    // DecisionTable.create(data, bootstrap.defaultContext, function(err) {
+    //   if (err) {
+    //     // console.dir(err)
+    //     done(err);
+    //   }
+    //   else {
+    //     done();
+    //   }
+    // });
+
+    var promises = data.map(d => new Promise((resolve, reject) => {
+      DecisionTable.create(d, bootstrap.defaultContext, function(err) {
+        if (err) {
+          reject(err)
+        }
+        else {
+          resolve();
+        }
+      });
+    }));
+
+    Promise.all(promises).then((results) => done()).catch(done);
   });
 
   it('should execute the decision table rule correctly - test 1', function(done) {
@@ -206,7 +219,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     var DecisionTable = models.DecisionTable;
     var executor = function(payload) {
       return new Promise((resolve, reject) => {
-        DecisionTable.exec('TestDecision4a', payload, bootstrap.defaultContext, function(err, dtResult) {
+        DecisionTable.exec('TestDecision4', payload, bootstrap.defaultContext, function(err, dtResult) {
           if (err) {
             // console.log('ValidationResult:', err);
             reject(err)
@@ -251,8 +264,8 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     });
   });
 
-  after(function(){
-    //model-feel-decision-table-blank-object-payload-test.js
-    debugger;
-  });
+  // after(function(){
+  //   //model-feel-decision-table-blank-object-payload-test.js
+  //   debugger;
+  // });
 });
