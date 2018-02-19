@@ -80,7 +80,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     };
 
     Customer.create(data, bootstrap.defaultContext, function(err) {
-      console.dir(err);
+      // console.dir(err);
       expect(err).to.be.null;
       done();
     });
@@ -163,8 +163,8 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
 
       DecisionTable.exec('TestDecision2', payload, bootstrap.defaultContext, function(err, dtResult) {
         if (err) {
-          console.log('error')
-          console.dir(err);
+          // console.log('error')
+          // console.dir(err);
           done(err)
         }
         else {
@@ -193,12 +193,12 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
       DecisionTable.exec('TestDecision3', payload, bootstrap.defaultContext, function(err, dtResult) {
         if (err) {
           // console.log('error')
-          console.dir(err);
+          // console.dir(err);
           done(err)
         }
         else {
           // console.log('pass')
-          console.dir(dtResult);
+          // console.dir(dtResult);
           expect(dtResult).to.be.array;
           expect(dtResult[0].errCode).to.equal('JS_FEEL_ERR');
           done();
@@ -256,7 +256,7 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
           console.log('responses:', inspect(responses));
           done();
         }).catch(e => {
-          console.dir(e);
+          // console.dir(e);
           done(e);
         });
       }
