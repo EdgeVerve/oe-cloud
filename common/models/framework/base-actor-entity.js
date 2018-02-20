@@ -226,7 +226,7 @@ module.exports = function (BaseActorEntity) {
     return resultObj;
   }
 
-  BaseActorEntity.prototype.createMessage = function (activity, journalEntityType, journalEntityVersion) {
+  BaseActorEntity.prototype.createMessage = function (activity, journalEntityType, journalEntityVersion, options) {
     var message = {};
     message.isProcessed = false;
     message.retryCount = 0;
@@ -238,6 +238,7 @@ module.exports = function (BaseActorEntity) {
     message.journalEntityType = journalEntityType;
     message.seqNum = activity.seqNum;
     message.journalStatus = null;
+    message.options = options;
     return message;
   };
 
@@ -264,8 +265,8 @@ module.exports = function (BaseActorEntity) {
           if (validation === true) {
             envelope.seqNum = envelope.seqNum + 1;
             ctx.activity.seqNum = envelope.seqNum;
-            actorCopy = JSON.parse(JSON.stringify(actorData));
             if (self.constructor.settings.noBackgroundProcess) {
+              actorCopy = JSON.parse(JSON.stringify(actorData));
               if (!envelope.updatedActor) {
                 envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
               }
@@ -320,48 +321,50 @@ module.exports = function (BaseActorEntity) {
     var journalEntityType = context.journalEntityType;
     var journalEntityVersion = context.journalEntityVersion;
 
-    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion);
+    var message = this.createMessage(context.activity, journalEntityType, journalEntityVersion, options);
     this.addMessage(message, context);
   };
 
   var sendNonAtomicMesssage = function (context, self, options, cb) {
     var journalEntityType = context.journalEntityType;
     var journalEntityVersion = context.journalEntityVersion;
-    var message = self.createMessage(context.activity, journalEntityType, journalEntityVersion);
+    var message = self.createMessage(context.activity, journalEntityType, journalEntityVersion, options);
     self.addMessage(message, context);
     return cb();
   };
 
+  var nonAtomicActionNoBackgroundProcess = function (self, envelope, options, cb) {
+    var actorCopy;
+    self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
+      self.processPendingStatus(envelope, options, function (err, actorData) {
+        if (err) {
+          return releaseLockCb(err);
+        }
+        actorCopy = JSON.parse(JSON.stringify(actorData));
+        if (!envelope.updatedActor) {
+          envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
+        }
+        actorCopy = self.nonAtomicInstructions(actorCopy, context.activity);
+        return releaseLockCb(null, true);
+      });
+    }, function (err, isValid) {
+      if (err) {
+        return cb(err);
+      }
+      sendNonAtomicMesssage(context, self, options, function () {
+        return cb(null, actorCopy);
+      });
+    });
+  };
+
   BaseActorEntity.prototype.nonAtomicAction = function (context, options, cb) {
     var self = this;
-    var envelope = context.envelope;
-    var actorCopy;
     if (this.constructor.settings.noBackgroundProcess) {
-      self.constructor.instanceLocker().acquire(self, options, self._version, function (releaseLockCb) {
-        self.processPendingStatus(envelope, options, function (err, actorData) {
-          if (err) {
-            return releaseLockCb(err);
-          }
-          actorCopy = JSON.parse(JSON.stringify(actorData));
-          if (!envelope.updatedActor) {
-            envelope.updatedActor = JSON.parse(JSON.stringify(actorData));
-          }
-          actorCopy = self.nonAtomicInstructions(actorCopy, context.activity);
-          return releaseLockCb(null, true);
-        });
-      }, function (err, isValid) {
-        if (err) {
-          return cb(err);
-        }
-        sendNonAtomicMesssage(context, self, options, function () {
-          return cb(null, actorCopy);
-        });
-      });
-    } else {
-      sendNonAtomicMesssage(context, self, options, function () {
-        return cb();
-      });
+      return nonAtomicActionNoBackgroundProcess(self, context.envelope, options, cb);
     }
+    sendNonAtomicMesssage(context, self, options, function () {
+      return cb();
+    });
   };
 
   var actualBackgroundProcess = function (self, envelope, messages, stateObj, options, actorCb) {
@@ -626,10 +629,21 @@ module.exports = function (BaseActorEntity) {
             return asyncCb();
           }
           if (ds.name === 'loopback-connector-postgresql') {
+            var translatePropertyNames = function (origin) {
+              var originKeys = Object.keys(origin);
+              var modelKeys = Object.keys(loopback.getModel('ActorActivity', options)._ownDefinition.properties);
+              modelKeys.forEach(function (modelKey) {
+                originKeys.forEach(function (originKey) {
+                  if (modelKey.toLowerCase() === originKey) {
+                    origin[modelKey] = origin[originKey];
+                    delete origin[originKey];
+                  }
+                });
+              });
+            };
             for (var x = 0; x < returnedInstances.length; x++) {
-              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadtxt);
-              returnedInstances[x].instructionType = returnedInstances[x].instructiontype;
-              returnedInstances[x].instructiontype = undefined;
+              translatePropertyNames(returnedInstances[x]);
+              returnedInstances[x].payload = JSON.parse(returnedInstances[x].payloadTxt);
               var funcToApply = returnedInstances[x].atomic ? self.atomicInstructions : self.nonAtomicInstructions;
               state.stateObj = funcToApply(state.stateObj, returnedInstances[x]);
               state.seqNum = returnedInstances[x].seqNum;

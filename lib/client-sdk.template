@@ -1,0 +1,164 @@
+var ClientSDK = (function () {
+
+    var headers = {};
+
+    var routes = __ROUTES__;
+
+    function getModel(modelName) {
+        var modelMethods = routes[modelName];
+        if (!modelMethods) {
+            return;
+        }
+        var modelCtor = {};
+        Object.keys(modelMethods).forEach(function (method) {
+            var url = modelMethods[method].url;
+            var verb = modelMethods[method].verb;
+            var functionArgs = __getFunctionArgs(modelMethods[method]);
+            modelCtor[method] = Function.apply(null, functionArgs);
+        });
+        return modelCtor;
+    }
+
+    function setHeader(key, value) {
+        headers[key] = value;
+    }
+
+    function removeHeader(key) {
+        delete headers[key];
+    }
+
+    function __getQueryString(params) {
+        var queryParts = [];
+        var param;
+        var value;
+
+        Object.keys(params).forEach(function (param) {
+            value = params[param];
+            param = encodeURIComponent(param);
+
+            if (Array.isArray(value)) {
+                for (var i = 0; i < value.length; i++) {
+                    queryParts.push(param + '=' + encodeURIComponent(value[i]));
+                }
+            } else if (value !== null) {
+                queryParts.push(param + '=' + encodeURIComponent(value));
+            } else {
+                queryParts.push(param);
+            }
+        });
+
+        return queryParts.join('&');
+    }
+
+    function __getProcessedArgs(fnArgs, optionalParams, argsList) {
+        var obj = {};
+        var args = Array.prototype.slice.call(fnArgs);
+        obj.cb = args[args.length - 1];
+        var requiredFieldsLength = argsList.length - optionalParams.length - 1;
+        var optionalArgsProvided = args.splice(requiredFieldsLength);
+        optionalArgsProvided.pop();
+        optionalParams.forEach(function (arg, index) {
+            obj[arg] = optionalArgsProvided[index];
+        });
+        return obj;
+    }
+
+
+    function __getFunctionArgs(method) {
+        var funcTemplate = "var url = __URL__;\nvar queryStr = \"\";";
+        var argsCheck = "var processed = ClientSDK.__getProcessedArgs(arguments, optionalParams, args)";
+        var filterTmpl = "\nif(filter){\n\tqueryStr=ClientSDK.__getQueryString({\"filter\":JSON.stringify(filter)})\n}";
+        var whereTmpl = "\nif(where){\n\tqueryStr=ClientSDK.__getQueryString({\"where\":JSON.stringify(where)})\n}";
+        var serverCallTmpl = "\nif(queryStr){\n\turl = url + '?' + queryStr\n}\nClientSDK.makeAjaxCall(url,__METHOD__,__BODY__,cb);";
+
+        var accepts = method.accepts;
+
+        funcTemplate = funcTemplate.replace('__URL__', __getURL(method.url));
+        serverCallTmpl = serverCallTmpl.replace('__METHOD__', '"' + method.verb + '"');
+
+        var pathParams = method.accepts.filter(obj => obj.http && obj.http.source === 'path').map(obj => obj.arg);
+        var queryParams = accepts.filter(obj => !obj.http).map(obj => obj.arg);
+        var bodyParams = accepts.filter(obj => obj.http && obj.http.source === 'body').map(obj => obj.arg);
+
+        if (bodyParams.length === 0) {
+            serverCallTmpl = serverCallTmpl.replace('__BODY__', 'null');
+        } else {
+            serverCallTmpl = serverCallTmpl.replace('__BODY__', bodyParams[0]);
+        }
+
+        var argsArr = [].concat(pathParams).concat(bodyParams).concat(queryParams);
+        argsArr.push('cb');
+
+        funcTemplate += '\nvar optionalParams = ' + JSON.stringify(queryParams) + ';\nvar args = ' + JSON.stringify(argsArr) + ';\n';
+        funcTemplate += argsCheck;
+
+        queryParams.forEach(function (param) {
+            funcTemplate += "\n" + param + "= processed['" + param + "'];\n";
+        });
+        funcTemplate += "\ncb = processed['cb'];\n"
+
+        if (queryParams.length > 0) {
+            if (queryParams.indexOf('filter') != -1)
+                funcTemplate += filterTmpl;
+            if (queryParams.indexOf('where') != -1)
+                funcTemplate += whereTmpl;
+        }
+
+        funcTemplate += serverCallTmpl;
+
+        argsArr.push(funcTemplate);
+        //console.log('----------------------------');
+        //console.log(funcTemplate);
+        //console.log('----------------------------');
+        return argsArr;
+    }
+
+    function __getURL(url) {
+        var funcUrl = '"' + url + '"';
+        funcUrl = funcUrl.replace(/:(\w+)/g, function (x, y) {
+            return '"+' + y + '+"'
+        });
+        return funcUrl;
+    }
+
+    function makeAjaxCall(url, method, body, cb) {
+        method = method.toLowerCase();
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.status === 200 && xhr.readyState == 4 && xhr.response.length > 0) {
+                cb(null, xhr.response)
+            }
+        }
+        xhr.onerror = function () {
+            cb(err)
+        };
+        xhr.open(method, url);
+        if (headers) {
+            headers["content-type"] = headers["content-type"] || "application/json";
+            Object.keys(headers).forEach(function (k) {
+                var val = headers[k];
+                if (Array.isArray(val)) {
+                    xhr.setRequestHeader(k, val[0]);
+                } else {
+                    xhr.setRequestHeader(k, val);
+                }
+            })
+        }
+        if (method === 'get') {
+            xhr.send()
+        } else {
+            xhr.send(JSON.stringify(body));
+        }
+
+    }
+
+    return {
+        getModel: getModel,
+        setHeader: setHeader,
+        removeHeader: removeHeader,
+        makeAjaxCall: makeAjaxCall,
+        __getQueryString: __getQueryString,
+        __getProcessedArgs: __getProcessedArgs
+    }
+
+})()
