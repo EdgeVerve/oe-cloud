@@ -37,6 +37,22 @@
 			"required": false,
 			"description": "caption/label or its localise key",
 			"max": 50
+		},
+		"container": {
+			"type": "string",
+			"required": false,
+			"description": "target container for the field",
+			"max": 50
+		},
+		"order": {
+			"type": "number",
+			"required": false,
+			"description": "field order in the container"
+		},
+		"exclude": {
+			"type": "boolean",
+			"required": false,
+			"description": "set to true for removing the field."
 		}
 	},
 	"validations": [],
