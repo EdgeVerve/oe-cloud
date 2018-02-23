@@ -234,8 +234,8 @@ function setDesignerPath(DesignerPath, server) {
       route.accepts = accepts;
       route.verb = convertVerb(route.verb);
       var methodSplitLength = route.method.split('.').length;
-      if (methodSplitLength >=1) {
-        route.method = method.split('.')[methodSplitLength-1];
+      if (methodSplitLength >= 1) {
+        route.method = method.split('.')[methodSplitLength - 1];
       } else {
         route.method = method;
       }
