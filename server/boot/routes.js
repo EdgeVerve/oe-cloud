@@ -39,11 +39,11 @@ module.exports = function Routes(app) {
     res.sendFile('login.html', { root: path.join(__dirname, '../../client') });
   });
 
-  router.get('/debug', function routesGetLoginCb(req, res) {
-    var model = app.models.DataSourceDefinition;
-    var ret = model.getDataSource().settings;
-    res.send(JSON.stringify(ret));
-  });
+  // router.get('/debug', function routesGetLoginCb(req, res) {
+  //   var model = app.models.DataSourceDefinition;
+  //   var ret = model.getDataSource().settings;
+  //   res.send(JSON.stringify(ret));
+  // });
 
   app.use(router);
 };
