@@ -171,7 +171,7 @@ describe(chalk.blue('business-validations-tests'), function () {
   it('trivial bussiness validation + atomic action pass --> transaction should pass', function (done) {
 
       var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options,ctx, cb) {
             log.debug(log.defaultContext(), 'trivial implementation');
             cb();
         };
@@ -249,7 +249,7 @@ describe(chalk.blue('business-validations-tests'), function () {
   it('trivial bussiness validation + atomic action fails --> transaction should fail', function (done) {
 
       var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'trivial implementation');
             cb();
         };
@@ -285,7 +285,7 @@ describe(chalk.blue('business-validations-tests'), function () {
   it('synchronous bussiness validation pass + atomic action pass --> transaction should pass', function (done) {
     var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
 
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             cb();
@@ -367,7 +367,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('synchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             cb();
@@ -403,7 +403,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('synchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             log.error(log.defaultContext(), 'failing synchronous actions on purpose');
@@ -440,7 +440,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('synchronous bussiness validation fails + atomic action should fail but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'synchronous implementation');
             doSynchronousActions();
             log.error(log.defaultContext(), 'failing synchronous actions on purpose');
@@ -477,7 +477,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('asynchronous bussiness validation pass + atomic action pass --> transaction should pass', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActions(cb);
         };
@@ -554,7 +554,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('asynchronous bussiness validation pass + atomic action fails --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActions(cb);
         };
@@ -589,7 +589,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('asynchronous bussiness validation fails + atomic action should pass but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActionsFail(cb);
         };
@@ -624,7 +624,7 @@ describe(chalk.blue('business-validations-tests'), function () {
 
     it('asynchronous bussiness validation fails + atomic action should fails but does not start --> transaction should fail', function(done) {
         var transferDefinition = loopback.getModel('TestTransfer', bootstrap.defaultContext);
-        transferDefinition.prototype.performBusinessValidations = function(options, cb) {
+        transferDefinition.prototype.performBusinessValidations = function(options, ctx, cb) {
             log.debug(log.defaultContext(), 'asynchronous implementation');
             doAsynchronousActionsFail(cb);
         };

@@ -14,7 +14,9 @@ var logger = require('oe-logger');
 var log = logger('batch-job-tests');
 var api = bootstrap.api;
 var async = require('async');
-var BatchJobRunner = require('../lib/batchJob-runner')
+var BatchJobRunner = require('../lib/batchJob-runner');
+var dbm = require('../lib/db-migrate-helper');
+var app = bootstrap.app;
 
 var accessToken;
 var accountModel;
@@ -91,7 +93,6 @@ describe(chalk.blue('batch-job-test'), function () {
       });
   });
 
-
   before('create testAccount models', function createModels(done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
     
@@ -132,7 +133,7 @@ describe(chalk.blue('batch-job-test'), function () {
     function addAllFunctions() {
 
       var transferDefinition = loopback.getModel(transactionModelName, bootstrap.defaultContext);
-      transferDefinition.prototype.performBusinessValidations = function (options, cb) {
+      transferDefinition.prototype.performBusinessValidations = function (options, ctx, cb) {
           cb();
       };
 

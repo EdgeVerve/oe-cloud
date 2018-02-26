@@ -146,7 +146,7 @@ module.exports = function AuthSessionFn(AuthSession) {
   };
 
   function checkUserExistence(parsedJWT, req, userObj, callback) {
-    var username = parsedJWT.username || parsedJWT.email || '';
+    var username = parsedJWT.username || parsedJWT.user_name || parsedJWT.email || '';
 
     // If token is available in cachedTokens, return from cachedTokens.
     if (cachedTokens[username]) {
@@ -191,11 +191,13 @@ module.exports = function AuthSessionFn(AuthSession) {
     // https://github.com/strongloop/loopback/issues/1326
     if (options.searchDefaultTokenKeys !== false) {
       params = params.concat(['access_token']);
-      headers = headers.concat(['X-Access-Token', 'authorization']);
+
       // Adding 'x-jwt-assertion' to headers for supporting JWT Assertion.
       let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
       if (jwtForAccessToken) {
-        headers = headers.concat(['x-jwt-assertion']);
+        headers = headers.concat(['X-Access-Token', 'x-jwt-assertion', 'authorization']);
+      } else {
+        headers = headers.concat(['X-Access-Token', 'authorization']);
       }
       cookies = cookies.concat(['access_token', 'authorization']);
     }

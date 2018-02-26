@@ -25,6 +25,9 @@ const settings = { logger };
 
 module.exports = function JsFeelInit(app, cb) {
   log.info('initializing js-feel');
+  settings.enableLexerLogging = app.get('jsFeelLexerLogging') || false;
+  settings.enableExecutionLogging = app.get('jsFeelExecutionLogging') || false;
+  settings.logResult = app.get('jsFeelLogResult') || false;
   jsFeel.init(settings);
   jsFeel.use(jsFeelCachePlugin);
   const jsFeelRelation = app.get('jsFeelRelation');

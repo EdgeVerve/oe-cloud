@@ -1,0 +1,6 @@
+{
+  "journalToActivities": {
+    "triggerStr": "CREATE OR REPLACE FUNCTION public.create_activities() RETURNS trigger LANGUAGE 'plpgsql' COST 100 VOLATILE NOT LEAKPROOF AS $BODY$ DECLARE m   integer; DECLARE n   integer; BEGIN FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s LOOP INSERT INTO public.actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) VALUES(new.atomicactivitieslist[m]->>'modelName',new.atomicactivitieslist[m]->>'entityId',cast (new.atomicactivitieslist[m]->>'seqNum' as int),new.atomicactivitieslist[m]->>'instructionType',true,new.atomicactivitieslist[m]->>'payload'); END LOOP; FOR n IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s LOOP INSERT INTO public.actoractivity(modelname,entityid,seqnum,instructionType,atomic,payloadtxt) VALUES(new.nonatomicactivitieslist[n]->>'modelName',new.nonatomicactivitieslist[n]->>'entityId',cast (new.nonatomicactivitieslist[n]->>'seqNum' as int),new.nonatomicactivitieslist[n]->>'instructionType',false,new.nonatomicactivitieslist[n]->>'payload'); END LOOP; return new; END $BODY$; ALTER FUNCTION public.create_activities() OWNER TO postgres; ",
+    "datasourceName": "db"
+  }
+}
