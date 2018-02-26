@@ -73,6 +73,10 @@
   "jsFeelRelation": {
     "disabled": false
   },
+  "jsFeelExternalFunction": {
+    "disabled": false,
+    "path": "test/model-rule-data/data/functions"
+  },
   "jsFeelLexerLogging" : false,
   "jsFeelExecutionLogging": false,
   "jsFeelLogResult": false
