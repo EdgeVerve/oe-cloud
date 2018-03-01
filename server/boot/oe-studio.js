@@ -201,11 +201,15 @@ function setDesignerPath(DesignerPath, server) {
         return;
       }
       var accepts = route.accepts || [];
+      var method = route.method || [];
       var split = route.method.split('.');
       /* HACK */
       if (classDef && classDef.sharedCtor &&
         classDef.sharedCtor.accepts && split.length > 2) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
+        if (classDef.sharedCtor.method) {
+          method = method.concat(classDef.sharedCtor.method);
+        }
       }
 
       // Filter out parameters that are generated from the incoming request,
@@ -229,11 +233,18 @@ function setDesignerPath(DesignerPath, server) {
       });
       route.accepts = accepts;
       route.verb = convertVerb(route.verb);
+      var methodSplitLength = route.method.split('.').length;
+      if (methodSplitLength >= 1) {
+        route.method = method.split('.')[methodSplitLength - 1];
+      } else {
+        route.method = method;
+      }
       return {
         path: route.path,
         type: route.verb,
         description: route.description,
-        accepts: route.accepts
+        accepts: route.accepts,
+        method: route.method
       };
     });
     var modelEndPoints = _.groupBy(routes, function modelEndPoints(d) {
