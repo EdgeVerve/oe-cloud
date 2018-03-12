@@ -68,6 +68,7 @@
         }
     },
     "routes": {},
+    "routes:after": {},
     "files": {
         "loopback#static": {
             "params": "$!../client"
