@@ -82,6 +82,7 @@ module.exports = function AuthSessionFn(AuthSession) {
                     if (u) {
                       parsedJWT.id = id;
                       parsedJWT.userId = u.id;
+                      parsedJWT.username = u.username;
                       cb(null, new AuthSession(parsedJWT));
                     } else {
                       userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
@@ -93,6 +94,7 @@ module.exports = function AuthSessionFn(AuthSession) {
                           // for setting callContext.accessToken
                           parsedJWT.id = id;
                           parsedJWT.userId = newUser.id;
+                          parsedJWT.username = newUser.username;
                           cb(null, new AuthSession(parsedJWT));
                         } else {
                           cb();
@@ -169,6 +171,7 @@ module.exports = function AuthSessionFn(AuthSession) {
       }
       if (u) {
         parsedJWT.userId = u.id;
+        parsedJWT.username = u.username;
         cachedTokens[username] = new AuthSession(parsedJWT);
         callback(null, cachedTokens[username]);
       } else {
