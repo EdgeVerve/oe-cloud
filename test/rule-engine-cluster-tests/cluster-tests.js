@@ -5,6 +5,11 @@ const url = require('url');
 const querystring = require('querystring');
 const util = require('util');
 
+function assertStatusCode200(res) {
+  var status_code = res.statusCode;
+  assert(status_code === 200, util.format('Expected status code 200. Actual status code: %s', status_code));
+}
+
 describe(chalk.blue('rule cluster tests'), function(){
 
   var credo = {
@@ -28,7 +33,8 @@ describe(chalk.blue('rule cluster tests'), function(){
       var data = "";
       var status_code = res.statusCode;
 
-      assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
+      // assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
+      assertStatusCode200(res);
 
       res.on('data', chunk => data += chunk);
 
@@ -64,7 +70,8 @@ describe(chalk.blue('rule cluster tests'), function(){
       var data = "";
       var status_code = res.statusCode;
 
-      assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
+      // assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
+      assertStatusCode200(res);
 
       res.on('data', chunk => data += chunk);
 
@@ -100,17 +107,17 @@ describe(chalk.blue('rule cluster tests'), function(){
 
     var reqOpts = {
       host: 'test.node1.oecloud.local',
-      path: '/api/ModelDefinitions',
+      path: '/api/ModelDefinitions?access_token=' + access_token_node1,
       method: 'POST',
       headers: {
         'Content-Type' : 'application/json',
-        'Content-Length': Buffer.byteLength(payload),
-        'access_token' : access_token_node1
+        'Content-Length': Buffer.byteLength(payload)
       }
     };
 
     var req = https.request(reqOpts, res => {
-      assert(res.statusCode === 200, "Expected status code 200. Got: " + res.statusCode);
+      // assert(res.statusCode === 200, "Expected status code 200. Got: " + res.statusCode);
+      assertStatusCode200(res);
       done();
     });
 
@@ -123,13 +130,14 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
   //
   it('should assert that the Employee model exists (in node2)', done => {
-    var endpoint = 'https://test.node2.oecloud.local/api/ModelDefinitions?filter=%s'
+    var endpoint = 'https://test.node2.oecloud.local/api/ModelDefinitions?access_token=%sfilter=%s'
     var filter = { where: { name: 'Employee'}};
 
-    var options = url.parse(util.format(endpoint, querystring.stringify(filter)));
+    var options = url.parse(util.format(endpoint, access_token_node2, querystring.stringify(filter)));
 
     https.get(options, res => {
-      assert(res.statusCode === 200, 'Status code not 200. Got: ' + res.statusCode);
+      // assert(res.statusCode === 200, 'Status code not 200. Got: ' + res.statusCode);
+      assertStatusCode200(res);
       done();
     });
   });
