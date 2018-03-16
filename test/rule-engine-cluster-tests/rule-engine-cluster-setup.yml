@@ -1,0 +1,49 @@
+version: "3"
+services:
+  mongo:
+    image: ${REGISTRY}/alpine-mongo:latest
+    networks:
+      - router_network
+  node1:
+    entrypoint: ["node", "."]
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    depends_on:
+      - mongo
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 60s
+    environment:
+      VIRTUAL_HOST: "https://test.node1.${DOMAIN_NAME},test.node1.${DOMAIN_NAME}"
+      SERVICE_PORTS: "3000"
+      FORCE_SSL: "yes"
+      SERVICE_NAME: "${APP_IMAGE_NAME}"
+    networks:
+      - router_network
+
+  node2:
+    entrypoint: ["node", "."]
+    image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
+    depends_on:
+      - mongo
+
+    deploy:
+      mode: replicated
+      replicas: 1
+      update_config:
+        delay: 60s
+
+    environment:
+      VIRTUAL_HOST: "https://test.node2.${DOMAIN_NAME},test.node2.${DOMAIN_NAME}"
+      SERVICE_PORTS: "3000"
+      FORCE_SSL: "yes"
+      SERVICE_NAME: "${APP_IMAGE_NAME}"
+
+    networks:
+      - router_network
+
+
+networks:
+  router_network:
+    external: true
