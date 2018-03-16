@@ -199,7 +199,8 @@ describe(chalk.blue('rule cluster tests'), function(){
     postData(options, data).then(result => {
       assertStatusCode200(result.res);
       done();
-    }, done);
+    })
+    .catch(done);
 
   });
 
@@ -207,14 +208,17 @@ describe(chalk.blue('rule cluster tests'), function(){
     var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
-
+    console.log('Url:', options.href);
     get(options).then(result => {
       assertStatusCode200(result.res);
       done();
-    }, done);
+    })
+    .catch(done);
   });
 
-  // it('should successfully attach a model rule to the Employee model', done => {
+  // it('should successfully attach a model validation rule to the Employee model (via node2)', done => {
+  //   var options = new URL('https://test.node2.oecloud.local/api/ModelRules');
+  //   options.searchParams.append('access_token', access_token_node2);
   //
   // });
 });
