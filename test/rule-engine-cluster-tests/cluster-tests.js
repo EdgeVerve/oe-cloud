@@ -24,7 +24,7 @@ function postData(options, data) {
       var outputString = "";
       res.on('data', chunk => outputString += chunk);
       res.on('end', () => {
-        resolve({ res, responseStr: outputString });
+        resolve({ res, responseText: outputString });
       });
     });
 
@@ -42,7 +42,7 @@ function get(options) {
       res.on('end', () => {
         resolve({
           res,
-          responseStr: data
+          responseText: data
         });
       });
     });
@@ -185,7 +185,7 @@ describe(chalk.blue('rule cluster tests'), function(){
 
   it('should insert a decision called "TestDecision" into DecisionTable (via node1)', done => {
     var options = url.parse('https://test.node1.oecloud.local/api/DecisionTables');
-    options.searchParams('access_token', access_token_node1);
+    options.searchParams.append('access_token', access_token_node1);
 
     var data = {
       name: 'TestDecision',
@@ -204,12 +204,16 @@ describe(chalk.blue('rule cluster tests'), function(){
 
   it('should assert that "TestDecision" is available (in node2)', done => {
     var options = url.parse('https://test.node2.oecloud.local/api/DecisionTables');
-    options.searchParams('access_token', access_token_node2);
-    options.searchParams('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
+    options.searchParams.append('access_token', access_token_node2);
+    options.searchParams.append('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
 
     get(options).then(result => {
       assertStatusCode200(result.res);
       done();
     }, done);
   });
+
+  // it('should successfully attach a model rule to the Employee model', done => {
+  //
+  // });
 });
