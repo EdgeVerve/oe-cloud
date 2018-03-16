@@ -13,6 +13,11 @@ function assertStatusCode200(res) {
   assert(status_code === 200, util.format('Expected status code 200. Actual status code: %s', status_code));
 }
 
+function assertStatusCodeNot200(res) {
+  var status_code = res.statusCode;
+  assert(status_code !== 200, "status code expected was a not ");
+}
+
 function postData(options, data) {
   return new Promise((resolve, reject) => {
     var payload = JSON.stringify(data);
@@ -217,7 +222,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should successfully attach a model validation rule to the Employee model (via node2)', done => {
-    var options = new URL('https://test.node2.oecloud.local/api/ModelRules');
+    var options = new url.URL('https://test.node2.oecloud.local/api/ModelRules');
     options.searchParams.append('access_token', access_token_node2);
 
     var record = {
@@ -233,7 +238,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should successfully insert a valid employee record (via node1)', done => {
-    var options = new URL('https://test.node1.oecloud.local/api/Employees');
+    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
     options.searchParams.append('access_token', access_token_node1);
 
     var data = {
@@ -252,7 +257,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should assert the presence of the above inserted record (via node2)', done => {
-    var options = new URL('https://test.node2.oecloud.local/api/Employees');
+    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp1' }}));
 
@@ -267,5 +272,24 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
+  // it('should deny insert of invalid record (via node1)', done => {
+  //   var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+  //   options.searchParams.append('access_token', access_token_node1);
+  //
+  //   var data = {
+  //     name: 'Emp2',
+  //     qualification: {
+  //       marks_10: 45,
+  //       marks_12: 65
+  //     }
+  //   };
+  //
+  //   postData(options, data).then(result => {
+  //     // assertStatusCode200(result.res);
+  //
+  //     done();
+  //   })
+  //   .catch(done);
+  // });
 
 });
