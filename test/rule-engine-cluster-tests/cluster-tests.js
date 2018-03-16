@@ -216,28 +216,56 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  // it('should successfully attach a model validation rule to the Employee model (via node2)', done => {
-  //   var options = new URL('https://test.node2.oecloud.local/api/ModelRules');
-  //   options.searchParams.append('access_token', access_token_node2);
-  //
-  //   var record = {
-  //     name: 'Employee',
-  //     validationRules: ['TestDecision']
-  //   };
-  //
-  //   postData(options, record).then(result => {
-  //     assertStatusCode200(result.res);
-  //     done();
-  //   })
-  //   .catch(done);
-  // });
-  //
-  // it('should successfully insert a valid employee record (via node1)', done => {
-  //   var options = new URL('https://test.node1.oecloud.local/api/Employees');
-  //   options.searchParams.append('access_token', access_token_node1);
-  //
-  //   var data = {
-  //
-  //   }
-  // });
+  it('should successfully attach a model validation rule to the Employee model (via node2)', done => {
+    var options = new URL('https://test.node2.oecloud.local/api/ModelRules');
+    options.searchParams.append('access_token', access_token_node2);
+
+    var record = {
+      name: 'Employee',
+      validationRules: ['TestDecision']
+    };
+
+    postData(options, record).then(result => {
+      assertStatusCode200(result.res);
+      done();
+    })
+    .catch(done);
+  });
+
+  it('should successfully insert a valid employee record (via node1)', done => {
+    var options = new URL('https://test.node1.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node1);
+
+    var data = {
+      name: 'Emp1',
+      qualification: {
+        marks_10: 65,
+        marks_12: 65
+      }
+    };
+
+    postData(options, data).then(result => {
+      assertStatusCode200(result.res);
+      done();
+    })
+    .catch(done);
+  });
+
+  it('should assert the presence of the above inserted record (via node2)', done => {
+    var options = new URL('https://test.node2.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node2);
+    options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp1' }}));
+
+    get(options).then(result => {
+      assertStatusCode200(result.res);
+      var data = JSON.parse(result.responseText);
+      assert(Array.isArray(data), "response received is not an array");
+      assert(data.length === 1, "Expected length of data: 1. Actual length received: " + data.length);
+      assert(data[0].name === 'Emp1', 'Expected "Emp1", Actual: ' + data[0].name);
+      done();
+    })
+    .catch(done);
+  });
+
+
 });
