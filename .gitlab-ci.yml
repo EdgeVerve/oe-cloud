@@ -343,7 +343,7 @@ rule-cluster-tests:
     - /bin/sh ./remove.sh
     - sleep 15
     - docker stack deploy -c test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml $STACK_NAME
-    - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/status" "https://test.node2.oecloud.local/status"
+    - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/" "https://test.node2.oecloud.local/"
     # - /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh "https://test.node1.oecloud.local/"
     - export NODE_TLS_REJECT_UNAUTHORIZED=0
     - ./node_modules/.bin/mocha ./test/rule-engine-cluster-tests/cluster-tests.js
