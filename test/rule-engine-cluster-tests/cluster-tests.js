@@ -323,17 +323,38 @@ describe(chalk.blue('rule cluster tests'), function(){
       'node1', 'node2'
     ];
 
-    var dataToPost = {
-      name: 'TestDecision2',
-      document : {
-        documentName: 'foo.xlsx',
-        documentData: prefix +
-      }
-    }
-    testData.map(n => {
+    var fileContents = prefix + fs.readFileSync('./test/model-rule-data/corrupt.xlsx');
+    var tasks = testData.map(n => {
       var options = new url.URL(util.format('https://test.%s.oecloud.local/api/DecisionTables'));
       options.searchParams.append('access_token', n === 'node1' ? access_token_node1 : access_token_node2);
-      return postData(options, )
+      var d = {
+        name: 'd-' + n,
+        document: {
+          documentName: 'corrupt-' + n + '.xlsx',
+          documentData: fileContents
+        }
+      };
+      return postData(options, d);
+    });
+
+    Promise.all(tasks).then(results => {
+      done('Should not have inserted in the first place');
     })
+    .catch(err => {
+      //So we did get some error
+
+      //assert that the nodes are still alive...
+      var checks = testData.map(n => {
+        return get(util.format('https://test.%s.oecloud.local/', n));
+      });
+
+      Promise.all(checks).then(results => {
+        results.map(r => {
+          assertStatusCode200(r.res);
+        });
+        done();
+      })
+      .catch(done);
+    });
   });
 });
