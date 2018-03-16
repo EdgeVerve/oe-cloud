@@ -19,6 +19,7 @@ function assertStatusCodeNot200(res) {
 }
 
 function postData(options, data) {
+  console.log('POST:', options.href, 'DATA:', data);
   return new Promise((resolve, reject) => {
     var payload = JSON.stringify(data);
     options.method = 'POST';
@@ -41,7 +42,7 @@ function postData(options, data) {
 }
 
 function get(options) {
-  console.log('HREF:', options.href);
+  console.log('GET:', options.href);
   return new Promise((resolve, reject) => {
     var req = https.get(options, res => {
       var data = "";
