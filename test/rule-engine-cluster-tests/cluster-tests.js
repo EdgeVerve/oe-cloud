@@ -5,9 +5,50 @@ const url = require('url');
 const querystring = require('querystring');
 const util = require('util');
 
+var prefix = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+
 function assertStatusCode200(res) {
   var status_code = res.statusCode;
   assert(status_code === 200, util.format('Expected status code 200. Actual status code: %s', status_code));
+}
+
+function postData(options, data) {
+  return new Promise((resolve, reject) => {
+    var payload = JSON.stringify(data);
+    options.method = 'POST';
+    options.headers = {
+      'Content-Type' : 'application/json',
+      'Content-Length' : payload.length
+    };
+    var req = https.request(options, res => {
+      var outputString = "";
+      res.on('data', chunk => outputString += chunk);
+      res.on('end', () => {
+        resolve({ res, responseStr: outputString });
+      });
+    });
+
+    req.on('error', reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+function get(options) {
+  return new Promise((resolve, reject) => {
+    var req = http.get(options, res => {
+      var data = "";
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        resolve({
+          res,
+          responseStr: data
+        });
+      });
+    });
+
+    req.on('error', reject);
+  });
 }
 
 describe(chalk.blue('rule cluster tests'), function(){
@@ -140,5 +181,35 @@ describe(chalk.blue('rule cluster tests'), function(){
       assertStatusCode200(res);
       done();
     });
+  });
+
+  it('should insert a decision called "TestDecision" into DecisionTable (via node1)', done => {
+    var options = url.parse('https://test.node1.oecloud.local/api/DecisionTables');
+    options.searchParams('access_token', access_token_node1);
+
+    var data = {
+      name: 'TestDecision',
+      document: {
+        documentName: 'foo.xlsx',
+        documentData: prefix + fs.readFileSync('./test/model-rule-data/employee_validation.xlsx').toString('base64')
+      }
+    };
+
+    postData(options, data).then(result => {
+      assertStatusCode200(result.res);
+      done();
+    }, done);
+
+  });
+
+  it('should assert that "TestDecision" is available (in node2)', done => {
+    var options = url.parse('https://test.node2.oecloud.local/api/DecisionTables');
+    options.searchParams('access_token', access_token_node2);
+    options.searchParams('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
+
+    get(options).then(result => {
+      assertStatusCode200(result.res);
+      done();
+    }, done);
   });
 });
