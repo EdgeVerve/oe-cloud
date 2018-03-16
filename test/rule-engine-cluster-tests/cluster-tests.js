@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const https = require('https');
 const assert = require('assert');
 const url = require('url');
-const querystring = require('querystring');
+// const querystring = require('querystring');
 const util = require('util');
 const fs = require('fs');
 
@@ -207,7 +207,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   it('should assert that "TestDecision" is available (in node2)', done => {
     var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node2);
-    options.searchParams.append('filter', querystring.escape(JSON.stringify({ where: {name: 'TestDecision'}})));
+    options.searchParams.append('filter', JSON.stringify({ where: {name: 'TestDecision'}}));
     console.log('Url:', options.href);
     get(options).then(result => {
       assertStatusCode200(result.res);
