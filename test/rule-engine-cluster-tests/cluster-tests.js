@@ -184,11 +184,16 @@ describe(chalk.blue('rule cluster tests'), function(){
 
     var options = url.parse(util.format(endpoint, access_token_node2, querystring.escape(JSON.stringify(filter))));
 
-    https.get(options, res => {
-      // assert(res.statusCode === 200, 'Status code not 200. Got: ' + res.statusCode);
-      assertStatusCode200(res);
+    get(options).then(result => {
+      assertStatusCode200(result.res);
+      var data = JSON.parse(result.responseText);
+      assert(Array.isArray(data), 'expected response to be an array');
+      var record = data[0];
+      assert(record, "expected a record");
+      assert(record.name === 'Employee', "model name should be \"Employee\"");
       done();
-    });
+    })
+    .catch(done);
   });
 
   it('should insert a decision called "TestDecision" into DecisionTable (via node1)', done => {
@@ -253,14 +258,16 @@ describe(chalk.blue('rule cluster tests'), function(){
 
     postData(options, data).then(result => {
       assertStatusCode200(result.res);
+      var data = JSON.parse(result.responseText);
+      console.log(data);
       done();
     })
     .catch(done);
   });
 
-  it('should assert the presence of the above inserted record (via node1)', done => {
-    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
-    options.searchParams.append('access_token', access_token_node1);
+  it('should assert the presence of the above inserted record (via node2)', done => {
+    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp1' }}));
 
     get(options).then(result => {
