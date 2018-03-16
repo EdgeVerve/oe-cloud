@@ -175,7 +175,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     var endpoint = 'https://test.node2.oecloud.local/api/ModelDefinitions?access_token=%sfilter=%s'
     var filter = { where: { name: 'Employee'}};
 
-    var options = url.parse(util.format(endpoint, access_token_node2, querystring.stringify(filter)));
+    var options = url.parse(util.format(endpoint, access_token_node2, querystring.escape(JSON.stringify(filter))));
 
     https.get(options, res => {
       // assert(res.statusCode === 200, 'Status code not 200. Got: ' + res.statusCode);
@@ -207,7 +207,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   it('should assert that "TestDecision" is available (in node2)', done => {
     var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node2);
-    options.searchParams.append('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
+    options.searchParams.append('filter', querystring.escape(JSON.stringify({ where: {name: 'TestDecision'}})));
     console.log('Url:', options.href);
     get(options).then(result => {
       assertStatusCode200(result.res);
@@ -220,5 +220,15 @@ describe(chalk.blue('rule cluster tests'), function(){
   //   var options = new URL('https://test.node2.oecloud.local/api/ModelRules');
   //   options.searchParams.append('access_token', access_token_node2);
   //
+  //   var record = {
+  //     name: 'Employee',
+  //     validationRules: ['TestDecision']
+  //   };
+  //
+  //   postData(options, record).then(result => {
+  //     assertStatusCode200(result.res);
+  //     done();
+  //   })
+  //   .catch(done);
   // });
 });
