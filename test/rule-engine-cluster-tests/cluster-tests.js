@@ -258,9 +258,9 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  it('should assert the presence of the above inserted record (via node2)', done => {
-    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
-    options.searchParams.append('access_token', access_token_node2);
+  it('should assert the presence of the above inserted record (via node1)', done => {
+    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node1);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp1' }}));
 
     get(options).then(result => {
@@ -294,7 +294,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  it('should assert the absence of the record attempted to save previously (via node1)', done => {
+  it('should assert the absence of the record attempted to save in the previous step (via node1)', done => {
     var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp2' }}));
@@ -308,6 +308,10 @@ describe(chalk.blue('rule cluster tests'), function(){
       done();
     })
     .catch(done);
+  });
+
+  it('should not take down node when inserting a file containing an incorrect rule', done => {
+
   });
 
 });
