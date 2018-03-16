@@ -41,6 +41,7 @@ function postData(options, data) {
 }
 
 function get(options) {
+  console.log('HREF:', options.href);
   return new Promise((resolve, reject) => {
     var req = https.get(options, res => {
       var data = "";
@@ -213,7 +214,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: {name: 'TestDecision'}}));
-    console.log('Url:', options.href);
+    // console.log('Url:', options.href);
     get(options).then(result => {
       assertStatusCode200(result.res);
       done();
@@ -272,24 +273,40 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  // it('should deny insert of invalid record (via node1)', done => {
-  //   var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
-  //   options.searchParams.append('access_token', access_token_node1);
-  //
-  //   var data = {
-  //     name: 'Emp2',
-  //     qualification: {
-  //       marks_10: 45,
-  //       marks_12: 65
-  //     }
-  //   };
-  //
-  //   postData(options, data).then(result => {
-  //     // assertStatusCode200(result.res);
-  //
-  //     done();
-  //   })
-  //   .catch(done);
-  // });
+  it('should deny insert of invalid record (via node2)', done => {
+    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node1);
+
+    var data = {
+      name: 'Emp2',
+      qualification: {
+        marks_10: 45,
+        marks_12: 65
+      }
+    };
+
+    postData(options, data).then(result => {
+      // assertStatusCode200(result.res);
+
+      done();
+    })
+    .catch(done);
+  });
+
+  it('should assert the absence of the record attempted to save previously (via node1)', done => {
+    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+    options.searchParams.append('access_token', access_token_node2);
+    options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp2' }}));
+
+    get(options).then(result => {
+      assertStatusCode200(result.res);
+      var data = JSON.parse(result.responseText);
+      assert(Array.isArray(data), "response received is not an array");
+      assert(data.length === 0, "Expected length of data: 0. Actual length received: " + data.length);
+      // assert(data[0].name === 'Emp1', 'Expected "Emp1", Actual: ' + data[0].name);
+      done();
+    })
+    .catch(done);
+  });
 
 });
