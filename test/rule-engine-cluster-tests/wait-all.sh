@@ -1,8 +1,8 @@
 #!/bin/bash
 waitcmd="wait "
 i=0
-for url in $@; do
-  /bin/sh ./test/wait-for-up.sh $url &
+for url in $@; do  
+  /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh $url &
   # ((i=$i+1))
   let i=i+1
   waitcmd="$waitcmd%$i "
