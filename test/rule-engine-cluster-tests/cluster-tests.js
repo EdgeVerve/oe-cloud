@@ -14,7 +14,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   var access_token_node2;
 
   it('should successfuly log-in to node1', done => {
-    var reqObj = url.parse("https://test.node1.oelcoud.local/api/local");
+    var reqObj = url.parse("https://test.node1.oecloud.local/api/local");
     var payload = JSON.stringify(credo);
     reqObj.method = 'POST';
     reqObj.headers = {
@@ -45,7 +45,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should successfuly log-in to node2', done => {
-    var reqObj = url.parse("https://test.node2.oelcoud.local/api/local");
+    var reqObj = url.parse("https://test.node2.oecloud.local/api/local");
     var payload = JSON.stringify(credo);
     reqObj.method = 'POST';
     reqObj.headers = {
