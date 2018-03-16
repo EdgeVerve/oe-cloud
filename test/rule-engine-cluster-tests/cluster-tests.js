@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const https = require('https');
 const assert = require('assert');
 const url = require('url');
-// const querystring = require('querystring');
+const querystring = require('querystring');
 const util = require('util');
 const fs = require('fs');
 
@@ -230,5 +230,14 @@ describe(chalk.blue('rule cluster tests'), function(){
   //     done();
   //   })
   //   .catch(done);
+  // });
+  //
+  // it('should successfully insert a valid employee record (via node1)', done => {
+  //   var options = new URL('https://test.node1.oecloud.local/api/Employees');
+  //   options.searchParams.append('access_token', access_token_node1);
+  //
+  //   var data = {
+  //
+  //   }
   // });
 });
