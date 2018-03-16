@@ -190,6 +190,7 @@ describe(chalk.blue('rule cluster tests'), function(){
       assert(Array.isArray(data), 'expected response to be an array');
       var record = data[0];
       assert(record, "expected a record");
+      console.log(record);
       assert(record.name === 'Employee', "model name should be \"Employee\"");
       done();
     })
@@ -317,8 +318,22 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  it('should not take down node when inserting a file containing an incorrect rule', done => {
+  it('should not take down nodes when inserting a file containing an incorrect rule', done => {
+    var testData = [
+      'node1', 'node2'
+    ];
 
+    var dataToPost = {
+      name: 'TestDecision2',
+      document : {
+        documentName: 'foo.xlsx',
+        documentData: prefix +
+      }
+    }
+    testData.map(n => {
+      var options = new url.URL(util.format('https://test.%s.oecloud.local/api/DecisionTables'));
+      options.searchParams.append('access_token', n === 'node1' ? access_token_node1 : access_token_node2);
+      return postData(options, )
+    })
   });
-
 });
