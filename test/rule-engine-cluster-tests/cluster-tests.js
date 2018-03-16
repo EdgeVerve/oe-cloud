@@ -184,7 +184,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should insert a decision called "TestDecision" into DecisionTable (via node1)', done => {
-    var options = url.parse('https://test.node1.oecloud.local/api/DecisionTables');
+    var options = new url.URL('https://test.node1.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node1);
 
     var data = {
@@ -203,7 +203,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should assert that "TestDecision" is available (in node2)', done => {
-    var options = url.parse('https://test.node2.oecloud.local/api/DecisionTables');
+    var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', querystring.stringify({ where: {name: 'TestDecision'}}));
 
