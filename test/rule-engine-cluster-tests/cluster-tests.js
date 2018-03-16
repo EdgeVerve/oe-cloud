@@ -4,6 +4,7 @@ const assert = require('assert');
 const url = require('url');
 const querystring = require('querystring');
 const util = require('util');
+const fs = require('fs');
 
 var prefix = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
 
@@ -36,7 +37,7 @@ function postData(options, data) {
 
 function get(options) {
   return new Promise((resolve, reject) => {
-    var req = http.get(options, res => {
+    var req = https.get(options, res => {
       var data = "";
       res.on('data', chunk => data += chunk);
       res.on('end', () => {
