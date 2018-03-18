@@ -30,6 +30,7 @@ services:
       SERVICE_NAME: "${APP_IMAGE_NAME}"
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
+      ROUTER_HOST: ${ROUTER}
     networks:
       - router_network
 
@@ -52,6 +53,7 @@ services:
       SERVICE_NAME: "${APP_IMAGE_NAME}"
       BROADCASTER_HOST: "broadcaster"
       ORCHESTRATOR: "dockerSwarm"
+      ROUTER_HOST: ${ROUTER}
     networks:
       - router_network
 
