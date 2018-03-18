@@ -260,11 +260,17 @@ describe(chalk.blue('rule cluster tests'), function(){
       validationRules: ['TestDecision']
     };
 
-    postData(options, record).then(result => {
-      assertStatusCode200(result.res);
-      done();
-    })
-    .catch(done);
+    setTimeout(() => {
+      postData(options, record).then(result => {
+        // console.log(result.responseText);
+        var response = JSON.parse(result.responseText);
+        console.log(response);
+        assertStatusCode200(result.res);
+        done();
+      })
+      .catch(done);
+    }, 5000)
+
   });
 
   it('should successfully insert a valid employee record (via node1)', done => {
