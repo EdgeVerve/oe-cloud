@@ -18,15 +18,20 @@ function assertStatusCodeNot200(res) {
   assert(status_code !== 200, "status code expected was a not ");
 }
 
-function postData(options, data) {
-  console.log('POST:', options.href, 'DATA:', data);
+function postData(urlInfo, data) {
+  // console.log('POST:', options.href, 'DATA:', data);
   return new Promise((resolve, reject) => {
     var payload = JSON.stringify(data);
+    var options = {};
+    options.path = urlInfo.pathname;
+    options.host = urlInfo.hostname;
+    options.port = urlInfo.port || 443;
     options.method = 'POST';
     options.headers = {
       'Content-Type' : 'application/json',
       'Content-Length' : payload.length
     };
+    console.log('POST:', options, 'Payload:', payload);
     var req = https.request(options, res => {
       var outputString = "";
       res.on('data', chunk => outputString += chunk);
