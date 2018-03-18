@@ -152,32 +152,7 @@ describe(chalk.blue('rule cluster tests'), function(){
       }
     };
 
-    // var payload = JSON.stringify(employeeModel);
-    //
-    // var reqOpts = {
-    //   host: 'test.node1.oecloud.local',
-    //   path: '/api/ModelDefinitions?access_token=' + access_token_node1,
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type' : 'application/json',
-    //     'Content-Length': Buffer.byteLength(payload)
-    //   }
-    // };
-    //
-    // var req = https.request(reqOpts, res => {
-    //   // assert(res.statusCode === 200, "Expected status code 200. Got: " + res.statusCode);
-    //   assertStatusCode200(res);
-    //
-    //   done();
-    // });
 
-
-
-    // req.on('error', done);
-    //
-    // req.write(payload);
-    //
-    // req.end();
 
     var options = new url.URL('https://test.node1.oecloud.local/api/ModelDefinitions');
     options.searchParams.append('access_token', access_token_node1);
@@ -185,10 +160,9 @@ describe(chalk.blue('rule cluster tests'), function(){
     postData(options, employeeModel).then(result => {
       assertStatusCode200(result.res);
       var data = JSON.parse(result.responseText);
-      // console.log(data);
-      assert(Array.isArray(data), "expected the response to be an array");
-      var record = data[0];
-      assert(record, "expected at least one item in the array");
+      assert(!Array.isArray(data), "expected the json response to be an object");
+      assert(data.name, "record retrieved should have \"name\" as a property");
+      assert(data.name === employeeModel.name, "does not match what we input for creation");
       done();
     })
     .catch(done)
