@@ -5,7 +5,7 @@ const url = require('url');
 const querystring = require('querystring');
 const util = require('util');
 const fs = require('fs');
-
+const verbose = process.env.DEBUG_TEST || 0;
 // Using urlToOptions from the nodejs source itself
 // https://github.com/nodejs/node/blob/1329844a0808705091891175a6bee58358380af6/lib/internal/url.js#L1305-L1322
 function urlToOptions(url) {
@@ -49,7 +49,10 @@ function postData(urlInfo, data) {
       'Content-Type' : 'application/json',
       'Content-Length' : payload.length
     };
-    console.log('POST:', options, 'Payload:', payload);
+    // console.log('POST:', options, 'Payload:', payload);
+    if (verbose) {
+      console.log('POST:', options, 'Payload:', payload);
+    }
     var req = https.request(options, res => {
       var outputString = "";
       res.on('data', chunk => outputString += chunk);
@@ -68,7 +71,9 @@ function get(urlInfo) {
   // console.log('GET:', options.href);
   return new Promise((resolve, reject) => {
     var options = urlToOptions(urlInfo);
-    console.log('GET:', options);
+    if (verbose) {
+      console.log('GET:', options);
+    }
     var req = https.get(options, res => {
       var data = "";
       res.on('data', chunk => data += chunk);
@@ -207,7 +212,7 @@ describe(chalk.blue('rule cluster tests'), function(){
       assert(Array.isArray(data), 'expected response to be an array');
       var record = data[0];
       assert(record, "expected a record");
-      console.log(record);
+      // console.log(record);
       assert(record.name === 'Employee', "model name should be \"Employee\"");
       done();
     })

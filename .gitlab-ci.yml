@@ -349,6 +349,6 @@ rule-cluster-tests:
     - ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
   after_script:
     - echo "done..."
-    # - /bin/sh ./remove.sh
+    - /bin/sh ./remove.sh
   tags:
     - CEP_RUNNER

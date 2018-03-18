@@ -4,11 +4,20 @@ services:
     image: ${REGISTRY}/alpine-mongo:latest
     networks:
       - router_network
+
+  broadcaster:
+    image: ${REGISTRY}/oecloudio-broadcaster-server:latest
+    environment:
+      SERVICE_PORTS: "2345"
+    networks:
+      - router_network
+
   node1:
     entrypoint: ["node", "."]
     image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
+      - broadcaster
     deploy:
       mode: replicated
       replicas: 1
@@ -19,6 +28,7 @@ services:
       SERVICE_PORTS: "3000"
       FORCE_SSL: "yes"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
+      BROADCASTER_HOST: "broadcaster"
     networks:
       - router_network
 
@@ -27,7 +37,7 @@ services:
     image: ${REGISTRY}/${APP_IMAGE_NAME}:latest
     depends_on:
       - mongo
-
+      - broadcaster
     deploy:
       mode: replicated
       replicas: 1
@@ -39,10 +49,9 @@ services:
       SERVICE_PORTS: "3000"
       FORCE_SSL: "yes"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
-
+      BROADCASTER_HOST: "broadcaster"
     networks:
       - router_network
-
 
 networks:
   router_network:
