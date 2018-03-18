@@ -29,6 +29,7 @@ services:
       FORCE_SSL: "yes"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
       BROADCASTER_HOST: "broadcaster"
+      ORCHESTRATOR: "dockerSwarm"
     networks:
       - router_network
 
@@ -50,6 +51,7 @@ services:
       FORCE_SSL: "yes"
       SERVICE_NAME: "${APP_IMAGE_NAME}"
       BROADCASTER_HOST: "broadcaster"
+      ORCHESTRATOR: "dockerSwarm"
     networks:
       - router_network
 
