@@ -346,7 +346,7 @@ rule-cluster-tests:
     - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/" "https://test.node2.oecloud.local/"
     # - /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh "https://test.node1.oecloud.local/"
     - export NODE_TLS_REJECT_UNAUTHORIZED=0
-    - ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
+    - DEBUG=http ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
   after_script:
     - echo "done..."
     # - /bin/sh ./remove.sh
