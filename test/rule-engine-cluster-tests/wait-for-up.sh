@@ -7,8 +7,9 @@ echo $pid > $fname
 url=$1
 counter=0
 status_code=404
-max_retry=5
-status_code=$(curl -s -o /dev/null -w "%{http_code}" $url)
+max_retry=10
+# status_code=$(curl -s -o /dev/null -w "%{http_code}" $url)
+status_code="0"
 is_fail=0
 sleep_time=30
 
@@ -21,7 +22,7 @@ until [[ "$status_code" -eq "200" ]]; do
   if [[ "$counter" -lt "$max_retry" ]]; then
     sleep $sleep_time
     status_code=$(curl -k -s -o /dev/null -w "%{http_code}" --connect-timeout 5 $url)
-    echo $status_code
+    echo "$status_code ($url)"
   else
     is_fail=1
     break
