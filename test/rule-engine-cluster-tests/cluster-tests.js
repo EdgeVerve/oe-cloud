@@ -185,7 +185,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     postData(options, employeeModel).then(result => {
       assertStatusCode200(result.res);
       var data = JSON.parse(result.responseText);
-      console.log(data);
+      // console.log(data);
       assert(Array.isArray(data), "expected the response to be an array");
       var record = data[0];
       assert(record, "expected at least one item in the array");

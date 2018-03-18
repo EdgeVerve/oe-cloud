@@ -348,6 +348,7 @@ rule-cluster-tests:
     - export NODE_TLS_REJECT_UNAUTHORIZED=0
     - ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
   after_script:
-    - /bin/sh ./remove.sh
+    - echo "done..."
+    # - /bin/sh ./remove.sh
   tags:
     - CEP_RUNNER
