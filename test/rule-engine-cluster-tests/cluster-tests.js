@@ -6,6 +6,27 @@ const querystring = require('querystring');
 const util = require('util');
 const fs = require('fs');
 
+// Using urlToOptions from the nodejs source itself
+// https://github.com/nodejs/node/blob/1329844a0808705091891175a6bee58358380af6/lib/internal/url.js#L1305-L1322
+function urlToOptions(url) {
+  var options = {
+    protocol: url.protocol,
+    hostname: url.hostname,
+    hash: url.hash,
+    search: url.search,
+    pathname: url.pathname,
+    path: `${url.pathname}${url.search}`,
+    href: url.href
+  };
+  if (url.port !== '') {
+    options.port = Number(url.port);
+  }
+  if (url.username || url.password) {
+    options.auth = `${url.username}:${url.password}`;
+  }
+  return options;
+};
+
 var prefix = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
 
 function assertStatusCode200(res) {
@@ -22,11 +43,7 @@ function postData(urlInfo, data) {
   // console.log('POST:', options.href, 'DATA:', data);
   return new Promise((resolve, reject) => {
     var payload = JSON.stringify(data);
-    var options = {};
-    // var urlPath =
-    options.path = urlInfo.pathname + urlInfo.search;
-    options.host = urlInfo.hostname;
-    options.port = urlInfo.port || 443;
+    var options = urlToOptions(urlInfo);
     options.method = 'POST';
     options.headers = {
       'Content-Type' : 'application/json',
@@ -47,9 +64,11 @@ function postData(urlInfo, data) {
   });
 }
 
-function get(options) {
-  console.log('GET:', options.href);
+function get(urlInfo) {
+  // console.log('GET:', options.href);
   return new Promise((resolve, reject) => {
+    var options = urlToOptions(urlInfo);
+    console.log('GET:', options);
     var req = https.get(options, res => {
       var data = "";
       res.on('data', chunk => data += chunk);
@@ -176,12 +195,13 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
   //
   it('should assert that the Employee model exists (in node2)', done => {
-    var endpoint = 'https://test.node2.oecloud.local/api/ModelDefinitions?access_token=%sfilter=%s'
+    var endpoint = new url.URL('https://test.node2.oecloud.local/api/ModelDefinitions');
     var filter = { where: { name: 'Employee'}};
+    endpoint.searchParams.append('access_token', access_token_node2);
+    endpoint.searchParams.append('filter', JSON.stringify(filter));
+    // var options = url.parse(util.format(endpoint, access_token_node2, querystring.escape(JSON.stringify(filter))));
 
-    var options = url.parse(util.format(endpoint, access_token_node2, querystring.escape(JSON.stringify(filter))));
-
-    get(options).then(result => {
+    get(endpoint).then(result => {
       assertStatusCode200(result.res);
       var data = JSON.parse(result.responseText);
       assert(Array.isArray(data), 'expected response to be an array');
