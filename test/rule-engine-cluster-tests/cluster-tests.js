@@ -23,7 +23,8 @@ function postData(urlInfo, data) {
   return new Promise((resolve, reject) => {
     var payload = JSON.stringify(data);
     var options = {};
-    options.path = urlInfo.pathname;
+    // var urlPath =
+    options.path = urlInfo.pathname + urlInfo.search;
     options.host = urlInfo.hostname;
     options.port = urlInfo.port || 443;
     options.method = 'POST';
