@@ -1,11 +1,15 @@
 const chalk = require('chalk');
-const https = require('https');
+const https = require('http');
 const assert = require('assert');
 const url = require('url');
 const querystring = require('querystring');
 const util = require('util');
 const fs = require('fs');
 const verbose = process.env.DEBUG_TEST || 0;
+
+const node1 = "http://localhost:3000/";
+const node2 = "http://localhost:3001";
+
 // Using urlToOptions from the nodejs source itself
 // https://github.com/nodejs/node/blob/1329844a0808705091891175a6bee58358380af6/lib/internal/url.js#L1305-L1322
 function urlToOptions(url) {
@@ -29,14 +33,20 @@ function urlToOptions(url) {
 
 var prefix = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
 
-function assertStatusCode200(res) {
-  var status_code = res.statusCode;
-  assert(status_code === 200, util.format('Expected status code 200. Actual status code: %s', status_code));
-}
+var makeUrl = function(server, apiPath) {
+  // return util.format('%s%s', server, apiPath);
+  var urlInfo = new url.URL(server);
+  urlInfo.pathname = apiPath;
+  return urlInfo;
+};
 
-function assertStatusCodeNot200(res) {
-  var status_code = res.statusCode;
-  assert(status_code !== 200, "status code expected was a not ");
+function assertStatusCode200(result) {
+  var status_code = result.res.statusCode;
+  var response = result.responseText;
+  console.assert(status_code === 200,
+    "Expected status code 200.",
+    util.format("Got status code: %s.", status_code),
+    "Response text:\n", response);
 }
 
 function postData(urlInfo, data) {
@@ -100,76 +110,30 @@ describe(chalk.blue('rule cluster tests'), function(){
   var access_token_node2;
 
   it('should successfuly log-in to node1', done => {
-    var reqObj = url.parse("https://test.node1.oecloud.local/auth/local");
-    var payload = JSON.stringify(credo);
-    reqObj.method = 'POST';
-    reqObj.headers = {
-      'Content-Type' : 'application/json',
-      'Content-Length' : Buffer.byteLength(payload)
-    };
+    // var reqObj = url.parse("https://test.node1.oecloud.local/auth/local");
+    // var payload = JSON.stringify(credo);
 
-    var req = https.request(reqObj, res => {
-      var data = "";
-      var status_code = res.statusCode;
+    var urlInfo = makeUrl(node1, "/auth/local");
 
-      // assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
-      assertStatusCode200(res);
-
-      res.on('data', chunk => data += chunk);
-
-      res.on('end', () => {
-        // console.log(data);
-        result = JSON.parse(data);
-
-        assert(result.access_token, "access_token absent in node1 response");
-        access_token_node1 = result.access_token;
-
-        done();
-      });
+    postData(urlInfo, credo).then(result => {
+      assertStatusCode200(result);
+      var data = result.responseText;
+      access_token_node1 = JSON.parse(data).access_token;
+      assert(access_token_node1, "got no access token post login");
+      done();
     });
-
-    req.on('error', done);
-
-    req.write(payload);
-
-    req.end();
 
   });
 
   it('should successfuly log-in to node2', done => {
-    var reqObj = url.parse("https://test.node2.oecloud.local/auth/local");
-    var payload = JSON.stringify(credo);
-    reqObj.method = 'POST';
-    reqObj.headers = {
-      'Content-Type' : 'application/json',
-      'Content-Length' : Buffer.byteLength(payload)
-    };
-
-    var req = https.request(reqObj, res => {
-      var data = "";
-      var status_code = res.statusCode;
-
-      // assert(status_code === 200, "Expected 200 status code. Got: " + status_code);
-      assertStatusCode200(res);
-
-      res.on('data', chunk => data += chunk);
-
-      res.on('end', () => {
-        // console.log(data);
-        result = JSON.parse(data);
-
-        assert(result.access_token, "access_token absent for node2 response");
-        access_token_node2 = result.access_token;
-        done();
-      });
+    var urlInfo = makeUrl(node2, "/auth/local");
+    postData(urlInfo, credo).then(result => {
+      assertStatusCode200(result);
+      var data = result.responseText;
+      access_token_node1 = JSON.parse(data).access_token;
+      assert(access_token_node2, "got no access token post login");
+      done();
     });
-
-    req.on('error', done);
-
-    req.write(payload);
-
-    req.end();
-
   });
 
   it('should create Employee model (via node1)', done => {
@@ -184,11 +148,12 @@ describe(chalk.blue('rule cluster tests'), function(){
 
 
 
-    var options = new url.URL('https://test.node1.oecloud.local/api/ModelDefinitions');
+    // var options = new url.URL('https://test.node1.oecloud.local/api/ModelDefinitions');
+    var options = makeUrl(node1, "/api/ModelDefinitions");
     options.searchParams.append('access_token', access_token_node1);
 
     postData(options, employeeModel).then(result => {
-      assertStatusCode200(result.res);
+      assertStatusCode200(result);
       var data = JSON.parse(result.responseText);
       assert(!Array.isArray(data), "expected the json response to be an object");
       assert(data.name, "record retrieved should have \"name\" as a property");
@@ -200,7 +165,8 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
   //
   it('should assert that the Employee model exists (in node2)', done => {
-    var endpoint = new url.URL('https://test.node2.oecloud.local/api/ModelDefinitions');
+    // var endpoint = new url.URL('https://test.node2.oecloud.local/api/ModelDefinitions');
+    var endpoint = makeUrl(node2, "/api/ModelDefinitions");
     var filter = { where: { name: 'Employee'}};
     endpoint.searchParams.append('access_token', access_token_node2);
     endpoint.searchParams.append('filter', JSON.stringify(filter));
@@ -221,7 +187,8 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should insert a decision called "TestDecision" into DecisionTable (via node1)', done => {
-    var options = new url.URL('https://test.node1.oecloud.local/api/DecisionTables');
+    // var options = new url.URL('https://test.node1.oecloud.local/api/DecisionTables');
+    var options = makeUrl(node1, "/api/DecisionTables");
     options.searchParams.append('access_token', access_token_node1);
 
     var data = {
@@ -233,7 +200,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     };
 
     postData(options, data).then(result => {
-      assertStatusCode200(result.res);
+      assertStatusCode200(result);
       done();
     })
     .catch(done);
@@ -241,19 +208,21 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should assert that "TestDecision" is available (in node2)', done => {
-    var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
+    // var options = new url.URL('https://test.node2.oecloud.local/api/DecisionTables');
+    var options = makeUrl(node2, "/api/DecisionTables");
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: {name: 'TestDecision'}}));
     // console.log('Url:', options.href);
     get(options).then(result => {
-      assertStatusCode200(result.res);
+      assertStatusCode200(result);
       done();
     })
     .catch(done);
   });
 
   it('should successfully attach a model validation rule to the Employee model (via node2)', done => {
-    var options = new url.URL('https://test.node2.oecloud.local/api/ModelRules');
+    // var options = new url.URL('https://test.node2.oecloud.local/api/ModelRules');
+    var options = makeUrl(node2, "/api/ModelRules");
     options.searchParams.append('access_token', access_token_node2);
 
     var record = {
@@ -275,7 +244,8 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should successfully insert a valid employee record (via node1)', done => {
-    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+    // var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+    var options = makeUrl(node1, "api/Employees");
     options.searchParams.append('access_token', access_token_node1);
 
     var data = {
@@ -296,7 +266,8 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should assert the presence of the above inserted record (via node2)', done => {
-    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
+    // var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
+    var options = makeUrl(node2, "api/Employees");
     options.searchParams.append('access_token', access_token_node2);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp1' }}));
 
@@ -312,8 +283,9 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should deny insert of invalid record (via node2)', done => {
-    var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
-    options.searchParams.append('access_token', access_token_node1);
+    // var options = new url.URL('https://test.node2.oecloud.local/api/Employees');
+    var options = makeUrl(node2, "api/Employees");
+    options.searchParams.append('access_token', access_token_node2);
 
     var data = {
       name: 'Emp2',
@@ -325,19 +297,20 @@ describe(chalk.blue('rule cluster tests'), function(){
 
     postData(options, data).then(result => {
       // assertStatusCode200(result.res);
-
+      assert(result.res.statusCode !== 200);
       done();
     })
     .catch(done);
   });
 
   it('should assert the absence of the record attempted to save in the previous step (via node1)', done => {
-    var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
-    options.searchParams.append('access_token', access_token_node2);
+    // var options = new url.URL('https://test.node1.oecloud.local/api/Employees');
+    var options = makeUrl(node1, "api/Employees");
+    options.searchParams.append('access_token', access_token_node1);
     options.searchParams.append('filter', JSON.stringify({ where: { name: 'Emp2' }}));
 
     get(options).then(result => {
-      assertStatusCode200(result.res);
+      assertStatusCode200(result);
       var data = JSON.parse(result.responseText);
       assert(Array.isArray(data), "response received is not an array");
       assert(data.length === 0, "Expected length of data: 0. Actual length received: " + data.length);
@@ -347,43 +320,43 @@ describe(chalk.blue('rule cluster tests'), function(){
     .catch(done);
   });
 
-  it('should not take down nodes when inserting a file containing an incorrect rule', done => {
-    var testData = [
-      'node1', 'node2'
-    ];
-
-    var fileContents = prefix + fs.readFileSync('./test/model-rule-data/corrupt.xlsx');
-    var tasks = testData.map(n => {
-      var options = new url.URL(util.format('https://test.%s.oecloud.local/api/DecisionTables'));
-      options.searchParams.append('access_token', n === 'node1' ? access_token_node1 : access_token_node2);
-      var d = {
-        name: 'd-' + n,
-        document: {
-          documentName: 'corrupt-' + n + '.xlsx',
-          documentData: fileContents
-        }
-      };
-      return postData(options, d);
-    });
-
-    Promise.all(tasks).then(results => {
-      done('Should not have inserted in the first place');
-    })
-    .catch(err => {
-      //So we did get some error
-
-      //assert that the nodes are still alive...
-      var checks = testData.map(n => {
-        return get(util.format('https://test.%s.oecloud.local/', n));
-      });
-
-      Promise.all(checks).then(results => {
-        results.map(r => {
-          assertStatusCode200(r.res);
-        });
-        done();
-      })
-      .catch(done);
-    });
-  });
+  // it('should not take down nodes when inserting a file containing an incorrect rule', done => {
+  //   var testData = [
+  //     'node1', 'node2'
+  //   ];
+  //
+  //   var fileContents = prefix + fs.readFileSync('./test/model-rule-data/corrupt.xlsx');
+  //   var tasks = testData.map(n => {
+  //     var options = new url.URL(util.format('https://test.%s.oecloud.local/api/DecisionTables'));
+  //     options.searchParams.append('access_token', n === 'node1' ? access_token_node1 : access_token_node2);
+  //     var d = {
+  //       name: 'd-' + n,
+  //       document: {
+  //         documentName: 'corrupt-' + n + '.xlsx',
+  //         documentData: fileContents
+  //       }
+  //     };
+  //     return postData(options, d);
+  //   });
+  //
+  //   Promise.all(tasks).then(results => {
+  //     done('Should not have inserted in the first place');
+  //   })
+  //   .catch(err => {
+  //     //So we did get some error
+  //
+  //     //assert that the nodes are still alive...
+  //     var checks = testData.map(n => {
+  //       return get(util.format('https://test.%s.oecloud.local/', n));
+  //     });
+  //
+  //     Promise.all(checks).then(results => {
+  //       results.map(r => {
+  //         assertStatusCode200(r.res);
+  //       });
+  //       done();
+  //     })
+  //     .catch(done);
+  //   });
+  // });
 });
