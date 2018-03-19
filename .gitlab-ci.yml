@@ -343,8 +343,8 @@ rule-cluster-tests:
     - echo "docker stack rm $STACK_NAME" > ./remove.sh
     - /bin/sh ./remove.sh
     - sleep 30
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' ./test/rule-engine-cluster-setup.yml > ./test/rule-engine-cluster-setup2.yml
-    - mv -f ./test/rule-engine-cluster-setup2.yml test/rule-engine-cluster-setup.yml
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' ./test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml > ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml
+    - mv -f ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml
     - docker stack deploy -c test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml $STACK_NAME
     - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/" "https://test.node2.oecloud.local/"
     # - /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh "https://test.node1.oecloud.local/"
