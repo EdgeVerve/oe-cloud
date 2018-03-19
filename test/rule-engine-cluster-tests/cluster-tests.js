@@ -207,6 +207,7 @@ describe(chalk.blue('rule cluster tests'), function(){
     // var options = url.parse(util.format(endpoint, access_token_node2, querystring.escape(JSON.stringify(filter))));
 
     get(endpoint).then(result => {
+      console.log(result.responseText)
       assertStatusCode200(result.res);
       var data = JSON.parse(result.responseText);
       assert(Array.isArray(data), 'expected response to be an array');
