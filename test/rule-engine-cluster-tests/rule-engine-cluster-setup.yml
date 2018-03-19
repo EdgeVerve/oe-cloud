@@ -4,7 +4,7 @@ services:
     image: ${REGISTRY}/alpine-mongo:latest
     networks:
       - ${NETWORK_NAME}
-      - router_network
+      # - router_network
 
   broadcaster:
     image: ${REGISTRY}/oecloudio-broadcaster-server:latest
