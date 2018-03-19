@@ -3,6 +3,7 @@ services:
   mongo:
     image: ${REGISTRY}/alpine-mongo:latest
     networks:
+      - ${NETWORK_NAME}
       - router_network
 
   broadcaster:
@@ -10,7 +11,7 @@ services:
     environment:
       SERVICE_PORTS: "2345"
     networks:
-      - router_network
+      - ${NETWORK_NAME}
 
   node1:
     entrypoint: ["node", "."]
@@ -32,6 +33,7 @@ services:
       ORCHESTRATOR: "dockerSwarm"
       ROUTER_HOST: ${ROUTER}
     networks:
+      - ${NETWORK_NAME}
       - router_network
 
   node2:
@@ -55,8 +57,10 @@ services:
       ORCHESTRATOR: "dockerSwarm"
       ROUTER_HOST: ${ROUTER}
     networks:
+      - ${NETWORK_NAME}
       - router_network
 
 networks:
+  $NETWORK_NAME:
   router_network:
     external: true
