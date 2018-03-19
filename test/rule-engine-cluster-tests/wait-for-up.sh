@@ -7,7 +7,7 @@ echo $pid > $fname
 url=$1
 counter=0
 status_code=404
-max_retry=20
+max_retry=50
 # status_code=$(curl -s -o /dev/null -w "%{http_code}" $url)
 status_code="0"
 is_fail=0
