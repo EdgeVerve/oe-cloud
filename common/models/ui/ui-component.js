@@ -24,6 +24,10 @@ module.exports = function uiComponent(UIComponent) {
   var templateMap = null;
   function loadTemplate(template, app, options, callback) {
     app.models.AppConfig.findOne({}, options, function AppConfigFindOneCb(err, data) {
+      if (err) {
+        callback(err);
+        return;
+      }
       if (!templateMap) {
         templateMap = generateTemplateMap(app);
       }
