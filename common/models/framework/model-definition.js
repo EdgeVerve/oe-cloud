@@ -175,7 +175,8 @@ module.exports = function ModelDefintionFn(modelDefinition) {
 
   function registerModel(modeldefinition, app, next) {
     var options = {
-      fetchAllScopes: true
+      fetchAllScopes: true,
+      bootContext:true
     };
     util.createModel(app, modeldefinition, options, function () {
       modelDefinition.events.emit('model-' + modeldefinition.name + '-available');
