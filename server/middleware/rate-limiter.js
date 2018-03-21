@@ -1,17 +1,18 @@
-var config = require('../config').rateLimiter
+const config = require('../config')
+const rateLimiterConfig = config.rateLimiter || { isEnable: false }
+const { redisHost, redisPort, rateLimitTLLSeconds, rateLimitThreshold, isEnable } = rateLimiterConfig
 
-var redis = require("redis"),
-  client = redis.createClient({ host: config.redisHost, port: config.redisPort })
+const redis = require("redis"),
+  client = redis.createClient({ host: redisHost, port: redisPort })
 
 module.exports = function rateLimiterMiddleware(options) {
-  return function rateLimiter(req, res, next) {
-    var ip = req.connection.remoteAddress
-    client.get(ip, function (err, reply) {
-
-      if (!reply) {
-        client.set(ip, '1', 'EX', config.rateLimitTLLSeconds)
+  return isEnable ? function rateLimiter(req, res, next) {
+    const ip = req.connection.remoteAddress;
+    client.get(ip, function (err, rateCount) {
+      if (!rateCount) {
+        client.set(ip, '1', 'EX', rateLimitTLLSeconds);
       }
-      if (Number(reply) >= config.rateLimitThreshold) {
+      if (Number(rateCount) >= rateLimitThreshold) {
         res.status(500).send('Unauthorized. \n rate exceeded.');
       }
       else {
@@ -19,7 +20,7 @@ module.exports = function rateLimiterMiddleware(options) {
         next();
       }
     })
-  };
+  } : function rateLimiterDisabled(req, res, next) { next(); };
 };
 
 
