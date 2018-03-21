@@ -3,6 +3,12 @@
   "host": "0.0.0.0",
   "port": 3000,
   "cookieSecret": "246bace2-9876-4321-1234-0ae8160b07c8",
+  "rateLimiter": {
+    "redisHost": "127.0.0.1",
+    "redisPort": "6379",
+    "rateLimitThreshold": 300,
+    "rateLimitTLLSeconds": 3
+  },
   "remoting": {
     "context": false,
     "rest": {
