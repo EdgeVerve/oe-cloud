@@ -1,5 +1,6 @@
 {
     "initial:before": {
+        "./middleware/rate-limiter": {},
         "loopback#favicon": {}
     },
     "initial": {
