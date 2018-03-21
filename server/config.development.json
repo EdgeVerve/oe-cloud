@@ -6,7 +6,7 @@
   "rateLimiter": {
     "redisHost": "127.0.0.1",
     "redisPort": "6379",
-    "rateLimitThreshold": 300,
+    "rateLimitThreshold": 301,
     "rateLimitTLLSeconds": 3
   },
   "remoting": {
