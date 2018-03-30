@@ -23,7 +23,7 @@ var loopback = require('loopback');
 var log = require('oe-logger')('model-rule');
 
 var messaging = require('../../lib/common/ev-global-messaging');
-var util = require('./../../lib/common/util');
+// var util = require('./../../lib/common/util');
 var modelRuleModel;
 
 module.exports = function ModelRule(app, cb) {
@@ -214,24 +214,23 @@ function executeDecisionTableRules(modelCtx, model, next) {
         payload.options = modelCtx.options;
         payload.options.modelName = model.modelName;
         var populatorTasks = defaultRules.map(rule => cb => {
-          if(modelRuleInfo.isService) {
+          if (modelRuleInfo.isService) {
             desicionServiceModel.invoke(rule, payload, modelCtx.options, (err, results) => {
-              // CONVENTION: the result received from a decision service invocation is an 
+              // CONVENTION: the result received from a decision service invocation is an
               // object. The properties represent nodes in the decision graph taking part in
               // the decision. We assume that the corresponding value (which is always an object)
               // are what enriches the payload
               Object.keys(results || {}).forEach(decisionName => {
                 var decisionValue = results[decisionName];
-                if(typeof decisionValue === 'object') {
-                  Object.keys(decisionValue).forEach(enrichedKey => 
-                    payload[enrichedKey] = decisionValue[enrichedKey]
-                  );
-                }                
+                if (typeof decisionValue === 'object') {
+                  Object.keys(decisionValue).forEach(enrichedKey => {
+                    payload[enrichedKey] = decisionValue[enrichedKey];
+                  });
+                }
               });
               cb(err);
             });
-          }
-          else {
+          } else {
             desicionTableModel.exec(rule, payload, modelCtx.options, (err, enrichedData) => {
               if (enrichedData && enrichedData.options) {
                 delete enrichedData.options;
