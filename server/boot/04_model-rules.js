@@ -169,179 +169,91 @@ function executeDecisionTableRules(modelCtx, model, next) {
   // Not checking the model existence since it is a loopback feature.
   var desicionTableModel = loopback.findModel('DecisionTable');
   var desicionServiceModel = loopback.findModel('DecisionService');
-  // var modelData = modelCtx.data || modelCtx.instance;
-  // var payload = modelData.__data;
-
-  // begin - new changes
-  // querying the ModelRule model to find the corresponding
-  // model
-  var filter = { where: { name: model.modelName, disabled: false }};
-  modelRuleModel.findOne(filter, modelCtx.options, (err, modelRuleRecord) => {
-    if (err) {
-      next(err);
-    } else if (!modelRuleRecord) {
-      next();
-    } else {
-      // Step 1. retrieving the inheritance chain
-      var inheritanceChain = [];
-      util.traverseInheritanceTree(modelCtx, base => {
-        inheritanceChain.push(base);
-      });
-      // begin - promise chaining
-      Promise.resolve(inheritanceChain)
-        .then(chain => {
-          // Step 2. retrieving all  base model names
-          // and adding the current model to the start
-          // of array
-          var names = chain.map(bm => bm.modelName);
-          names.unshift(modelRuleRecord.modelName);
-          return names;
-        })
-        .then(modelArray => {
-          // step 3. fetching all default rules
-
-          // begin - step 3
-          var defaultRulesArray = [];
-          var fetchTasks = modelArray.map((m, idx) => cb => {
-            var filter = {
-              where: {
-                modelName: m,
-                disabled: false
-              }
-            };
-            modelRuleModel.findOne(filter, modelCtx.options, (err, modelRuleInfo) => {
-              if (err) {
-                cb(err);
-              } else {
-                var defaultRules = modelRuleInfo.defaultRules.map((r, ridx) => ({
-                  modelName: modelRuleInfo.modelName,
-                  rule: r,
-                  isService: modelRuleInfo.isService,
-                  ordinal: idx,
-                  ridx
-                }));
-                defaultRulesArray = defaultRulesArray.concat(defaultRules);
-                cb();
-              }
-            });
-          });
-
-          return new Promise((resolve, reject) => {
-            async.seq(...fetchTasks)(err => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve(defaultRulesArray);
-              }
-            });
-          });
-          // end - step 3
-        })
-        .then(defaultRules => {
-          // step 4. execute all default rules in reverse
-          // inheritance order (i.e. from base -> derived)
-
-          // ASSUMPTION: Order of the default populator rules
-          // is probably important...we probably cannot ignore this
-          // hence the weird sorting logic
-
-          // begin - step 4
-          var modelData = modelCtx.data || modelCtx.instance;
-          var payload = modelData.__data;
-
-          var populatorTasks = defaultRules.sort((a, b) =>{
-            if (a.ordinal < b.ordinal) {
-              return 1;
-            } else if (a.ordinal > b.ordinal) {
-              return -1;
-            }
-
-            return a.ridx - b.ridx;
-          }).map(ruleObj => {
-            return cb => {
-              payload.options = modelCtx.options;
-              payload.options.modelName = ruleObj.modelName;
-              if (ruleObj.isService) {
-                desicionServiceModel.invoke(ruleObj.rule, payload, modelCtx.options, (err, enrichedData) => {
-                  if (enrichedData && enrichedData.options) {
-                    delete enrichedData.options;
-                  }
-                  payload = enrichedData;
-                  cb(err);
-                });
-              } else {
-                desicionTableModel.exec(ruleObj.rule, payload, modelCtx.options, (err, enrichedData) => {
-                  if (enrichedData && enrichedData.options) {
-                    delete enrichedData.options;
-                  }
-                  payload = enrichedData;
-                  cb(err);
-                });
-              }
-            };
-          });
-
-          return new Promise((resolve, reject) => {
-            async.seq(...populatorTasks)(err => {
-              modelCtx.data = modelCtx.instance = payload;
-              next(err);
-            });
-          });
-          // end - step 4
-        })
-        .catch(next);
-      // end - promise chaining
-    }
-  });
-  // end - new changes
+  var modelData = modelCtx.data || modelCtx.instance;
+  var payload = modelData.__data;
 
   // begin - old code
   // Building filter query to find the modelRule
   // Is model.modelName is the right way to get model name or we have to use modelCtx, who is populating modelName to model constructor
   // does models with base PersistedModel also works.
-  // var filter = {
-  //   where: {
-  //     modelName: model.modelName,
-  //     disabled: false
-  //   }
-  // };
-  // // Querying the ModelRule model with model context options since it is from 'before save' hook.
-  // modelRuleModel.find(filter, modelCtx.options, function (err, results) {
-  //   if (err) {
-  //     // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
-  //     log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
-  //     return next(err);
-  //   }
-  //   // Validating results is array and it contains the first element and defaultRules
-  //   if (results && results instanceof Array && results[0] && results[0].defaultRules) {
-  //     // Getting the defaultRules from the DB/cache results.
-  //     var defaultRules = results[0].defaultRules;
-  //     // Validating defaultRules is of type array and have some rules present in it.
-  //     if (defaultRules instanceof Array && defaultRules.length > 0) {
-  //       // Default rules need to be executed in sequence and enrich the payload data.
-  //       async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
-  //         log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
-  //         payload.options = modelCtx.options;
-  //         payload.options.modelName = model.modelName;
-  //         desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {
-  //           if (enrichedData && enrichedData.options) {
-  //             delete enrichedData.options;
-  //           }
-  //           payload = enrichedData;
-  //           ruleCb(err);
-  //         });
-  //       }, function (err) {
-  //         modelCtx.data = modelCtx.instance = payload;
-  //         next(err);
-  //       });
-  //     } else {
-  //       log.debug(log.defaultContext(), 'No default rules to execute.');
-  //       next();
-  //     }
-  //   } else {
-  //     log.debug(log.defaultContext(), 'no model rule found for model ', model.modelName);
-  //     next();
-  //   }
-  // });
+  var filter = {
+    where: {
+      modelName: model.modelName,
+      disabled: false
+    }
+  };
+  // Querying the ModelRule model with model context options since it is from 'before save' hook.
+  modelRuleModel.findOne(filter, modelCtx.options, function (err, modelRuleInfo) {
+    if (err) {
+      // Not sure how to trigger this code from the test cases i.e. how to trigger error for modelRuleModel.find
+      log.error(log.defaultContext(), 'modelRuleModel.find err - ', err);
+      return next(err);
+    }
+    // Validating results is array and it contains the first element and defaultRules
+    if (modelRuleInfo) {
+      // Getting the defaultRules from the DB/cache results.
+      var defaultRules = modelRuleInfo.defaultRules;
+      // Validating defaultRules is of type array and have some rules present in it.
+      if (defaultRules instanceof Array && defaultRules.length > 0) {
+        // Default rules need to be executed in sequence and enrich the payload data.
+        // async.eachSeries(defaultRules, function (defaultRule, ruleCb) {
+        //   log.debug(log.defaultContext(), 'Executing Rule - ', defaultRule);
+        //   payload.options = modelCtx.options;
+        //   payload.options.modelName = model.modelName;
+        //   desicionTableModel.exec(defaultRule, payload, modelCtx.options, function (err, enrichedData) {
+        //     if (enrichedData && enrichedData.options) {
+        //       delete enrichedData.options;
+        //     }
+        //     payload = enrichedData;
+        //     ruleCb(err);
+        //   });
+        // }, function (err) {
+        //   modelCtx.data = modelCtx.instance = payload;
+        //   next(err);
+        // });
+        payload.options = modelCtx.options;
+        payload.options.modelName = model.modelName;
+        var populatorTasks = defaultRules.map(rule => cb => {
+          if(modelRuleInfo.isService) {
+            desicionServiceModel.invoke(rule, payload, modelCtx.options, (err, results) => {
+              // CONVENTION: the result received from a decision service invocation is an 
+              // object. The properties represent nodes in the decision graph taking part in
+              // the decision. We assume that the corresponding value (which is always an object)
+              // are what enriches the payload
+              Object.keys(results || {}).forEach(decisionName => {
+                var decisionValue = results[decisionName];
+                if(typeof decisionValue === 'object') {
+                  Object.keys(decisionValue).forEach(enrichedKey => 
+                    payload[enrichedKey] = decisionValue[enrichedKey]
+                  );
+                }                
+              });
+              cb(err);
+            });
+          }
+          else {
+            desicionTableModel.exec(rule, payload, modelCtx.options, (err, enrichedData) => {
+              if (enrichedData && enrichedData.options) {
+                delete enrichedData.options;
+              }
+              payload = enrichedData;
+              cb(err);
+            });
+          }
+        });
+
+        async.seq(...populatorTasks)(err => {
+          modelCtx.data = modelCtx.instance = payload;
+          next(err);
+        });
+      } else {
+        log.debug(log.defaultContext(), 'No default rules to execute.');
+        next();
+      }
+    } else {
+      log.debug(log.defaultContext(), 'no model rule found for model ', model.modelName);
+      next();
+    }
+  });
   // end - old code
 }

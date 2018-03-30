@@ -32,6 +32,7 @@ describe('model rules with inherited models', function() {
   before('creating the base model', function(done){
     var EmployeeBase = {
       name: 'Employee',
+      base: 'BaseEntity',
       properties: {
         name: 'string',
         age: 'number',
@@ -135,6 +136,128 @@ describe('model rules with inherited models', function() {
     });
   }); //end ...before()
 
+  it('should assert the order in which the hooks execute are as expected', done => {
+
+    // The purpose of this test is to convince yourself of the order in
+    // which the hooks execute
+    var task1 = cb => {
+      // begin - creating a parent model from BaseEntity
+      var modelDef = {
+        name: 'A',
+        properties: {
+          a : 'string'
+        },
+        base: 'BaseEntity'
+      };
+
+      models.ModelDefinition.create(modelDef, adminContext, (err, record) => {
+        if(err) {
+          cb(err)
+        }
+        else {
+          // expect(record.name).to.equal(modelDef.name);
+          cb();
+        }
+      });
+      // end - creating a parent model from BaseEntity
+    };
+
+    var task2 = cb => {
+      // begin - creating a derived model from A
+      var modelDef = {
+        name: 'B',
+        base: 'A',
+        properties: {
+          b: 'number'
+        }
+      };
+
+      models.ModelDefinition.create(modelDef, adminContext, (err, record) => {
+        if(err) {
+          cb(err)
+        }
+        else {
+          // expect(record.name).to.equal(modelDef.name);
+          cb();
+        }
+      });
+      // end - creating a derived model from A
+    };
+
+    var task3 = cb => {
+      // begin - create a derived model from B
+      var modelDef = {
+        name: 'C',
+        base: 'B',
+        properties: {
+          c: 'boolean'
+        }
+      };
+
+      models.ModelDefinition.create(modelDef, adminContext, (err, record) => {
+        if(err) {
+          cb(err)
+        }
+        else {
+          // expect(record.name).to.equal(modelDef.name);
+          cb();
+        }
+      });
+      // end - create a derived model from B
+    };
+    var cache = [];
+    var task4 = cb => {
+      // begin - wiring before save hooks
+      var A = loopback.findModel('A');
+      var B = loopback.findModel('B');
+
+      A.observe('before save', function _bsA(ctx, next) {
+        cache.push('A');
+        // console.log('A ctx:', ctx);
+        next();
+      });
+
+      B.observe('before save', function _bsB(ctx, next){
+        cache.push('B');
+        // console.log('B ctx:', ctx);
+        next();
+      });
+      // end - wiring before save hooks
+
+      cb();
+    };
+
+    var task5 = cb => {
+      // begin - creating a record in c
+      var C = loopback.findModel('C');
+      var data = {
+        a: 'fooA',
+        b: 2,
+        c: false
+      };
+
+      C.create(data, adminContext, err => {
+        if(err) {
+          cb(err);
+        }
+        else {
+          cb();
+        }
+      });
+      // end - creating a record in c
+    };
+    // debugger;
+    async.seq(task1, task2, task3, task4, task5)(err => {
+      if(err) {
+        done(err);
+      }
+      else {
+        expect(cache).to.eql(['A', 'B']);
+        done();
+      }
+    })
+  });
+
   it('should create a derived employee (as test-tenant)', done => {
     var derivedEmployee = {
       name: 'BPOEmployee',
@@ -170,7 +293,7 @@ describe('model rules with inherited models', function() {
     };
 
     var derivedModel = loopback.findModel('BPOEmployee', context);
-    debugger;
+    // debugger;
     derivedModel.create(invalidRecord, context, err => {
       if (err) {
         // debugger;
@@ -194,7 +317,7 @@ describe('model rules with inherited models', function() {
           documentData: prefix + fs.readFileSync(__dirname + '/model-rule-data/populator1.xlsx').toString('base64')
         }
       };
-      models.DecisionTable.create(data, context, err => {
+      models.DecisionTable.create(data, adminContext, err => {
         if(err) {
           cb(err);
         }
@@ -205,7 +328,7 @@ describe('model rules with inherited models', function() {
     };
 
     var findModelRuleForBaseEmployee = cb => {
-      models.ModelRule.findOne({ modelName: 'Employee' }, context, (err, data) => {
+      models.ModelRule.findOne({ modelName: 'Employee' }, adminContext, (err, data) => {
         if(err) {
           cb(err)
         }
@@ -219,8 +342,8 @@ describe('model rules with inherited models', function() {
       //add a populator rule for employee
       var data = record.__data;
       data.defaultRules = ['Populator1']
-
-      models.ModelRule.upsert(data, context, err => {
+      // console.log(data);
+      models.ModelRule.upsert(data, adminContext, err => {
         if (err) {
           cb(err);
         }
@@ -230,19 +353,21 @@ describe('model rules with inherited models', function() {
       });
     };
 
+    var record = {
+      name: 'Arif',
+      qualification: {
+        marks_10: 63,
+        marks_12: 65
+      },
+      gender: "M",
+      age: 23,
+      shift: 'night'
+    };
+
     var insertBPOEmployeeRecord = cb => {
       var bpoModel = loopback.findModel('BPOEmployee', context);
-      var record = {
-        name: 'Arif',
-        qualification: {
-          marks_10: 63,
-          marks_12: 65
-        },
-        gender: "M",
-        age: 23,
-        shift: 'night'
-      };
-
+      
+      // debugger;
       bpoModel.create(record, context, (err, inst) => {
         if (err) {
           cb(err)
@@ -258,6 +383,9 @@ describe('model rules with inherited models', function() {
       createPopulatorDecision, 
       findModelRuleForBaseEmployee, 
       updateModelRuleForBaseEmployee, 
+      // cb => {
+      //   setTimeout(cb, 3000);
+      // },
       insertBPOEmployeeRecord)
 
     ((err, result) => {
@@ -268,7 +396,7 @@ describe('model rules with inherited models', function() {
         var data = result.__data;
         expect(data).to.be.defined;
         expect(typeof(data.section)).to.not.equal('undefined');
-        expect(data.section).to.equal("men");
+        expect(data.section).to.equal("junior men");
         done();  
       }      
     });
