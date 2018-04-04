@@ -211,8 +211,8 @@ module.exports = function AuthSessionFn(AuthSession) {
       id = req.params && typeof req.params[param] !== 'undefined' ? req.params[param] :
         req.body && typeof req.body[param] !== 'undefined' ? req.body[param] :
           req.query && typeof req.query[param] !== 'undefined' ? req.query[param] :
-            null;
-      if (id && typeof id === 'string') {
+          getFromCookie(req, param);
+          if (id && typeof id === 'string') {
         return id;
       }
     }
@@ -259,3 +259,18 @@ module.exports = function AuthSessionFn(AuthSession) {
     return null;
   }
 };
+
+
+function getFromCookie(r, p) {
+  if(r.headers && r.headers.cookie) {
+    var all_cookies = r.headers.cookie.split(';');
+    var result = null;
+    all_cookies.forEach(function(c) {
+      if(c.split('=')[0].trim() === p) {
+        result = c.split('=')[1].trim();
+        return;
+      }
+     });
+    return result.substring(4, 68);
+  }
+}
