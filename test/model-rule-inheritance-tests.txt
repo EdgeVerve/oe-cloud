@@ -1,0 +1,184 @@
+/**
+ *
+ * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
+var chalk = require('chalk');
+var bootstrap = require('./bootstrap');
+var expect = bootstrap.chai.expect;
+var models = bootstrap.models;
+var app = bootstrap.app;
+var chai = require('chai');
+chai.use(require('chai-things'));
+var prefix = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,';
+
+var context = bootstrap.defaultContext;
+
+describe('model rules with inherited models', function() {
+  var baseModel;
+  before('creating the base model', function(done){
+    var EmployeeBase = {
+      name: 'Employee',
+      properties: {
+        name: 'string',
+        age: 'number',
+        gender: 'string',
+        qualification: 'object'
+      }
+    };
+
+    models.ModelDefinition.create(EmployeeBase, context, (err, model) => {
+      if (err) {
+        done(err);
+      } else {
+        baseModel = mode;
+        expect(baseModel.modelName).to.equal('Employee-test-tenant');
+        done();
+      }
+    });
+  });
+
+  var DecisionTable = models.DecisionTable;
+  var insert = function(obj) {
+    return new Promise((done, reject) => {
+      DecisionTable.create(obj, context, (err) => {
+        if (err) {
+          reject(err)
+        }
+        else {
+          done();
+        }
+      });
+    });
+  };
+
+  before('Creating decisions for the base model', function(done){
+
+
+    var decisions = [
+      {
+        name: 'd1',
+        document: {
+          documentName: 'employee_validation.xlsx',
+          documentData: prefix + fs.readFileSync(__dirname + '/model-rule-data/employee_validation.xlsx').toString('base64')
+        }
+      }
+    ];
+
+
+  });
+
+  before('...wiring the model rule to run on base model insert', (done) => {
+    var obj = {
+      name: 'Employee',
+      validationRules: ['d1']
+    };
+
+    models.ModelRule.create(obj, context, (err) => {
+      if(err) {
+        done(err)
+      }
+      else {
+        done();
+      }
+    });
+  });
+
+  before('...asserting the base model rules get invoked on insert', done => {
+    var records = [
+      {
+        name: 'person1',
+        age: 23,
+        qualification: {
+          marks_10: 65,
+          marks_12: 65
+        }
+      },
+      {
+        name: 'person2',
+        age: 24,
+        qualification: {
+          marks_10: 65,
+          marks_12: 59
+        }
+      }
+    ];
+
+    baseModel.create(records, context, err => {
+      expect(err).to.not.be.null;
+      baseModel.find({}, context, (errFind, data) => {
+        if(errFind) {
+          done(errFind)
+        }
+        else {
+          expect(data.length).to.equal(1);
+          done();
+        }
+      });
+    });
+  }); //end ...before()
+
+  var variantModel;
+
+  before('...creating variantOf model', done => {
+    var variantDefinition = {
+      name: 'BPOEmployee',
+      variantOf: 'Employee',
+      properties: {
+        shift: 'string'
+      }
+    };
+
+    models.ModelDefinition.create(variantDefinition, context, (err, model) => {
+      if(err) {
+        done(err);
+      }
+      else {
+        variantModel = model;
+        expect(variantModel.modelName).to.equal('BPOEmployee-test-tenant');
+        done();
+      }
+    });
+  });
+
+  it('should insert a valid record for BPO employee', done => {
+    var record = {
+      name: 'emp1',
+      age: 18,
+      qualification: {
+        marks_10: 62,
+        marks_12: 61
+      },
+      shift: 'night'
+    };
+
+    variantModel.create(record,context, err => {
+      if (err) {
+        done(err)
+      }
+      else {
+        done(); //insert passed
+      }
+    });
+  }); //end it()
+
+  it('should deny insert of an incorrect record', done => {
+    var badRecord = {
+      name: 'emp2',
+      age: 32,
+      qualification: {
+        marks_10 : 69,
+        marks_12 : 58
+      },
+      shift: 'afternoon'
+    };
+
+    variantModel.create(badRecord, context, err => {
+      expect(err).to.not.be.null;
+      done();
+    });
+  }); //end it()
+
+
+});
