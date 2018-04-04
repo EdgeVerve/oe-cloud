@@ -25,7 +25,7 @@ var Customer, Order;
 describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
   before('creating the parent model', function(done) {
     var data = {
-      name: 'Customer',
+      name: 'XCustomer',
       properties: {
         name: {
           type: 'string',
@@ -40,7 +40,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
     models.ModelDefinition.create(data, bootstrap.defaultContext, function (err, models) {
       var testModel = loopback.getModel(data.name, bootstrap.defaultContext);
       // testModelWithBase = loopback.getModel(testModelAsBasePM, bootstrap.defaultContext);
-      expect(testModel.modelName).to.equal('Customer-test-tenant');
+      expect(testModel.modelName).to.equal('XCustomer-test-tenant');
       Customer = testModel;
 
       done(err);
@@ -49,7 +49,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
 
   before('creating the child model', function(done) {
     var data = {
-      name: 'Order',
+      name: 'XOrder',
       properties: {
         gate: {
           type: 'string'
@@ -58,7 +58,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
       relations: {
         cust: {
           type: 'belongsTo',
-          model: 'Customer'
+          model: 'XCustomer'
         }
       }
     };
@@ -66,7 +66,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
     models.ModelDefinition.create(data, bootstrap.defaultContext, function (err, models) {
       var testModel = loopback.getModel(data.name, bootstrap.defaultContext);
       // testModelWithBase = loopback.getModel(testModelAsBasePM, bootstrap.defaultContext);
-      expect(testModel.modelName).to.equal('Order-test-tenant');
+      expect(testModel.modelName).to.equal('XOrder-test-tenant');
       Order = testModel;
       done(err);
     });
@@ -74,7 +74,7 @@ describe(chalk.blue('model-rule-belongsTo-relation-test'), function() {
 
   var custId;
   // var orderId;
-  before('creating some dummy data in Customer', function(done) {
+  before('creating some dummy data in XCustomer', function(done) {
     var data = {
       name: 'Ankur',
       amount: {

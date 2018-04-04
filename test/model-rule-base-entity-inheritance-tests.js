@@ -31,7 +31,7 @@ describe('model rules with inherited models', function() {
   var baseModel;
   before('creating the base model', function(done){
     var EmployeeBase = {
-      name: 'Employee',
+      name: 'XEmployee',
       base: 'BaseEntity',
       properties: {
         name: 'string',
@@ -47,7 +47,7 @@ describe('model rules with inherited models', function() {
         done(err);
       } else {
         baseModel = model;
-        expect(baseModel.name).to.equal('Employee');
+        expect(baseModel.name).to.equal(EmployeeBase.name);
         done();
       }
     });
@@ -87,7 +87,7 @@ describe('model rules with inherited models', function() {
 
   before('...wiring the model rule to run on base model insert (as default tenant)', (done) => {
     var obj = {
-      modelName: 'Employee',
+      modelName: 'XEmployee',
       validationRules: ['d1']
     };
 
@@ -120,7 +120,7 @@ describe('model rules with inherited models', function() {
         }
       }
     ];
-    var baseModel = loopback.findModel('Employee', adminContext);
+    var baseModel = loopback.findModel('XEmployee', adminContext);
 
     baseModel.create(records, context, err => {
       expect(err).to.not.be.null;
@@ -261,7 +261,7 @@ describe('model rules with inherited models', function() {
   it('should create a derived employee (as test-tenant)', done => {
     var derivedEmployee = {
       name: 'BPOEmployee',
-      base: 'Employee',
+      base: 'XEmployee',
       properties: {
         shift: 'string'
       }
@@ -291,7 +291,7 @@ describe('model rules with inherited models', function() {
       age: 34,
       gender: 'M'
     };
-
+    // debugger;
     var derivedModel = loopback.findModel('BPOEmployee', context);
     // debugger;
     derivedModel.create(invalidRecord, context, err => {
@@ -328,7 +328,7 @@ describe('model rules with inherited models', function() {
     };
 
     var findModelRuleForBaseEmployee = cb => {
-      models.ModelRule.findOne({ modelName: 'Employee' }, adminContext, (err, data) => {
+      models.ModelRule.findOne({ modelName: 'XEmployee' }, adminContext, (err, data) => {
         if(err) {
           cb(err)
         }

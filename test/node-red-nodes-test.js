@@ -150,7 +150,7 @@ describe(chalk.blue('Node-red Nodes test'), function () {
             });
     });
 
-    it('Destroy Node - failure scenario', function(done) {
+    xit('Destroy Node - failure scenario', function(done) {
         var api = defaults(supertest(bootstrap.app));
         var getUrl = '/redapi/literaldelete?access_token=' + accessToken;
         api.set('Accept', 'application/json')
