@@ -62,7 +62,7 @@ npminstall:
   tags:
     - CEP_RUNNER
 
-.mongotest:
+mongotest:
   stage: pre-build-test
   script:
     - export NODE_ENV=test
