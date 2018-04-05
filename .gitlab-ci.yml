@@ -38,7 +38,7 @@ before_script:
   - export APP_TAG=latest
   - export ROUTER=cep_router
 
-npminstall:
+.npminstall:
   stage: pre-build
   script:
     - echo "Performing code style check..."
@@ -62,7 +62,7 @@ npminstall:
   tags:
     - CEP_RUNNER
 
-mongotest:
+.mongotest:
   stage: pre-build-test
   script:
     - export NODE_ENV=test
