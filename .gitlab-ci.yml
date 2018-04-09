@@ -38,7 +38,7 @@ before_script:
   - export APP_TAG=latest
   - export ROUTER=cep_router
 
-.npminstall:
+npminstall:
   stage: pre-build
   script:
     - echo "Performing code style check..."
@@ -62,7 +62,7 @@ before_script:
   tags:
     - CEP_RUNNER
 
-.mongotest:
+mongotest:
   stage: pre-build-test
   script:
     - export NODE_ENV=test
@@ -101,7 +101,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.oracletest:
+oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
@@ -134,7 +134,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.consistenthashtest:
+consistenthashtest:
   stage: pre-build-test
   script:
     - mkdir -p /data/db
@@ -156,7 +156,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.buildjob:
+buildjob:
   stage: build
   script:
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
@@ -168,7 +168,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.swarm-actor-pattern:
+swarm-actor-pattern:
   stage: swarm-actor-pattern
   script:
     - export STARTUP_CMD="npm run grunt-cover"
@@ -210,7 +210,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.retry-service:
+retry-service:
   stage: retry-service
   script:
     - export ROUTER="cep_router"
@@ -264,7 +264,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.ldap-auth:
+ldap-auth:
   stage: ldap-auth
   script:
     - export ROUTER="cep_router"
@@ -292,7 +292,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.job-scheduler-service:
+job-scheduler-service:
   stage: job-scheduler-service
   script:
     - export ROUTER="cep_router"
@@ -334,7 +334,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-.rule-cluster-tests:
+rule-cluster-tests:
   stage: rule-engine-cluster-tests
   script:
     - export STACK_NAME=${APP_IMAGE_NAME}
