@@ -101,7 +101,7 @@ postgrestest:
   tags:
     - CEP_RUNNER
 
-oracletest:
+.oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
