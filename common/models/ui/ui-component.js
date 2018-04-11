@@ -159,6 +159,7 @@ module.exports = function uiComponent(UIComponent) {
     response.modelName = component.modelName || '';
     response.modelAlias = component.modelAlias || (component.modelName ? component.modelName.toLowerCase() : 'vm');
     response.fields = component.fields;
+    response.container = component.container;
 
     if (fetchAsHtml && component.content) {
       response.content = component.content.replace(/<\/script>/g, '<\\/script>');

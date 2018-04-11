@@ -278,5 +278,9 @@
     "FailedObserverLog": {
         "public": true,
         "dataSource": "db"
+    },
+    "DraftData":{
+        "public": true,
+        "dataSource": "db"
     }
 }

@@ -1,0 +1,29 @@
+{
+	"name": "DraftData",
+	"base": "UIBase",
+	"idInjection": true,
+    "description" : "Store temporary draft data for model forms",
+	"properties": {
+      "formName": {
+          "type": "string",
+          "required": true,
+          "description" : "name of UI component for which the data is drafted"
+      },
+      "modelData":{
+          "type": "object",
+          "description": "Draft data of the form model"
+      },
+      "componentData":{
+          "type":"object",
+          "description":"Data to be set on the component"
+      },
+      "options":{
+          "type":"object",
+          "description":"Parameters for custom filtering while fetching draft data"
+      }
+	},
+	"validations": [],
+	"relations": {},
+	"acls": [],
+	"methods": {}
+}
