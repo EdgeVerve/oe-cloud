@@ -18,7 +18,7 @@ var logger = require('oe-logger');
 var log = logger('actor-pattern-activity-check-test');
 var uuidv4 = require('uuid/v4');
 
-describe('Actor startUp Test', function () {
+xdescribe('Actor startUp Test', function () {
     var modelDefinition = loopback.findModel('ModelDefinition');
     var actorModelInstance;
     var actorModel;
@@ -152,7 +152,7 @@ describe('Actor startUp Test', function () {
         });
     });
 
-    it('Check activities in db', function(done) {
+    xit('Check activities in db', function(done) {
         var checkActivities = function(done) {
             var activitiesModel = loopback.getModel('ActorActivity', options);
             activitiesModel.find({"where": {"entityId": actorId}}, options, function (err, res) {
