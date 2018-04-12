@@ -26,7 +26,7 @@ var async = require('async');
 var logger = require('oe-logger');
 var log = logger('actor-pattern-startup-test');
 
-describe('Actor startUp Test', function () {
+xdescribe('Actor startUp Test', function () {
     var modelDefinition = loopback.findModel('ModelDefinition');
     var actorModelInstance;
     var actorModel;
@@ -224,7 +224,7 @@ describe('Actor startUp Test', function () {
         }
     });
 
-    it('Check Strat Up', function(done) {
+    xit('Check Strat Up', function(done) {
         var createJournalInstanceAndCheckBalance = function(done) {
             data = {
                 "nonAtomicActivitiesList": [

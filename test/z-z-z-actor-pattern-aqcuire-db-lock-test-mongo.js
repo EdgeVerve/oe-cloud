@@ -45,7 +45,7 @@ function apiRequest(url, postData, callback, done) {
     });
 }
 
-describe(chalk.blue('actor-pattern-db-lock-test'), function () {
+xdescribe(chalk.blue('actor-pattern-db-lock-test'), function () {
   this.timeout(40000);
   var afterTest = {};
 

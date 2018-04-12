@@ -81,7 +81,7 @@ mongotest:
   tags:
     - CEP_RUNNER
 
-postgrestest:
+.postgrestest:
   stage: pre-build-test
   script:
     - export NODE_ENV=test

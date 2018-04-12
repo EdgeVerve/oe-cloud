@@ -207,10 +207,6 @@
         "public": true,
         "dataSource": "db"
     },
-    "NodeRedFlow": {
-        "public": true,
-        "dataSource": "db"
-    },
     "BaseActorEntity": {
         "dataSource": "db",
         "public": false
