@@ -68,6 +68,10 @@
 			"type": "object",
 			"description" : "fields of default model to be rendered"
 		},
+		"container" : {
+			"type": "object",
+			"description" : "containers to be added into the template"
+		},
 		"gridConfig" : {
 			"type": "object",
 			"description" : "fields to display in grids"
