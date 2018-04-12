@@ -266,7 +266,7 @@ module.exports = function ModelValidations(Model) {
                 return cb(err);
               }
               var errorArr = dataAfterValidationRule.map(function (obj) {
-                obj.fieldName = 'DecisionTable';
+                obj.fieldName = obj.field || 'DecisionTable';
                 return obj;
               });
               cb(null, errorArr);
@@ -278,7 +278,7 @@ module.exports = function ModelValidations(Model) {
               }
               var allDataAfterValidationRule = Object.values(dataAfterValidationRule).reduce((arr, item) => arr.concat(item), []);
               var errorArr = allDataAfterValidationRule.map(function (obj) {
-                obj.fieldName = 'DecisionService';
+                obj.fieldName = obj.field || 'DecisionService';
                 return obj;
               });
               cb(null, errorArr);

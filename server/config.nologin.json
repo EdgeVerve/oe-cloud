@@ -36,7 +36,6 @@
   "modelstocache": ["ACL", "ModelDefinition", "PersonalizationRule"],
   "tenantsource": "HEADER",
   "tenantkey": "tenant_id",
-  "disableNodered": true,
   "nologin": true,
   "app": "oecloud.io",
   "realm": "oecloud",

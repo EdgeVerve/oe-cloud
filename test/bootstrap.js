@@ -31,7 +31,6 @@ process.env.CONSISTENT_HASH = 'true';
 options.clientAppRootDir = __dirname;
 var basePath = app.get('restApiRoot');
 app.locals.apphome = __dirname;
-app.set('disableNodered', false);
 
 //rule engine configuration - begin
 app.set('jsFeelRelation', { disabled: false });
