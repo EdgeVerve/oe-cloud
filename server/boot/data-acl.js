@@ -110,6 +110,7 @@ function dataACLAfterSave(ctx, next) {
  * @param {Object} options - Context options
  */
 function attachBeforeRemoteHookToModel(modelName, options) {
+  console.log(modelName);
   var model = loopback.findModel(modelName, options);
   // Checking the flag that DataACL exists and attaching the hook
   if (!model.settings._dataACLExists) {
