@@ -207,10 +207,6 @@
         "public": true,
         "dataSource": "db"
     },
-    "NodeRedFlow": {
-        "public": true,
-        "dataSource": "db"
-    },
     "BaseActorEntity": {
         "dataSource": "db",
         "public": false
@@ -276,6 +272,10 @@
         "dataSource": "db"
     },
     "FailedObserverLog": {
+        "public": true,
+        "dataSource": "db"
+    },
+    "DraftData":{
         "public": true,
         "dataSource": "db"
     }

@@ -54,6 +54,9 @@ describe(chalk.blue('model-rule-test'), function () {
             base: 'BaseEntity',
             plural: testModelPlural,
             properties: {
+                id: {
+                    type: 'string'
+                },
                 status: {
                     type: 'string',
                     max: 8
@@ -246,9 +249,11 @@ describe(chalk.blue('model-rule-test'), function () {
                 });
         });
 
-        it('create with valid data should be succesfull.', function (done) {
+        var modelId, modelVersion;
+        it('create with valid data should be succesful.', function (done) {
             var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
             var postData = {
+                id: "5a57260551b1d70c2c4f6666",
                 status: 'entered',
                 age: 50,
                 husband_name: 'Hopper'
@@ -264,6 +269,41 @@ describe(chalk.blue('model-rule-test'), function () {
                     if (err) {
                         log.error(log.defaultContext(), 'create with valid data should be succesfull model rest api Error: ', err);
                     }
+                    expect(response).not.to.be.null;
+                    expect(response).not.to.be.undefined;
+                    expect(response.body).not.to.be.null;
+                    expect(response.body).not.to.be.undefined;
+                    expect(response.body.sex).to.be.equal('F');
+                    expect(response.body.married).to.be.equal(true);
+                    expect(response.body.phone).to.be.equal(1234);
+                    expect(response.body.email).to.be.equal('abc');
+                    modelId = response.body.id;
+                    modelVersion = response.body._version;
+                    done();
+                });
+        });
+
+        it('PUT with valid data should be succesful.', function (done) {
+            var url = baseUrl + '/' + testModelPlural + '?access_token=' + accessToken;
+            var putData = {
+                id: modelId,
+                _version: modelVersion,
+                status: 'entered',
+                age: 50,
+                husband_name: 'Pradeep'
+            };
+            console.log("putData", putData);
+            api
+                .set('tenant_id', 'test-tenant')
+                .set('Accept', 'application/json')
+                .put(url)
+                .send(putData)
+                .expect(200)
+                .end(function (err, response) {
+                    if (err) {
+                        log.error(log.defaultContext(), 'create with valid data should be succesfull model rest api Error: ', err);
+                    }
+                    console.log("response.body", response.body);
                     expect(response).not.to.be.null;
                     expect(response).not.to.be.undefined;
                     expect(response.body).not.to.be.null;

@@ -41,7 +41,7 @@ function apiRequest(url, postData, callback, done) {
     });
 }
 
-describe(chalk.blue('actor-pattern-test'), function () {
+xdescribe(chalk.blue('actor-pattern-test'), function () {
   this.timeout(40000);
   var afterTest = {};
 
