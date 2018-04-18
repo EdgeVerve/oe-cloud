@@ -58,6 +58,7 @@ describe(chalk.blue('Composite Model test'), function () {
             },
             'filebased': false
         }, callContext, function (err, model) {
+            console.log(err);
             expect(err).to.be.not.ok;
             models.ModelDefinition.create({
                 name: 'UpcomingEvent',
@@ -111,7 +112,6 @@ describe(chalk.blue('Composite Model test'), function () {
                     filebased: false
                 }, callContext, function (err2, model2) {
                     expect(err2).to.be.null;
-
                     models.ModelDefinition.create({
                         name: 'CompositeModel',
                         base: 'BaseEntity',
@@ -127,9 +127,57 @@ describe(chalk.blue('Composite Model test'), function () {
                             'Customer': {},
                             'UpcomingEvent': {}
                         }
-                    }, callContext, function (err2, model2) {
-                        expect(err2).to.be.not.ok;
-                        return done(err2);
+                    }, callContext, function (err3, model3) {
+                        expect(err3).to.be.not.ok;
+                        models.ModelDefinition.create({
+                            name: 'HOUser',
+                            'idInjection': false,
+                            base: 'BaseEntity',
+                            'mixins': {
+                                'VersionMixin': false,
+                                'IdempotentMixin': false,
+                            },
+                            properties: {
+                                name: {
+                                    type: 'string'
+                                }
+                            },
+                            relations: {
+                                preferences: {
+                                type: 'hasOne',
+                                model: 'HOPreferences',
+                                foreignKey: 'userId'
+                            }
+                            }
+                        }, callContext, function(err4, model4){
+                            models.ModelDefinition.create({
+                                name: 'HOPreferences',
+                                'idInjection': false,
+                                base: 'BaseEntity',
+                                'mixins': {
+                                    'VersionMixin': false,
+                                    'IdempotentMixin': false,
+                                },
+                                properties: {
+                                    choice1: {
+                                        type: 'string'
+                                    },
+                                    flag1: {
+                                        type: 'boolean'
+                                    }
+                                },
+                                relations: {
+                                    preferences: {
+                                        type: 'hasOne',
+                                        model: 'HOPreferences',
+                                        foreignKey: 'userId'
+                                    }
+                                }
+                            }, callContext, function(err5, model5){
+                                expect(err5).to.be.not.ok;
+                                return done(err5);
+                            });
+                        })
                     });
                 });
             });
@@ -137,6 +185,12 @@ describe(chalk.blue('Composite Model test'), function () {
     });
 
     after('destroy test models', function (done) {
+        models.ModelDefinition.destroyAll({
+            name: 'HOPreferences'
+        }, callContext, function () { });
+        models.ModelDefinition.destroyAll({
+            name: 'HOUser'
+        }, callContext, function () { });
         models.ModelDefinition.destroyAll({
             name: 'Customer'
         }, callContext, function () { });
@@ -146,6 +200,8 @@ describe(chalk.blue('Composite Model test'), function () {
         models.ModelDefinition.destroyAll({
             name: 'CustomerAddress'
         }, callContext, function () { });
+        loopback.findModel("HOPreferences", callContext).destroyAll({}, callContext, function () { });
+        loopback.findModel("HOUser", callContext).destroyAll({}, callContext, function () { });
         loopback.findModel("Customer", callContext).destroyAll({}, callContext, function () { });
         loopback.findModel("CustomerAddress", callContext).destroyAll({}, callContext, function () { });
         loopback.findModel("UpcomingEvent", callContext).destroyAll({}, callContext, function () { });
@@ -693,5 +749,176 @@ describe(chalk.blue('Composite Model test'), function () {
         });
 
     });
+/************************* */
+/************************* */
+    it('hasOne Child posted as [{}], record is created and returned in array', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 1001,
+                preferences: [{
+                    choice1: 'Delhi',
+                    flag1: true
+                }]
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.have.property('preferences');
+            expect(response.preferences).to.be.an('array');
+            expect(response.preferences[0]).to.have.property('choice1');
+            expect(response.preferences[0]).to.have.property('flag1');
+            done();
+        });
+    });
 
+    it('hasOne Child posted as [{}], can be added later as part of PUT', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 1002
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.not.have.property('preferences');
+            response.preferences = [{__row_status:'added',choice1: 'Bengaluru', flag1: false}];
+
+            customer.upsert(response, callContext, function(err2, results2){
+                if (err2) {
+                    return done(err2);
+                }
+                    
+                var response2 = results2.__data;
+                expect(response2).to.have.property('preferences');
+                expect(response2.preferences).to.be.an('array');
+                expect(response2.preferences[0]).to.have.property('choice1');
+                expect(response2.preferences[0]).to.have.property('flag1');
+                done();
+            });
+        });
+    });
+
+    it('hasOne Child posted as [{}], record can be deleted', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 1003,
+                preferences: [{
+                    choice1: 'Delhi',
+                    flag1: true
+                }]
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.have.property('preferences');
+            expect(response.preferences).to.be.an('array');
+
+            response.preferences[0].__row_status = 'deleted';
+            customer.upsert(response, callContext, function(err2, results2){
+                if (err2) {
+                    return done(err2);
+                }
+
+                var response2 = results2.__data;
+                expect(response2).to.not.have.property('preferences');
+                done();
+            });
+
+        });
+    });
+
+    it('hasOne Child posted as {}, record is created and returned as object', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 2001,
+                preferences: {
+                    choice1: 'Delhi',
+                    flag1: true
+                }
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.have.property('preferences');
+            expect(response.preferences).to.be.ok;
+            expect(response.preferences).to.not.be.an('array');
+            expect(response.preferences).to.have.property('choice1');
+            expect(response.preferences).to.have.property('flag1');
+            done();
+        });
+    });
+
+    it('hasOne Child posted as {}, can be added later as part of PUT', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 2002
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.not.have.property('preferences');
+            response.preferences = {__row_status:'added',choice1: 'Bengaluru', flag1: false};
+
+            customer.upsert(response, callContext, function(err2, results2){
+                if (err2) {
+                    return done(err2);
+                }
+                    
+                var response2 = results2.__data;
+                expect(response2).to.have.property('preferences');
+                expect(response2.preferences).to.be.ok;
+                expect(response2.preferences).to.not.be.an('array');
+                expect(response2.preferences).to.have.property('choice1');
+                expect(response2.preferences).to.have.property('flag1');
+                done();
+            });
+        });
+    });
+
+    it('hasOne Child posted as {}, record can be deleted', function (done) {
+        var customer = loopback.getModel('HOUser', callContext);
+        customer.create({
+                name: 'Smith',
+                id: 2003,
+                preferences: {
+                    choice1: 'Delhi',
+                    flag1: true
+                }
+        }, callContext, function (err, results) {
+            if (err) {
+                return done(err);
+            }
+            var response = results.__data;
+            expect(response).to.have.property('name');
+            expect(response).to.have.property('preferences');
+            expect(response.preferences).to.be.ok;
+
+            response.preferences.__row_status = 'deleted';
+            customer.upsert(response, callContext, function(err2, results2){
+                if (err2) {
+                    return done(err2);
+                }
+
+                var response2 = results2.__data;
+                expect(response2).to.not.have.property('preferences');
+                done();
+            });
+
+        });
+    });
+    
 });

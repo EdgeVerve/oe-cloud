@@ -21,6 +21,7 @@ var validationBuilder = require('../../lib/common/validation-builder.js');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 var getError = require('../../lib/common/error-utils').attachValidationError;
 var loopback = require('loopback');
+var util = require('../../lib/common/util.js');
 
 module.exports = function ModelValidations(Model) {
   if (Model.modelName === 'BaseEntity') {
@@ -245,58 +246,189 @@ module.exports = function ModelValidations(Model) {
     var desicionTableModel = loopback.findModel('DecisionTable');
     var desicionServiceModel = loopback.findModel('DecisionService');
     var modelRule = loopback.findModel('ModelRule');
-    var filter = {
-      where: {
-        modelName: model.modelName,
-        disabled: false
-      }
-    };
-    modelRule.find(filter, options, function modelRule(err, res) {
-      if (err) {
-        return callback(err);
-      }
-      if (res && res[0] && res[0].validationRules && res[0].validationRules.length > 0) {
-        var rules = res[0].validationRules;
-        inst.options = options;
-        inst.options.modelName = model.modelName;
-        async.concat(rules, function (rule, cb) {
-          if (!res[0].isService) {
-            desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
-              if (err) {
-                return cb(err);
-              }
-              var errorArr = dataAfterValidationRule.map(function (obj) {
-                obj.fieldName = obj.field || 'DecisionTable';
-                return obj;
-              });
-              cb(null, errorArr);
-            });
-          } else {
-            desicionServiceModel.invoke(rule, inst, options, function (err, dataAfterValidationRule) {
-              if (err) {
-                return cb(err);
-              }
-              var allDataAfterValidationRule = Object.values(dataAfterValidationRule).reduce((arr, item) => arr.concat(item), []);
-              var errorArr = allDataAfterValidationRule.map(function (obj) {
-                obj.fieldName = obj.field || 'DecisionService';
-                return obj;
-              });
-              cb(null, errorArr);
-            });
-          }
-        }, function (err, results) {
-          if (inst && inst.options) {
-            delete inst.options;
-          }
-          if (err) {
-            results.push(err);
-          }
-          callback(null, results);
-        });
-      } else {
-        callback(null, null);
-      }
+
+    // begin - new change
+    // Traverse up the inheritance tree
+    var chain = [];
+
+    util.traverseInheritanceTree(model, options, base => {
+      chain.push(base);
     });
+
+    Promise.resolve(chain).then(chain => {
+      // Step 1. Getting all the base model names
+      // var results = [];
+      // var { tenantId } = options.ctx;
+
+      var modelNames = chain.map(baseModel => baseModel.modelName);
+
+      // adding the original model to the start of array
+      // modelNames.unshift(fnExtractUserFriendlyModelName(model.modelName));
+      modelNames.unshift(model.modelName);
+
+      return modelNames;
+    })
+      .then(modelArray => {
+      // Step 2. Getting all validation rules
+        var results = [];
+        // begin - routine to fetch rules on model
+        var fetchTasks = modelArray.map(m => cb => {
+          var filter = {
+            where: {
+              modelName: m,
+              disabled: false
+            }
+          };
+          // console.log('Fetching model rule: ', filter);
+          modelRule.findOne(filter, options, (err, rule) => {
+            if (err) {
+              cb(err);
+            } else {
+              if (rule) {
+                results = results.concat(rule.validationRules.map(r =>
+                  (
+                    {
+                      model: m,
+                      rule: r,
+                      isService: rule.isService
+                    }
+                  )
+                ));
+              }
+              cb();
+            }
+          });
+        });
+        // end - routine to fetch rules on model
+
+        return new Promise((resolve, reject) => {
+          async.seq(...fetchTasks)(err => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(results);
+            }
+          });
+        });
+      })
+      .then(validationRules => {
+      // Step 3. execute the validation rules in no particular order
+        var data = inst;
+        data.options = options;
+        return new Promise(resolve => {
+          async.concat(validationRules, (ruleObj, cb) => {
+          // begin - rule invocation
+            data.options.modelName = ruleObj.model;
+            if (ruleObj.isService) {
+            // begin - decision service invoation
+              desicionServiceModel.invoke(ruleObj.rule, data, options, (err, postValidationResults) => {
+                if (err) {
+                  cb(err);
+                } else {
+                  var results = Object.values(postValidationResults).reduce((arr, item) => arr.concat(item), []);
+                  var errorArr = results.map(obj => {
+                    obj.fieldName = 'DecisionService';
+                    obj.model = ruleObj.model;
+                    return obj;
+                  });
+                  cb(null, errorArr);
+                }
+              });
+            // end - decision service invoation
+            } else {
+            // begin - decision table invocation
+              desicionTableModel.exec(ruleObj.rule, data, options, (err, postValidationResults) => {
+                if (err) {
+                  cb(err);
+                } else {
+                  var errorArr = postValidationResults.map(function (obj) {
+                    obj.fieldName = 'DecisionTable';
+                    obj.model = ruleObj.model;
+                    return obj;
+                  });
+                  cb(null, errorArr);
+                }
+              });
+            // end - decision table invocation
+            }
+          // end - rule invocation
+          }, (err, results) => {
+            if (inst && inst.options) {
+              delete inst.options;
+            }
+            if (err) {
+              results.push(err);
+            }
+            // callback(null, results);
+            resolve(results);
+          });
+        });
+      })
+      .then(results => {
+      // Step 5. We are done...
+        callback(null, results);
+      })
+      .catch(err => {
+        callback(err);
+      });
+    // end - new change
+
+    // begin - legacy
+    // var filter = {
+    //   where: {
+    //     modelName: model.modelName,
+    //     disabled: false
+    //   }
+    // };
+    // modelRule.find(filter, options, function modelRule(err, res) {
+    //   if (err) {
+    //     return callback(err);
+    //   }
+
+
+    //   if (res && res[0] && res[0].validationRules && res[0].validationRules.length > 0) {
+    //     var rules = res[0].validationRules;
+    //     inst.options = options;
+    //     inst.options.modelName = model.modelName;
+    //     async.concat(rules, function (rule, cb) {
+    //       if (!res[0].isService) {
+    //         desicionTableModel.exec(rule, inst, options, function (err, dataAfterValidationRule) {
+    //           if (err) {
+    //             return cb(err);
+    //           }
+    //           var errorArr = dataAfterValidationRule.map(function (obj) {
+    //             obj.fieldName = 'DecisionTable';
+    //             return obj;
+    //           });
+    //           cb(null, errorArr);
+    //         });
+    //       } else {
+    //         desicionServiceModel.invoke(rule, inst, options, function (err, dataAfterValidationRule) {
+    //           if (err) {
+    //             return cb(err);
+    //           }
+    //           var allDataAfterValidationRule = Object.values(dataAfterValidationRule).reduce((arr, item) => arr.concat(item), []);
+    //           var errorArr = allDataAfterValidationRule.map(function (obj) {
+    //             obj.fieldName = 'DecisionService';
+    //             return obj;
+    //           });
+    //           cb(null, errorArr);
+    //         });
+    //       }
+    //     }, function (err, results) {
+    //       if (inst && inst.options) {
+    //         delete inst.options;
+    //       }
+    //       if (err) {
+    //         results.push(err);
+    //       }
+    //       callback(null, results);
+    //     });
+    //   } else {
+    //     callback(null, null);
+    //   }
+    // });
+    // end - legacy
   }
 
 
