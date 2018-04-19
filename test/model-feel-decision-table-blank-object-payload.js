@@ -213,8 +213,9 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
     });
   });
 
-  // note: add the necessary external function config
-  // in the corresponding environment: server/config.whatever.json
+  // note: add the necessary external function config.
+  // In this test, we have added this in test\bootstrap.js
+
   it('should execute the decision table correctly', function(done) {
     var DecisionTable = models.DecisionTable;
     var executor = function(payload) {
@@ -246,14 +247,20 @@ describe(chalk.blue('model-feel-decision-table-blank-object-payload-test'), func
         var promises = results.map( r => {
           var pl = r.__data;
           pl.options = bootstrap.defaultContext;
-          pl.modelName = Customer.modelName;
+          pl.options.modelName = Customer.modelName;
           return executor(pl);
         });
 
 
         Promise.all(promises).then(function(responses) {
 
-          console.log('responses:', inspect(responses));
+          // console.log('responses:', inspect(responses));
+          responses.forEach(resp => {
+            // expect(resp[0].errorCode).to.not.equal('JS_FEEL_ERR');
+            if(resp.length) {
+              expect(resp[0].errCode).to.not.equal('JS_FEEL_ERR')
+            }
+          });
           done();
         }).catch(e => {
           // console.dir(e);

@@ -118,6 +118,7 @@ describe(chalk.blue('model validations using decision service'), function () {
             type: 'PERSONAL_LOAN',
             experience: 5
         };
+        // debugger;
         testModel.create(incorrectRecordData, bootstrap.defaultContext, function(err) {
             if (err !== null) {
                 done();
@@ -135,7 +136,7 @@ describe(chalk.blue('model validations using decision service'), function () {
             type: 'PERSONAL_LOAN',
             experience: 7
         };
-
+        // debugger;
         testModel.create(data, bootstrap.defaultContext, function(err, result) {
             if (err) {
                 done(err)
@@ -151,7 +152,7 @@ describe(chalk.blue('model validations using decision service'), function () {
     after('resetting model', function(done) {
         testModelName = 'ServiceModelPropertyPopulationTest';
         testModelPlural = 'ServiceModelPropertyPopulationTests';
-        console.log("After of first Describe block");
+        // console.log("After of first Describe block");
         done();
     });
 });
@@ -212,12 +213,6 @@ describe(chalk.blue('model data populators with decision services'), function(){
     });
 
 
-    after('second after block', function(done) {
-        console.log("After of second Describe block");
-        done();
-    });
-
-
     it('should insert into model into model rules table to register for property population without errors', function(done){
         var modelRuleData = {
             modelName: testModelName,
@@ -226,7 +221,12 @@ describe(chalk.blue('model data populators with decision services'), function(){
         };
 
         models.ModelRule.create(modelRuleData, bootstrap.defaultContext, (err, res) =>{
-            done();
+            if(err) {
+                done(err)
+            }
+            else {
+                done();
+            }
         });
 
     });
@@ -237,7 +237,7 @@ describe(chalk.blue('model data populators with decision services'), function(){
             age: 32,
             gender: 'M'
         };
-
+        // debugger;
         testModel.create(instanceData, bootstrap.defaultContext, function(err, result) {
             if (err) {
                 done(err)
@@ -250,4 +250,8 @@ describe(chalk.blue('model data populators with decision services'), function(){
         });
     });
 
+    after('second after block', function(done) {
+        // console.log("After of second Describe block");
+        done();
+    });
 });
