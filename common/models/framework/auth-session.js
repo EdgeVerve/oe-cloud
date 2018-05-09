@@ -271,6 +271,6 @@ function getFromCookie(r, p) {
         return;
       }
     });
-    return result? result.substring(4, 68) : null;
+    return result ? result.substring(4, 68) : null;
   }
 }

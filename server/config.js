@@ -21,10 +21,10 @@ var appconfig = null;
 var config = null;
 var env = '';
 var filename = '';
-var TAG = "    * ";
+var TAG = '    * ';
 // set env to development if NODE_ENV is not set
 env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
-log.info("\n\n========================oe-Cloud==========================\n");
+log.info('\n\n========================oe-Cloud==========================\n');
 log.info(TAG + 'ENVIRONMENT = ' + env);
 filename = 'config.' + env + '.json';
 try {
@@ -45,7 +45,7 @@ try {
     log.info(TAG + 'node_modules/oe-cloud/server/config.json');
   } catch (e) { log.info(TAG + 'No Config File in Framework.');}
 }
-log.info("\n============================================================\n");
+log.info('\n============================================================\n');
 
 if (appconfig) {
   Object.assign(config, appconfig);
