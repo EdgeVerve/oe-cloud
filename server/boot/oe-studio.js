@@ -18,6 +18,8 @@ var util = require('../../lib/common/util');
 var appconfig = require('../config');
 var glob = require('glob');
 var designerName = 'oe-studio';
+var logger = require('oe-logger');
+var log = logger('oe-studio');
 
 function setDesignerPath(DesignerPath, server) {
   if (!appconfig.designer.templatePath || appconfig.designer.templatePath.length === 0) {
@@ -396,7 +398,7 @@ function setDesignerPath(DesignerPath, server) {
     if (status) {
       server.once('started', function DesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
-        console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
+        log.info('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
       });
     }
   });

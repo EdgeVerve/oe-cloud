@@ -13,34 +13,39 @@
  *
  *
  */
+var log = require('oe-logger')('config.js');
+
 // app config file.
 var appconfig = null;
 // oecloud.io config file.
 var config = null;
 var env = '';
 var filename = '';
+var TAG = "    * ";
 // set env to development if NODE_ENV is not set
 env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development';
-console.log('ENVIRONMENT=' + env);
+log.info("\n\n========================oe-Cloud==========================\n");
+log.info(TAG + 'ENVIRONMENT = ' + env);
 filename = 'config.' + env + '.json';
 try {
   appconfig = require('../../../server/' + filename);
-  console.log('Using Application Config File: server/' + filename + ' to override ');
+  log.info(TAG + 'Using Application Config File: server/' + filename + ' to override ');
 } catch (e) {
   try {
     appconfig = require('../../../server/config.json');
-    console.log('Using Application Config File: server/config.json to override ');
-  } catch (e) { console.log('No Config File in Application. Framework default config will be used.'); }
+    log.info(TAG + 'Using Application Config File: server/config.json to override ');
+  } catch (e) { log.info(TAG + 'No Config File in Application. Framework default config will be used.'); }
 }
 try {
   config = require('./' + filename);
-  console.log('node_modules/oe-cloud/server/' + filename);
+  log.info(TAG + 'node_modules/oe-cloud/server/' + filename);
 } catch (e) {
   try {
     config = require('./config.json');
-    console.log('node_modules/oe-cloud/server/config.json');
-  } catch (e) { console.log('No Config File in Framework.');}
+    log.info(TAG + 'node_modules/oe-cloud/server/config.json');
+  } catch (e) { log.info(TAG + 'No Config File in Framework.');}
 }
+log.info("\n============================================================\n");
 
 if (appconfig) {
   Object.assign(config, appconfig);
