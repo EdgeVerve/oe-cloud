@@ -137,8 +137,22 @@ function finalBoot(appinstance, options, cb) {
   if (require.main === module) {
     loadDatasource(options, env);
   }
-
-  var server = require('http').createServer(appinstance);
+  var server;
+  if (process.env.REQUIRE_HTTPS === true || process.env.REQUIRE_HTTPS === 'true') {
+    var keyPath = process.env.SSL_KEY_PATH || '';
+    var certPath = process.env.SSL_CERT_PATH || '';
+    if (!(keyPath && certPath)) {
+      console.log('SSL_KEY_PATH or SSL_CERT_PATH are missing');
+      process.exit(1);
+    }
+    let configOptions = {
+      key: fs.readFileSync(path.resolve(__dirname, keyPath)).toString(),
+      cert: fs.readFileSync(path.resolve(__dirname, certPath)).toString()
+    };
+    server = require('https').createServer(configOptions, appinstance);
+  } else {
+    server = require('http').createServer(appinstance);
+  }
   appinstance.server = server;
   module.exports.options = options;
 
@@ -193,12 +207,18 @@ function finalBoot(appinstance, options, cb) {
             // that can be copied and pasted into the browser.
             host = 'localhost';
           }
-          var url = 'http://' + host + ':' + self.get('port') + '/';
+          var url;
+          if (self.get('REQUIRE_HTTPS')) {
+            url = 'https://' + host + ':' + self.get('port') + '/';
+          } else {
+            url = 'http://' + host + ':' + self.get('port') + '/';
+          }
+
           self.set('url', url);
         }
       });
       var useAppConfig = arguments.length === 0 ||
-                (arguments.length === 1 && typeof arguments[0] === 'function');
+        (arguments.length === 1 && typeof arguments[0] === 'function');
 
       if (useAppConfig) {
         server.listen(this.get('port'), this.get('host'), cb);

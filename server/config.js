@@ -25,13 +25,13 @@ try {
 try {
   config = require('./config.json');
 } catch (e) {
-/* ignored */
+  /* ignored */
 }
 
 if (appconfig) {
   Object.assign(config, appconfig);
 }
-
+config.REQUIRE_HTTPS = process.env.REQUIRE_HTTPS || false;
 module.exports = config;
 
 module.exports.gcmServerApiKey = 'gcmServerApiActualKey';
