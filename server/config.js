@@ -50,7 +50,7 @@ log.info('\n============================================================\n');
 if (appconfig) {
   Object.assign(config, appconfig);
 }
-
+config.REQUIRE_HTTPS = process.env.REQUIRE_HTTPS || false;
 module.exports = config;
 
 module.exports.gcmServerApiKey = 'gcmServerApiActualKey';
