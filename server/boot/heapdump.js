@@ -12,12 +12,13 @@
  * @author Pradeep Kumar Tippa
  * @name Heap Dump
  */
-var AdmZip = require('adm-zip');
+var Nodezip = require('node-zip');
+var zip = new Nodezip();
 var async = require('async');
 var fs = require('fs');
 var log = require('oe-logger')('heapdump');
 // @ms node_module is internal dependency of @debug and @node-red/send
-var ms =  require('ms');
+var ms = require('ms');
 var path = require('path');
 
 module.exports = function HeapDumpFn(app, cb) {
@@ -73,17 +74,17 @@ module.exports = function HeapDumpFn(app, cb) {
 
             // Checking heapdump files are available or not.
             if (!fs.existsSync(path.join(dirToStoreDump, heapdumpName1)) ||
-                !fs.existsSync(path.join(dirToStoreDump, heapdumpName2))) {
+                            !fs.existsSync(path.join(dirToStoreDump, heapdumpName2))) {
               return res.status(500).json({ error: 'One or more heapdump files are not present to send.' });
             }
-            var zip = new AdmZip('');
+            // var zip = new AdmZip('');
             // Reading buffer of heapdump files in parallel and adding to adm-zip.
             async.each([heapdumpName1, heapdumpName2], (file, callback) => {
               fs.readFile(path.join(dirToStoreDump, file), (err, data) => {
                 if (err) {
                   return callback(err);
                 }
-                zip.addFile(file, data);
+                zip.file(file, data);
                 callback();
               });
             }, (err) => {
@@ -91,13 +92,14 @@ module.exports = function HeapDumpFn(app, cb) {
                 log.error(log.defaultContext(), 'Encountered error while zipping heapdump snapshots. Error: ', err);
                 return res.status(500).json({ err: err, msg: 'Encountered error while zipping heapdump snapshots.' });
               }
-              res.writeHead(200, {
-                'Content-Type': 'application/octet-stream',
-                'Content-Disposition': 'attachment; filename=' + heapdumpZip
-              });
+
               // Getting the Buffer from zip and sending it in response.
-              res.write(zip.toBuffer(), 'binary');
-              res.end(null, 'binary');
+              fs.writeFile(heapdumpZip, zip.generate({ base64: false, compression: 'DEFLATE' }), 'binary', function (error) {
+                res.download(heapdumpZip);
+                fs.unlink(heapdumpZip, function () {
+                  // do nothing
+                });
+              });
             });
           });
         }

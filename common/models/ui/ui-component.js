@@ -24,6 +24,10 @@ module.exports = function uiComponent(UIComponent) {
   var templateMap = null;
   function loadTemplate(template, app, options, callback) {
     app.models.AppConfig.findOne({}, options, function AppConfigFindOneCb(err, data) {
+      if (err) {
+        callback(err);
+        return;
+      }
       if (!templateMap) {
         templateMap = generateTemplateMap(app);
       }
@@ -155,6 +159,8 @@ module.exports = function uiComponent(UIComponent) {
     response.modelName = component.modelName || '';
     response.modelAlias = component.modelAlias || (component.modelName ? component.modelName.toLowerCase() : 'vm');
     response.fields = component.fields;
+    response.container = component.container;
+    response.componentData = component.componentData;
 
     if (fetchAsHtml && component.content) {
       response.content = component.content.replace(/<\/script>/g, '<\\/script>');

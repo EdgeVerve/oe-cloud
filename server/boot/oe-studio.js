@@ -18,6 +18,8 @@ var util = require('../../lib/common/util');
 var appconfig = require('../config');
 var glob = require('glob');
 var designerName = 'oe-studio';
+var logger = require('oe-logger');
+var log = logger('oe-studio');
 
 function setDesignerPath(DesignerPath, server) {
   if (!appconfig.designer.templatePath || appconfig.designer.templatePath.length === 0) {
@@ -201,11 +203,15 @@ function setDesignerPath(DesignerPath, server) {
         return;
       }
       var accepts = route.accepts || [];
+      var method = route.method || [];
       var split = route.method.split('.');
       /* HACK */
       if (classDef && classDef.sharedCtor &&
         classDef.sharedCtor.accepts && split.length > 2) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
+        if (classDef.sharedCtor.method) {
+          method = method.concat(classDef.sharedCtor.method);
+        }
       }
 
       // Filter out parameters that are generated from the incoming request,
@@ -229,11 +235,18 @@ function setDesignerPath(DesignerPath, server) {
       });
       route.accepts = accepts;
       route.verb = convertVerb(route.verb);
+      var methodSplitLength = route.method.split('.').length;
+      if (methodSplitLength >= 1) {
+        route.method = method.split('.')[methodSplitLength - 1];
+      } else {
+        route.method = method;
+      }
       return {
         path: route.path,
         type: route.verb,
         description: route.description,
-        accepts: route.accepts
+        accepts: route.accepts,
+        method: route.method
       };
     });
     var modelEndPoints = _.groupBy(routes, function modelEndPoints(d) {
@@ -385,7 +398,7 @@ function setDesignerPath(DesignerPath, server) {
     if (status) {
       server.once('started', function DesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
-        console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
+        log.info('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
       });
     }
   });

@@ -9,10 +9,11 @@ stages:
   - retry-service
   - ldap-auth
   - job-scheduler-service
+  - rule-engine-cluster-tests
 
 cache:
   untracked: true
-  paths: 
+  paths:
     - node_modules/
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
@@ -64,7 +65,7 @@ npminstall:
 mongotest:
   stage: pre-build-test
   script:
-    - export NODE_ENV=docker
+    - export NODE_ENV=test
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
     - export DB_NAME=${CI_PIPELINE_ID}_mongo
@@ -80,10 +81,10 @@ mongotest:
   tags:
     - CEP_RUNNER
 
-postgrestest:
+.postgrestest:
   stage: pre-build-test
   script:
-    - export NODE_ENV=postgres
+    - export NODE_ENV=test
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
     - export DB=postgres
@@ -99,14 +100,14 @@ postgrestest:
     when: on_failure
   tags:
     - CEP_RUNNER
-    
+
 .oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
     - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
     - export APP_TAG=oracle
-    - export NODE_ENV=oracle
+    - export NODE_ENV=test
     - export POSTGRES_HOST="10.73.53.144"
     - export MONGO_HOST="10.73.53.144"
     - export ORACLE_HOST=10.73.53.144
@@ -131,7 +132,7 @@ postgrestest:
     - node server/oracle-utility.js
     - cd .. && mv oe-cloud/ ${PROJECT_DIR} && cd ${PROJECT_DIR}/oe-cloud
   tags:
-    - CEP_RUNNER    
+    - CEP_RUNNER
 
 consistenthashtest:
   stage: pre-build-test
@@ -157,9 +158,9 @@ consistenthashtest:
 
 buildjob:
   stage: build
-  script: 
+  script:
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile   
+    - mv -f Dockerfile2 Dockerfile
     - time npm install --no-optional
     - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
     - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
@@ -168,7 +169,7 @@ buildjob:
     - CEP_RUNNER
 
 swarm-actor-pattern:
-  stage: swarm-actor-pattern 
+  stage: swarm-actor-pattern
   script:
     - export STARTUP_CMD="npm run grunt-cover"
     - export FILE_NAME=docker-compose.test.env.yml
@@ -211,7 +212,7 @@ swarm-actor-pattern:
 
 retry-service:
   stage: retry-service
-  script: 
+  script:
     - export ROUTER="cep_router"
     #- export HAPROXY=10.73.96.214
     - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
@@ -330,5 +331,28 @@ job-scheduler-service:
     - time mocha --timeout 60000 test/job-scheduler-service-tests/scheduler-test.js
   after_script:
     - sh /removeStack.sh
+  tags:
+    - CEP_RUNNER
+
+rule-cluster-tests:
+  stage: rule-engine-cluster-tests
+  script:
+    - export STACK_NAME=${APP_IMAGE_NAME}
+    - export NETWORK_NAME=${APP_IMAGE_NAME}
+    - npm install mocha
+    - echo "docker stack rm $STACK_NAME" > ./remove.sh
+    - /bin/sh ./remove.sh
+    - sleep 30
+    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' ./test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml > ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml
+    - mv -f ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml
+    - docker stack deploy -c test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml $STACK_NAME
+    - sleep 10
+    - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/" "https://test.node2.oecloud.local/"
+    # - /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh "https://test.node1.oecloud.local/"
+    - export NODE_TLS_REJECT_UNAUTHORIZED=0
+    - ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
+  after_script:
+    # - echo "done..."
+    - /bin/sh ./remove.sh
   tags:
     - CEP_RUNNER

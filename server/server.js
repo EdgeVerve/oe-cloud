@@ -58,12 +58,12 @@ function checkLicense() {
       });
     } catch (e) {
       log.debug({}, e);
-      console.log('\x1b[33m***********************************************\n\x1b[31mINVALID LICENSE KEY INVALID LICENSE KEY INVALID LICENSE KEY\n\x1b[33m***********************************************\x1b[0m');
+      log.error('\x1b[33m***********************************************\n\x1b[31mINVALID LICENSE KEY INVALID LICENSE KEY INVALID LICENSE KEY\n\x1b[33m***********************************************\x1b[0m');
       setTimeout(checkLicense, 60 * 60 * 1000);
     }
     if (decoded.endl && (Date.now() > decoded.endl)) {
       log.debug({}, 'License Expired!');
-      console.log('\x1b[33m***********************************************\n\x1b[31mLICENSE EXPIRED LICENSE EXPIRED LICENSE EXPIRED\n\x1b[33m***********************************************\x1b[0m');
+      log.error('\x1b[33m***********************************************\n\x1b[31mLICENSE EXPIRED LICENSE EXPIRED LICENSE EXPIRED\n\x1b[33m***********************************************\x1b[0m');
       setTimeout(checkLicense, 60 * 60 * 1000);
     } else {
       var timeOut = decoded.endl - Date.now();
@@ -79,7 +79,7 @@ module.exports.boot = function serverBoot(appinstance, options, cb) {
   // /starting with config.json.
   if (!appinstance.locals.apphome) {
     var msg = 'please set app.locals.apphome in your server.js before calling  boot.  (app.locals.apphome = _dirname;) ';
-    console.error(msg);
+    log.error(msg);
     process.exit(1);
   }
   var appListPath = path.resolve(path.join(appinstance.locals.apphome, 'app-list.json'));
@@ -267,7 +267,7 @@ function finalBoot(appinstance, options, cb) {
         });
         appinstance.frameworkBooted = true;
         appinstance.emit('started', appinstance);
-        console.log('Web server listening at: %s', appinstance.get('url'));
+        log.info('Web server listening at: %s', appinstance.get('url'));
 
         appinstance.get('remoting').errorHandler = {
           handler: function remotingErrorHandler(err, req, res, defaultHandler) {
@@ -577,7 +577,7 @@ module.exports.loadOptionsFromConfig = function loadOptionsFromConfig(appRootPat
               options.clientAppRootDirList.push(appRoot);
               options.bootDirs.push(bootRoot);
             } catch (e) {
-              console.log('[ERROR] Invalid path for app merge');
+              log.error('[ERROR] Invalid path for app merge');
             }
           }
         },
@@ -596,7 +596,7 @@ function getApiInfo() {
   var cwd = process.cwd();
   var pkgFile = path.join(cwd, 'package.json');
   var pkg = require(pkgFile);
-  var desc = pkg.description || (function () { console.warn('No description found in package.json...Using a default description.'); return 'An oe-cloud based API application'; })();
+  var desc = pkg.description || (function () { log.warn('No description found in package.json...Using a default description.'); return 'An oe-cloud based API application'; })();
   var apiInfo = {
     description: desc
   };
