@@ -278,5 +278,9 @@
     "DraftData":{
         "public": true,
         "dataSource": "db"
+    },
+    "BatchStatus":{
+        "public": true,
+        "dataSource": "db"
     }
 }
