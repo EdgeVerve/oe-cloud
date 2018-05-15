@@ -384,7 +384,7 @@ module.exports = function uiComponent(UIComponent) {
           var refCodeType = field.refcodetype;
           subtasks.push(function subTaskPushCb(fetched) {
             var refCodeModel = loopback.findModel(refCodeType, options);
-            if(refCodeModel) {
+            if (refCodeModel) {
               refCodeModel.find({}, options, function findCb(err, resp) {
                 if (!err) {
                   field.listdata = resp;
