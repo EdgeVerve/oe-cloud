@@ -384,14 +384,18 @@ module.exports = function uiComponent(UIComponent) {
           var refCodeType = field.refcodetype;
           subtasks.push(function subTaskPushCb(fetched) {
             var refCodeModel = loopback.findModel(refCodeType, options);
-            refCodeModel.find({}, options, function findCb(err, resp) {
-              if (!err) {
-                field.listdata = resp;
-                field.displayproperty = 'description';
-                field.valueproperty = 'code';
-              }
-              fetched(err);
-            });
+            if(refCodeModel) {
+              refCodeModel.find({}, options, function findCb(err, resp) {
+                if (!err) {
+                  field.listdata = resp;
+                  field.displayproperty = 'description';
+                  field.valueproperty = 'code';
+                }
+                fetched(err);
+              });
+            } else {
+              log.error('Invalid refCode model ', refCodeType);
+            }
           });
         }
         if (field.validateWhen) {
