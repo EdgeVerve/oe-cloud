@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
@@ -47,6 +47,9 @@ describe(chalk.blue('Decision Table Create - Drools'), function () {
                 return done(err);
             }
             models.DecisionTable.create(decisionTableData, bootstrap.defaultContext, function (err, result) {
+                console.log("==========================================");
+                console.log("err: ", err);
+                console.log("==========================================");
                 expect(err).not.to.be.undefined;
                 expect(err.code).to.equal('ECONNREFUSED');
                 expect(err.errno).to.equal('ECONNREFUSED');
@@ -74,6 +77,9 @@ describe(chalk.blue('Decision Table Create - Drools'), function () {
                     done(sysErr);
                 }
                 models.DecisionTable.exec("sample", payload, bootstrap.defaultContext, function (err, res) {
+                    console.log("==========================================");
+                    console.log("err: ", err);
+                    console.log("==========================================");
                     expect(err).not.to.be.undefined;
                     expect(err.code).to.equal('ECONNREFUSED');
                     expect(err.errno).to.equal('ECONNREFUSED');

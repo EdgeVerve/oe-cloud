@@ -56,7 +56,6 @@ describe(chalk.blue('Config files merge test'), function () {
       'modelstocache': ['ACL', 'ModelDefinition', 'PersonalizationRule'],
       'tenantsource': 'HEADER',
       'tenantkey': 'tenant_id',
-      'disableNodered': true,
       'app': 'oecloud.io',
       'realm': 'oecloud',
       'enableJWTAssertion': false,

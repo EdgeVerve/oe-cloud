@@ -21,48 +21,52 @@ var path = require('path');
 var glob = require('glob');
 
 module.exports = function uiComponent(UIComponent) {
+  var templateMap = null;
   function loadTemplate(template, app, options, callback) {
     app.models.AppConfig.findOne({}, options, function AppConfigFindOneCb(err, data) {
-      var templatesDir;
-      if (!err && data && data.server && data.server.templateDir) {
-        templatesDir = data.server.templatesDir;
-      } else {
-        templatesDir = '../client/templates';
+      if (err) {
+        callback(err);
+        return;
+      }
+      if (!templateMap) {
+        templateMap = generateTemplateMap(app);
+      }
+      var templatePath = templateMap[template];
+
+      function fullSearch(template, callback) {
+        glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
+          if (!err2 && files && files.length > 0) {
+            templatePath = files[0];
+            fs.readFile(templatePath, function read(err3, data2) {
+              if (err3) {
+                callback(err3, '');
+              } else {
+                templateMap[template] = templatePath;
+                callback(err3, data2.toString());
+              }
+            });
+          } else {
+            var error = new Error();
+            error.message = 'Template ' + template + ' not found';
+            error.code = 'TEMPLATE_TYPE_MISSING';
+            error.statusCode = 422;
+            callback(error, '');
+          }
+        });
       }
 
-      var templatePath = path.join(app.locals.apphome, templatesDir, template);
-      fs.readFile(templatePath, function read(err, data) {
-        if (err) {
-          templatesDir = '../client/bower_components/oe-studio/templates';
-          templatePath = path.join(app.locals.apphome, templatesDir, template);
-          fs.readFile(templatePath, function read(err1, data1) {
-            if (err1) {
-              glob(app.locals.apphome + '/../**/' + template, function getClientTemplate(err2, files) {
-                if (!err2 && files && files.length > 0) {
-                  templatePath = files[0];
-                  fs.readFile(templatePath, function read(err3, data2) {
-                    if (err3) {
-                      callback(err3, '');
-                    } else {
-                      callback(err3, data2.toString());
-                    }
-                  });
-                } else {
-                  var error = new Error();
-                  error.message = 'Template ' + template + ' not found';
-                  error.code = 'TEMPLATE_TYPE_MISSING';
-                  error.statusCode = 422;
-                  callback(error, '');
-                }
-              });
-            } else {
-              callback(err1, data1.toString());
-            }
-          });
-        } else {
-          callback(err, data.toString());
-        }
-      });
+
+      if (typeof templatePath === 'string') {
+        fs.readFile(templatePath, function read(err, data) {
+          if (err) {
+            fullSearch(template, callback);
+          } else {
+            callback(err, data.toString());
+          }
+        });
+      } else {
+        fullSearch(template, callback);
+      }
     });
   }
 
@@ -118,7 +122,7 @@ module.exports = function uiComponent(UIComponent) {
 
       if (rec.gridConfig.modelGrid.length < 4) {
         Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
-          if (key.startsWith('_') || key === 'scope' || key === 'id') {
+          if (key.startsWith('_') || key === 'scope' || key === 'id' || model.definition.rawProperties[key].required) {
             return;
           }
           if (rec.gridConfig.modelGrid.length < 5) {
@@ -155,6 +159,8 @@ module.exports = function uiComponent(UIComponent) {
     response.modelName = component.modelName || '';
     response.modelAlias = component.modelAlias || (component.modelName ? component.modelName.toLowerCase() : 'vm');
     response.fields = component.fields;
+    response.container = component.container;
+    response.componentData = component.componentData;
 
     if (fetchAsHtml && component.content) {
       response.content = component.content.replace(/<\/script>/g, '<\\/script>');
@@ -164,6 +170,10 @@ module.exports = function uiComponent(UIComponent) {
     response.autoInjectFields = component.autoInjectFields;
     response.excludeFields = component.excludeFields;
     response.resturl = component.resturl;
+    response.geturl = component.geturl;
+    response.posturl = component.posturl;
+    response.puturl = component.puturl;
+    response.deleteurl = component.deleteurl;
     response.options = component.options;
     response.polymerConfig = component.polymerConfig;
     response.gridConfig = component.gridConfig;
@@ -371,8 +381,9 @@ module.exports = function uiComponent(UIComponent) {
           }
         }
         if (field.refcodetype) {
+          var refCodeType = field.refcodetype;
           subtasks.push(function subTaskPushCb(fetched) {
-            var refCodeModel = loopback.findModel(field.refcodetype, options);
+            var refCodeModel = loopback.findModel(refCodeType, options);
             refCodeModel.find({}, options, function findCb(err, resp) {
               if (!err) {
                 field.listdata = resp;
@@ -456,6 +467,27 @@ module.exports = function uiComponent(UIComponent) {
     return template;
   }
 
+  function generateTemplateMap(app) {
+    var designerName = 'oe-studio';
+    var designer = app.get('designer');
+    if (!designer.templatePath || designer.templatePath.length === 0) {
+      designer.templatePath = ['client/bower_components/' + designerName + '/templates'];
+    }
+    var templatesData = {};
+    designer.templatePath.forEach(function templatePathForEach(tPath) {
+      if (fs.existsSync(tPath)) {
+        var templateFiles = fs.readdirSync(tPath);
+        templateFiles.forEach(function templateFilesForEach(fileName) {
+          if (fileName.endsWith('.html')) {
+            templatesData[fileName] = path.join(tPath, fileName);
+          }
+        });
+      }
+    });
+    return templatesData;
+  }
+
+
   UIComponent.component = function fetchComponent(name, options, callback) {
     var fetchAsHtml = true;
     UIComponent._createResponse(fetchAsHtml, name, options, callback);
@@ -513,7 +545,7 @@ module.exports = function uiComponent(UIComponent) {
 
         if (rec.gridConfig.modelGrid.length < 4) {
           Object.keys(model.definition.rawProperties).forEach(function removeScopeFilter(key) {
-            if (key.startsWith('_') || key === 'scope' || key === 'id') {
+            if (key.startsWith('_') || key === 'scope' || key === 'id' || model.definition.rawProperties[key].required) {
               return;
             }
             if (rec.gridConfig.modelGrid.length < 5) {

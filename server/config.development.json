@@ -36,10 +36,6 @@
   "frameworkMetadataModels"  : ["ModelDefinition", "BaseUser", "BaseACL", "DataACL", "DataSourceDefinition", "DataSourceMapping", "EnumBase", "ErrorDetail", "JobScheduler", "PersonalizationRule", "Error", "Literal", "Field", "GridColumnDefinition", "GridMetaData", "UIResource", "UIRoute", "UIMetadata", "NavigationLink"],
   "tenantsource": "HEADER",
   "tenantkey": "tenant_id",
-  "disableNodered": false,
-  "nodeRedUserDir": "nodered/",
-  "nodeRedMetrics": false,
-  "nodeRedAudit": false,
   "app": "oecloud.io",
   "realm": "oecloud",
   "enableQuickBootTest":true,
@@ -69,5 +65,15 @@
   "maxFailedLoginTries": 5,
   "metadataModelList": {
     "ModelDefinition": true
-  }
+  },
+  "jsFeelRelation": {
+    "disabled": false
+  },
+  "jsFeelExternalFunction": {
+    "disabled": false,
+    "path": "test/model-rule-data/data/functions"
+  },
+  "jsFeelLexerLogging" : false,
+  "jsFeelExecutionLogging": false,
+  "jsFeelLogResult": false
 }

@@ -5,7 +5,8 @@
     "idInjection": true,
     "description" :  "Used in designer tool to save views of models",
     "options": {
-        "validateUpsert": true
+        "validateUpsert": true,
+        "disableManualPersonalization":false
     },
     "properties": {
         "name": {

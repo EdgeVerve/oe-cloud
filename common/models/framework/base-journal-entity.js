@@ -10,87 +10,8 @@ var logger = require('oe-logger');
 var log = logger('journal-entity');
 var loopback = require('loopback');
 var actorModelsMap = {};
-var defaultOptions = {
-  'ctx': {
-    'remoteUser': 'admin',
-    'tenantId': 'default'
-  }
-};
 
 module.exports = function (BaseJournalEntity) {
-  BaseJournalEntity.setup = function () {
-    BaseJournalEntity.base.setup.call(this);
-    var BaseJournal = this;
-    BaseJournal.on('dataSourceAttached', function onAttach(Model) {
-      if (Model.dataSource.name === 'loopback-connector-postgresql') {
-        Model.findOrCreate({where: {'id': 'xxx' }}, {'id': 'xxx'}, defaultOptions, function (err, instance, created) {
-          if (err) {
-            log.debug('did not create dummy record ', Model.modeName);
-          }
-          if (!created) {
-            return;
-          }
-          var modelQuery = 'select tgname from pg_trigger where not tgisinternal and ' +
-          'tgrelid = \'' + BaseJournal.modelName + '\'::regclass';
-          Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
-            if (err || result.length === 0) {
-              modelQuery = 'CREATE TRIGGER \"onCreate\" BEFORE INSERT ' +
-              ' ON public.' + Model.modelName.toLowerCase() +
-              ' FOR EACH ROW ' +
-              ' EXECUTE PROCEDURE public.create_activities(); ';
-              Model.dataSource.connector.query(modelQuery, [], defaultOptions, function (err, result) {
-                if (err) {
-                  log.debug('could not insert trigger function on model');
-                }
-              });
-            }
-          });
-        });
-      }
-    });
-  };
-  BaseJournalEntity.on('dataSourceAttached', function onAttach(Model) {
-    if (Model.dataSource.name === 'loopback-connector-postgresql') {
-      var modefiedQuery = 'select proname from pg_proc where proname = \'create_activities\'';
-      Model.dataSource.connector.query(modefiedQuery, [], defaultOptions, function (err, result) {
-        if (err) {
-          log.debug('could not read pg table');
-        }
-        if (result.length === 0) {
-          modefiedQuery = 'CREATE FUNCTION public.create_activities() ' +
-          ' RETURNS trigger ' +
-          ' LANGUAGE \'plpgsql\' ' +
-          ' COST 100 ' +
-          ' VOLATILE NOT LEAKPROOF ' +
-          ' AS $BODY$ ' +
-          ' DECLARE ' +
-          ' m   integer; ' +
-          ' BEGIN ' +
-          ' FOR m IN SELECT generate_subscripts(new.atomicactivitieslist,1) as s ' +
-          ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
-          ' VALUES(new.atomicactivitieslist[m]->>\'modelName\',new.atomicactivitieslist[m]->>\'entityId\',cast (new.atomicactivitieslist[m]->>\'seqNum\' as int),new.atomicactivitieslist[m]->>\'instructionType\',true,new.atomicactivitieslist[m]->>\'payload\'); ' +
-          ' END LOOP; ' +
-          ' FOR m IN SELECT generate_subscripts(new.nonatomicactivitieslist,1) as s ' +
-          ' LOOP ' +
-          ' INSERT INTO actoractivity(modelname,entityid,seqnum,instructiontype,atomic,payloadtxt) ' +
-          '  VALUES(new.nonatomicactivitieslist[m]->>\'modelName\',new.nonatomicactivitieslist[m]->>\'entityId\',cast (new.nonatomicactivitieslist[m]->>\'seqNum\' as int),new.nonatomicactivitieslist[m]->>\'instructionType\',false,new.nonatomicactivitieslist[m]->>\'payload\'); ' +
-          ' END LOOP; ' +
-          ' return new; ' +
-          ' END ' +
-          ' $BODY$; ' +
-          ' ALTER FUNCTION public.create_activities() ' +
-          ' OWNER TO postgres; ';
-          Model.dataSource.connector.query(modefiedQuery, [], defaultOptions, function (err, result) {
-            if (err) {
-              log.debug('could not insert trigger function');
-            }
-          });
-        }
-      });
-    }
-  });
-
   var performAtomicOperation = function (journalEntity, operationContexts, next) {
     if (operationContexts.length === 0) {
       return next();
@@ -106,7 +27,6 @@ module.exports = function (BaseJournalEntity) {
     if (hasDuplicates) {
       asyncFunc = async.eachSeries;
     }
-    // async.eachSeries(operationContexts, function (operationContext, callback) {
     asyncFunc(operationContexts, function (operationContext, callback) {
       var actor = operationContext.actorEntity;
       actor.validateAndReserveAtomicAction(operationContext, operationContext.options, function (err, validationObj) {
@@ -244,9 +164,45 @@ module.exports = function (BaseJournalEntity) {
     }
   };
 
-  BaseJournalEntity.prototype.performBusinessValidations = function (options, cb) {
+  BaseJournalEntity.prototype.performBusinessValidations = function (options, ctx, cb) {
     log.error('No business validations were implemented. Please Implement, and run again.');
     throw new Error('No business validations were implemented. Please Implement, and run again.');
+  };
+
+  BaseJournalEntity.prototype.changeInstance = function (options, ctx, cb) {
+    return cb();
+  };
+
+  BaseJournalEntity.prototype.startTarnsactionFlow = function (instance, ctx, options, next) {
+    instance.performBusinessValidations(options, ctx, function (err) {
+      if (err) {
+        log.error(ctx.options, err.message);
+        next(err);
+      } else {
+        BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
+          if (err) {
+            if (ctx.hookState && ctx.hookState.actorInstancesMap) {
+              async.each(Object.keys(ctx.hookState.actorInstancesMap), function (key, cb) {
+                var actor = ctx.hookState.actorInstancesMap[key];
+                if (actor.constructor.settings.noBackgroundProcess) {
+                  actor.clearActorMemory(ctx.options, function () {
+                    cb();
+                  });
+                } else {
+                  cb();
+                }
+              }, function () {
+                return next(err);
+              });
+            } else {
+              return next(err);
+            }
+          } else {
+            return next();
+          }
+        });
+      }
+    });
   };
 
   BaseJournalEntity.observe('before save', function (ctx, next) {
@@ -255,33 +211,17 @@ module.exports = function (BaseJournalEntity) {
       err.retriable = false;
       return next(err);
     }
-
     if (ctx.instance.id === 'xxx') {
       return next();
     }
-
     var instance = ctx.instance;
-    instance.performBusinessValidations(ctx.options, function (err) {
+    var options = ctx.options;
+    instance.changeInstance(options, ctx, function (err) {
       if (err) {
         log.error(ctx.options, err.message);
-        next(err);
-      } else {
-        BaseJournalEntity.prototype.performOperations(ctx, function (err, result) {
-          if (err) {
-            Object.keys(ctx.hookState.actorInstancesMap).forEach(function (key) {
-              var actor = ctx.hookState.actorInstancesMap[key];
-              if (actor.constructor.settings.noBackgroundProcess) {
-                actor.clearActorMemory(actor, ctx.options, function () {
-
-                });
-              }
-            });
-            next(err);
-          } else {
-            return next();
-          }
-        });
+        return next(err);
       }
+      return instance.startTarnsactionFlow(instance, ctx, options, next);
     });
   });
 
@@ -291,7 +231,8 @@ module.exports = function (BaseJournalEntity) {
     next(err);
   });
 
-  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+
+  var doAfterSave = function (ctx) {
     var atomicActivitiesList = ctx.instance.atomicActivitiesList;
     var nonAtomicActivitiesList = ctx.instance.nonAtomicActivitiesList;
     var activities = atomicActivitiesList.concat(nonAtomicActivitiesList);
@@ -302,12 +243,21 @@ module.exports = function (BaseJournalEntity) {
         actor = ctx.hookState.actorInstancesMap[activity.entityId];
       }
       if (actor) {
-        actor.journalSaved(activity.toObject(), options, function (err) {
-          if (err) {
-            return cb(err);
-          }
-          cb();
-        });
+        if (ctx.instance._connectorData && ctx.instance._connectorData.error
+        && actor.constructor.settings.noBackgroundProcess) {
+          log.info(ctx.instance._type + ' Failed! Clearing Actor ' + activity.entityId);
+          ctx.instance.startup = JSON.stringify(ctx.instance._connectorData.error);
+          actor.clearActorMemory(ctx.options, function () {
+            cb();
+          });
+        } else {
+          actor.journalSaved(activity.toObject(), options, function (err) {
+            if (err) {
+              return cb(err);
+            }
+            cb();
+          });
+        }
       } else {
         var err = new Error('Invalid activity. No actor with id ' + activity.entityId);
         err.retriable = false;
@@ -315,10 +265,16 @@ module.exports = function (BaseJournalEntity) {
       }
     }, function (err) {
       if (err) {
-        return next(err);
+        log.info('error in JournalSaved: ' + err);
       }
-      return next();
+      log.info('JournalSaved done');
+      return;
     });
+  };
+
+  BaseJournalEntity.observe('after save', function drainActorMailBox(ctx, next) {
+    next();
+    return process.nextTick(doAfterSave, ctx);
   });
 
   function getActorModel(modelName, options) {

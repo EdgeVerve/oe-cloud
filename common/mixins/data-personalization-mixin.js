@@ -87,11 +87,15 @@ module.exports = Model => {
   if ((Model.settings.overridingMixins && !Model.settings.overridingMixins.DataPersonalizationMixin) || !Model.definition.settings.mixins.DataPersonalizationMixin) {
     Model.evRemoveObserver('before save', dataPersonalizationBeforeSave);
     Model.evRemoveObserver('access', dataPersonalizationAccess);
-    Model.evRemoveObserver('after accesss', dataPersonalizationAfterAccess);
+    if (!Model.definition.settings.disableManualPersonalization) {
+      Model.evRemoveObserver('after accesss', dataPersonalizationAfterAccess);
+    }
   } else {
     Model.evObserve('before save', dataPersonalizationBeforeSave);
     Model.evObserve('access', dataPersonalizationAccess);
-    Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+    if (!Model.definition.settings.disableManualPersonalization) {
+      Model.evObserve('after accesss', dataPersonalizationAfterAccess);
+    }
   }
 };
 
@@ -586,165 +590,163 @@ function dataPersonalizationAfterAccess(ctx, next) {
     return next();
   }
 
-  var prepareResponse = function (variantData) {
-    // Reads the data which we get based the query fromed in dataAccess function.
-    const result = ctx.accdata;
-    if (variantData && variantData.length) {
-      if (!ctx.accdata) {
-        ctx.accdata = [];
-      }
-      for (var i = 0; i < variantData.length; ++i) {
-        ctx.accdata.push(variantData[i]);
-      }
-    }
+  // Reads the data which we get based the query fromed in dataAccess function.
+  const result = ctx.accdata;
+  // if (variantData && variantData.length) {
+  //   if (!ctx.accdata) {
+  //     ctx.accdata = [];
+  //   }
+  //   for (var i = 0; i < variantData.length; ++i) {
+  //     ctx.accdata.push(variantData[i]);
+  //   }
+  // }
 
-    if (result && result.length) {
-      // Get the loopback current context and reads the callContext from the context.
-      const callContext = {};
-      const callCtx = ctx.options;
+  if (result && result.length) {
+    // Get the loopback current context and reads the callContext from the context.
+    const callContext = {};
+    const callCtx = ctx.options;
 
-      // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
-      callContext.ctx = Object.assign({}, callCtx.ctx);
+    // Clone callContext.ctx so the any changes locally made will not affect callContext.ctx.
+    callContext.ctx = Object.assign({}, callCtx.ctx);
 
-      // Convert the callcontext.ctx to lowercase.
-      callContext.ctx = convertToLowerCase(callContext.ctx);
+    // Convert the callcontext.ctx to lowercase.
+    callContext.ctx = convertToLowerCase(callContext.ctx);
 
-      // Clone callContext.ctxWeights so the any changes locally made will not affect callContext.ctx.
-      callContext.ctxWeights = Object.assign({}, callCtx.ctxWeights);
+    // Clone callContext.ctxWeights so the any changes locally made will not affect callContext.ctx.
+    callContext.ctxWeights = Object.assign({}, callCtx.ctxWeights);
 
-      // Convert the callcontext.ctxWeights to lowercase.
-      callContext.ctxWeights = convertToLowerCase(callContext.ctxWeights);
+    // Convert the callcontext.ctxWeights to lowercase.
+    callContext.ctxWeights = convertToLowerCase(callContext.ctxWeights);
 
-      // Reading the autoscope values from the model definition settings.
-      const autoscope = modelSettings.autoscope;
+    // Reading the autoscope values from the model definition settings.
+    const autoscope = modelSettings.autoscope;
 
-      // Reading the autoscope values from the model definition settings.
-      // var scoreScheme = modelSettings.scoreScheme ? modelSettings.scoreScheme : 'sum';
+    // Reading the autoscope values from the model definition settings.
+    // var scoreScheme = modelSettings.scoreScheme ? modelSettings.scoreScheme : 'sum';
 
-      let resultData = [];
-      const weights = {};
+    let resultData = [];
+    const weights = {};
 
 
-      // get default autoscope value from config files
-      const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
+    // get default autoscope value from config files
+    const defaultValue = ctx.Model.app.get('defaultAutoScope') || '';
 
-      if (callContext.ctx) {
-        // Loops through each value in callContext.ctx to calculate scope and
-        // weights ignoring for the values in ignore list.
-        if (callContext.ctxWeights) {
-          Object.keys(callContext.ctx).forEach((key) => {
-            const value = callContext.ctx[key];
-            if (Array.isArray(value)) {
-              value.forEach((item, index) => {
-                weights[`${key}:${item}`] = (callContext.ctxWeights[key] && callContext.ctxWeights[key][index]) || 1;
-              });
-            } else {
-              weights[`${key}:${value}`] = callContext.ctxWeights[key] || 1;
-            }
-          });
-        }
-
-        autoscope.forEach((key) => {
-          const weight = (callContext.ctxWeights && callContext.ctxWeights[key]) ? callContext.ctxWeights[key] - 1 : -1;
-          weights[`${key}:${defaultValue}`] = weight.toString();
-        });
-      }
-      const dataSourceName = ctx.Model.dataSource.connector.name;
-      const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
-      if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
-        resultData = calculateScoreMongo(result, weights);
-      } else {
-        let scope = {};
-        // Get the manually applied filter keys
-        const whereKeys = JSON.parse(JSON.stringify(callCtx[`whereKeys${ctx.Model.modelName}`] || []));
-
-        // Reads the ignore list from the callContext.
-        let ignoreList = JSON.parse(JSON.stringify(callCtx.ignoreContextList || []));
-        // Converts ignore list to lowercase
-        ignoreList = convertToLowerCase(ignoreList);
-
+    if (callContext.ctx) {
+      // Loops through each value in callContext.ctx to calculate scope and
+      // weights ignoring for the values in ignore list.
+      if (callContext.ctxWeights) {
         Object.keys(callContext.ctx).forEach((key) => {
           const value = callContext.ctx[key];
-          if (!(_.contains(ignoreList, key))) {
-            scope[key] = value;
-          }
-        });
-
-        // Convert scope obj to array of strings.
-        scope = convertToKeyValueString(scope);
-
-        // Adding all autoscope.default values to scope.
-        autoscope.forEach((element) => {
-          scope.push(`${element}:${defaultValue}`);
-        });
-        scope = scope.concat(whereKeys);
-
-        // Loops through each record in result and calculate score based on subset
-        result.forEach((obj) => {
-          let score = 0;
-          let weight = 0;
-          // read _scope from record
-          const _scope = obj._scope || [];
-          if (!(_.difference(_scope, scope).length)) {
-            // Find out the intersection part of _scope and our own calculated scope.
-            //  var intersection = _.intersection(_scope, scope);
-            _scope.forEach((element) => {
-              score = Math.max(score, parseInt(weights[element] || '1', 10));
-              weight += parseInt(weights[element] || '1', 10);
+          if (Array.isArray(value)) {
+            value.forEach((item, index) => {
+              weights[`${key}:${item}`] = (callContext.ctxWeights[key] && callContext.ctxWeights[key][index]) || 1;
             });
-            obj._score = score;
-            obj._weight = weight;
-            resultData.push(obj);
+          } else {
+            weights[`${key}:${value}`] = callContext.ctxWeights[key] || 1;
           }
         });
       }
 
-      // Sort in descending order based on score .
-      // resultData =_.orderBy(resultData, ['score', 'weight'], ['desc', 'desc']);  //Lodash v4.6.1
-      // Lodash v3.10.1
-      resultData = _.sortByOrder(resultData, ['_score', '_weight'], ['desc', 'desc']);
-      resultData.forEach((obj) => {
-        delete obj._score;
-        delete obj._weight;
+      autoscope.forEach((key) => {
+        const weight = (callContext.ctxWeights && callContext.ctxWeights[key]) ? callContext.ctxWeights[key] - 1 : -1;
+        weights[`${key}:${defaultValue}`] = weight.toString();
       });
-      if (ctx.query.scope && Object.keys(ctx.query.scope).length !== 0) {
-        ctx.accdata = resultData;
-      } else {
-        ctx.accdata = calculateUnique(ctx.Model.definition.properties, resultData);
-      }
     }
-    next();
-  };
-  function isSameCollection(settings1, settings2) {
-    if (!settings1.mongodb || !settings2.mongodb) {
-      return false;
-    }
-    var collection1 = settings1.mongodb.collection;
-    if (collection1) { collection1 = collection1.toLowerCase(); }
-    var collection2 = settings2.mongodb.collection;
-    if (collection2) { collection2 = collection2.toLowerCase(); }
-    if (collection1 === collection2) { return true; }
-    return false;
-  }
+    const dataSourceName = ctx.Model.dataSource.connector.name;
+    const dataSourceTypes = ['mongodb', 'postgresql', 'oracle'];
+    if (dataSourceTypes.indexOf(dataSourceName) !== -1) {
+      resultData = calculateScoreMongo(result, weights);
+    } else {
+      let scope = {};
+      // Get the manually applied filter keys
+      const whereKeys = JSON.parse(JSON.stringify(callCtx[`whereKeys${ctx.Model.modelName}`] || []));
 
-  var loopback = require('loopback');
-  if (modelSettings.variantOf) {
-    var variantModel = loopback.findModel(modelSettings.variantOf);
-    if (variantModel) {
-      if (isSameCollection(variantModel.definition.settings, modelSettings)) {
-        return prepareResponse();
-      }
-      variantModel.find(ctx.query, ctx.options, function (err, variantData) {
-        if (err) {
-          return next(new Error(err));
+      // Reads the ignore list from the callContext.
+      let ignoreList = JSON.parse(JSON.stringify(callCtx.ignoreContextList || []));
+      // Converts ignore list to lowercase
+      ignoreList = convertToLowerCase(ignoreList);
+
+      Object.keys(callContext.ctx).forEach((key) => {
+        const value = callContext.ctx[key];
+        if (!(_.contains(ignoreList, key))) {
+          scope[key] = value;
         }
-        return prepareResponse(variantData);
       });
-      return;
+
+      // Convert scope obj to array of strings.
+      scope = convertToKeyValueString(scope);
+
+      // Adding all autoscope.default values to scope.
+      autoscope.forEach((element) => {
+        scope.push(`${element}:${defaultValue}`);
+      });
+      scope = scope.concat(whereKeys);
+
+      // Loops through each record in result and calculate score based on subset
+      result.forEach((obj) => {
+        let score = 0;
+        let weight = 0;
+        // read _scope from record
+        const _scope = obj._scope || [];
+        if (!(_.difference(_scope, scope).length)) {
+          // Find out the intersection part of _scope and our own calculated scope.
+          //  var intersection = _.intersection(_scope, scope);
+          _scope.forEach((element) => {
+            score = Math.max(score, parseInt(weights[element] || '1', 10));
+            weight += parseInt(weights[element] || '1', 10);
+          });
+          obj._score = score;
+          obj._weight = weight;
+          resultData.push(obj);
+        }
+      });
+    }
+
+    // Sort in descending order based on score .
+    // resultData =_.orderBy(resultData, ['score', 'weight'], ['desc', 'desc']);  //Lodash v4.6.1
+    // Lodash v3.10.1
+    resultData = _.sortByOrder(resultData, ['_score', '_weight'], ['desc', 'desc']);
+    resultData.forEach((obj) => {
+      delete obj._score;
+      delete obj._weight;
+    });
+    if (ctx.query.scope && Object.keys(ctx.query.scope).length !== 0) {
+      ctx.accdata = resultData;
+    } else {
+      ctx.accdata = calculateUnique(ctx.Model.definition.properties, resultData);
     }
   }
+  next();
+  // function isSameCollection(settings1, settings2) {
+  //   if (!settings1.mongodb || !settings2.mongodb) {
+  //     return false;
+  //   }
+  //   var collection1 = settings1.mongodb.collection;
+  //   if (collection1) { collection1 = collection1.toLowerCase(); }
+  //   var collection2 = settings2.mongodb.collection;
+  //   if (collection2) { collection2 = collection2.toLowerCase(); }
+  //   if (collection1 === collection2) { return true; }
+  //   return false;
+  // }
 
-  return prepareResponse();
+  // var loopback = require('loopback');
+  // if (modelSettings.variantOf) {
+  //   var variantModel = loopback.findModel(modelSettings.variantOf);
+  //   if (variantModel) {
+  //     if (isSameCollection(variantModel.definition.settings, modelSettings)) {
+  //       return prepareResponse();
+  //     }
+  //     variantModel.find(ctx.query, ctx.options, function (err, variantData) {
+  //       if (err) {
+  //         return next(new Error(err));
+  //       }
+  //       return prepareResponse(variantData);
+  //     });
+  //     return;
+  //   }
+  // }
+
+  // return prepareResponse();
 }
 
 /**

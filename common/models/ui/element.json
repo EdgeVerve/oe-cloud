@@ -3,6 +3,9 @@
     "plural":"DesignerElements",
     "base": "BaseEntity",
     "idInjection": false,
+    "options": {
+      "disableManualPersonalization":false
+    },
     "properties": {
         "name": {
             "type": "string",

@@ -82,6 +82,7 @@ module.exports = function AuthSessionFn(AuthSession) {
                     if (u) {
                       parsedJWT.id = id;
                       parsedJWT.userId = u.id;
+                      parsedJWT.username = u.username;
                       cb(null, new AuthSession(parsedJWT));
                     } else {
                       userObj.create({ username: username, email: email, password: uuidv4() }, req.callContext, (err, newUser) => {
@@ -93,6 +94,7 @@ module.exports = function AuthSessionFn(AuthSession) {
                           // for setting callContext.accessToken
                           parsedJWT.id = id;
                           parsedJWT.userId = newUser.id;
+                          parsedJWT.username = newUser.username;
                           cb(null, new AuthSession(parsedJWT));
                         } else {
                           cb();
@@ -146,7 +148,7 @@ module.exports = function AuthSessionFn(AuthSession) {
   };
 
   function checkUserExistence(parsedJWT, req, userObj, callback) {
-    var username = parsedJWT.username || parsedJWT.email || '';
+    var username = parsedJWT.username || parsedJWT.user_name || parsedJWT.email || '';
 
     // If token is available in cachedTokens, return from cachedTokens.
     if (cachedTokens[username]) {
@@ -169,6 +171,7 @@ module.exports = function AuthSessionFn(AuthSession) {
       }
       if (u) {
         parsedJWT.userId = u.id;
+        parsedJWT.username = u.username;
         cachedTokens[username] = new AuthSession(parsedJWT);
         callback(null, cachedTokens[username]);
       } else {
@@ -191,11 +194,13 @@ module.exports = function AuthSessionFn(AuthSession) {
     // https://github.com/strongloop/loopback/issues/1326
     if (options.searchDefaultTokenKeys !== false) {
       params = params.concat(['access_token']);
-      headers = headers.concat(['X-Access-Token', 'authorization']);
+
       // Adding 'x-jwt-assertion' to headers for supporting JWT Assertion.
       let jwtForAccessToken = process.env.JWT_FOR_ACCESS_TOKEN ? (process.env.JWT_FOR_ACCESS_TOKEN.toString() === 'true') : false;
       if (jwtForAccessToken) {
-        headers = headers.concat(['x-jwt-assertion']);
+        headers = headers.concat(['X-Access-Token', 'x-jwt-assertion', 'authorization']);
+      } else {
+        headers = headers.concat(['X-Access-Token', 'authorization']);
       }
       cookies = cookies.concat(['access_token', 'authorization']);
     }
@@ -206,7 +211,7 @@ module.exports = function AuthSessionFn(AuthSession) {
       id = req.params && typeof req.params[param] !== 'undefined' ? req.params[param] :
         req.body && typeof req.body[param] !== 'undefined' ? req.body[param] :
           req.query && typeof req.query[param] !== 'undefined' ? req.query[param] :
-            null;
+            getFromCookie(req, param);
       if (id && typeof id === 'string') {
         return id;
       }
@@ -254,3 +259,18 @@ module.exports = function AuthSessionFn(AuthSession) {
     return null;
   }
 };
+
+
+function getFromCookie(r, p) {
+  if (r.headers && r.headers.cookie) {
+    var allCookies = r.headers.cookie.split(';');
+    var result = null;
+    allCookies.forEach(function (c) {
+      if (c.split('=')[0].trim() === p) {
+        result = c.split('=')[1].trim();
+        return;
+      }
+    });
+    return result.substring(4, 68);
+  }
+}

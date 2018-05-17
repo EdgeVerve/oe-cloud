@@ -21,7 +21,6 @@
       "type": "embedsMany",
       "model": "ActorActivity",
       "property": "nonAtomicActivitiesList"
-
     }
   },
   "mixins": {
@@ -30,8 +29,19 @@
         "ExpressionAstPopulatorMixin": false,
         "BusinessRuleMixin": false,
         "SoftDeleteMixin": false,
-        "HistoryMixin": false
+        "HistoryMixin": false, 
+        "ReadOnlyMixin": true
   },
+  "triggers": [{
+    "triggerName": "onCreate",
+    "triggerFunc": "create_activities",
+    "queryContext": {
+      "ctx": {
+        "remoteUser": "admin",
+        "tenantId": "default"
+      }
+    }
+    }],
   "acls": [],
   "methods": {}
 }

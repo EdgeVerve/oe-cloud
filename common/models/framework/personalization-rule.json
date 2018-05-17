@@ -7,7 +7,8 @@
   "strict": true,
   "options": {
     "validateUpsert": true,
-    "isFrameworkModel": true
+    "isFrameworkModel": true,
+    "disableManualPersonalization": false
   },
   "properties": {
     "ruleName": {

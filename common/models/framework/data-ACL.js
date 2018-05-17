@@ -205,6 +205,9 @@ module.exports = function DataACLFn(DataACL) {
           filterUsed = { 'ahfgfhewklhkhwakwd': 'asdasdsad' };
         }
         var filter = ctx.args.filter || {};
+        if (typeof ctx.args.filter === 'string') {
+          filter = JSON.parse(filter);
+        }
 
         Object.keys(filterUsed).forEach(function filterUsedForEach(group) {
           if (filterUsed[group].length === 1) {

@@ -2,7 +2,7 @@
 	"name": "UIComponent",
 	"base": "UIBase",
 	"idInjection": false,
-    "description" : "Configuration and content for UI components",
+	"description": "Configuration and content for UI components",
 	"options": {
 		"validateUpsert": true
 	},
@@ -10,76 +10,100 @@
 		"name": {
 			"type": "string",
 			"required": true,
-			"description" : "name of UI component, matches Polymer proptotype.is property",
+			"description": "name of UI component, matches Polymer proptotype.is property",
 			"max": 80,
-      "unique" : true
+			"unique": true
 		},
-    "category":{
-      "type": "string",
-      "description": "Component category"
-    },
-		"templateName" : {
+		"category": {
 			"type": "string",
-			"description" : "Based on templateName component is generatred"
+			"description": "Component category"
 		},
-		"resturl" : {
+		"templateName": {
 			"type": "string",
-			"description" : "url for form data handling"
+			"description": "Based on templateName component is generatred"
 		},
-		"filePath" : {
+		"resturl": {
 			"type": "string",
-			"description" : "If component is file based, file location"
+			"description": "url for form data handling"
+		},
+		"geturl": {
+			"type": "string",
+			"description": "url for GET"
+		},
+		"posturl": {
+			"type": "string",
+			"description": "url for POST"
+		},
+		"puturl": {
+			"type": "string",
+			"description": "url for PUT"
+		},
+		"deleteurl": {
+			"type": "string",
+			"description": "url for DELETE"
+		},
+		"componentData": {
+			"type": "object",
+			"description": "Data to be set on the generated component on attached."
+		},
+		"filePath": {
+			"type": "string",
+			"description": "If component is file based, file location"
 		},
 		"content": {
-		  "type": "string",
-		  "max":10000,
-		  "allowScript" : true,
-		  "description" : "html content of the component, if not stored it is generated from model metadata"
-		},
-		"routePath" : {
 			"type": "string",
-			"description" : "If this UI component handles a route then route path"
+			"max": 10000,
+			"allowScript": true,
+			"description": "html content of the component, if not stored it is generated from model metadata"
 		},
-		"modelName" : {
+		"routePath": {
 			"type": "string",
-			"description" : "If this component renders default UI for a model then model name"
+			"description": "If this UI component handles a route then route path"
 		},
-    "modelAlias" : {
+		"modelName": {
 			"type": "string",
-			"description" : "If model Alias is given it is used as primary model for binding, else lower case of modelName is used, for old UI Metadata migration this can be vm"
+			"description": "If this component renders default UI for a model then model name"
 		},
-		"fields" : {
+		"modelAlias": {
+			"type": "string",
+			"description": "If model Alias is given it is used as primary model for binding, else lower case of modelName is used, for old UI Metadata migration this can be vm"
+		},
+		"fields": {
 			"type": "object",
-			"description" : "fields of default model to be rendered"
+			"description": "fields of default model to be rendered"
 		},
-		"gridConfig" : {
+		"container": {
 			"type": "object",
-			"description" : "fields to display in grids"
+			"description": "containers to be added into the template"
 		},
-		"options" : {
+		"gridConfig": {
 			"type": "object",
-			"description" : "Any data which can be used by UI for this component"
+			"description": "fields to display in grids"
 		},
-    "polymerConfig" : {
+		"options": {
 			"type": "object",
-			"description" : "Polymer Configuration, used for polymer registration"
+			"description": "Any data which can be used by UI for this component"
 		},
-    "autoInjectFields" : {
+		"polymerConfig": {
+			"type": "object",
+			"description": "Polymer Configuration, used for polymer registration"
+		},
+		"autoInjectFields": {
 			"type": "boolean",
-			"description" : "Whether remaining model fields should be auto injected or not",
-      "default" : true
-    },
-    "excludeFields" : {
+			"description": "Whether remaining model fields should be auto injected or not",
+			"default": true
+		},
+		"excludeFields": {
+			"type": "object",
+			"description": "Fields which are to be excluded from injection"
+		},
+		"oeValidations": {
+			"type": ["Validation"],
+			"required": false
+		},
+		"importUrls": {
 			"type": ["string"],
-			"description" : "Fields which are to be excluded from injection"
-    },
-    "oeValidations": {
-      "type": ["Validation"],
-      "required": false
-    },
-		"importUrls":{
-			"type":["string"],
-			"description" : "Additionals Import links for the component"
+			"description": "Additionals Import links for the component"
 		}
 	},
 	"validations": [],

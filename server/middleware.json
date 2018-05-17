@@ -41,10 +41,7 @@
     "auth": {
     },
     "auth:after": {
-        "./middleware/post-auth-context-populator": {},
-        "./middleware/node-red-access-control": {
-            "paths": ["/red"]
-        }
+        "./middleware/post-auth-context-populator": {}
     },
     "parse": {},
     "routes:before": {
@@ -68,6 +65,7 @@
         }
     },
     "routes": {},
+    "routes:after": {},
     "files": {
         "loopback#static": {
             "params": "$!../client"

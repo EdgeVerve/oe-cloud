@@ -201,11 +201,15 @@ function setDesignerPath(DesignerPath, server) {
         return;
       }
       var accepts = route.accepts || [];
+      var method = route.method || [];
       var split = route.method.split('.');
       /* HACK */
       if (classDef && classDef.sharedCtor &&
         classDef.sharedCtor.accepts && split.length > 2) {
         accepts = accepts.concat(classDef.sharedCtor.accepts);
+        if (classDef.sharedCtor.method) {
+          method = method.concat(classDef.sharedCtor.method);
+        }
       }
 
       // Filter out parameters that are generated from the incoming request,
@@ -229,11 +233,18 @@ function setDesignerPath(DesignerPath, server) {
       });
       route.accepts = accepts;
       route.verb = convertVerb(route.verb);
+      var methodSplitLength = route.method.split('.').length;
+      if (methodSplitLength >= 1) {
+        route.method = method.split('.')[methodSplitLength - 1];
+      } else {
+        route.method = method;
+      }
       return {
         path: route.path,
         type: route.verb,
         description: route.description,
-        accepts: route.accepts
+        accepts: route.accepts,
+        method: route.method
       };
     });
     var modelEndPoints = _.groupBy(routes, function modelEndPoints(d) {
@@ -299,6 +310,68 @@ function setDesignerPath(DesignerPath, server) {
     });
   });
 
+
+  // api to create default UI for model using default-form template and adding it to NavigationLink.
+  server.post(appconfig.designer.mountPath + '/createDefaultUI', function (req, res) {
+    var options = req.callContext;
+    var modelName = req.body ? req.body.modelName : null;
+    var err;
+
+    if (!modelName) {
+      err = new Error();
+      err.error = {
+        message: 'Please provide model name'
+      };
+      return res.status(500).send(err);
+    }
+
+    var model = loopback.findModel(modelName, options);
+    if (!model) {
+      err = new Error();
+      err.error = {
+        message: 'Model not found'
+      };
+      return res.status(500).send(err);
+    }
+
+    var modelNameLowerCase = req.body.modelName.toLowerCase();
+
+    var uiRouteData = {
+      type: 'elem',
+      name: modelNameLowerCase + '-default',
+      path: '/' + modelNameLowerCase + '-default',
+      import: appconfig.designer.restApiRoot + '/UIComponents/component/' + modelNameLowerCase + '-default.html'
+    };
+
+    var uiComponentData = {
+      name: modelNameLowerCase + '-default',
+      templateName: 'default-form.html',
+      modelName: modelName
+    };
+
+    var navigationLinkData = {
+      name: modelNameLowerCase + '-default',
+      url: '/' + modelNameLowerCase + '-default',
+      label: modelName,
+      group: 'root'
+    };
+
+    var arr = [];
+    arr.push(findAndCreate('UIRoute', uiRouteData, options));
+    arr.push(findAndCreate('UIComponent', uiComponentData, options));
+    arr.push(findAndCreate('NavigationLink', navigationLinkData, options));
+
+    Promise.all(arr).then(function (result) {
+      if (new Set(result).size === 1) {
+        res.json({ message: 'Default UI already exists' });
+      } else {
+        res.json({ message: 'Default UI created' });
+      }
+    }).catch(function (err) {
+      res.status(500).send(err);
+    });
+  });
+
   server.get(appconfig.designer.mountPath + '/assets', function designerStyles(req, res) {
     res.json(module.assetData);
   });
@@ -348,6 +421,27 @@ function ifDirectoryExist(dirname, cb) {
       status = false;
     }
     cb(dirname, status);
+  });
+}
+
+function findAndCreate(modelName, data, options) {
+  return new Promise(function (resolve, reject) {
+    var model = loopback.findModel(modelName, options);
+    model.findOne({ where: data }, options, function (err, res) {
+      if (err) {
+        reject(err);
+      } else if (!res) {
+        model.create(data, options, function (err, res) {
+          if (!err) {
+            resolve(res);
+          } else {
+            reject(err);
+          }
+        });
+      } else {
+        resolve(true);
+      }
+    });
   });
 }
 

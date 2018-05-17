@@ -151,22 +151,22 @@ describe(chalk.blue('logger-config-test'), function () {
       });
   });
 
-  after('restore the original log configuration', function (done) {
-    var loggerModel = loopback.findModel('LoggerConfig');
-    loggerModel.destroyAll({}, { tenantId: 'default' }, function (err) {
-      if (err) {
-        console.log('unable to destroy loggerConfig models');
-        return done(new Error('unable to destory loggerConfig models'));
-      }
-      else {
-        loggerModel.create(originalLogConfig, { tenantId: 'default' }, function (err) {
-          if (err) {
-            console.log('unable to restore the original LoggerConfig');
-            return done(new Error('unable to restore the original LoggerConfig'));
-          }
-          return done();
-        });
-      }
-    });
-  });
+  // after('restore the original log configuration', function (done) {
+  //   var loggerModel = loopback.findModel('LoggerConfig');
+  //   loggerModel.destroyAll({}, { tenantId: 'default' }, function (err) {
+  //     if (err) {
+  //       console.log('unable to destroy loggerConfig models');
+  //       return done(new Error('unable to destory loggerConfig models'));
+  //     }
+  //     else {
+  //       loggerModel.create(originalLogConfig, { tenantId: 'default' }, function (err) {
+  //         if (err) {
+  //           console.log('unable to restore the original LoggerConfig');
+  //           return done(new Error('unable to restore the original LoggerConfig'));
+  //         }
+  //         return done();
+  //       });
+  //     }
+  //   });
+  // });
 });

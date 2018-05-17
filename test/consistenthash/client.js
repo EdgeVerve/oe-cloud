@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 // Pass the port number and proxy url as command line args in the same order.
 var bootstrap = require('../bootstrap');
@@ -19,6 +19,8 @@ var host, port;
 if (process.argv[3] && !isNaN(parseInt(process.argv[3]))) {
   app.set('port', process.argv[3]);
 }
+// making sure this node does not connect to tx-router
+process.env.TX_ROUTER_HOST = '128.0.0.1';
 if (process.env.APP_URL) {
   url = process.env.APP_URL;
   request = supertest(url);

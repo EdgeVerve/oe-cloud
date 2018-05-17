@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var chalk = require('chalk');
 var chai = require('chai');
@@ -31,7 +31,16 @@ process.env.CONSISTENT_HASH = 'true';
 options.clientAppRootDir = __dirname;
 var basePath = app.get('restApiRoot');
 app.locals.apphome = __dirname;
-app.set('disableNodered', false);
+
+//rule engine configuration - begin
+app.set('jsFeelRelation', { disabled: false });
+app.set('jsFeelExternalFunction', { disabled: false, path: 'test/model-rule-data/data/functions'});
+
+app.set('jsFeelExecutionLogging', false);
+app.set('jsFeelLogResult', false);
+app.set('jsFeelLexerLogging', false);
+//rule engine configuration - end
+
 evapp.boot(app, options, function() {
     app.start();
     app.emit('EVstarted');
@@ -116,7 +125,7 @@ if (config) {
     config.designer.assetPath = ['client/bower_components/images'];
 }
 
-/* When tests are run in git-lab, the oe-studio is not installed and 
+/* When tests are run in git-lab, the oe-studio is not installed and
  * none of the oe-studio routes are setup. We create dummy directory before boot
  */
 !fs.existsSync('client') && fs.mkdirSync('client');

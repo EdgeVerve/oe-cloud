@@ -6,7 +6,7 @@ services:
       - ${NETWORK_NAME}
       
   broadcaster:
-    image: ${REGISTRY}/evf-broadcaster-server:latest
+    image: ${REGISTRY}/oecloudio-broadcaster-server:latest
     environment:
       SERVICE_PORTS: "2345"
     networks:
