@@ -1,3 +1,9 @@
+/**
+ *
+ * ©2017-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
 const chalk = require('chalk');
 const https = require('https');
 const assert = require('assert');
@@ -112,7 +118,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   };
 
   var access_token_node1;
-  
+
   it('should successfuly log-in to node1', done => {
     // var reqObj = url.parse("https://test.node1.oecloud.local/auth/local");
     // var payload = JSON.stringify(credo);
@@ -318,7 +324,7 @@ describe(chalk.blue('rule cluster tests'), function(){
   });
 
   it('should not take down nodes when executing a rule that came from a corrupted file', done => {
-    
+
     // debugger;
     var fileContents = prefix + fs.readFileSync('./test/model-rule-data/corrupt.xlsx').toString('base64');
 
