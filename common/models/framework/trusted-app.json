@@ -16,6 +16,12 @@
         "appName": {
             "type": "string"
         },
+        "username": {
+            "type": "string"
+        },
+        "publicKey": {
+            "type": "string"
+        },
         "expiry": {
             "type": "number"
         },
