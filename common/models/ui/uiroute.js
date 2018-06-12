@@ -46,7 +46,11 @@
 
 module.exports = function uiRoute(UIRoute) {
   var routes = {};
-
+  var app = require('../../../server/server').app;
+  var subPath = app.get('subPath');
+  if (subPath) {
+    UIRoute.observe('after accesss', addSubPath);
+  }
   UIRoute.prototype.redirectHandler = function redirectHandler(app) {
     if (!routes[this.path]) {
       app.get(this.path, function getPath(req, res) {
@@ -55,4 +59,15 @@ module.exports = function uiRoute(UIRoute) {
     }
     routes[this.path] = true;
   };
+
+  function addSubPath(ctx, next) {
+    var result = ctx.accdata;
+    result && result.forEach(function (route) {
+      route.path = "/" + subPath + route.path;
+      route.import = subPath + "/" + route.import;
+    });
+    next();
+  }
+
+
 };

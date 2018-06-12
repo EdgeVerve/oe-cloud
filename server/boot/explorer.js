@@ -29,11 +29,12 @@ module.exports = function Explorer(server) {
   }
   var swaggerUiDist = require('oe-swagger-ui').dist;
   var restApiRoot = server.get('restApiRoot');
+  var subPath = server.get('subPath');
   var explorerDir = path.join(__dirname, '..', '..', 'client', 'explorer');
   var uiDirs = [explorerDir, swaggerUiDist];
 
   var explorerApp = explorer.routes(server, {
-    basePath: restApiRoot,
+    basePath: subPath ? '/' + subPath + restApiRoot : restApiRoot,
     uiDirs: uiDirs
   });
   server.use(explorerPathName, explorerApp);

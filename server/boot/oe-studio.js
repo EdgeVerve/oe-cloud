@@ -491,9 +491,14 @@ module.exports = function Designer(server) {
     }
 
     appconfig.designer.restApiRoot = appconfig.designer.restApiRoot || server.get('restApiRoot') || appconfig.restApiRoot;
-
+    appconfig.designer.subPath = appconfig.designer.subPath || server.get('subPath') || appconfig.subPath;
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
+    if (appconfig.designer.subPath) {
+      appconfig.designer.modules.forEach(function (item) {
+        item.import = appconfig.designer.subPath + item.import;
+      });
+    }
 
     ifDirectoryExist(appconfig.designer.installationPath + '/' + designerName, function directorySearch(dirname, status) {
       if (status) {
