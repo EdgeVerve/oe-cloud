@@ -4,7 +4,9 @@
   "description": "This model is used to store application configuration",
 	"options": {
 		"validateUpsert": true,
-		"isFrameworkModel": true		
+		"isFrameworkModel": true,
+		"queryCacheSize": 20000,
+      	"queryCacheExpiration": 86400000 		
 	},
 	"properties": {
 		"server": {
