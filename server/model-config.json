@@ -282,5 +282,9 @@
     "BatchStatus":{
         "public": true,
         "dataSource": "db"
+    },
+    "BatchRun":{
+        "public": true,
+        "dataSource": "db"
     }
 }
