@@ -6,7 +6,9 @@
     "description": "holds trusted application details",
     "options": {
         "validateUpsert": true,
-        "isFrameworkModel": true
+        "isFrameworkModel": true,
+        "queryCacheSize": 20000,
+        "queryCacheExpiration": 86400000
     },
     "properties": {
         "appId": {
@@ -46,5 +48,6 @@
             "accessType": "*"
         }
     ],
+    "cacheable": true,
     "methods": {}
 }
