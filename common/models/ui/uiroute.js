@@ -63,11 +63,9 @@ module.exports = function uiRoute(UIRoute) {
   function addSubPath(ctx, next) {
     var result = ctx.accdata;
     result && result.forEach(function (route) {
-      route.path = "/" + subPath + route.path;
-      route.import = subPath + "/" + route.import;
+      route.path = '/' + subPath + route.path;
+      route.import = subPath + '/' + route.import;
     });
     next();
   }
-
-
 };
