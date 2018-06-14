@@ -158,9 +158,17 @@ function setDesignerPath(DesignerPath, server) {
 
   // server.use(loopback.static(DesignerPath));
   server.get(appconfig.designer.mountPath, function sendResponse(req, res) {
-    res.sendFile('index.html', {
-      root: DesignerPath + '/' + designerName
-    });
+    var subPath = server.get('subPath');
+    if (subPath) {
+      var studioIndexFile = fs.readFileSync(path.join(DesignerPath + '/' + designerName + '/index.html'), 'utf8');
+      studioIndexFile = studioIndexFile.replace('/designer/config', '/' + subPath + '/designer/config');
+      res.setHeader('content-type', 'text/HTML');
+      res.send(studioIndexFile);
+    } else {
+      res.sendFile('index.html', {
+        root: DesignerPath + '/' + designerName
+      });
+    }
   });
 
 
