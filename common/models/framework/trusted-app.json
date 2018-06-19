@@ -42,6 +42,12 @@
         },
         {
             "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "authenticate"      
+        },
+        {
+            "principalType": "ROLE",
             "principalId": "$authenticated",
             "permission": "ALLOW",
             "property": "*",
