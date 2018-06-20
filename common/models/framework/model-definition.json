@@ -7,7 +7,9 @@
   "options": {
     "validateUpsert": true,
     "isFrameworkModel": true,
-    "disableManualPersonalization":false
+    "disableManualPersonalization":false,
+    "queryCacheSize": 20000,
+    "queryCacheExpiration": 86400000     
   },
   "properties": {
     "properties": {

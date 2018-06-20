@@ -158,9 +158,17 @@ function setDesignerPath(DesignerPath, server) {
 
   // server.use(loopback.static(DesignerPath));
   server.get(appconfig.designer.mountPath, function sendResponse(req, res) {
-    res.sendFile('index.html', {
-      root: DesignerPath + '/' + designerName
-    });
+    var subPath = server.get('subPath');
+    if (subPath) {
+      var studioIndexFile = fs.readFileSync(path.join(DesignerPath + '/' + designerName + '/index.html'), 'utf8');
+      studioIndexFile = studioIndexFile.replace('/designer/config', '/' + subPath + '/designer/config');
+      res.setHeader('content-type', 'text/HTML');
+      res.send(studioIndexFile);
+    } else {
+      res.sendFile('index.html', {
+        root: DesignerPath + '/' + designerName
+      });
+    }
   });
 
 
@@ -491,9 +499,14 @@ module.exports = function Designer(server) {
     }
 
     appconfig.designer.restApiRoot = appconfig.designer.restApiRoot || server.get('restApiRoot') || appconfig.restApiRoot;
-
+    appconfig.designer.subPath = appconfig.designer.subPath || server.get('subPath') || appconfig.subPath;
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
+    if (appconfig.designer.subPath) {
+      appconfig.designer.modules.forEach(function (item) {
+        item.import = appconfig.designer.subPath + item.import;
+      });
+    }
 
     ifDirectoryExist(appconfig.designer.installationPath + '/' + designerName, function directorySearch(dirname, status) {
       if (status) {

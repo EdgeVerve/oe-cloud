@@ -11,7 +11,7 @@
  * @author Sambit Kumar Patra
  * @mixin Business Rule Mixin
  */
-var q = require('q');
+var q = require('oe-promise');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 var loopback = require('loopback');
 var logger = require('oe-logger');
