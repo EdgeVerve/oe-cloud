@@ -16,7 +16,7 @@ Any unauthorized reproduction, storage, transmission in any form or by any means
 var logger = require('oe-logger');
 var log = logger('model-validations');
 var async = require('async');
-var q = require('q');
+var q = require('oe-promise');
 var validationBuilder = require('../../lib/common/validation-builder.js');
 var exprLang = require('../../lib/expression-language/expression-language.js');
 var getError = require('../../lib/common/error-utils').attachValidationError;
@@ -86,6 +86,11 @@ module.exports = function ModelValidations(Model) {
     log.debug(options, 'isValid called for : ', path);
     var self = inst;
     var ast = self.constructor._ast;
+    var args = {};
+    args.inst = inst;
+    args.data = data;
+    args.path = path;
+    args.options = options;
     // construct an array of promises for validateWhen and wait for expression language to resolve all the promises
     inst.constructor.validationRules.forEach(function modelValidationsRulesForEachFn(obj) {
       if (obj.args.validateWhen) {
@@ -109,11 +114,7 @@ module.exports = function ModelValidations(Model) {
         if (d) {
           // this wrapper prepares an array of functions containg all the validations attached to the model
           var obj = inst.constructor.validationRules[i];
-          obj.args.inst = inst;
-          obj.args.data = data;
-          obj.args.path = path;
-          obj.args.options = options;
-          fnArr.push(async.apply(obj.expression, obj.args));
+          fnArr.push(async.apply(obj.expression, obj.args, args));
         }
       });
       /* prepare an array of functions which are nothing but the isValid method of the
