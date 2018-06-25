@@ -48,6 +48,18 @@ module.exports = function GruntConfig(grunt) {
       }
     },
 
+    check_copyright: {
+      options: {
+        // Task-specific options go here.
+        copyrights: [/EdgeVerve Systems Limited \(a fully owned Infosys subsidiary\).*Bangalore, India.*All Rights Reserved.*/],
+        lines: 10
+      },
+      files: {
+        // Target-specific file lists and/or options go here.
+        src: ['**/*.js', '**/*.html', '!node_modules/**', '!bower_components/**', '!client/bower_components/**']
+      }
+    },
+
     mochaTest: {
       test: {
         options: {
@@ -117,6 +129,7 @@ module.exports = function GruntConfig(grunt) {
 
   grunt.loadNpmTasks('grunt-mkdir');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-check-copyright');
   grunt.loadNpmTasks('grunt-banner');
 
   grunt.registerTask('test-with-coverage', ['clean:coverage', 'mocha_istanbul']);

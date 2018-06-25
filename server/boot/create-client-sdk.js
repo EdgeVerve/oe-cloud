@@ -1,3 +1,9 @@
+/**
+ *
+ * ©2017-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
 var fs = require('fs');
 var path = require('path');
 var util = require('../../lib/common/util.js');

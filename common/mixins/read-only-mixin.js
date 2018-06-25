@@ -1,4 +1,9 @@
-
+/**
+ *
+ * ©2017-2018 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
+ * Bangalore, India. All Rights Reserved.
+ *
+ */
 var logger = require('oe-logger');
 var log = logger('read-only-mixin');
 
