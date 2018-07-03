@@ -49,7 +49,7 @@
         "loopback-component-storage": "git+http://evgit/oecloud.io/loopback-component-storage.git#master",
         "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#master",
         "loopback-datasource-juggler": "git+http://evgit/oecloud.io/loopback-datasource-juggler.git#master",
-        "oe-promise": "git+http://evgit/oecloud.io/oe-promise#master",
+        "oe-promise": "git+http://evgit/oecloud.io/oe-promise.git#master",
         "loopback-filters": "0.1.2",
         "lru-cache": "^4.0.1",
         "mail": "^0.2.3",
