@@ -132,12 +132,12 @@ module.exports = function OTP(otpModel) {
       value[i] = randomNumberSet[rnd[i] % len];
     }
     return parseInt(value.join(''), 10);
-  }
+  };
 
   otpModel.verify = function (data, req, res, options, cb) {
     var otpInstanceID = req.cookies.otp_id;
     if (!otpInstanceID) {
-      return cb(new Error("Unknown OTP request or Exceeded maximum retries"));
+      return cb(new Error('Unknown OTP request or Exceeded maximum retries'));
     }
 
     otpModel.findOne({'id': otpInstanceID}, options, function (err, result) {
@@ -163,13 +163,13 @@ module.exports = function OTP(otpModel) {
         // delete record when otp verified, didnt delete record
         otpModel.deleteById(otpInstanceID, options, function (err, deleteResp) {
           if (err) {
-            console.error(err);
+            log.error(req.callContext, 'Error when deleting record after OTP verified', err);
           }
           res.clearCookie('otp_id');
           return cb(null, {'status': 'verified'});
         });
       } else {
-        result.updateAttribute('failed', result.failed + 1, options, function (err, updateResp){
+        result.updateAttribute('failed', result.failed + 1, options, function (err, updateResp) {
           if (err) {
             return cb(err);
           }
@@ -182,7 +182,7 @@ module.exports = function OTP(otpModel) {
   otpModel.resend = function (req, res, options, cb) {
     var otpInstanceID = req.cookies.otp_id;
     if (!otpInstanceID) {
-      return cb(new Error("Unknown OTP request"));
+      return cb(new Error('Unknown OTP request'));
     }
 
     otpModel.findOne({'id': otpInstanceID}, options, function (err, result) {
@@ -209,6 +209,9 @@ module.exports = function OTP(otpModel) {
           return cb(err);
         }
         result.updateAttribute('resend', result.resend + 1, options, function (err, updateResp) {
+          if (err) {
+            return cb(err);
+          }
           return cb(null, status);
         });
       });
@@ -218,14 +221,17 @@ module.exports = function OTP(otpModel) {
   otpModel.sendOTP = function sendOTP(data, smsConfig, cb) {
     var asyncFn = {};
     if (data.config.sms) {
-      asyncFn.sms = function (cb) { otpModel.sendSMS(data, smsConfig, cb) };
+      asyncFn.sms = function (cb) { otpModel.sendSMS(data, smsConfig, cb); };
     }
 
     if (data.config.mail) {
-      asyncFn.mail = function (cb){ otpModel.sendMail(data, cb) };
+      asyncFn.mail = function (cb) { otpModel.sendMail(data, cb); };
     }
 
-    async.parallel(asyncFn, function(err, results) {
+    async.parallel(asyncFn, function (err, results) {
+      if (err) {
+        return cb(err);
+      }
       var resp = {};
       if (results.sms instanceof Error) {
         resp.sms = {'status': 'failed', 'error': results.sms.message};
@@ -239,15 +245,15 @@ module.exports = function OTP(otpModel) {
       }
       cb(null, resp);
     });
-  }
+  };
 
   otpModel.sendSMS = function sendSMS(data, smsConfig, cb) {
     var numbers = data.phone;
     var message = encodeURIComponent('OTP generated is ' + data.otp);
-    var sender = smsConfig.FROM;
     var smsAPI = smsConfig.API;
     var apiKey = smsConfig.API_KEY;
     // ignoring sender name as its not there for promotional account
+    // var sender = smsConfig.FROM;
     // var getURL = smsAPI + '?apikey=' + apiKey + '&numbers=' + numbers + '&message=' + message + '&sender=' + sender;
     var getURL = smsAPI + '?apikey=' + apiKey + '&numbers=' + numbers + '&message=' + message;
 
@@ -265,21 +271,21 @@ module.exports = function OTP(otpModel) {
       if (typeof body === 'object' && body.status && body.status === 'success') {
         cb(null, 'success');
       } else {
-        var errorMessage = "";
+        var errorMessage = '';
         if (typeof body.errors === 'object' && body.errors.length > 0) {
-          body.errors.forEach(function (err){
-            errorMessage = errorMessage + err.message + " ; "
+          body.errors.forEach(function (err) {
+            errorMessage = errorMessage + err.message + ' ; ';
           });
         }
         if (typeof body.warnings === 'object' && body.warnings.length > 0) {
-          body.warnings.forEach(function (warn){
-            errorMessage = errorMessage + warn.message + " ; "
+          body.warnings.forEach(function (warn) {
+            errorMessage = errorMessage + warn.message + ' ; ';
           });
         }
         cb(null, new Error(errorMessage));
       }
     });
-  }
+  };
 
   otpModel.sendMail = function sendMail(data, cb) {
     var html = 'OTP generated is ' + data.otp;
@@ -300,7 +306,7 @@ module.exports = function OTP(otpModel) {
         cb(null, 'success');
       }
     });
-  }
+  };
 
   otpModel.remoteMethod(
     'send',

@@ -56,7 +56,7 @@ module.exports = function GruntConfig(grunt) {
       },
       files: {
         // Target-specific file lists and/or options go here.
-        src: ['**/*.js', '**/*.html', '!node_modules/**', '!bower_components/**', '!client/bower_components/**']
+        src: ['**/*.js', '**/*.html', '!node_modules/**', '!bower_components/**', '!client/bower_components/**', '!coverage/**']
       }
     },
 
