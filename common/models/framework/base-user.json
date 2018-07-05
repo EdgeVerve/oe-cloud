@@ -50,11 +50,6 @@
       "type": "hasMany",
       "model": "userCredential",
       "foreignKey": "userId"
-    },
-    "otp": {
-      "type": "hasMany",
-      "model": "OTP",
-      "foreignKey": "userId"
     }
   },
   "acls": [

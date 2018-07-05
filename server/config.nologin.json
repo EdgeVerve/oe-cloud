@@ -41,8 +41,5 @@
   "realm": "oecloud",
   "defaultAutoScope": "default",
   "encryptionAlgorithm": "crypto.aes256",
-  "encryptionPassword": "SomePassword",
-  "otpConfig":{
-	  "FundsTransfer" : "transferFund"
-  }
+  "encryptionPassword": "SomePassword"
 }
