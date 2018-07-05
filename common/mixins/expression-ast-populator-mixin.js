@@ -62,11 +62,11 @@ module.exports = function ExpressionAstPopulator(Model) {
     }
   });
 
-  var otpEnabledMethods = Model.definition.settings.enableOTP || [];
-  otpEnabledMethods.forEach(function otpMethodIterate(otpConfig) {
-    var expression = otpConfig.authWhen;
-    if (expression) {
-      Model._ast[expression] = exprLang.createAST(expression);
-    }
-  });
+  // var otpEnabledMethods = Model.definition.settings.enableOTP || [];
+  // otpEnabledMethods.forEach(function otpMethodIterate(otpConfig) {
+  //   var expression = otpConfig.authWhen;
+  //   if (expression) {
+  //     Model._ast[expression] = exprLang.createAST(expression);
+  //   }
+  // });
 };

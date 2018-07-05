@@ -1,3 +1,0 @@
-dirlist.txt
-framework
-ui

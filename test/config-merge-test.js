@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 var chalk = require('chalk');
 var bootstrap = require('./bootstrap');
@@ -60,10 +60,7 @@ describe(chalk.blue('Config files merge test'), function () {
       'realm': 'oecloud',
       'enableJWTAssertion': false,
       'encryptionAlgorithm': 'crypto.aes256',
-      'encryptionPassword': 'SomePassword',
-      'otpConfig': {
-        'FundsTransfer': 'transferFund'
-      }
+      'encryptionPassword': 'SomePassword'
     };
     var clientConfig = {
       'restApiRoot': '/api',

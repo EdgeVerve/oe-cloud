@@ -1,44 +1,43 @@
 {
   "name": "OTP",
   "base": "PersistedModel",
+  "plural": "OTP",
   "idInjection": false,
   "description": "This model is used in OTP functionality",
+  "mixins": {
+    "ObserverMixin": true,
+    "AuditFieldsMixin": true
+  },
   "options": {
     "isFrameworkModel": true,
     "validateUpsert": true
   },
   "properties": {
-    "token": {
-      "type": "number",
-      "required": true
+    "otp": {
+      "type": "number"
     },
-    "timestamp": {
-      "type": "number",
-      "required": true
+    "mail": {
+      "type": "string"
     },
-    "state": {
-      "type": "string",
-      "required": true,
-      "max": 30
+    "phone": {
+      "type": "string"
     },
-    "data": {
-      "type": "object",
-      "required": false
+    "failed": {
+      "type": "number"
     },
-    "failedAttemps": {
-      "type": "number",
-      "default": 0
+    "resend": {
+      "type": "number"
+    },
+    "expire": {
+      "type": "number"
+    },
+    "config": {
+      "type": "object"
     }
   },
   "hidden": [],
   "validations": [],
-  "relations": {
-    "user": {
-      "type": "belongsTo",
-      "model": "BaseUser",
-      "foreignKey": "userId"
-    }
-  },
+  "relations": {},
   "acls": [],
   "methods": {}
 }

@@ -272,5 +272,7 @@ function getFromCookie(r, p) {
       }
     });
     return result ? result.substring(4, 68) : null;
+  } else if (r.cookies && r.cookies[p]) {
+    return r.cookies[p];
   }
 }
