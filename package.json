@@ -60,7 +60,7 @@
     "oe-explorer": "^1.0.0",
     "oe-jwt-generator": "^1.0.0",
     "oe-logger": "^1.0.0",
-    "oe-promise": "git+http://evgit/oecloud.io/oe-promise#master",
+    "oe-promise": "git+http://evgit/oecloud.io/oe-promise.git#master",
     "oe-swagger-ui": "^0.9.0",
     "passport-google-oauth": "0.1.5",
     "passport-local": "1.0.0",
