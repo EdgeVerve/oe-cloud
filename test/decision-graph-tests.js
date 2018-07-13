@@ -31,6 +31,17 @@ describe(chalk.blue('Decision graph insertion tests'), function() {
             done();
         });
     });
+
+    it('Should fail to create decision graph if any node fails the validation ', function (done) {
+        var decisionGraphData = { "name": "new22", "data": { "Boxed Invocation 1": " (key : value)", "Boxed Context 1": "{key : value}" }, "graph": { "nodes": [{ "id": "00oz0nv89", "i": 2, "name": "Knowledge Source 1", "nodeType": "KNOWLEDGE_SOURCE", "x": 846, "y": 285, "data": {} }, { "id": "fvtqfb1pg", "i": 4, "name": "Boxed Invocation 1", "nodeType": "BOXED_INVOCATION", "x": 709, "y": 143, "data": { "target": "", "parameters": [{ "key": "key", "value": "value" }] }, "__validity": { "valid": false, "errormessage": { "name": "SyntaxError", "location": { "start": { "offset": 6, "line": 1, "column": 7 }, "end": { "offset": 7, "line": 1, "column": 8 } } } } }, { "id": "btdt3cu6hg", "i": 5, "name": "Boxed Context 1", "nodeType": "BOXED_CONTEXT", "x": 497, "y": 261, "data": { "result": { "type": "none" }, "parameters": [{ "key": "key", "value": "value" }] }, "__validity": { "valid": true, "errormessage": null } }], "connections": [] }, "payload": "" }
+
+        models.DecisionGraph.create(decisionGraphData, bootstrap.defaultContext, function (err, res) {
+            expect(err).not.to.be.undefined;
+            expect(err.message).to.equal('Decision graph contains an invalid FEEL node.');
+            done();
+        });
+    });
+
     it('should parse and insert workbook data correctly', function(done) {
         //our workbook is a base64 encoded string.
         var workbookBase64 = "";

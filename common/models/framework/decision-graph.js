@@ -16,7 +16,71 @@ var { createDecisionGraphAST, executeDecisionService } = jsFeel.decisionService;
 
 
 module.exports = function (DecisionGraph) {
-// Remote method to execute a Decision Service with data POSTed from the Rule Designer
+  // Remote method to validate the nodes of a decision graph  POSTed from the Rule Designer
+  DecisionGraph.remoteMethod('validate', {
+    description: 'Validate the nodes of a decision graph from the Rule Designer',
+    accessType: 'WRITE',
+    isStatic: true,
+    accepts: [{
+      arg: 'inputData', type: 'object', http: { source: 'body' },
+      required: true, description: 'The JSON containing the graph node data to validate'
+    }
+    ],
+    http: {
+      verb: 'POST',
+      path: '/validate'
+    },
+    returns: {
+      type: 'object',
+      root: true
+    }
+  });
+
+  // Validates the nodes with data POSTed from the Rule Designer
+  DecisionGraph.validate = function validateDecisionGraph(inputData, options, cb) {
+    var output = {};
+    Object.keys(inputData).forEach(function (key) {
+      var isValid = false;
+      var message = null;
+      try {
+        jsFeel.feel.parse(inputData[key]);
+        isValid = true;
+      } catch (e) {
+        message = {
+          name: e.name,
+          location: e.location
+        };
+      }
+      output[key] = {
+        valid: isValid,
+        errormessage: message
+      };
+    });
+    cb(null, output);
+  };
+
+  DecisionGraph.observe('before save', function beforeSaveDecisionGraph(ctx, next) {
+    var data = ctx.instance || ctx.data;
+    var document = ctx.options.graphDocument;
+    if (document) {
+      return next();
+    }
+    DecisionGraph.validate(data.data, ctx.options, function validateHandler(err, output) {
+      if (err) {
+        next(err);
+      }
+      var isInValid = Object.keys(output).find(function invalidFinder(k) {
+        return !output[k].valid;
+      });
+
+      if (isInValid) {
+        next(new Error('Decision graph contains an invalid FEEL node.'));
+      } else {
+        next();
+      }
+    });
+  });
+  // Remote method to execute a Decision Service with data POSTed from the Rule Designer
   DecisionGraph.remoteMethod('execute', {
     description: 'Executes a Decision Service Payload Posted from the Rule Designer',
     accessType: 'WRITE',
