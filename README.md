@@ -70,6 +70,24 @@ http://localhost:3000/explorer
   ```
 Or if you face a similar config mismatch issue get the value from node_modules/oe-cloud/config.json and try to have the same value in all modules listed in app-list.json
 
+## Migration from oe-cloud ^0.9.x to ^1.1.x
+* For Issue: Cannot merge values of incompatible types for the option `remoting.context`, Please change all the modules config files(config.\*.js and config.\*.json ) listed in app-list.json, change `remoting.context` to `false`.
+
+  Ex: older config
+  
+  ``` json
+    "context": {
+      "enableHttpContext": true
+    },
+  ```
+
+  new config
+
+  ``` json
+    "context": false,
+  ```
+Or if you face a similar config mismatch issue get the value from node_modules/oe-cloud/config.json and try to have the same value in all modules listed in app-list.json
+
 ## More information
 
 Please visit [oeCloud.io](https://www.oecloud.io)
