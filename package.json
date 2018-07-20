@@ -1,6 +1,6 @@
 {
     "name": "oe-cloud",
-    "version": "1.4.2",
+    "version": "1.5.0",
     "main": "server/server.js",
     "engines": {
         "node": ">=6.9.0"
@@ -64,7 +64,6 @@
         "passport-google-oauth": "0.1.5",
         "passport-local": "1.0.0",
         "passport-saml": "^0.15.0",
-        "q": "^1.5.1",
         "request": "^2.67.0",
         "restler": "^3.4.0",
         "strong-error-handler": "^2.1.0",

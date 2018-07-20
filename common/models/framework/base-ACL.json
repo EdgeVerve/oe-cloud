@@ -24,6 +24,10 @@
   "validations": [],
   "relations": {
   },
+  "options": {
+    "queryCacheSize": 20000,
+    "queryCacheExpiration": 86400000     
+},
   "acls": [],
   "cacheable": true,
   "methods": {}

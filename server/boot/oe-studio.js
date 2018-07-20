@@ -18,6 +18,8 @@ var util = require('../../lib/common/util');
 var appconfig = require('../config');
 var glob = require('glob');
 var designerName = 'oe-studio';
+var logger = require('oe-logger');
+var log = logger('oe-studio');
 
 function setDesignerPath(DesignerPath, server) {
   if (!appconfig.designer.templatePath || appconfig.designer.templatePath.length === 0) {
@@ -156,9 +158,17 @@ function setDesignerPath(DesignerPath, server) {
 
   // server.use(loopback.static(DesignerPath));
   server.get(appconfig.designer.mountPath, function sendResponse(req, res) {
-    res.sendFile('index.html', {
-      root: DesignerPath + '/' + designerName
-    });
+    var subPath = server.get('subPath');
+    if (subPath) {
+      var studioIndexFile = fs.readFileSync(path.join(DesignerPath + '/' + designerName + '/index.html'), 'utf8');
+      studioIndexFile = studioIndexFile.replace('/designer/config', '/' + subPath + '/designer/config');
+      res.setHeader('content-type', 'text/HTML');
+      res.send(studioIndexFile);
+    } else {
+      res.sendFile('index.html', {
+        root: DesignerPath + '/' + designerName
+      });
+    }
   });
 
 
@@ -396,7 +406,7 @@ function setDesignerPath(DesignerPath, server) {
     if (status) {
       server.once('started', function DesignerServerStarted() {
         var baseUrl = server.get('url').replace(/\/$/, '');
-        console.log('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
+        log.info('Browse Designer at %s%s', baseUrl, appconfig.designer.mountPath);
       });
     }
   });
@@ -489,9 +499,14 @@ module.exports = function Designer(server) {
     }
 
     appconfig.designer.restApiRoot = appconfig.designer.restApiRoot || server.get('restApiRoot') || appconfig.restApiRoot;
-
+    appconfig.designer.subPath = appconfig.designer.subPath || server.get('subPath') || appconfig.subPath;
     Object.assign(defaultConfig, appconfig.designer || {});
     appconfig.designer = defaultConfig;
+    if (appconfig.designer.subPath) {
+      appconfig.designer.modules.forEach(function (item) {
+        item.import = appconfig.designer.subPath + item.import;
+      });
+    }
 
     ifDirectoryExist(appconfig.designer.installationPath + '/' + designerName, function directorySearch(dirname, status) {
       if (status) {

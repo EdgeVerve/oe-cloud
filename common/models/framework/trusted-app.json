@@ -6,7 +6,9 @@
     "description": "holds trusted application details",
     "options": {
         "validateUpsert": true,
-        "isFrameworkModel": true
+        "isFrameworkModel": true,
+        "queryCacheSize": 20000,
+        "queryCacheExpiration": 86400000
     },
     "properties": {
         "appId": {
@@ -14,6 +16,12 @@
             "required": true
         },
         "appName": {
+            "type": "string"
+        },
+        "username": {
+            "type": "string"
+        },
+        "publicKey": {
             "type": "string"
         },
         "expiry": {
@@ -34,11 +42,18 @@
         },
         {
             "principalType": "ROLE",
+            "principalId": "$everyone",
+            "permission": "ALLOW",
+            "property": "authenticate"      
+        },
+        {
+            "principalType": "ROLE",
             "principalId": "$authenticated",
             "permission": "ALLOW",
             "property": "*",
             "accessType": "*"
         }
     ],
+    "cacheable": true,
     "methods": {}
 }
