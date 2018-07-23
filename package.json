@@ -60,6 +60,7 @@
         "oe-explorer": "^1.0.0",
         "oe-jwt-generator": "^1.0.0",
         "oe-logger": "^1.2.0",
+        "oe-promise": "^1.5.0",
         "oe-swagger-ui": "^1.2.0",
         "passport-google-oauth": "0.1.5",
         "passport-local": "1.0.0",
