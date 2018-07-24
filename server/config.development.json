@@ -67,7 +67,7 @@
     "disabled": false
   },
   "jsFeelExternalFunction": {
-    "disabled": false,
+    "disabled": true,
     "path": "test/model-rule-data/data/functions"
   },
   "jsFeelLexerLogging" : false,
