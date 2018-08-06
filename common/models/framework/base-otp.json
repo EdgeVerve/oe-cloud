@@ -1,7 +1,7 @@
 {
-  "name": "OTP",
+  "name": "BaseOTP",
   "base": "PersistedModel",
-  "plural": "OTP",
+  "plural": "BaseOTP",
   "idInjection": false,
   "description": "This model is used in OTP functionality",
   "mixins": {
