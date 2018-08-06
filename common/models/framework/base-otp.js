@@ -20,19 +20,19 @@ var request = require('request');
 var async = require('async');
 
 module.exports = function BaseOTP(otpModel) {
-  otpModel.disableRemoteMethod("create", true);
-  otpModel.disableRemoteMethod("upsert", true);
-  otpModel.disableRemoteMethod("updateAll", true);
-  otpModel.disableRemoteMethod("updateAttributes", false);
+  otpModel.disableRemoteMethod('create', true);
+  otpModel.disableRemoteMethod('upsert', true);
+  otpModel.disableRemoteMethod('updateAll', true);
+  otpModel.disableRemoteMethod('updateAttributes', false);
 
-  otpModel.disableRemoteMethod("find", true);
-  otpModel.disableRemoteMethod("findById", true);
-  otpModel.disableRemoteMethod("findOne", true);
+  otpModel.disableRemoteMethod('find', true);
+  otpModel.disableRemoteMethod('findById', true);
+  otpModel.disableRemoteMethod('findOne', true);
 
-  otpModel.disableRemoteMethod("deleteById", true);
+  otpModel.disableRemoteMethod('deleteById', true);
 
-  otpModel.disableRemoteMethod("count", true);
-  otpModel.disableRemoteMethod("exists", true);
+  otpModel.disableRemoteMethod('count', true);
+  otpModel.disableRemoteMethod('exists', true);
 
   otpModel.send = function send(data, req, res, options, cb) {
     var self = this;
@@ -67,14 +67,14 @@ module.exports = function BaseOTP(otpModel) {
 
     if (data.config && typeof data.config === 'object') {
       data.config.ttl = data.config.ttl ? data.config.ttl : defaultConfig.ttl;
-      data.config.enableFailedTTL = (data.config.enableFailedTTL !== undefined) ? data.config.enableFailedTTL : defaultConfig.enableFailedTTL;
+      data.config.enableFailedTTL = (data.config.hasOwnProperty('enableFailedTTL')) ? data.config.enableFailedTTL : defaultConfig.enableFailedTTL;
       if (data.config.enableFailedTTL) {
         data.config.failedTTL = data.config.failedTTL ? data.config.failedTTL : defaultConfig.failedTTL;
       }
       data.config.failed = data.config.failed ? data.config.failed : defaultConfig.failed;
       data.config.resend = data.config.resend ? data.config.resend : defaultConfig.resend;
-      data.config.mail = (data.config.mail !== undefined) ? data.config.mail : defaultConfig.mail;
-      data.config.sms = (data.config.sms !== undefined) ? data.config.sms : defaultConfig.sms;
+      data.config.mail = (data.config.hasOwnProperty('mail')) ? data.config.mail : defaultConfig.mail;
+      data.config.sms = (data.config.hasOwnProperty('sms')) ? data.config.sms : defaultConfig.sms;
     } else {
       data.config = defaultConfig;
     }
@@ -388,25 +388,26 @@ module.exports = function BaseOTP(otpModel) {
   );
 
   var originalSetup = otpModel.setup;
-  otpModel.setup = function () { // this will be called everytime a
-    // model is extended from this model.
-
-    originalSetup.apply(this, arguments); // This is necessary if your
+  // this will be called everytime a
+  // model is extended from this model.
+  otpModel.setup = function () {
+    // This is necessary if your
     // AnotherModel is based of another model, like PersistedModel.
+    originalSetup.apply(this, arguments);
 
-    this.disableRemoteMethod("create", true);
-    this.disableRemoteMethod("upsert", true);
-    this.disableRemoteMethod("updateAll", true);
-    this.disableRemoteMethod("updateAttributes", false);
+    this.disableRemoteMethod('create', true);
+    this.disableRemoteMethod('upsert', true);
+    this.disableRemoteMethod('updateAll', true);
+    this.disableRemoteMethod('updateAttributes', false);
 
-    this.disableRemoteMethod("find", true);
-    this.disableRemoteMethod("findById", true);
-    this.disableRemoteMethod("findOne", true);
+    this.disableRemoteMethod('find', true);
+    this.disableRemoteMethod('findById', true);
+    this.disableRemoteMethod('findOne', true);
 
-    this.disableRemoteMethod("deleteById", true);
+    this.disableRemoteMethod('deleteById', true);
 
-    this.disableRemoteMethod("count", true);
-    this.disableRemoteMethod("exists", true);
+    this.disableRemoteMethod('count', true);
+    this.disableRemoteMethod('exists', true);
 
     this.remoteMethod(
       'send',
@@ -463,5 +464,4 @@ module.exports = function BaseOTP(otpModel) {
       }
     );
   };
-
 };

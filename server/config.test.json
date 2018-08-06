@@ -72,5 +72,20 @@
   },
   "jsFeelLexerLogging" : false,
   "jsFeelExecutionLogging": false,
-  "jsFeelLogResult": false
+  "jsFeelLogResult": false,
+  "otp": {
+    "MAX_FAILED_ATTEMPTS": 3,
+    "MAX_RESEND_ATTEMPTS": 3,
+    "DEFAULT_TTL": 180000,
+    "ENABLE_FAILED_TTL": true,
+    "DEFAULT_FAILED_TTL": 900000,
+    "MAIL_FROM": "no-reply@otp.oecloud.io",
+    "SMS": {
+        "FROM": "OECLD",
+        "API": "https://sms.gateway.com/",
+        "API_KEY": "API_KEY"
+    },
+    "ENABLE_MAIL": true,
+    "ENABLE_SMS": true
+}
 }
