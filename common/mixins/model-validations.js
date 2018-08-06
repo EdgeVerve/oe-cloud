@@ -4,6 +4,7 @@ The EdgeVerve proprietary software program ("Program"), is protected by copyrigh
 The Program may contain/reference third party or open source components, the rights to which continue to remain with the applicable third party licensors or the open source community as the case may be and nothing here transfers the rights to the third party and open source components, except as expressly permitted.
 Any unauthorized reproduction, storage, transmission in any form or by any means (including without limitation to electronic, mechanical, printing, photocopying, recording or  otherwise), or any distribution of this Program, or any portion of it, may result in severe civil and criminal penalties, and will be prosecuted to the maximum extent possible under the law.
 */
+/* eslint-disable no-eval */
 /**
  * This mixin is for validations, where we override the isValid function of loopback.
  * All the validations defined on the model will be aggregated and attached to the model,
@@ -22,7 +23,25 @@ var exprLang = require('../../lib/expression-language/expression-language.js');
 var getError = require('../../lib/common/error-utils').attachValidationError;
 var loopback = require('loopback');
 var util = require('../../lib/common/util.js');
+// design-break this is experimental, may break functionality of expression validation
+function isSimpleValidation(expression) {
+  var regex = new RegExp('(@m)|( where )|(if[ ]{0,1}\\()|(while[ ]{0,1}\\()|(switch[ ]{0,1}\\()|(void )|(delete )|(typeof )|(alert[ ]{0,1}\\()|(eval[ ]{0,1}\\()');
+  return !regex.test(expression);
+}
 
+// design-break this is experimental, may break functionality of expression validation
+function generateSimpleValidation(expression) {
+  var regex = new RegExp('@i.', 'g');
+  return expression.replace(regex, 'data.');
+}
+
+// design-break this is experimental, may break functionality of expression validation
+function evalSimpleValidation(value, data) {
+  // this eval value is validated with possible validation expression and it returns a boolean value which is not inserted in DB
+  var res = eval(value);
+  if (typeof (res) === typeof (true) ) {return res;}
+  return false;
+}
 module.exports = function ModelValidations(Model) {
   if (Model.modelName === 'BaseEntity') {
     // No need to apply the "isValid" change at BaseEntity level
@@ -94,7 +113,34 @@ module.exports = function ModelValidations(Model) {
     // construct an array of promises for validateWhen and wait for expression language to resolve all the promises
     inst.constructor.validationRules.forEach(function modelValidationsRulesForEachFn(obj) {
       if (obj.args.validateWhen) {
-        validateWhenPromises.push(exprLang.traverseAST(ast[obj.args.validateWhen], data, options));
+        // design-break this is experimental implementation, may break functionality of expression validation
+        // check self.constructor._simpleValidation[obj.args.validateWhen] true
+        // if true, eval(inst.constructor._simpleValidation[obj.args.validateWhen]);
+        // check if simple expression true,
+        // if true, replace "@i.property" with "data.property"
+        // eval the result and self.constructor._simpleValidation[obj.args.validateWhen] = result
+        if (self.constructor._simpleValidation && self.constructor._simpleValidation[obj.args.validateWhen]) {
+          // console.log('already there -----', obj.args.validateWhen)
+          validateWhenPromises.push((function validateWhenPromisesCb() {
+            return q.fcall(function fCallCb() {
+              return evalSimpleValidation(self.constructor._simpleValidation[obj.args.validateWhen], data);
+            });
+          })());
+        } else if (isSimpleValidation(obj.args.validateWhen)) {
+          // console.log('simple -----', obj.args.validateWhen)
+          var res = generateSimpleValidation(obj.args.validateWhen);
+          self.constructor._simpleValidation = {};
+          self.constructor._simpleValidation[obj.args.validateWhen] = res;
+          validateWhenPromises.push((function validateWhenPromisesCb() {
+            return q.fcall(function fCallCb() {
+              return evalSimpleValidation(res, data);
+            });
+          })());
+        } else {
+          // not a simple validation need to traverse the AST
+          // console.log('not simple *****', obj.args.validateWhen)
+          validateWhenPromises.push(exprLang.traverseAST(ast[obj.args.validateWhen], data, options));
+        }
       } else {
         validateWhenPromises.push((function validateWhenPromisesCb() {
           return q.fcall(function fCallCb() {
