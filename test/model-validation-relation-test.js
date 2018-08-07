@@ -117,7 +117,7 @@ describe(chalk.blue('Relation Validation test'), function () {
                   'type': 'string'
                 },
                 'cuisine': {
-                  'type': 'number'
+                  'type': 'string'
                 }
               },
               'validations': [],
