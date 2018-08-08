@@ -4,6 +4,10 @@
   "plural": "BaseOTP",
   "idInjection": false,
   "description": "This model is used in OTP functionality",
+  "readonly": false,
+  "strict": false,
+  "public": true,
+  "validateUpsert": false,
   "mixins": {
     "ObserverMixin": true,
     "AuditFieldsMixin": true

@@ -88,36 +88,54 @@ module.exports = function BaseOTP(otpModel) {
 
     data.expire = Date.now() + data.config.ttl;
 
-    self.findOne({ 'where': { 'or': [{ 'phone': data.phone }, { 'mail': data.mail }] } }, options, function (findErr, findRes) {
+    var orQuery = [];
+    if (data.phone) {
+      orQuery.push({ 'phone': data.phone });
+    }
+    if (data.mail) {
+      orQuery.push({ 'mail': data.mail });
+    }
+
+    if (orQuery.length === 0) {
+      return cb(new Error('Require phone or mail to send OTP'));
+    }
+
+    self.find({ 'where': { 'or': orQuery } }, options, function (findErr, findRes) {
       if (findErr) {
+        log.error(options, findErr.message);
         return cb(findErr);
       }
-      if (findRes && findRes.config.enableFailedTTL && (findRes.failed >= findRes.config.failed) && ((Date.now() - findRes._modifiedOn.getTime()) <= findRes.config.failedTTL)) {
-        return cb(new Error('OTP failed wait time not exceeded'));
-      }
 
-      // Failing, creating new column called id with same ObjectID
-      if (findRes && findRes.id) {
-        data.id = findRes.id;
+      if (findRes.length !== 0) {
+        log.trace(options, 'send: updating existing instance');
+        findRes = findRes[0];
+
+        if (findRes.config.enableFailedTTL && (findRes.failed >= findRes.config.failed) && ((Date.now() - findRes._modifiedOn.getTime()) <= findRes.config.failedTTL)) {
+          log.error(options, 'OTP failed wait time not exceeded');
+          return cb(new Error('OTP failed wait time not exceeded'));
+        }
+
+        var keys = Object.keys(data);
+        for (var i = 0; i < keys.length; i++) {
+          var key = keys[i];
+          if (data.hasOwnProperty(key)) {
+            findRes[key] = data[key];
+          }
+        }
+        data = JSON.parse(JSON.stringify(findRes));
       }
 
       self.upsert(data, options, function (err, result) {
         if (err) {
+          log.error(options, err.message);
           return cb(err);
         }
         self.sendOTP(data, smsConfig, function (err, status) {
           if (err) {
+            log.error(options, err.message);
             return cb(err);
           }
-          // var secure = true;
-          // if (!req.secure) {
-          //   secure = false;
-          // }
-          // res.cookie('otp_id', result.id, {
-          //   signed: false,
-          //   secure: secure,
-          //   httpOnly: true
-          // });
+          log.info(options, 'Inserted record and OTP sent');
           status.otpId = result.id;
           return cb(null, status);
         });
@@ -142,42 +160,49 @@ module.exports = function BaseOTP(otpModel) {
     // var otpInstanceID = req.cookies.otp_id;
     var otpInstanceID = data.otpId;
     if (!otpInstanceID) {
+      log.error(options, 'Unknown OTP request or Exceeded maximum retries');
       return cb(new Error('Unknown OTP request or Exceeded maximum retries'));
     }
 
-    self.findOne({ 'id': otpInstanceID }, options, function (err, result) {
+    self.findById(otpInstanceID, options, function (err, result) {
       if (err) {
+        log.error(options, err.message);
         return cb(err);
       }
 
       if (!result) {
+        log.error(options, 'No record found');
         return cb(new Error('No record found'));
       }
 
       if (result.failed >= result.config.failed) {
         // res.clearCookie('otp_id');
+        log.error(options, 'Exceeded maximum retries');
         return cb(new Error('Exceeded maximum retries'));
       }
 
       if (Date.now() >= result.expire) {
         // res.clearCookie('otp_id');
+        log.error(options, 'OTP timed out');
         return cb(new Error('OTP timed out'));
       }
 
       if (data.otp === result.otp) {
-        // delete record when otp verified, didnt delete record
         self.deleteById(otpInstanceID, options, function (err, deleteResp) {
           if (err) {
             log.error(options, 'Error when deleting record after OTP verified', err);
           }
           // res.clearCookie('otp_id');
+          log.info(options, 'OTP verified');
           return cb(null, { 'status': 'verified' });
         });
       } else {
         result.updateAttribute('failed', result.failed + 1, options, function (err, updateResp) {
           if (err) {
+            log.error(options, 'Error when updating record after OTP verification failed', err);
             return cb(err);
           }
+          log.info(options, 'Verification failed');
           return cb(new Error('Verification failed'));
         });
       }
@@ -198,36 +223,44 @@ module.exports = function BaseOTP(otpModel) {
     }
 
     if (!otpInstanceID) {
+      log.error(options, 'Unknown OTP request');
       return cb(new Error('Unknown OTP request'));
     }
 
-    self.findOne({ 'id': otpInstanceID }, options, function (err, result) {
+    self.findById(otpInstanceID, options, function (err, result) {
       if (err) {
+        log.error(options, err.message, err);
         return cb(err);
       }
 
       if (!result) {
+        log.error(options, 'No record found');
         return cb(new Error('No record found'));
       }
 
       if (result.resend >= result.config.resend) {
         // res.clearCookie('otp_id');
+        log.error(options, 'Exceeded maximum resend');
         return cb(new Error('Exceeded maximum resend'));
       }
 
       if (Date.now() >= result.expire) {
         // res.clearCookie('otp_id');
+        log.error(options, 'OTP timed out');
         return cb(new Error('OTP timed out'));
       }
 
       self.sendOTP(result, smsConfig, function (err, status) {
         if (err) {
+          log.error(options, err.message, err);
           return cb(err);
         }
         result.updateAttribute('resend', result.resend + 1, options, function (err, updateResp) {
           if (err) {
+            log.error(options, err.message, err);
             return cb(err);
           }
+          log.info(options, 'Resend the OTP', status);
           return cb(null, status);
         });
       });
@@ -289,24 +322,29 @@ module.exports = function BaseOTP(otpModel) {
 
     request(options, function (error, response, body) {
       if (error) {
+        log.error(log.defaultContext(), error.message, error);
         return cb(null, error);
       }
 
-      if (body && typeof body === 'object' && body.status && body.status === 'success') {
-        cb(null, 'success');
-      } else {
-        var errorMessage = '';
-        if (body && typeof body.errors === 'object' && body.errors.length > 0) {
-          body.errors.forEach(function (err) {
-            errorMessage = errorMessage + err.message + ' ; ';
-          });
+      if (body) {
+        if (body.status && body.status === 'success') {
+          log.info(log.defaultContext(), 'OTP sent successfully');
+          cb(null, 'success');
+        } else {
+          var errorMessage = '';
+          if (body.errors && body.errors.length > 0) {
+            body.errors.forEach(function (err) {
+              errorMessage = errorMessage + err.message + ' ; ';
+            });
+          }
+          if (body.warnings && body.warnings.length > 0) {
+            body.warnings.forEach(function (warn) {
+              errorMessage = errorMessage + warn.message + ' ; ';
+            });
+          }
+          log.error(log.defaultContext(), errorMessage);
+          cb(null, new Error(errorMessage));
         }
-        if (body && typeof body.warnings === 'object' && body.warnings.length > 0) {
-          body.warnings.forEach(function (warn) {
-            errorMessage = errorMessage + warn.message + ' ; ';
-          });
-        }
-        cb(null, new Error(errorMessage));
       }
     });
   };
