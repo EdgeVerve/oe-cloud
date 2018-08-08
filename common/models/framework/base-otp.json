@@ -10,8 +10,7 @@
   "validateUpsert": false,
   "mixins": {
     "ObserverMixin": true,
-    "AuditFieldsMixin": true,
-    "IdempotentMixin": true
+    "AuditFieldsMixin": true
   },
   "options": {
     "isFrameworkModel": true,
