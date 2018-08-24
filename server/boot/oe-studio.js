@@ -475,7 +475,7 @@ module.exports = function Designer(server) {
       'name': 'oe-feel-designer',
       'path': 'rule-manager',
       'import': '/bower_components/oe-feel-designer/oe-feel-designer.html'
-    },{
+    }, {
       'name': 'oe-component-manager',
       'path': 'component-manager',
       'import': '/bower_components/oe-component-manager/oe-component-manager.html'
