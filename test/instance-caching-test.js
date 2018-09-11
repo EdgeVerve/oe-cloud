@@ -449,7 +449,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after upsert', function (done) {
+    xit('Should cache the Test instance after upsert', function (done) {
       var id = uuidv4();
       var result1, result2;
       TestModel.create({
@@ -490,7 +490,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after save', function (done) {
+    xit('Should cache the Test instance after save', function (done) {
       var id = uuidv4();
       var result1, result2;
       TestModel.create({
@@ -532,7 +532,7 @@ describe('Instance Caching Test', function () {
       });
     });
 
-    it('Should cache the Test instance after updateAttributes', function (done) {
+    xit('Should cache the Test instance after updateAttributes', function (done) {
       var id = uuidv4();
       var result1, result2;
       TestModel.create({
