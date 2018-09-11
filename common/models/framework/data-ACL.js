@@ -30,7 +30,6 @@ var loopback = require('loopback');
 var applyFilter = require('loopback-filters');
 var mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 var async = require('async');
-var log = require('oe-logger')('data-ACL');
 var loopbackAccessContext = require('loopback/lib/access-context');
 var AccessContext = loopbackAccessContext.AccessContext;
 var errorUtil = require('../../../lib/common/error-utils').getValidationError;
@@ -198,7 +197,7 @@ module.exports = function DataACLFn(DataACL) {
         if (typeof filter === 'string') {
           filter = JSON.parse(filter);
         }
-        
+
         Object.keys(filterUsed).forEach(function filterUsedForEach(group) {
           if (filterUsed[group].length === 1) {
             mergeQuery(filter, {
@@ -236,7 +235,7 @@ module.exports = function DataACLFn(DataACL) {
           }
         }
 
-        var updateMethods = ['create', 'updateAttributes', 'update', 'updateOrCreate', 'upsert', 'replaceById','replaceOrCreate'];
+        var updateMethods = ['create', 'updateAttributes', 'update', 'updateOrCreate', 'upsert', 'replaceById', 'replaceOrCreate'];
         var applyDataACLOnBody = updateMethods.indexOf(method.name) >= 0 || method.applyDataACLOnBody;
         // Only if this method is for parent model
         // and only for those methods which accepts body
