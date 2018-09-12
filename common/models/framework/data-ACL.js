@@ -30,7 +30,6 @@ var loopback = require('loopback');
 var applyFilter = require('loopback-filters');
 var mergeQuery = require('loopback-datasource-juggler/lib/utils').mergeQuery;
 var async = require('async');
-
 var loopbackAccessContext = require('loopback/lib/access-context');
 var AccessContext = loopbackAccessContext.AccessContext;
 var errorUtil = require('../../../lib/common/error-utils').getValidationError;
@@ -51,17 +50,6 @@ function getValue(target, field) {
   return retVal;
 }
 
-
-// function hasBody(accepts) {
-//    for (var i = 0; i < accepts.length; i++) {
-//        var arg = accepts[i];
-//        if (arg.http && arg.http.source === 'body') {
-//            return true;
-//        }
-//    }
-//    return false;
-// }
-
 function buildFilter(filter, ctx) {
   Object.keys(filter).map(function filterForEachKey(item) {
     var value = filter[item];
@@ -74,7 +62,7 @@ function buildFilter(filter, ctx) {
           throw err;
         }
       } else if (value.startsWith('@CC.')) {
-        filter[item] = getValue(ctx, value.substr(5));
+        filter[item] = getValue(ctx, value.substr(4));
         if (!filter[item]) {
           var err1 = new Error('Context not present');
           err1.retriable = false;
@@ -182,9 +170,7 @@ module.exports = function DataACLFn(DataACL) {
 
       async.parallel(inRoleTasks, function inRoleTasks(err, results) {
         if (err) {
-          if (callback) {
-            return callback(err, null);
-          }
+          return callback(err, null);
         }
 
         var filterUsed = (dataFilter[1] && Object.keys(dataFilter[1]).length) ? dataFilter[1] : dataFilter[0];
@@ -195,17 +181,20 @@ module.exports = function DataACLFn(DataACL) {
         }
 
         var obj = {};
-        var callContext = ctx.req.callContext;
+        var callContext = ctx.req.callContext || {};
         try {
           buildFilter(filterUsed, callContext.ctx);
         } catch (err) {
-          // do not fetch any record instead of error
-          // TODO more analysis best way to handle this
-          // fix for demo today
-          filterUsed = { 'ahfgfhewklhkhwakwd': 'asdasdsad' };
+          var error = new Error();
+          error.name = 'DataACL Definition Error';
+          error.message = `The DataACL defined is invalid for model ${modelName} `;
+          error.code = 'DATA_ACL_ERROR_090';
+          error.type = 'value in context is missing';
+          log.error(log.defaultContext(), 'DataACL filter error', error);
+          return callback(error);
         }
         var filter = ctx.args.filter || {};
-        if (typeof ctx.args.filter === 'string') {
+        if (typeof filter === 'string') {
           filter = JSON.parse(filter);
         }
 
@@ -246,7 +235,7 @@ module.exports = function DataACLFn(DataACL) {
           }
         }
 
-        var updateMethods = ['create', 'updateAttributes', 'update', 'updateOrCreate', 'upsert'];
+        var updateMethods = ['create', 'updateAttributes', 'update', 'updateOrCreate', 'upsert', 'replaceById', 'replaceOrCreate'];
         var applyDataACLOnBody = updateMethods.indexOf(method.name) >= 0 || method.applyDataACLOnBody;
         // Only if this method is for parent model
         // and only for those methods which accepts body
@@ -276,6 +265,7 @@ module.exports = function DataACLFn(DataACL) {
           obj.options = callContext;
           errorUtil(errorCode, obj, function errorUtil(err) {
             err.statusCode = 403;
+            log.error(log.defaultContext(), 'Data Access Control does not allow access', err);
             return callback(err, failed);
           });
         } else {
