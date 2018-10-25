@@ -45,9 +45,6 @@
   "encryptionAlgorithm": "crypto.aes256",
   "encryptionPassword": "SomePassword",
   "mqttOptions" : "mqtt://mqttguest:mqttguest@10.73.44.51",
-  "otpConfig":{
-	  "FundsTransfer" : "transferFund"
-  },
   "enableDevEnvironment" : true,
   "enableDesigner":true,
   "designer":{

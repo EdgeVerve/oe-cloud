@@ -118,6 +118,53 @@ module.exports = function decisionTableFn(decisionTable) {
     }
   });
 
+  // Remote method to parse the excel sheet and return a valid decision table object
+  decisionTable.remoteMethod('parseExcel', {
+    description: 'Parse the uploaded excel and return valid decision table',
+    accessType: 'WRITE',
+    isStatic: true,
+    accepts: [{
+      arg: 'inputData', type: 'object', http: { source: 'body' },
+      required: true, description: 'The JSON containing the document data to parse'
+    }
+    ],
+    http: {
+      verb: 'POST',
+      path: '/parseExcel'
+    },
+    returns: {
+      type: 'object',
+      root: true
+    }
+  });
+
+  // Parses the excel uploaded from the feel designer
+  decisionTable.parseExcel = function (inputData, options, cb) {
+    var document = inputData;
+    if (
+      typeof document.documentData !== 'string' ||
+      document.documentData.indexOf('base64') < 0
+    ) {
+      return cb(
+        new Error(
+          'Decision table data provided is not a base64 encoded string'
+        )
+      );
+    }
+    var base64String = document.documentData.split(',')[1];
+    var binaryData = new Buffer(base64String, 'base64').toString(
+      'binary'
+    );
+    var workbook = XLSX.read(binaryData, {
+      type: 'binary'
+    });
+
+    var sheet = workbook.Sheets[workbook.SheetNames[0]];
+    var csv = XLSX.utils.sheet_to_csv(sheet, { FS: delimiter });
+    var decisionRules = dTable.csv_to_decision_table(csv);
+    cb(null, decisionRules);
+  };
+
   decisionTable.remoteMethod('exec', {
     description: 'execute a business rule',
     accessType: 'WRITE',
@@ -247,7 +294,7 @@ module.exports = function decisionTableFn(decisionTable) {
                   results = results || [];
                   if (rules.hitPolicy === 'V') {
                     if (err) {
-                      getError('JS_FEEL_ERR', {options: options, name: 'JS_FEEL'}, function validateMaxGetErrCb(error) {
+                      getError('JS_FEEL_ERR', { options: options, name: 'JS_FEEL' }, function validateMaxGetErrCb(error) {
                         error.errMessage = err;
                         results.push(error);
                         callback(null, results);

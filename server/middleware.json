@@ -34,7 +34,8 @@
                     "tenant-id"
                 ]
             }
-        }
+        },
+        "cookie-parser": { "params": "${cookieSecret}" }
     },
     "session": {},
     "session:after": {},
@@ -54,10 +55,6 @@
         },
         "./middleware/model-discovery-filter": {
             "enabled": true,
-            "paths": ["${restApiRoot}"]
-        },
-        "./middleware/otp-middleware": {
-            "enabled": false,
             "paths": ["${restApiRoot}"]
         },
         "./middleware/recaptcha-validate": {

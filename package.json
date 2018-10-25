@@ -1,6 +1,6 @@
 {
     "name": "oe-cloud",
-    "version": "1.5.0",
+    "version": "1.6.0",
     "main": "server/server.js",
     "engines": {
         "node": ">=6.9.0"
@@ -15,6 +15,7 @@
         "oracle": "grunt mochaTest:oracle",
         "lint": "./node_modules/.bin/eslint .",
         "fix-lint": "./node_modules/.bin/eslint --fix .",
+        "check-copyright": "grunt check_copyright",
         "validate": "npm ls"
     },
     "dependencies": {
@@ -47,7 +48,6 @@
         "loopback-component-push": "1.7.0",
         "loopback-component-storage": "git+https://github.com/EdgeVerve/loopback-component-storage.git#master",
         "loopback-connector-mongodb": "git+https://github.com/EdgeVerve/loopback-connector-mongodb.git#master",
-        "loopback-connector-nodes-for-Node-RED": "git+https://github.com/EdgeVerve/loopback-connector-nodes-for-Node-RED.git#master",
         "loopback-datasource-juggler": "git+https://github.com/EdgeVerve/loopback-datasource-juggler.git#master",
         "loopback-filters": "0.1.2",
         "lru-cache": "^4.0.1",
@@ -85,6 +85,7 @@
         "eslint": "^4.10.0",
         "grunt": "^0.4.5",
         "grunt-banner": "^0.6.0",
+        "grunt-check-copyright": "^0.1.0",
         "grunt-cli": "^0.1.13",
         "grunt-contrib-clean": "^0.7.0",
         "grunt-contrib-copy": "^1.0.0",

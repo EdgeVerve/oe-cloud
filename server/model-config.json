@@ -157,7 +157,7 @@
         "dataSource": "db",
         "public": false
     },
-    "OTP": {
+    "BaseOTP": {
         "dataSource": "db",
         "public": true
     },

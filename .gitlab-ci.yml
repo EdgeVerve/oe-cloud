@@ -45,11 +45,13 @@ npminstall:
     - status_eslint=0
     - exit_status=0
     - npm set progress=false
-    - time npm install eslint babel-eslint --no-optional
+    - time npm install eslint babel-eslint grunt grunt-cli grunt-check-copyright --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
+    - if npm run check-copyright; then status_copyright=0; else status_copyright=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
+    - if [ $status_copyright == 1 ]; then exit_status=1 && echo "copyright not present in files"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
-    - echo "Code style check done successfully"
+    - echo "Code style and copyright check done successfully"
     - time npm install --no-optional
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
     - mv -f Dockerfile2 Dockerfile

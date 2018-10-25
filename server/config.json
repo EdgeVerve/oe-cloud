@@ -44,8 +44,6 @@
     "encryptionAlgorithm": "crypto.aes256",
     "encryptionPassword": "SomePassword",
     "defaultAutoScope": "default",
-    "MAX_OTP_FAILED_ATTEMP": 3,
-    "DEFAULT_TTL_OTP": 180000,
     "UNLOCK_USER_ACCOUNT_TIME": 600000,
     "denyUnauthenticatedWrite": true,
     "maxFileSize": 4000,
@@ -112,5 +110,20 @@
         "<iframe",
         "<link"
     ],
-    "serverMonitor": {}
+    "serverMonitor": {},
+    "otp": {
+        "MAX_FAILED_ATTEMPTS": 3,
+        "MAX_RESEND_ATTEMPTS": 3,
+        "DEFAULT_TTL": 180000,
+        "ENABLE_FAILED_TTL": true,
+        "DEFAULT_FAILED_TTL": 900000,
+        "MAIL_FROM": "no-reply@otp.oecloud.io",
+        "SMS": {
+            "FROM": "OECLD",
+            "API": "https://sms.gateway.com/",
+            "API_KEY": "API_KEY"
+        },
+        "ENABLE_MAIL": true,
+        "ENABLE_SMS": true
+    }
 }

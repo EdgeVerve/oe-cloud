@@ -468,25 +468,13 @@ module.exports = function Designer(server) {
       'path': '',
       'import': '/bower_components/oe-model-manager/oe-model-manager.html'
     }, {
-      'name': 'oe-ui-designer',
-      'path': 'ui-designer',
-      'import': '/bower_components/oe-ui-designer/oe-ui-designer.html'
-    }, {
-      'name': 'oe-route-manager',
-      'path': 'route-manager',
-      'import': '/bower_components/oe-route-manager/oe-route-manager.html'
-    }, {
-      'name': 'oe-resource-manager',
-      'path': 'resource-manager',
-      'import': '/bower_components/oe-resource-manager/oe-resource-manager.html'
-    }, {
-      'name': 'oe-rule-manager',
-      'path': 'rule-manager',
-      'import': '/bower_components/oe-rule-manager/oe-rule-manager.html'
-    }, {
       'name': 'workflow-designer',
       'path': 'workflow-designer',
       'import': '/bower_components/oe-workflow-modeler/workflow-designer.html'
+    }, {
+      'name': 'oe-feel-designer',
+      'path': 'rule-manager',
+      'import': '/bower_components/oe-feel-designer/oe-feel-designer.html'
     }, {
       'name': 'oe-component-manager',
       'path': 'component-manager',
