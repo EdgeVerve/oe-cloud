@@ -158,14 +158,14 @@ function finalBoot(appinstance, options, cb) {
 
   appinstance.set('apiInfo', getApiInfo());
 
-  if(process.argv.indexOf('-m') > -1 || process.argv.indexOf('--migrate') > -1) {
-    console.log("\n\n===============================================================================\n");
-      console.log("    Migration functionality using the \"-m\" switch is no longer part of oeCloud. ");
-      console.log("    Please use the app-list module \"oe-migration\" for the same.");
-      console.log("    Refer README.md of http://evgit/oecloud.io/oe-migration"); 
-      console.log("    to know how to integrate oe-migration with your oeCloud-based application");
-      console.log("\n===============================================================================\n\n");
-      process.exit(1);
+  if (process.argv.indexOf('-m') > -1 || process.argv.indexOf('--migrate') > -1) {
+    console.log('\n\n===============================================================================\n');
+    console.log('    Migration functionality using the "-m" switch is no longer part of oeCloud. ');
+    console.log('    Please use the app-list module "oe-migration" for the same.');
+    console.log('    Refer README.md of http://evgit/oecloud.io/oe-migration');
+    console.log('    to know how to integrate oe-migration with your oeCloud-based application');
+    console.log('\n===============================================================================\n\n');
+    process.exit(1);
   }
 
   boot(appinstance, options, function serverFinalBootCb(err) {

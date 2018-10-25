@@ -14,7 +14,7 @@
 var log = require('oe-logger')('boot-db-models');
 var util = require('../../lib/common/util');
 module.exports = function DbDsAutoupdate(app, cb) {
-    log.debug(util.bootContext(), 'Setting the environment "ENABLE_DS_AUTOUPDATE" variable to true');
-    process.env.ENABLE_DS_AUTOUPDATE = true;
-    cb();
+  log.debug(util.bootContext(), 'Setting the environment "ENABLE_DS_AUTOUPDATE" variable to true');
+  process.env.ENABLE_DS_AUTOUPDATE = true;
+  cb();
 };
