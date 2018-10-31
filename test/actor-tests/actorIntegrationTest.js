@@ -109,7 +109,7 @@ describe(chalk.blue('integrationTest'), function() {
   }
 
 
-it('should log in', function(done) {
+xit('should log in', function(done) {
 console.log('Base Url is ', baseurl);
 request.post(
               baseurl + "BaseUsers/login", {
