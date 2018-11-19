@@ -20,6 +20,59 @@
 
 var uuidv4 = require('uuid/v4');
 
+function versionMixinBeforeSave(ctx, next) {
+  // if (Model.modelName !== ctx.Model.modelName) {
+  //     return next();
+  // }
+  var data = ctx.data || ctx.instance;
+  var error;
+  if (ctx.isNewInstance) {
+    data._version = data._newVersion || data._version || uuidv4();
+    delete data._oldVersion;
+    delete data._newVersion;
+  } else if (ctx.currentInstance) {
+    if (ctx.currentInstance.__remoteInvoked) {
+      if (!data._version) {
+        error = new Error();
+        error.name = 'Data Error';
+        error.message = 'current version must be specified in _version field';
+        error.code = 'DATA_ERROR_071';
+        error.type = 'DataModifiedError';
+        error.retriable = false;
+        error.status = 422;
+        return next(error);
+      }
+    }
+    var version = data._version || ctx.currentInstance._version;
+    if (data._newVersion && data._newVersion === version) {
+      error = new Error();
+      error.name = 'Data Error';
+      error.message = 'current version and new version must be different';
+      error.code = 'DATA_ERROR_071';
+      error.type = 'DataModifiedError';
+      error.retriable = false;
+      error.status = 422;
+      return next(error);
+    }
+    if (version.toString() !== ctx.currentInstance._version.toString()) {
+      error = new Error();
+      error.name = 'Data Error';
+      error.message = 'No record with version specified';
+      error.code = 'DATA_ERROR_071';
+      error.type = 'DataModifiedError';
+      error.retriable = false;
+      error.status = 422;
+      return next(error);
+    }
+    data._oldVersion = version;
+    data._version = data._newVersion || uuidv4();
+    delete data._newVersion;
+  }
+  // TODO replaceById will have ctx.instance, and not
+  // ctx.currentinstance, need to analyze that
+  next();
+};
+
 module.exports = function VersionMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
     return;
@@ -56,59 +109,7 @@ module.exports = function VersionMixin(Model) {
     next();
   });
 
-  Model.switchVersion = function versionMixinBeforeSave(ctx, next) {
-    // if (Model.modelName !== ctx.Model.modelName) {
-    //     return next();
-    // }
-    var data = ctx.data || ctx.instance;
-    var error;
-    if (ctx.isNewInstance) {
-      data._version = data._newVersion || data._version || uuidv4();
-      delete data._oldVersion;
-      delete data._newVersion;
-    } else if (ctx.currentInstance) {
-      if (ctx.currentInstance.__remoteInvoked) {
-        if (!data._version) {
-          error = new Error();
-          error.name = 'Data Error';
-          error.message = 'current version must be specified in _version field';
-          error.code = 'DATA_ERROR_071';
-          error.type = 'DataModifiedError';
-          error.retriable = false;
-          error.status = 422;
-          return next(error);
-        }
-      }
-      var version = data._version || ctx.currentInstance._version;
-      if (data._newVersion && data._newVersion === version) {
-        error = new Error();
-        error.name = 'Data Error';
-        error.message = 'current version and new version must be different';
-        error.code = 'DATA_ERROR_071';
-        error.type = 'DataModifiedError';
-        error.retriable = false;
-        error.status = 422;
-        return next(error);
-      }
-      if (version.toString() !== ctx.currentInstance._version.toString()) {
-        error = new Error();
-        error.name = 'Data Error';
-        error.message = 'No record with version specified';
-        error.code = 'DATA_ERROR_071';
-        error.type = 'DataModifiedError';
-        error.retriable = false;
-        error.status = 422;
-        return next(error);
-      }
-      data._oldVersion = version;
-      data._version = data._newVersion || uuidv4();
-      delete data._newVersion;
-    }
-    // TODO replaceById will have ctx.instance, and not
-    // ctx.currentinstance, need to analyze that
-    next();
-  };
-
+  Model.switchVersion = versionMixinBeforeSave;
   // lock current _version
   Model.evObserve('persist', function versionMixinPersistsFn(ctx, next) {
     delete ctx.data._newVersion;
@@ -143,3 +144,5 @@ module.exports = function VersionMixin(Model) {
     }
   });
 };
+
+module.exports.switchVersion = versionMixinBeforeSave;
