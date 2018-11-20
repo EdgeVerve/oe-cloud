@@ -228,7 +228,10 @@ module.exports = function SwitchDatasourceMixin(model) {
           model.attachTo(ds);
           // re-attaching switchVersion method after datasource switching on any model. so that _version will be created properly
           // because switchVersion method will be overridden by the dao switchVersion method which simply return cb() when datasource switching happen on any model.
-          model.switchVersion = versionMixin.switchVersion;
+          // check if version mixin enabled on model too.
+          if (model.settings.mixins.VersionMixin) {
+            model.switchVersion = versionMixin.switchVersion;
+          }
           return ds;
         }
       }
