@@ -14,6 +14,7 @@
 var logger = require('oe-logger');
 var log = logger('switch-datasource-mixin');
 var appinstance = require('../../server/server.js').app;
+var versionMixin = require('./version-mixin.js');
 
 function getScopeMatchedDS(model, list, scope) {
   var matchedds;
@@ -225,6 +226,12 @@ module.exports = function SwitchDatasourceMixin(model) {
         if (ds) {
           // console.log('switch datasource ', modelName, ds.settings.name);
           model.attachTo(ds);
+          // re-attaching switchVersion method after datasource switching on any model. so that _version will be created properly
+          // because switchVersion method will be overridden by the dao switchVersion method which simply return cb() when datasource switching happen on any model.
+          // check if version mixin enabled on model too.
+          if (model.settings.mixins.VersionMixin) {
+            model.switchVersion = versionMixin.switchVersion;
+          }
           return ds;
         }
       }
