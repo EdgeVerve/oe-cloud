@@ -14,6 +14,7 @@
 var logger = require('oe-logger');
 var log = logger('switch-datasource-mixin');
 var appinstance = require('../../server/server.js').app;
+var versionMixin = require('./version-mixin.js');
 
 function getScopeMatchedDS(model, list, scope) {
   var matchedds;
@@ -223,8 +224,11 @@ module.exports = function SwitchDatasourceMixin(model) {
       if (mapping) {
         var ds = getDataSourceForName(app, model, mapping.dataSourceName, scope);
         if (ds) {
-          // console.log('switch datasource ', modelName, ds.settings.name);
+          // console.log('switch datasource ', modelName, ds.settings.name); 
           model.attachTo(ds);
+          if (model.settings.mixins.VersionMixin) {
+            model.switchVersion = versionMixin.switchVersion;
+          }
           return ds;
         }
       }

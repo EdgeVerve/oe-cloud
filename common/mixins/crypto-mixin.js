@@ -44,7 +44,7 @@ function cryptoMixinBeforeSaveHook(ctx, next) {
   if (ctx.Model.settings.propsToEncrypt && ctx.Model.settings.propsToEncrypt.length === 0) {
     return next();
   }
-  var data = ctx.instance || ctx.currentInstance || ctx.data;
+  var data = ctx.instance || ctx.data || ctx.currentInstance;
   log.debug(ctx.options, 'cryptoMixin before save called: ModelName =', ctx.Model.modelName);
   var props = ctx.Model.definition.properties;
   ctx.Model.settings.propsToEncrypt.forEach(function (key) {
