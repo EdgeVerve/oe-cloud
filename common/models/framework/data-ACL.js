@@ -224,8 +224,9 @@ module.exports = function DataACLFn(DataACL) {
         log.debug(callContext, 'filter in dataacl ', filter);
 
         var failed = [];
+        ctx.args.filter = filter;
         if (accessType === 'READ') {
-          ctx.args.filter = filter;
+          //ctx.args.filter = filter;
           return callback();
         }
         var coll = [];
