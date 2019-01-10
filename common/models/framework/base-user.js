@@ -325,7 +325,7 @@ module.exports = function BaseUser(BaseUser) {
           // User can switch tenantId for a session,
           // tenantId stores current tenantId
           // userTenantid stores users tenantId
-          callback(null, rolesArr ? rolesArr : []);
+          callback(null, rolesArr && rolesArr.length>0 ? rolesArr : options.ctx.roles);
         });
       });
     },
