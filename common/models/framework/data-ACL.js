@@ -146,7 +146,7 @@ module.exports = function DataACLFn(DataACL) {
       if (ctx.req.accessToken && ctx.req.accessToken.roles && Array.isArray(ctx.req.accessToken.roles)) {
         // Looping through Roles in accessToken and adding them to context.principals as RoleMapping.ROLE
         ctx.req.accessToken.roles.forEach((role) => {
-        context.addPrincipal(RoleMapping.ROLE, role);
+          context.addPrincipal(RoleMapping.ROLE, role);
         });
       }
       var errorCode;
@@ -227,7 +227,7 @@ module.exports = function DataACLFn(DataACL) {
         var failed = [];
         ctx.args.filter = filter;
         if (accessType === 'READ') {
-          //ctx.args.filter = filter;
+          // ctx.args.filter = filter;
           return callback();
         }
         var coll = [];
