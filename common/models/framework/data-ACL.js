@@ -141,7 +141,6 @@ module.exports = function DataACLFn(DataACL) {
         accessType: accessTypeQuery,
         remotingContext: ctx
       });
-      
       // Checking the AccessContext has accessToken with roles attached
       if (ctx.req.accessToken && ctx.req.accessToken.roles && Array.isArray(ctx.req.accessToken.roles)) {
         // Looping through Roles in accessToken and adding them to context.principals as RoleMapping.ROLE
