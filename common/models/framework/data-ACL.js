@@ -141,13 +141,14 @@ module.exports = function DataACLFn(DataACL) {
         accessType: accessTypeQuery,
         remotingContext: ctx
       });
-     // Checking the AccessContext has accessToken with roles attached
-                    if (ctx.req.accessToken && ctx.req.accessToken.roles && Array.isArray(ctx.req.accessToken.roles)) {
-                        // Looping through Roles in accessToken and adding them to context.principals as RoleMapping.ROLE
-                        ctx.req.accessToken.roles.forEach((role) => {
-                            context.addPrincipal(RoleMapping.ROLE, role);
-                        });
-                    }
+      
+      // Checking the AccessContext has accessToken with roles attached
+      if (ctx.req.accessToken && ctx.req.accessToken.roles && Array.isArray(ctx.req.accessToken.roles)) {
+        // Looping through Roles in accessToken and adding them to context.principals as RoleMapping.ROLE
+        ctx.req.accessToken.roles.forEach((role) => {
+            context.addPrincipal(RoleMapping.ROLE, role);
+        });
+      }
       var errorCode;
       dataacls.forEach(function dataaclsForEach(dataacl) {
         dataacl.filter = dataacl.filter || {};
