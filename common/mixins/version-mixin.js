@@ -71,7 +71,7 @@ function versionMixinBeforeSave(ctx, next) {
   // TODO replaceById will have ctx.instance, and not
   // ctx.currentinstance, need to analyze that
   next();
-}
+};
 
 module.exports = function VersionMixin(Model) {
   if (Model.modelName === 'BaseEntity') {
