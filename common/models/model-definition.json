@@ -1,0 +1,123 @@
+{
+  "name": "ModelDefinition",
+  "base": "BaseEntity",
+  "strict": true,
+  "plural": "ModelDefinitions",
+  "description": "This model stores application models metadata",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "properties": {
+      "type": "object"
+    },
+    "name": {
+      "type": "string",
+      "required": true,
+      "unique": "ignoreCase",
+      "max": 200,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "description": {
+      "type": "string",
+      "max": 500
+    },
+    "plural": {
+      "type": "string",
+      "unique": "ignoreCase",
+      "max": 200,
+      "pattern": "^[a-zA-Z][a-zA-Z0-9_]*$"
+    },
+    "base": {
+      "type": "string",
+      "max": 200
+    },
+    "strict": {
+      "type": "boolean",
+      "default": false
+    },
+    "forceId": {
+      "type": "boolean",
+      "default": false
+    },
+    "replaceOnPUT": {
+      "type": "boolean",
+      "default": true
+    },
+    "trackChanges": {
+      "type": "boolean",
+      "default": false
+    },
+    "public": {
+      "type": "boolean",
+      "default": true
+    },
+    "idInjection": {
+      "type": "boolean",
+      "default": false
+    },
+    "isFrameworkModel": {
+      "type": "boolean",
+      "default": false
+    },
+    "validateUpsert": {
+      "type": "boolean",
+      "default": false
+    },
+    "mongodb": {
+      "type": "string"
+    },    
+    "validations": {
+      "type": [
+        "object"
+      ]
+    },
+    "relations": {
+      "type": "object"
+    },
+    "acls": {
+      "type": [
+        "object"
+      ]
+    },
+    "methods": {
+      "type": "object"
+    },
+    "filebased": {
+      "type": "boolean",
+      "default": false
+    },
+    "dataSourceName": {
+      "type": "string",
+      "default": "db",
+      "max": 200
+    },
+    "mixins": {
+      "type": "object"
+    },
+    "options": {
+      "type": "object"
+    },
+    "hidden": {
+      "type": [
+        "string"
+      ]
+    },
+    "protected": {
+      "type": [
+        "string"
+      ]
+    },
+    "createTime": {
+      "type": "timestamp"
+    }
+  },
+  "hidden": [
+    "filebased"
+  ],
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

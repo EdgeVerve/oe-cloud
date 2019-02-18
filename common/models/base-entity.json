@@ -1,0 +1,29 @@
+{
+  "name": "BaseEntity",
+  "base": "PersistedModel",
+  "idInjection": true,
+  "strict": true,
+  "forceId": false,
+  "options": {
+    "validateUpsert": true,
+    "trackChanges": false,
+    "updateOnLoad": true,
+    "isBaseEntity": true,
+    "strictObjectIDCoercion": true
+  },
+  "mixins": {
+    "ObserverMixin": true
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "DENY"
+    }
+  ],
+  "methods": {}
+}
+

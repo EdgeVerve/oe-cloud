@@ -1,1 +1,0 @@
-{"Category":"decision table(input expression list : ['age'],outputs : \"category\",input values list : [[]],output values : [[]],rule list : [['<2','\"infant\"'],['[2..5]','\"child\"'],['[6..11]','\"student\"'],['[12..18]','\"adoloscent\"'],['[19..55]','\"adult\"'],['>55','\"senior\"']],id : 'Category',hit policy : 'U')"}

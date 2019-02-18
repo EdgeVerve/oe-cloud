@@ -1,0 +1,29 @@
+{
+  "name": "Error",
+  "base": "BaseEntity",
+  "plural": "errors",
+  "idInjection": false,
+  "description": "This Model stores all the Customized error details",
+  "options": {
+    "validateUpsert": true,
+    "isFrameworkModel": true
+  },
+  "properties": {
+    "errCode": {
+      "type": "string",
+      "max": 100
+    },
+    "errMessage": {
+      "type": "string",
+      "max": 250
+    },
+    "moreInformation": {
+      "type": "string",
+      "max": 500
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}

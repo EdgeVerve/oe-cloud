@@ -12,26 +12,17 @@
       }
     }
   },
-  "session:before": {},
-  "session": {},
-  "session:after": {
-    "cookie-parser" : {
-      "params": "${cookieSecret}"
-    }
+  "session": {
   },
   "auth": {
-    "loopback#token": {}
   },
-  "auth:after": {},
   "parse": {
   },
-  "routes:before": {},
-  "routes": {
+  "routes:before": {
     "loopback#rest": {
       "paths": ["${restApiRoot}"]
-    }    
+    }
   },
-  "routes:after":{},
   "files": {
     "serve-static": {
       "params": "$!../client"

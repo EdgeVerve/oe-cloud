@@ -1,14 +1,18 @@
-{
+﻿{
   "_meta": {
     "sources": [
       "loopback/common/models",
       "loopback/server/models",
-      "../common/models"
+      "./common/models",
+      "./test/common/models",
+      "./models"
     ],
     "mixins": [
       "loopback/common/mixins",
       "loopback/server/mixins",
-      "../common/mixins"
+      "./common/mixins",
+      "../common/mixins",
+      "./mixins"
     ]
   },
   "User": {
@@ -30,27 +34,11 @@
     "dataSource": "db",
     "public": false
   },
-  "BaseEntity": {
+  "Customer": {
     "dataSource": "db",
     "public": true
   },
-  "ModelDefinition": {
-    "dataSource": "db",
-    "public": true
-  },
-  "DataSourceDefinition": {
-    "dataSource": "db",
-    "public": true
-  },
-  "EnumBase": {
-    "dataSource": "db",
-    "public": false
-  },
-  "RefCodeBase": {
-    "dataSource": "db",
-    "public": false
-  },
-  "Error": {
+  "Spouse": {
     "dataSource": "db",
     "public": true
   }
