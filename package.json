@@ -23,7 +23,7 @@
     "loopback-boot": "2.27.1",
     "loopback-component-explorer": "5.4.0",
     "mustache": "2.3.2",
-    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#master",
+    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#2.0.0",
     "serve-favicon": "2.5.0",
     "serve-static": "1.13.2",
     "strong-error-handler": "2.3.2"
@@ -48,9 +48,9 @@
     "mocha": "5.2.0",
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
-    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#master",
-    "oe-connector-mongodb": "git+http://evgit/oecloud.io/oe-connector-mongodb.git#master",
-    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#master"
+    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#2.0.0",
+    "oe-connector-mongodb": "git+http://evgit/oecloud.io/oe-connector-mongodb.git#2.0.0",
+    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#2.0.0"
   },
   "author": "Atul Pandit <atul_pandit@infosys.com>",
   "repository": {
