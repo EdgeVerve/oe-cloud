@@ -15,7 +15,7 @@
     "database": "oe-cloud-test",
     "password": "admin",
     "name": "db",
-    "connector": "mongodb",
+    "connector": "oe-connector-mongodb",
     "user": "admin",
     "connectionTimeout": 500000,
     "connectTimeoutMS": 500000,
