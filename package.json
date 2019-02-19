@@ -1,7 +1,7 @@
 {
   "name": "oe-cloud",
   "version": "2.0.0",
-  "description": "oe-cloud modularization aka oec-next",
+  "description": "oe-cloud modularization aka oecloud.io",
   "engines": {
     "node": ">=6"
   },
@@ -23,7 +23,7 @@
     "loopback-boot": "2.27.1",
     "loopback-component-explorer": "5.4.0",
     "mustache": "2.3.2",
-    "oe-logger": "git+http://evgit/oec-next/oe-logger.git#master",
+    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#master",
     "serve-favicon": "2.5.0",
     "serve-static": "1.13.2",
     "strong-error-handler": "2.3.2"
@@ -48,14 +48,14 @@
     "mocha": "5.2.0",
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2",
-    "oe-skeleton": "git+http://evgit/oec-next/oe-skeleton.git#master",
+    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#master",
     "loopback-connector-mongodb": "git+http://evgit/oecloud.io/loopback-connector-mongodb.git#master",
-    "oe-connector-postgresql": "git+http://evgit/oec-next/oe-connector-postgresql.git#master"
+    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#master"
   },
   "author": "Atul Pandit <atul_pandit@infosys.com>",
   "repository": {
     "type": "git",
-    "url": "git@evgit:oec-next/oe-cloud.git"
+    "url": "https://github.com/EdgeVerve/oe-cloud.git"
   },
   "license": "MIT"
 }

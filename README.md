@@ -40,28 +40,28 @@ oeCloud framework has been in development for almost two years and several devel
 It has been demonstrated that application development using oeCloud is fast and developer get many levers to play with when he/she developing with oeCloud - due to framework offering and also JavaScript inherent power.
 
 
-However, there is scope of improvement. 
+However, there is scope of improvement.
 * oeCloud itself has got several features and all of these features are bundled into single monolith node module. This causes trouble for application developer as many of features are included even though they are not needed by application developer.
 * Maintainability of oeCloud framework is getting difficult because features cannot be developed/enhanced in isolation.
 * Development cycle time is increased due to several CI/CD issues.
 * some of the node modules of loopback is forked and maintained by oeCloud team. Example is **loopback-datasource-juggler**. This node module is extensively modified and hence there is no way oeCloud can use latest loopback framework. This is tightly coupled with oeCloud.
- 
 
-To address above concerns, oeCloud is being modularized 
+
+To address above concerns, oeCloud is being modularized
 * oeCloud application will install oeCloud modules based on requirements. For example if data personalization is really required, he/she will install and use *oe-data-personalization* node module.
 * node modules will be created based on feature of oeCloud and each feature thus  will have its own development life cycle.
-* This way, each feature will live independently of each other and will have separate CI / CD. 
+* This way, each feature will live independently of each other and will have separate CI / CD.
 * As each feature is separately developed - there will be decoupling with loopback, oeCloud can keep pace with loopback development.
 
-*oe-cloud* is base node module for all oeCloud base application development. 
+*oe-cloud* is base node module for all oeCloud base application development.
 
 # oe-cloud overall modules
-![Modularization](http://evgit/oec-next/oe-cloud/raw/master/oe-modularization.png)
+![Modularization](http://evgit/oecloud.io/oe-cloud/raw/master/oe-modularization.png)
 
 
 # oe-cloud Features and functionalities
 
-This is most important project of oeCloud. This module needs to be required in application's server.js. 
+This is most important project of oeCloud. This module needs to be required in application's server.js.
 Below are responsibilities of oe-cloud
 
 ## oe-cloud - What it will do
@@ -105,11 +105,11 @@ Typical app-list.json, which would be part of application would look like
   {
     "path": "oe-common-mixins",
     "enabled": true
-  },  
+  },
   {
     "path": "oe-cache",
     "enabled": true
-  },   
+  },
   {
     "path": "oe-personalization",
     "enabled": true
@@ -117,11 +117,11 @@ Typical app-list.json, which would be part of application would look like
   {
     "path": "oe-validation",
     "enabled": true
-  },  
+  },
   {
     "path": "oe-service-personalization",
     "enabled": true
-  },  
+  },
   {
       "path": "./",
       "enabled": true
@@ -156,7 +156,7 @@ module.exports = function(app){
     // oe-cloud will call this function when it loads the module and when init() is not defined.
     // app object will be passed which has got much of information to manipulate
     // you can set observer hook as below
-    
+
     app.observe('loaded', function(ctx, next){
         //ctx.app will have app handle
         return next();
@@ -213,7 +213,7 @@ In above model-config, MyModel will be created as public model. However, definit
 ```
 * Above example will change default behavior.
 * you can also selectively ON/OFF the mixin attachments by calling **addModuleMixinsToBaseEntity** API as below. This can be important if you have to have some mixins from other dependent module.
- 
+
 ```
 var oecloud = require('oe-cloud');
 oecloud.addModuleMixinsToBaseEntity('oe-data-personalization', false);
@@ -259,15 +259,15 @@ oecloud.boot(__dirname, function(err){
 ```javaScript
 // boot script with callback
 module.exports = function(app, cb){
-    
+
     // must call cb() otherwise next boot script will not be executed
-    // should throw error if needed like 
+    // should throw error if needed like
     // return cb(new Error("something went wrong");
 }
 
 // boot script without callback
 module.exports = function(app){
-    
+
     // next boot script will be executed when function returns
 }
 
@@ -292,7 +292,7 @@ and middleware should have code such as below. This file should reside in server
 ```javaScript
 module.exports = function (options) {
   return function(req, res, next) {
-      
+
       return next(); // must call next() otherwise next middlware will not be executed and system will hang.
   }
 
@@ -309,7 +309,7 @@ There are simple utility functions which can be used in your module
 ### IsBaseEntity(Model)
 
 
-This utility function checks if given Model is derived from BaseEntity. This will be useful many times in programming. Below is code snippet. 
+This utility function checks if given Model is derived from BaseEntity. This will be useful many times in programming. Below is code snippet.
 
 ```javaScript
 const oecloudUtil = require('oecloud/lib/util');
@@ -414,7 +414,7 @@ This function will boot the application. It will do following typical things, bu
 ```javaScript
 const oecloud = require('oe-cloud');
 oecloud.boot(__dirname, function(err){
-  orcloud.start();    
+  orcloud.start();
 })
 ```
 
@@ -428,7 +428,7 @@ This function will start web server and starts listening on PORT. Default port i
 const oecloud = require('oe-cloud');
 oecloud.start()
 oecloud.once('started', function(){
-   // do something. 
+   // do something.
 });
 ```
 
@@ -453,13 +453,13 @@ accessToken.evObserve("before save", function (ctx, next) {
 
 customerModel.evObserve("access", function(ctx, next){
     var context = ctx.options.ctx;
-    
+
     assert (context.tenantId)
 })
 
 customerModel.beforeRemote("*", function(req, res.next){
     var context = req.callContext;
-    
+
     assert (context.tenantId)
 })
 
@@ -475,7 +475,7 @@ var app = require('oe-cloud');
     app.removeForceId('Role');
     app.removeForceId('RoleMapping');
 ```
-However, please note that, **by default** above code is executed as part of boot script. Meaning, by default, ForceId is deisabled for User, Role and RoleMapping models. Therefore, you can create User/Role/Rolemapping data by passing id field explicitly. 
+However, please note that, **by default** above code is executed as part of boot script. Meaning, by default, ForceId is deisabled for User, Role and RoleMapping models. Therefore, you can create User/Role/Rolemapping data by passing id field explicitly.
 If you want to disable this, you can use **disableForceIdForUserModels** setting to true in config.json.
 
 **About ForceId** : In loopback 3, ForceId setting is done on model which is **true** by default. In this case, user/programmer cannot create a record on model by passing his/her own id. Id is always generated by loopback. To disable this setting, you can use removeForceId call.
@@ -525,9 +525,9 @@ var app = require('oe-cloud');
 app.observe('loaded', function(ctx, next){
   app.addSettingsToModelDefinition({properties : {_versioning : {type : "boolean", default : false}}});
   app.addSettingsToModelDefinition({properties : {HistoryMixin : {type : "boolean", default: false}}});
-  
+
   app.addSettingsToBaseEntity({autoscope:["tenantId"]});
-  
+
   return next();
 })
 ```
@@ -536,19 +536,19 @@ app.observe('loaded', function(ctx, next){
 
 | Feature | Exisiting | Proposed |
 | ------ | ------ | ------- |
-| Custom Types Register-Email & timestamp | Data Source juggler Change | Model Builder Wrapper [oe-cloud](http://evgit/oec-next/oe-cloud) |
-| **after access** observer notification | DAO Change | Data Source juggler Wrapper [oe-cloud](http://evgit/oec-next/oe-cloud) |
-| app-list.json handling | server.js | [oe-cloud](http://evgit/oec-next/oe-cloud) |
-| EvObserver | Mixin in file | [oe-cloud](http://evgit/oec-next/oe-cloud) |
-| Audit Field  | Mixin in file | [oe-common-mixins](http://evgit/oec-next/oe-common-mixins) |
-| Versioning | Mixin in file | [oe-common-mixins](http://evgit/oec-next/oe-common-mixins) |
-| History | Mixin | [oe-common-mixins](http://evgit/oec-next/oe-common-mixins)|
+| Custom Types Register-Email & timestamp | Data Source juggler Change | Model Builder Wrapper [oe-cloud](http://evgit/oecloud.io/oe-cloud) |
+| **after access** observer notification | DAO Change | Data Source juggler Wrapper [oe-cloud](http://evgit/oecloud.io/oe-cloud) |
+| app-list.json handling | server.js | [oe-cloud](http://evgit/oecloud.io/oe-cloud) |
+| EvObserver | Mixin in file | [oe-cloud](http://evgit/oecloud.io/oe-cloud) |
+| Audit Field  | Mixin in file | [oe-common-mixins](http://evgit/oecloud.io/oe-common-mixins) |
+| Versioning | Mixin in file | [oe-common-mixins](http://evgit/oecloud.io/oe-common-mixins) |
+| History | Mixin | [oe-common-mixins](http://evgit/oecloud.io/oe-common-mixins)|
 | Idempotency | Mixin+DAO | Not done |
-| Soft Delete  | Mixin + DAO | [oe-common-mixins](http://evgit/oec-next/oe-common-mixins) |
-| Validations | Mixin | [oe-validation](http://evgit/oec-next/oe-validation) |
-| Expression Support | Mixin | [oe-expression](http://evgit/oec-next/oe-expression) |
-| Model Composite - Implicit and Explicit | DAO Change | DAO Wrapper [oe-model-composite](http://evgit/oec-next/oe-model-composite) |
-| Data Personalization | Mixin | [oe-personalization](http://evgit/oec-next/oe-personalization) |
-| Service Personalization | Mixin+Boot | Boot [oe-service=personalization](http://evgit/oec-next/oe-service-personalization) |
-| Cachinge | Mixin+DAO | DAO Wrapper [oe-cache](http://evgit/oec-next/oe-cache) |
+| Soft Delete  | Mixin + DAO | [oe-common-mixins](http://evgit/oecloud.io/oe-common-mixins) |
+| Validations | Mixin | [oe-validation](http://evgit/oecloud.io/oe-validation) |
+| Expression Support | Mixin | [oe-expression](http://evgit/oecloud.io/oe-expression) |
+| Model Composite - Implicit and Explicit | DAO Change | DAO Wrapper [oe-model-composite](http://evgit/oecloud.io/oe-model-composite) |
+| Data Personalization | Mixin | [oe-personalization](http://evgit/oecloud.io/oe-personalization) |
+| Service Personalization | Mixin+Boot | Boot [oe-service=personalization](http://evgit/oecloud.io/oe-service-personalization) |
+| Cachinge | Mixin+DAO | DAO Wrapper [oe-cache](http://evgit/oecloud.io/oe-cache) |
 
