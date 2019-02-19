@@ -23,7 +23,7 @@ module.exports =
     "database": dbName,
     "password": "admin",
     "name": "db",
-    "connector": "mongodb",
+    "connector": "oe-connector-mongodb",
     "user": "admin",
     "connectionTimeout": 500000
   }
