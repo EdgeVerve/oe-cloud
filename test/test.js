@@ -16,7 +16,14 @@ require = function (a) {
 var oecloud = require('oe-cloud');
 var loopback = require('loopback');
 
-const path = require('path');
+// Atul : Below code is commented - kept is as reference to test behavior when by default BaseEntity write operation is protected.
+// when this code is uncommented, t-17 would fail.
+// oecloud.setACLToBaseEntity({
+//   "accessType": "WRITE",
+//   "principalType": "ROLE",
+//   "principalId": "$unauthenticated",
+//   "permission": "DENY"
+//   });
 
 oecloud.observe('loaded', function (ctx, next) {
   if (!oecloud.options.baseEntitySources) {
@@ -575,7 +582,6 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   });
 
   it('t13 - changing datasource of model', function (done) {
-    var DataSourceDefinition = loopback.findModel('DataSourceDefinition');
     var ds = oecloud.datasources['oe-cloud-test-newdb'];
     var newCustomerModel = loopback.findModel('NewCustomer');
     ds.attach(newCustomerModel);
@@ -643,6 +649,31 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         done(err);
       });
   });  
+
+  it('t17 - Able to create record in customer without passing access token', function (done) {
+    var url = basePath + '/customers';
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send({name : "customer created without access token", age : 10})
+      .end(function (err, response) {
+        console.log(response.error);
+        done(err);
+      });
+  });  
+  it('t17 - Should not Able to create record in customer without passing valid access token', function (done) {
+    var acl = { accessType: 'WRITE', permission: 'DENY', principalId: '$unauthenticated', principalType: 'ROLE' };
+    var baseEntity = loopback.findModel('Customer');
+    baseEntity.settings.acls = [];
+    baseEntity.settings.acls.push(acl);
+    var url = basePath + '/customers';
+    api.set('Accept', 'application/json')
+      .post(url)
+      .send({name : "Another customer created without access token", age : 10})
+      .end(function (err, response) {
+        if(response.status != 401){
+          return done(new Error("unauthorized access should not be allowed"));
+        }
+        done();
+      });
+  });  
 });
-
-
