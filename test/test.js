@@ -5,63 +5,35 @@
  *
  */
 
-const _require = require;
-require = function (a) {
-  if (a === 'oe-cloud') {
-    return _require('../index.js');
-  }
-  return _require(a);
-};
-
-var oecloud = require('oe-cloud');
+var bootstrap = require('./bootstrap.js');
 var loopback = require('loopback');
+var chalk = require('chalk');
+var chai = require('chai');
+chai.use(require('chai-things'));
+var expect = chai.expect;
+var app = bootstrap.app;
+var api = bootstrap.api;
+var basePath = bootstrap.basePath;
 
 // Atul : Below code is commented - kept is as reference to test behavior when by default BaseEntity write operation is protected.
 // when this code is uncommented, t-17 would fail.
-// oecloud.setACLToBaseEntity({
+// app.setACLToBaseEntity({
 //   "accessType": "WRITE",
 //   "principalType": "ROLE",
 //   "principalId": "$unauthenticated",
 //   "permission": "DENY"
 //   });
 
-oecloud.observe('loaded', function (ctx, next) {
-  if (!oecloud.options.baseEntitySources) {
-    oecloud.options.baseEntitySources = [process.cwd() + '/test/common/models/base-entity-test.js'];
+app.observe('loaded', function (ctx, next) {
+  if (!app.options.baseEntitySources) {
+    app.options.baseEntitySources = [process.cwd() + '/test/common/models/base-entity-test.js'];
   }
-  oecloud.attachMixinsToModelDefinition('NewMixin');
-  oecloud.attachMixinsToBaseEntity('TestMixin');
-  oecloud.addSettingsToBaseEntity({ mysettings: true });
-  oecloud.addSettingsToModelDefinition({ xsettings: true });
+  app.attachMixinsToModelDefinition('NewMixin');
+  app.attachMixinsToBaseEntity('TestMixin');
+  app.addSettingsToBaseEntity({ mysettings: true });
+  app.addSettingsToModelDefinition({ xsettings: true });
   return next();
 });
-
-oecloud.boot(__dirname, function (err) {
-  if (err) {
-    console.log(err);
-    process.exit(1);
-  }
-  oecloud.start();
-  oecloud.emit('test-start');
-});
-
-
-var chalk = require('chalk');
-var chai = require('chai');
-var async = require('async');
-chai.use(require('chai-things'));
-
-var expect = chai.expect;
-
-var app = oecloud;
-var defaults = require('superagent-defaults');
-var supertest = require('supertest');
-var api = defaults(supertest(app));
-var basePath = app.get('restApiRoot');
-var url = basePath + '/Employees';
-
-var models = oecloud.models;
-
 
 function deleteAllUsers(done) {
   var userModel = loopback.findModel('User');
@@ -83,7 +55,7 @@ function deleteAllUsers(done) {
 
 var globalCtx = {
   ignoreAutoScope: true,
-  ctx: { tenantId: '/default'}
+  ctx: { tenantId: '/default' }
 };
 var defaultContext = {
   ctx: { tenantId: '/default' }
@@ -94,10 +66,8 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   this.timeout(10000);
 
   before('wait for boot scripts to complete', function (done) {
-    app.on('test-start', function () {
-      deleteAllUsers(function () {
-        return done();
-      });
+    deleteAllUsers(function () {
+      return done();
     });
   });
 
@@ -119,11 +89,11 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     api.set('Accept', 'application/json')
       .post(url)
       .send([{ id: 'admin', username: 'admin', password: 'admin', email: 'admin@admin.com' },
-        {id: 'evuser', username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
-        {id: 'infyuser', username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
-        { id: 'bpouser', username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' },
-        { id: 'iciciuser', username: 'iciciuser', password: 'iciciuser', email: 'iciciuser@iciciuser.com' },
-        { id: 'citiuser', username: 'citiuser', password: 'citiuser', email: 'citiuser@citiuser.com' }
+      { id: 'evuser', username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
+      { id: 'infyuser', username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
+      { id: 'bpouser', username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' },
+      { id: 'iciciuser', username: 'iciciuser', password: 'iciciuser', email: 'iciciuser@iciciuser.com' },
+      { id: 'citiuser', username: 'citiuser', password: 'citiuser', email: 'citiuser@citiuser.com' }
       ])
       .end(function (err, response) {
         var result = response.body;
@@ -145,10 +115,10 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     //  validations.id.shift();
     //}
     roleModel.create([
-      {id: 'admin', name: 'admin'},
-      {id: 'businessUser', name: 'businessUser'},
-      {id: 'guest', name: 'guest'},
-      {id: 'poweruser', name: 'poweruser'}
+      { id: 'admin', name: 'admin' },
+      { id: 'businessUser', name: 'businessUser' },
+      { id: 'guest', name: 'guest' },
+      { id: 'poweruser', name: 'poweruser' }
     ], function (err, result) {
       return done(err);
     });
@@ -162,10 +132,10 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     //}
     //roleMapping.settings.forceId = false;
     roleMapping.create([
-      {id: 'adminuser', principalType: roleMapping.USER, principalId: 'admin', roleId: 'admin'},
-      {id: 'businessUser', principalType: roleMapping.USER, principalId: 'infyuser', roleId: 'businessUser'},
-      {id: 'poweruser', principalType: roleMapping.USER, principalId: 'infyuser', roleId: 'poweruser'},
-      {id: 'guestuser', principalType: roleMapping.USER, principalId: 'evuser', roleId: 'guest' }
+      { id: 'adminuser', principalType: roleMapping.USER, principalId: 'admin', roleId: 'admin' },
+      { id: 'businessUser', principalType: roleMapping.USER, principalId: 'infyuser', roleId: 'businessUser' },
+      { id: 'poweruser', principalType: roleMapping.USER, principalId: 'infyuser', roleId: 'poweruser' },
+      { id: 'guestuser', principalType: roleMapping.USER, principalId: 'evuser', roleId: 'guest' }
     ], function (err, result) {
       return done(err);
     });
@@ -298,7 +268,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   it('t7 hooking observer', function (done) {
     var modelDefinition = loopback.findModel('ModelDefinition');
     modelDefinition.find({
-      where: {name: 'NewCustomer'}
+      where: { name: 'NewCustomer' }
     }, {}, function (err, results) {
       var item = results[0];
       expect(item.name).to.be.equal('NewCustomer');
@@ -339,7 +309,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     if (!x) {
       return done(new Error('Expcted instnace query flag to be true'));
     }
-    x = utils.isInstanceQuery(newCustomerModel, { where: { and: [{ name: 'x' }, { age: 1 }, { and: [{ id: 1 }, {age: 10}]}] } });
+    x = utils.isInstanceQuery(newCustomerModel, { where: { and: [{ name: 'x' }, { age: 1 }, { and: [{ id: 1 }, { age: 10 }] }] } });
     if (!x) {
       return done(new Error('Expcted instnace query flag to be true'));
     }
@@ -354,11 +324,11 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
 
     var id = utils.getIdValue(newCustomerModel, { id: 10, name: 'A' });
 
-    var f = utils.checkDependency(oecloud, ['./']);
-    f = utils.checkDependency(oecloud, './');
+    var f = utils.checkDependency(app, ['./']);
+    f = utils.checkDependency(app, './');
 
     var o1 = { x: 'x', a1: [12, 3, 4] };
-    var o2 = { y: 'y', a2: [1122, 33, 44], a1: [1122, 33, 44]  };
+    var o2 = { y: 'y', a2: [1122, 33, 44], a1: [1122, 33, 44] };
 
     var o3 = utils.mergeObjects(o1, o2);
     expect(o3.x).to.be.equal('x');
@@ -561,7 +531,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
 
   console.log(JSON.stringify(newds));
 
-  var datasources = [ newds ];
+  var datasources = [newds];
 
   it('t12 - creating datasource', function (done) {
     var ds = datasources[0];
@@ -582,19 +552,19 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   });
 
   it('t13 - changing datasource of model', function (done) {
-    var ds = oecloud.datasources['oe-cloud-test-newdb'];
+    var ds = app.datasources['oe-cloud-test-newdb'];
     var newCustomerModel = loopback.findModel('NewCustomer');
     ds.attach(newCustomerModel);
-    newCustomerModel.create({name: 'CustomerInNewDB'}, defaultContext, function (err, res) {
+    newCustomerModel.create({ name: 'CustomerInNewDB' }, defaultContext, function (err, res) {
       return done(err);
     });
   });
 
   it('t14 - testing group by', function (done) {
     var customerModel = loopback.findModel('Customer');
-    customerModel.create([{name: 'A', age: 30}, { name: 'B', age: 30 }], {}, function (err, r) {
+    customerModel.create([{ name: 'A', age: 30 }, { name: 'B', age: 30 }], {}, function (err, r) {
       if (err) return done(err);
-      customerModel.find({group: {groupBy: ['age']}}, {}, function (err2, r2) {
+      customerModel.find({ group: { groupBy: ['age'] } }, {}, function (err2, r2) {
         if (err2) return done(err2);
         console.log(r2);
         return done();
@@ -648,18 +618,18 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         console.log(response.error);
         done(err);
       });
-  });  
+  });
 
   it('t17 - Able to create record in customer without passing access token', function (done) {
     var url = basePath + '/customers';
     api.set('Accept', 'application/json')
       .post(url)
-      .send({name : "customer created without access token", age : 10})
+      .send({ name: "customer created without access token", age: 10 })
       .end(function (err, response) {
         console.log(response.error);
         done(err);
       });
-  });  
+  });
   it('t17 - Should not Able to create record in customer without passing valid access token', function (done) {
     var acl = { accessType: 'WRITE', permission: 'DENY', principalId: '$unauthenticated', principalType: 'ROLE' };
     var baseEntity = loopback.findModel('Customer');
@@ -668,12 +638,12 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     var url = basePath + '/customers';
     api.set('Accept', 'application/json')
       .post(url)
-      .send({name : "Another customer created without access token", age : 10})
+      .send({ name: "Another customer created without access token", age: 10 })
       .end(function (err, response) {
-        if(response.status != 401){
+        if (response.status != 401) {
           return done(new Error("unauthorized access should not be allowed"));
         }
         done();
       });
-  });  
+  });
 });
