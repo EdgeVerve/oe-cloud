@@ -13,6 +13,11 @@
     <hashTree>
       <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables" enabled="true">
         <collectionProp name="Arguments.arguments">
+          <elementProp name="secure" elementType="Argument">
+            <stringProp name="Argument.name">secure</stringProp>
+            <stringProp name="Argument.value">${__P(secure,http)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
           <elementProp name="hostname" elementType="Argument">
             <stringProp name="Argument.name">hostname</stringProp>
             <stringProp name="Argument.value">${__P(host,10.73.97.32)}</stringProp>
@@ -21,11 +26,6 @@
           <elementProp name="port" elementType="Argument">
             <stringProp name="Argument.name">port</stringProp>
             <stringProp name="Argument.value">${__P(port,3000)}</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="model" elementType="Argument">
-            <stringProp name="Argument.name">model</stringProp>
-            <stringProp name="Argument.value">CustomerPerfModel</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="users" elementType="Argument">
@@ -41,6 +41,11 @@
           <elementProp name="loopcount" elementType="Argument">
             <stringProp name="Argument.name">loopcount</stringProp>
             <stringProp name="Argument.value">${__P(loopcount,5)}</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="model" elementType="Argument">
+            <stringProp name="Argument.name">model</stringProp>
+            <stringProp name="Argument.value">CustomerPerfModel</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
           <elementProp name="relatedmodel" elementType="Argument">
@@ -83,7 +88,7 @@
           </elementProp>
           <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/api/Users/</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -147,7 +152,7 @@
           </elementProp>
           <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/api/Users/login</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -246,7 +251,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/api/ModelDefinitions?access_token=${access_token}</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -359,7 +364,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
           </elementProp>
           <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
-          <stringProp name="HTTPSampler.protocol">http</stringProp>
+          <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
           <stringProp name="HTTPSampler.contentEncoding"></stringProp>
           <stringProp name="HTTPSampler.path">/api/ModelDefinitions?access_token=${access_token}</stringProp>
           <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -576,7 +581,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
-            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/api/${model}</stringProp>
             <stringProp name="HTTPSampler.method">POST</stringProp>
@@ -634,7 +639,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
-            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/api/${model}/customer${id}</stringProp>
             <stringProp name="HTTPSampler.method">GET</stringProp>
@@ -696,7 +701,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
-            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/api/${model}/customer${id}</stringProp>
             <stringProp name="HTTPSampler.method">PUT</stringProp>
@@ -754,7 +759,7 @@ props.put(&quot;access_token&quot;, access);</stringProp>
             </elementProp>
             <stringProp name="HTTPSampler.domain">${hostname}</stringProp>
             <stringProp name="HTTPSampler.port">${port}</stringProp>
-            <stringProp name="HTTPSampler.protocol">http</stringProp>
+            <stringProp name="HTTPSampler.protocol">${secure}</stringProp>
             <stringProp name="HTTPSampler.contentEncoding"></stringProp>
             <stringProp name="HTTPSampler.path">/api/${model}/customer${id}</stringProp>
             <stringProp name="HTTPSampler.method">DELETE</stringProp>
