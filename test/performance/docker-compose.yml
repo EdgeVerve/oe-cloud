@@ -1,0 +1,19 @@
+version: "3"
+services:
+  
+  web:
+    image: "${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}"
+    environment:
+      NODE_ENV: "mongo"
+      MONGO_HOST: ${MONGO_HOST}
+      SERVICE_PORTS: "3000"
+      VIRTUAL_HOST: "https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME},${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}"
+
+    deploy:
+      mode: replicated
+      replicas: 1
+    networks:
+      - router_network
+networks:
+  router_network:
+    external: true

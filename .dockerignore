@@ -1,0 +1,5 @@
+.git
+.gitlab-ci.yml
+.gitattributes
+.gitignore
+./test/performance/docker-compose.yml
