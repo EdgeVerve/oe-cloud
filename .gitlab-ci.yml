@@ -135,17 +135,17 @@ performancejob:
     - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/)
     - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
     - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
-    - jmeter -n -t ./test/performance/oe-cloud-test.jmx -Jloopcount=100 -Jhost=ujwala-perf-oecloud.oecloud.perf -Jport=80 -Jusers=1 -l oe-cloud-test.jtl -Jsecure=https
-    - JMeterPluginsCMD.sh --generate-csv oe-cloud-test.csv --input-jtl oe-cloud-test.jtl --plugin-type AggregateReport
+    - jmeter -n -t ./test/performance/oe-cloud-test.jmx -Jloopcount=50000 -Jhost=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME} -Jport=443 -Jsecure=https -Jusers=1 -l ${CI_PROJECT_NAME}.jtl 
+    - JMeterPluginsCMD.sh --generate-csv ${CI_PROJECT_NAME}.csv --input-jtl ${CI_PROJECT_NAME}.jtl --plugin-type AggregateReport
     - if [$app_exit_status -eq 1]; then exit $app_exit_status; else echo "proceeding with performance testing"; fi
-    - cat oe-cloud-test.csv
+    - cat ${CI_PROJECT_NAME}.csv
     - export DATE=`date '+%Y-%m-%d-%H-%M-%S'`
-    - cp oe-cloud-test.csv $DATE-oe-cloud-test.csv
+    - cp ${CI_PROJECT_NAME}.csv $DATE-${CI_PROJECT_NAME}.csv
     - if docker rm -f ${APP_IMAGE_NAME}; then echo "container removed"; else echo "There is no such container"; fi
     - docker run -d --name ${APP_IMAGE_NAME} -v /datadisk/cep-data/oecloud-portal/performance:/perf ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} tail -f ./test/server.js
     - if docker exec ${APP_IMAGE_NAME} mkdir /perf/${CI_PROJECT_NAME}; then echo "folder in the path is created"; else echo "folder exists in specified path"; fi
-    - docker cp ./oe-cloud-test.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
-    - docker cp ./$DATE-oe-cloud-test.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
+    - docker cp ./${CI_PROJECT_NAME}.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
+    - docker cp ./$DATE-${CI_PROJECT_NAME}.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
   when: manual
   tags:
