@@ -147,8 +147,6 @@ performancejob:
     - docker cp ./oe-cloud-test.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
     - docker cp ./$DATE-oe-cloud-test.csv ${APP_IMAGE_NAME}:/perf/${CI_PROJECT_NAME}
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
-  only:
-    - tags
   when: manual
   tags:
     - PERF_RUNNER
