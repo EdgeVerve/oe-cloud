@@ -3,7 +3,7 @@ stages:
   - pre-build-test
   - performance
 
-image: $REGISTRY/jmeter:docker
+image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
   DOMAIN_NAME: oecloud.local
   PERF_DOMAIN_NAME: oecloud.perf
@@ -113,11 +113,13 @@ oracletest:
     - CEP_RUNNER_EE
 
 performancejob:
+  image: $REGISTRY/jmeter:docker
   stage: performance
   script:
     - npm set progress=false
     - npm config set registry http://10.188.25.62:9002/
     #- npm config set registry https://registry.npmjs.org/
+    - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
     - export MONGO_HOST=10.73.97.17
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./test/performance/Dockerfile > Dockerfile
@@ -134,10 +136,8 @@ performancejob:
     - echo "${DOCKER_ROUTER_HOST} ${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}" >> /etc/hosts
     - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/)
     - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
-    - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
-    - jmeter -n -t ./test/performance/oe-cloud-test.jmx -Jloopcount=50000 -Jhost=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME} -Jport=443 -Jsecure=https -Jusers=1 -l ${CI_PROJECT_NAME}.jtl 
-    - JMeterPluginsCMD.sh --generate-csv ${CI_PROJECT_NAME}.csv --input-jtl ${CI_PROJECT_NAME}.jtl --plugin-type AggregateReport
-    - if [$app_exit_status -eq 1]; then exit $app_exit_status; else echo "proceeding with performance testing"; fi
+    - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
+    - sh test/performance/performance.sh
     - cat ${CI_PROJECT_NAME}.csv
     - export DATE=`date '+%Y-%m-%d-%H-%M-%S'`
     - cp ${CI_PROJECT_NAME}.csv $DATE-${CI_PROJECT_NAME}.csv
