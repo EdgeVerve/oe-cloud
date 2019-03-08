@@ -1,9 +1,12 @@
 stages:
   - pre-build
   - pre-build-test
+  - performance
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
+  DOMAIN_NAME: oecloud.local
+  PERF_DOMAIN_NAME: oecloud.perf
   REGISTRY: registry.${DOMAIN_NAME}
 
 before_script:
@@ -11,6 +14,10 @@ before_script:
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
   - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
+  - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
+  - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
+  - export APP_TAG=latest
+
 
 npminstall:
   stage: pre-build
@@ -20,6 +27,7 @@ npminstall:
     - exit_status=0
     - npm set progress=false
     - npm config set registry http://10.188.25.62:9002/
+    #- npm config set registry https://registry.npmjs.org/
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
@@ -102,6 +110,40 @@ oracletest:
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER_EE    
+    - CEP_RUNNER_EE
 
-
+performancejob:
+  image: $REGISTRY/jmeter:docker
+  stage: performance
+  script:
+    - npm set progress=false
+    - npm config set registry http://10.188.25.62:9002/
+    #- npm config set registry https://registry.npmjs.org/
+    - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
+    - time npm install --no-optional
+    - export MONGO_HOST=10.73.97.17
+    - export DB_NAME=${CI_JOB_ID}_mongo
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./test/performance/Dockerfile > Dockerfile
+    - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
+    - time docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --no-cache --pull .
+    - time docker image push ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}
+    - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}) built and pushed to registry"
+    - docker stack deploy --compose-file ./test/performance/docker-compose.yml ${APP_IMAGE_NAME}
+    - export HTTP_RESPONSE_CODE=200
+    - export countElapsed=0
+    - export app_exit_status=0
+    - export no_proxy=$no_proxy,${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}
+    - export NO_PROXY=$no_proxy
+    - echo "${DOCKER_ROUTER_HOST} ${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}" >> /etc/hosts
+    - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/)
+    - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
+    - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
+    - sh test/performance/performance.sh
+    - if docker rm -f ${APP_IMAGE_NAME}; then echo "container removed"; else echo "There is no such container"; fi
+    - docker run -d --name ${APP_IMAGE_NAME} -v /datadisk/cep-data/oecloud-portal/performance:/perf ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} tail -f ./test/server.js
+    - if docker exec ${APP_IMAGE_NAME} mkdir /perf/${CI_PROJECT_NAME}; then echo "folder in the path is created"; else echo "folder exists in specified path"; fi
+    - sh test/performance/push_performance_results.sh
+    - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
+  when: manual
+  tags:
+    - PERF_RUNNER
