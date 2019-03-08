@@ -122,6 +122,7 @@ performancejob:
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
     - export MONGO_HOST=10.73.97.17
+    - export DB_NAME=${CI_JOB_ID}_mongo
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./test/performance/Dockerfile > Dockerfile
     - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
     - time docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --no-cache --pull .
