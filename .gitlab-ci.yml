@@ -1,6 +1,6 @@
 stages:
-  #- pre-build
-  #- pre-build-test
+  - pre-build
+  - pre-build-test
   - performance
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
@@ -19,7 +19,7 @@ before_script:
   - export APP_TAG=latest
 
 
-.npminstall:
+npminstall:
   stage: pre-build
   script:
     - echo "Performing code style check..."
@@ -70,7 +70,7 @@ before_script:
   tags:
     - CEP_RUNNER_EE
 
-.postgrestest:
+postgrestest:
   stage: pre-build-test
   script:
     - echo 'Performing PostgreSQL Test'
@@ -85,7 +85,7 @@ before_script:
   tags:
     - CEP_RUNNER_EE    
     
-.oracletest:
+oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
