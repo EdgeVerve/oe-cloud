@@ -124,7 +124,6 @@ performancejob:
     - export MONGO_HOST=10.73.97.17
     - export DB_NAME=${CI_JOB_ID}_mongo
     - git clone http://10.73.97.24/oecloud.io/build-tools.git
-    - cd build-tools
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./build-tools/performance/Dockerfile > Dockerfile
     - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
     - time docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --no-cache --pull .
