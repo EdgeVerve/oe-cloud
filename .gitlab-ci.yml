@@ -50,7 +50,7 @@ npminstall:
     - CEP_RUNNER_EE
 
 
-.mongotest:
+mongotest:
   stage: pre-build-test
   script:
     - echo 'Performing MongoDB Test'
