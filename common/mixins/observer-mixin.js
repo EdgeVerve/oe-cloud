@@ -28,7 +28,6 @@
 
 var logger = require('oe-logger');
 var log = logger('observer-mixin');
-
 module.exports = function ObserverMixin(Model) {
   /**
    * evObserve: Register observers based on the value of isObserverApplied.<br>
@@ -41,6 +40,7 @@ module.exports = function ObserverMixin(Model) {
    * @param {object}listener - The listener function. It will be invoked with this set to the model constructor, e.g. User.
    * @memberof Observer mixin
    */
+  log.debug(log.defaultContext(), 'observer-mixin is loaded for ', Model.modelName);
   Model.evObserve = function evObserve(operation, listener) {
     if (!Model.isObserverApplied(operation, listener)) {
       log.debug(log.defaultContext(), 'Registering observer for model - ', Model.modelName);
@@ -75,15 +75,16 @@ module.exports = function ObserverMixin(Model) {
   Model.isObserverApplied = function isObserverApplied(operation, listener) {
     var isApplied = false;
     var observerList = Model._observers[operation];
-    var fsObserverList;
+    // var fsObserverList;
 
     var isSameName = function isSameNameFn(e) {
-      return e.name === listener.name;
+      return e === listener;
+      // return e.name === listener.name;
     };
 
-    if (Model._fsObservers) {
-      fsObserverList = Model._fsObservers[operation];
-    }
+    // if (Model._fsObservers) {
+    // fsObserverList = Model._fsObservers[operation];
+    // }
     if (observerList) {
       isApplied = observerList.indexOf(listener) !== -1 ? true : false;
       if (!isApplied) {
@@ -93,18 +94,18 @@ module.exports = function ObserverMixin(Model) {
       isApplied = false;
     }
 
-    if (!isApplied) {
-      if (fsObserverList) {
-        for (var x = 0; x < fsObserverList.observers.length; x++) {
-          var observer = fsObserverList.observers[x];
-          isApplied = (observer.getName() === listener.name) ? true : false;
-          log.debug(log.defaultContext(), 'fs observer  ', observer.getName());
-          if (isApplied) {
-            break;
-          }
-        }
-      }
-    }
+    // if (!isApplied) {
+    //  if (fsObserverList) {
+    //    for (var x = 0; x < fsObserverList.observers.length; x++) {
+    //      var observer = fsObserverList.observers[x];
+    //      isApplied = (observer.getName() === listener.name) ? true : false;
+    //      log.debug(log.defaultContext(), 'fs observer  ', observer.getName());
+    //      if (isApplied) {
+    //        break;
+    //      }
+    //    }
+    //  }
+    // }
 
     if (isApplied) {
       return true;
@@ -120,15 +121,15 @@ module.exports = function ObserverMixin(Model) {
   Model.observerAppliedWhere = function observerAppliedWhere(operation, listener) {
     var isApplied = false;
     var observerList = Model._observers[operation];
-    var fsObserverList;
+    // var fsObserverList;
 
     var isSameName =  function (e, index, array) {
       return e.name === listener.name;
     };
 
-    if (Model._fsObservers) {
-      fsObserverList = Model._fsObservers[operation];
-    }
+    // if (Model._fsObservers) {
+    // fsObserverList = Model._fsObservers[operation];
+    // }
     if (observerList) {
       isApplied = observerList.indexOf(listener) !== -1 ? true : false;
       if (!isApplied) {
@@ -138,18 +139,18 @@ module.exports = function ObserverMixin(Model) {
       isApplied = false;
     }
 
-    if (!isApplied) {
-      if (fsObserverList) {
-        for (var x = 0; x < fsObserverList.observers.length; x++) {
-          var observer = fsObserverList.observers[x];
-          isApplied = (observer.getName() === listener.name) ? true : false;
-          log.debug(log.defaultContext(), 'fs observer  ', observer.getName());
-          if (isApplied) {
-            break;
-          }
-        }
-      }
-    }
+    // if (!isApplied) {
+    //  if (fsObserverList) {
+    //    for (var x = 0; x < fsObserverList.observers.length; x++) {
+    //      var observer = fsObserverList.observers[x];
+    //      isApplied = (observer.getName() === listener.name) ? true : false;
+    //      log.debug(log.defaultContext(), 'fs observer  ', observer.getName());
+    //      if (isApplied) {
+    //        break;
+    //      }
+    //    }
+    //  }
+    // }
 
     if (isApplied) {
       return Model;

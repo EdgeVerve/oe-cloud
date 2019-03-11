@@ -1,0 +1,15 @@
+[
+  {
+    "path": "./",
+    "forceLoad": "index.js"
+  },
+  {
+    "path": "oe-skeleton",
+    "enabled": true
+  },
+  {
+    "path": "./",
+    "enabled": true,
+    "serverDir": "test"
+  }
+]

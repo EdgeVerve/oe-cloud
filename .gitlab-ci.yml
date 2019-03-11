@@ -1,26 +1,9 @@
-# ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
-#Bangalore, India. All Rights Reserved.
-
 stages:
   - pre-build
   - pre-build-test
-  - build
-  - swarm-actor-pattern
-  - retry-service
-  - ldap-auth
-  - job-scheduler-service
-  - rule-engine-cluster-tests
-
-cache:
-  untracked: true
-  paths:
-    - node_modules/
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
-
 variables:
-  USE_BROADCASTER: "false"
-  #DOMAIN_NAME: oecloud.local
   REGISTRY: registry.${DOMAIN_NAME}
 
 before_script:
@@ -28,15 +11,6 @@ before_script:
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
   - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
-  - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
-  - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - npm config set registry $NPM_REGISTRY
-  - npm config set fetch-retries 0
-  #- export DOMAIN_NAME=oecloud.local
-  #- export REGISTRY=registry.${DOMAIN_NAME}
-  - export NETWORK_NAME=${APP_IMAGE_NAME}
-  - export APP_TAG=latest
-  - export ROUTER=cep_router
 
 npminstall:
   stage: pre-build
@@ -45,35 +19,40 @@ npminstall:
     - status_eslint=0
     - exit_status=0
     - npm set progress=false
-    - time npm install eslint babel-eslint grunt grunt-cli grunt-check-copyright --no-optional
+    - npm config set registry http://10.188.25.62:9002/
+    - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
-    - if npm run check-copyright; then status_copyright=0; else status_copyright=1; fi
     - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
-    - if [ $status_copyright == 1 ]; then exit_status=1 && echo "copyright not present in files"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
-    - echo "Code style and copyright check done successfully"
+    - echo "Code style check done successfully"
     - time npm install --no-optional
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile
     - echo "Node Modules Installed"
+    - npm config rm registry
+    - npm audit --json >vulnerabilities.json
+    - status_vulnerabilities='echo $?'
+    - npm audit
+    - if [ $status_vulnerabilities == 1 ]; then exit_status=1 && echo "Dependency vulnerabilities exist"; fi
+    - if [ $exit_status == 1 ]; then exit $exit_status; fi
   artifacts:
     untracked: true
     expire_in: 2h
     paths:
       - node_modules/
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE
+
 
 mongotest:
   stage: pre-build-test
   script:
-    - export NODE_ENV=test
+    - echo 'Performing MongoDB Test'
+    - export NODE_ENV=mongo
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
     - export DB_NAME=${CI_PIPELINE_ID}_mongo
+    - npm config set registry http://10.188.25.62:9002/
     - time npm install --no-optional
     - npm run grunt-cover
-    - mocha test/01-cleanup.js
   artifacts:
     untracked: true
     expire_in: 2h
@@ -81,280 +60,48 @@ mongotest:
       - coverage/
     when: on_failure
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE
 
-.postgrestest:
+postgrestest:
   stage: pre-build-test
   script:
-    - export NODE_ENV=test
-    - export POSTGRES_HOST="10.73.53.144"
-    - export MONGO_HOST="10.73.53.144"
+    - echo 'Performing PostgreSQL Test'
+    - export NODE_ENV=postgres
     - export DB=postgres
+    - export POSTGRES_HOST="10.73.53.144"
     - export DB_NAME=${CI_PIPELINE_ID}_pg
+    - export ENABLE_DS_AUTOUPDATE=true
+    - npm config set registry http://10.188.25.62:9002/
     - time npm install --no-optional
     - npm run grunt-cover
-    - mocha test/01-cleanup.js
-  artifacts:
-    untracked: true
-    expire_in: 2h
-    paths:
-      - coverage/
-    when: on_failure
   tags:
-    - CEP_RUNNER
-
-.oracletest:
+    - CEP_RUNNER_EE    
+    
+oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
-    - cd .. && export PROJECT_DIR=$(pwd) && mv oe-cloud/ /root/ && cd /root/oe-cloud
+    - echo 'Performing Oracle Test'
     - export APP_TAG=oracle
-    - export NODE_ENV=test
-    - export POSTGRES_HOST="10.73.53.144"
-    - export MONGO_HOST="10.73.53.144"
+    - export NODE_ENV=oracle
     - export ORACLE_HOST=10.73.53.144
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
+    - export DB_NAME=${CI_PIPELINE_ID}_pg
+    - export ENABLE_DS_AUTOUPDATE=true    
+    - npm config set registry http://10.188.25.62:9002/
+    - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git --no-optional
     - time npm install --no-optional
-    - npm install nan async --no-optional
-    - npm install git+http://10.73.97.24/oecloud.io/oe-connector-oracle.git --no-optional
     - mv /oracledb node_modules/
-    #- export TMP_CI_PROJECT_NAMESPACE=${CI_PROJECT_NAMESPACE}
     - export CI_PROJECT_NAMESPACE=${group}
-    - node server/oracle-utility.js
-    #- export CI_PROJECT_NAMESPACE=${TMP_CI_PROJECT_NAMESPACE}
-    # Removing decision test cases which are frequently failing in oracle
-    - rm test/model-rule-test.js test/decision-graph-tests.js test/business-rule-hit-policy-test.js test/decision-service-tests.js test/decision-table-test.js
+    - node test/oracle-utility.js
     - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
     - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
     - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
-    - npm run grunt-test
-    - node server/oracle-utility.js
-    - cd .. && mv oe-cloud/ ${PROJECT_DIR} && cd ${PROJECT_DIR}/oe-cloud
+    - npm run grunt-cover
   tags:
-    - CEP_RUNNER
+    - CEP_RUNNER_EE    
 
-consistenthashtest:
-  stage: pre-build-test
-  script:
-    - mkdir -p /data/db
-    - mongod --dbpath /data/db &
-    - haproxy -f ./test/consistenthash/haproxy.cfg -p /run/haproxy.pid -Ds &
-    - export APP_URL=http://localhost:8080/api
-    - NO_PROXY=$NO_PROXY,localhost,127.0.0.1
-    - git clone http://10.73.97.24/oecloud.io/oe-tx-router.git
-    - cd oe-tx-router
-    - time npm install --no-optional
-    - node . &
-    - cd ..
-    - time npm install --no-optional
-    - mocha test/consistenthash/server.js &
-    - sleep 60
-    - mocha test/consistenthash/server.js 3100 &
-    - sleep 60
-    - mocha test/consistenthash/client.js 3200
-  tags:
-    - CEP_RUNNER
 
-buildjob:
-  stage: build
-  script:
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile
-    - time npm install --no-optional
-    - time docker build -t ${REGISTRY}/${APP_IMAGE_NAME}:latest --no-cache --pull .
-    - docker push ${REGISTRY}/${APP_IMAGE_NAME}:latest
-    - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:latest) built and pushed to registry"
-  tags:
-    - CEP_RUNNER
-
-swarm-actor-pattern:
-  stage: swarm-actor-pattern
-  script:
-    - export STARTUP_CMD="npm run grunt-cover"
-    - export FILE_NAME=docker-compose.test.env.yml
-    - export DB_NAME=${APP_IMAGE_NAME}_mongo
-    - export DB=mongo
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${APP_IMAGE_NAME}
-    - export exit_status="0"
-    - export nameWebService=${STACK_NAME}"_web"
-    - export nameDBService=${STACK_NAME}"_"${DB}
-    #- export HAPROXY=10.73.96.214
-    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
-    - docker stack rm ${APP_IMAGE_NAME}
-    - time npm install --no-optional
-    - mkdir test/actor-tests/test-files/server
-    - node test/actor-tests/prepare-test.js
-    - cd test/actor-tests/test-files
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile
-    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${APP_IMAGE_NAME}  -t ${REGISTRY}/${APP_IMAGE_NAME}:testing .
-    - time docker push ${REGISTRY}/${APP_IMAGE_NAME}:testing
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' qqq.yml > qqq2.yml
-    - mv -f qqq2.yml qqq.yml
-    - sed 's/\$EVFURL/'${APP_IMAGE_NAME}.${DOMAIN_NAME}'/g' ../actorIntegrationTest.js > ../actorIntegrationTest2.js
-    - mv -f ../actorIntegrationTest2.js ../actorIntegrationTest.js
-    - docker stack deploy -c qqq.yml ${APP_IMAGE_NAME}
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - docker service logs -f ${nameWebService} &
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - cd ../../..
-    - time mocha test/actor-tests/actorIntegrationTest.js
-  after_script:
-    - sh /removeStack.sh
-  tags:
-    - CEP_RUNNER
-
-retry-service:
-  stage: retry-service
-  script:
-    - export ROUTER="cep_router"
-    #- export HAPROXY=10.73.96.214
-    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
-    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-r
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${STACK_NAME}
-    - export RETRY_SERVICE_NAME=${APP_IMAGE_NAME}-retry-service
-    - export RETRY_STACK_NAME=${APP_IMAGE_NAME}-rs
-    - export RETRY_NETWORK_NAME=${RETRY_STACK_NAME}
-    - echo "docker stack rm ${STACK_NAME}" >> /removeStacks.sh
-    - echo "docker stack rm ${RETRY_STACK_NAME}" >> /removeStacks.sh
-    - docker stack rm ${STACK_NAME}
-    - docker stack rm ${RETRY_STACK_NAME}
-    - sleep 10
-    - time npm install --no-optional
-    - mkdir test/async-service-tests/test-files/server
-    - node test/async-service-tests/prepare-test.js
-    - cd test/async-service-tests/test-files
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile
-    - time docker build --build-arg REGISTRY=${REGISTRY} --build-arg APP_IMAGE_NAME=${ORIG_APP_IMAGE_NAME}  -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test .
-    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:async-test
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' oecloud.yml > oecloud2.yml
-    - mv -f oecloud2.yml oecloud.yml
-    - docker stack deploy -c oecloud.yml ${STACK_NAME}
-    - sed 's/\$RETRY_NETWORK_NAME/'"$RETRY_NETWORK_NAME"'/g' retry-service.yml > retry-service2.yml
-    - mv -f retry-service2.yml retry-service.yml
-    - docker stack deploy -c retry-service.yml ${RETRY_STACK_NAME}
-    - docker service logs -f ${STACK_NAME}_web &
-    - docker service logs -f ${RETRY_STACK_NAME}_server &
-    - docker service logs -f ${RETRY_STACK_NAME}_processor &
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - echo "${HAPROXY} ${RETRY_SERVICE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${RETRY_SERVICE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${RETRY_SERVICE_NAME}; exit ${app_exit_status}; fi
-    - cd ../../..
-    - sleep 60
-    - time mocha --timeout 30000 test/async-service-tests/async-service-integration-test.js
-  after_script:
-    - sh /removeStacks.sh
-  tags:
-    - CEP_RUNNER
-
-ldap-auth:
-  stage: ldap-auth
-  script:
-    - export ROUTER="cep_router"
-    #- export HAPROXY=10.73.96.214
-    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}
-    - export STACK_NAME=${APP_IMAGE_NAME}-ldap
-    - export NETWORK_NAME=${STACK_NAME}
-    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
-    - docker stack rm ${STACK_NAME}
-    - sleep 10
-    - time npm install --no-optional
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/ldap-auth-tests/oe-cloud.yml > test/ldap-auth-tests/oe-cloud2.yml
-    - mv -f test/ldap-auth-tests/oe-cloud2.yml test/ldap-auth-tests/oe-cloud.yml
-    - docker stack deploy -c test/ldap-auth-tests/oe-cloud.yml ${STACK_NAME}
-    - docker service logs -f ${STACK_NAME}_web &
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - time mocha --timeout 30000 test/ldap-auth-tests/ldap-authentication-test.js
-  after_script:
-    - sh /removeStack.sh
-  tags:
-    - CEP_RUNNER
-
-job-scheduler-service:
-  stage: job-scheduler-service
-  script:
-    - export ROUTER="cep_router"
-    #- export HAPROXY=10.73.96.214
-    - export ORIG_APP_IMAGE_NAME=${APP_IMAGE_NAME}
-    - export APP_IMAGE_NAME=${APP_IMAGE_NAME}-s
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${STACK_NAME}
-    - export SCHEDULER_NAME=${APP_IMAGE_NAME}-scheduler-service
-    - echo "docker stack rm ${STACK_NAME}" > /removeStack.sh
-    - docker stack rm ${STACK_NAME}
-    - sleep 10
-    - time npm install --no-optional
-    - node test/job-scheduler-service-tests/prepare-test.js
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' Dockerfile > Dockerfile2
-    - mv -f Dockerfile2 Dockerfile
-    - time docker build -t ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test .
-    - time docker push ${REGISTRY}/${ORIG_APP_IMAGE_NAME}:oe-scheduler-test
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' test/job-scheduler-service-tests/oe-cloud.yml > test/job-scheduler-service-tests/oe-cloud2.yml
-    - mv -f test/job-scheduler-service-tests/oe-cloud2.yml test/job-scheduler-service-tests/oe-cloud.yml
-    - docker stack deploy -c test/job-scheduler-service-tests/oe-cloud.yml ${STACK_NAME}
-    - docker service logs -f ${STACK_NAME}_web &
-    - docker service logs -f ${STACK_NAME}_scheduler &
-    - echo "${HAPROXY} ${APP_IMAGE_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - echo "${HAPROXY} ${SCHEDULER_NAME}.${DOMAIN_NAME}" >> /etc/hosts
-    - isSchedulerStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${SCHEDULER_NAME}.${DOMAIN_NAME}/)
-    - export countElapsedScheduler=0
-    - export app_exit_status_scheduler=0
-    - while [ $isSchedulerStarted -ne 200 ]; do let countElapsedScheduler=countElapsedScheduler+1; echo ""; echo -n "Waiting till the scheduler URL is up..."; export isSchedulerStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${SCHEDULER_NAME}.${DOMAIN_NAME}/); echo $isSchedulerStarted; sleep 15; if [ $countElapsedScheduler -eq 18 ] ; then export app_exit_status_scheduler=1; export isSchedulerStarted=200; fi; done
-    - if [ ${app_exit_status_scheduler} -ne 0 ]; then echo "Failed to start scheduler..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status_scheduler}; fi;
-    - isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/)
-    - export countElapsed=0
-    - export app_exit_status=0
-    - while [ $isStarted -ne 200 ]; do let countElapsed=countElapsed+1; echo ""; echo -n "Waiting till the URL is up..."; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${DOMAIN_NAME}/); echo $isStarted; sleep 15; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=200; fi; done
-    - if [ ${app_exit_status} -ne 0 ]; then echo "Failed to start app..."; docker stack rm ${APP_IMAGE_NAME}; exit ${app_exit_status}; fi
-    - time mocha --timeout 60000 test/job-scheduler-service-tests/scheduler-test.js
-  after_script:
-    - sh /removeStack.sh
-  tags:
-    - CEP_RUNNER
-
-rule-cluster-tests:
-  stage: rule-engine-cluster-tests
-  script:
-    - export STACK_NAME=${APP_IMAGE_NAME}
-    - export NETWORK_NAME=${APP_IMAGE_NAME}
-    - npm install mocha
-    - echo "docker stack rm $STACK_NAME" > ./remove.sh
-    - /bin/sh ./remove.sh
-    - sleep 30
-    - sed 's/\$NETWORK_NAME/'"$NETWORK_NAME"'/g' ./test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml > ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml
-    - mv -f ./test/rule-engine-cluster-tests/rule-engine-cluster-setup2.yml test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml
-    - docker stack deploy -c test/rule-engine-cluster-tests/rule-engine-cluster-setup.yml $STACK_NAME
-    - sleep 10
-    - /bin/sh ./test/rule-engine-cluster-tests/wait-all.sh "https://test.node1.oecloud.local/" "https://test.node2.oecloud.local/"
-    # - /bin/sh ./test/rule-engine-cluster-tests/wait-for-up.sh "https://test.node1.oecloud.local/"
-    - export NODE_TLS_REJECT_UNAUTHORIZED=0
-    - ./node_modules/.bin/mocha --bail --timeout 10000 ./test/rule-engine-cluster-tests/cluster-tests.js
-  after_script:
-    # - echo "done..."
-    - /bin/sh ./remove.sh
-  tags:
-    - CEP_RUNNER

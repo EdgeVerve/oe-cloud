@@ -1,0 +1,46 @@
+{
+  "memdb": {
+    "name": "memdb",
+    "connector": "memory"
+  },
+  "transient": {
+    "name": "transient",
+    "connector": "transient"
+  },
+
+  "db": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "mongodb://localhost:27017/oe-cloud-test",
+    "database": "oe-cloud-test",
+    "password": "admin",
+    "name": "db",
+    "connector": "mongodb",
+    "user": "admin",
+    "connectionTimeout": 500000,
+    "connectTimeoutMS": 500000,
+    "socketTimeoutMS": 500000
+  },
+
+  "pgdb": {
+    "host": "localhost",
+    "port": 5432,
+    "url": "postgres://postgres:postgres@localhost:5432/oe-cloud-test",
+    "database": "oe-cloud-test",
+    "password": "postgres",
+    "name": "pgdb",
+    "connector": "oe-connector-postgresql",
+    "user": "postgres",
+    "max": 50,
+    "connectionTimeout": 50000
+  },
+  "oradb": {
+    "name": "oradb",
+    "connector": "oe-connector-oracle",
+    "database": "ORCLCDB",
+    "host": "10.73.53.144",
+    "port": "1521",
+    "password": "atul",
+    "user": "ATUL_TEST"
+  }
+}

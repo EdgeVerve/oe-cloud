@@ -1,7 +1,0 @@
-[{
-  "name": "DBMigrationTestModel0",
-  "base": "BaseEntity",
-  "properties": {
-    "name": "string"
-  }
-}]

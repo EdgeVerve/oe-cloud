@@ -1,0 +1,37 @@
+{
+  "memdb": {
+    "name": "memdb",
+    "connector": "memory"
+  },
+  "transient": {
+    "name": "transient",
+    "connector": "transient"
+  },
+
+  "mongodb": {
+    "host": "localhost",
+    "port": 27017,
+    "url": "mongodb://localhost:27017/oe-common-mixins-test",
+    "database": "oe-common-mixins-test",
+    "password": "admin",
+    "name": "mongodb",
+    "connector": "mongodb",
+    "user": "admin",
+    "connectionTimeout": 500000,
+    "connectTimeoutMS": 500000,
+    "socketTimeoutMS": 500000
+  },
+
+  "db": {
+    "host": "localhost",
+    "port": 5432,
+    "url": "postgres://postgres:postgres@localhost:5432/oe-common-mixins-test",
+    "database": "oe-common-mixins-test",
+    "password": "postgres",
+    "name": "db",
+    "connector": "loopback-connector-postgresql",
+    "user": "postgres",
+    "max": 50,
+    "connectionTimeout": 50000
+  }
+}
