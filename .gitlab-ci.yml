@@ -36,7 +36,7 @@ npminstall:
     - time npm install --no-optional
     - echo "Node Modules Installed"
     - npm config rm registry
-    - mkdir -p /artifacts/${CI_PROJECT_NAME}/performance
+    - mkdir -p /artifacts/${CI_PROJECT_NAME}/audit
     - export FILE_PREFIX=`date '+%Y-%m-%d-%H-%M-%S'`
     - npm audit --json >/artifacts/${CI_PROJECT_NAME}/audit/${FILE_PREFIX}-vulnerabiliites.json
     - status_vulnerabilities='echo $?'
