@@ -36,7 +36,9 @@ npminstall:
     - time npm install --no-optional
     - echo "Node Modules Installed"
     - npm config rm registry
-    - npm audit --json >vulnerabilities.json
+    - mkdir -p /artifacts/${CI_PROJECT_NAME}/performance
+    - export FILE_PREFIX=`date '+%Y-%m-%d-%H-%M-%S'`
+    - npm audit --json >/artifacts/${CI_PROJECT_NAME}/audit/${FILE_PREFIX}-vulnerabiliites.json
     - status_vulnerabilities='echo $?'
     - npm audit
     - if [ $status_vulnerabilities == 1 ]; then exit_status=1 && echo "Dependency vulnerabilities exist"; fi
@@ -50,7 +52,7 @@ npminstall:
     - CEP_RUNNER_EE
 
 
-mongotest:
+.mongotest:
   stage: pre-build-test
   script:
     - echo 'Performing MongoDB Test'
@@ -70,7 +72,7 @@ mongotest:
   tags:
     - CEP_RUNNER_EE
 
-postgrestest:
+.postgrestest:
   stage: pre-build-test
   script:
     - echo 'Performing PostgreSQL Test'
@@ -85,7 +87,7 @@ postgrestest:
   tags:
     - CEP_RUNNER_EE    
     
-oracletest:
+.oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
   script:
