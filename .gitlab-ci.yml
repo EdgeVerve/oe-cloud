@@ -1,8 +1,9 @@
 stages:
   - pre-build
   - pre-build-test
-  - performance
   - push-artifacts
+  - performance
+  
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
