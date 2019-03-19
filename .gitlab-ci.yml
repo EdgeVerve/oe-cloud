@@ -130,13 +130,13 @@ performancejob:
   image: $REGISTRY/jmeter:docker
   stage: performance
   variables:
-    NODE_ENV: mongo
-    MONGO_HOST: 10.73.97.17
-    DB_NAME: ${CI_JOB_ID}_mongo
-    APP_PROTOCOL: https
-    APP_PORT: 443
-    PERF_USERS: 1
-    PERF_LOOPCOUNT: 50000
+    NODE_ENV: "mongo"
+    MONGO_HOST: "10.73.97.17"
+    DB_NAME: "${CI_JOB_ID}_mongo"
+    APP_PROTOCOL: "https"
+    APP_PORT: "443"
+    PERF_USERS: "1"
+    PERF_LOOPCOUNT: "50000"
   script:
     - npm set progress=false
     - npm config set registry http://10.188.25.62:9002/
