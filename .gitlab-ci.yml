@@ -2,7 +2,7 @@ stages:
   - pre-build
   - pre-build-test
   - performance
-  - copy-artifacts
+  - push-artifacts
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
@@ -117,17 +117,33 @@ oracletest:
   tags:
     - CEP_RUNNER_EE
 
+pushartifacts:
+  stage: push-artifacts
+  script:
+    - echo "Copying all artifacts"
+    - git clone http://10.73.97.24/oecloud.io/build-tools.git
+    - sh ./build-tools/push_artifacts.sh
+  tags:
+    - CEP_RUNNER
+
 performancejob:
   image: $REGISTRY/jmeter:docker
   stage: performance
+  variables:
+    NODE_ENV: mongo
+    MONGO_HOST: 10.73.97.17
+    DB_NAME: ${CI_JOB_ID}_mongo
+    APP_PROTOCOL: https
+    APP_PORT: 443
+    PERF_USERS: 1
+    PERF_LOOPCOUNT: 50000
   script:
     - npm set progress=false
     - npm config set registry http://10.188.25.62:9002/
     #- npm config set registry https://registry.npmjs.org/
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
-    - export MONGO_HOST=10.73.97.17
-    - export DB_NAME=${CI_JOB_ID}_mongo
+    - export APP_URL=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}
     - git clone http://10.73.97.24/oecloud.io/build-tools.git
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./build-tools/performance/Dockerfile > Dockerfile
     - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
@@ -145,7 +161,7 @@ performancejob:
     - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
     - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
     - mkdir -p /artifacts/${CI_PROJECT_NAME}/performance
-    - sh ./build-tools/performance/performance.sh
+    - sh ./build-tools/push_artifacts.sh
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
   when: manual
   artifacts:
@@ -157,11 +173,3 @@ performancejob:
   tags:
     - PERF_RUNNER
 
-copyartifacts:
-  stage: copy-artifacts
-  script:
-    - echo "Copying all artifacts"
-    - git clone http://10.73.97.24/oecloud.io/build-tools.git
-    - sh ./build-tools/push_artifacts.sh
-  tags:
-    - CEP_RUNNER
