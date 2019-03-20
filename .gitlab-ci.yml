@@ -49,7 +49,7 @@ npminstall:
     expire_in: 2h
     paths:
       - node_modules/
-      - /artifacts/
+      - artifacts/
   tags:
     - CEP_RUNNER_EE
 
@@ -72,7 +72,7 @@ mongotest:
     expire_in: 2h
     paths:
       - coverage/
-      - /artifacts/
+      - artifacts/
   tags:
     - CEP_RUNNER_EE
 
@@ -166,12 +166,6 @@ performancejob:
     - sh ./build-tools/push_artifacts.sh
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
   when: manual
-  artifacts:
-    untracked: true
-    expire_in: 2h
-    paths:
-      - node_modules/
-      - /artifacts/
   tags:
     - PERF_RUNNER
 
