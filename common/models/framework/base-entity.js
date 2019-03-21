@@ -86,7 +86,7 @@ module.exports = function BaseEntityFn(BaseEntity) {
 const getDataFromBaseModels = function getDataFromBaseModels(ctx, next) {
   let result = ctx.accdata || [];
   const modelSettings = ctx.Model.definition.settings;
-  if (modelSettings.variantOf) {
+  if (modelSettings.fetchVariantRecords && modelSettings.variantOf) {
     var variantModel = loopback.findModel(modelSettings.variantOf);
     if (variantModel) {
       if (isSameCollection(variantModel.definition.settings, modelSettings)) {
