@@ -1,7 +1,9 @@
 stages:
   - pre-build
   - pre-build-test
+  - push-artifacts
   - performance
+  
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
@@ -36,7 +38,8 @@ npminstall:
     - time npm install --no-optional
     - echo "Node Modules Installed"
     - npm config rm registry
-    - npm audit --json >vulnerabilities.json
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
+    - npm audit --json > ./artifacts/${CI_PROJECT_NAME}/vulnerabilities.json
     - status_vulnerabilities='echo $?'
     - npm audit
     - if [ $status_vulnerabilities == 1 ]; then exit_status=1 && echo "Dependency vulnerabilities exist"; fi
@@ -46,6 +49,7 @@ npminstall:
     expire_in: 2h
     paths:
       - node_modules/
+      - artifacts/
   tags:
     - CEP_RUNNER_EE
 
@@ -61,12 +65,14 @@ mongotest:
     - npm config set registry http://10.188.25.62:9002/
     - time npm install --no-optional
     - npm run grunt-cover
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
+    - cp -r coverage ./artifacts/${CI_PROJECT_NAME}/
   artifacts:
     untracked: true
     expire_in: 2h
     paths:
       - coverage/
-    when: on_failure
+      - artifacts/
   tags:
     - CEP_RUNNER_EE
 
@@ -112,23 +118,40 @@ oracletest:
   tags:
     - CEP_RUNNER_EE
 
+pushartifacts:
+  stage: push-artifacts
+  script:
+    - echo "Copying all artifacts"
+    - git clone http://10.73.97.24/oecloud.io/build-tools.git
+    - sh ./build-tools/push_artifacts.sh
+  tags:
+    - CEP_RUNNER
+
 performancejob:
   image: $REGISTRY/jmeter:docker
   stage: performance
+  variables:
+    NODE_ENV: "mongo"
+    MONGO_HOST: "10.73.97.17"
+    DB_NAME: "${CI_JOB_ID}_mongo"
+    APP_PROTOCOL: "https"
+    APP_PORT: "443"
+    PERF_USERS: "1"
+    PERF_LOOPCOUNT: "50000"
   script:
     - npm set progress=false
     - npm config set registry http://10.188.25.62:9002/
     #- npm config set registry https://registry.npmjs.org/
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
-    - export MONGO_HOST=10.73.97.17
-    - export DB_NAME=${CI_JOB_ID}_mongo
-    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./test/performance/Dockerfile > Dockerfile
+    - export APP_URL=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}
+    - git clone http://10.73.97.24/oecloud.io/build-tools.git
+    - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./build-tools/performance/Dockerfile > Dockerfile
     - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
     - time docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --no-cache --pull .
     - time docker image push ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}) built and pushed to registry"
-    - docker stack deploy --compose-file ./test/performance/docker-compose.yml ${APP_IMAGE_NAME}
+    - docker stack deploy --compose-file ./build-tools/performance/docker-compose.yml ${APP_IMAGE_NAME}
     - export HTTP_RESPONSE_CODE=200
     - export countElapsed=0
     - export app_exit_status=0
@@ -138,12 +161,11 @@ performancejob:
     - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/)
     - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
     - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
-    - sh test/performance/performance.sh
-    - if docker rm -f ${APP_IMAGE_NAME}; then echo "container removed"; else echo "There is no such container"; fi
-    - docker run -d --name ${APP_IMAGE_NAME} -v /datadisk/cep-data/oecloud-portal/performance:/perf ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} tail -f ./test/server.js
-    - if docker exec ${APP_IMAGE_NAME} mkdir /perf/${CI_PROJECT_NAME}; then echo "folder in the path is created"; else echo "folder exists in specified path"; fi
-    - sh test/performance/push_performance_results.sh
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/performance
+    - sh ./build-tools/performance/performance.sh
+    - sh ./build-tools/push_artifacts.sh
     - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
   when: manual
   tags:
     - PERF_RUNNER
+
