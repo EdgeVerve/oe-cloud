@@ -110,7 +110,6 @@ module.exports = function VersionMixin(Model) {
   });
 
   Model.switchVersion = versionMixinBeforeSave;
-
   // lock current _version
   Model.evObserve('persist', function versionMixinPersistsFn(ctx, next) {
     delete ctx.data._newVersion;

@@ -1,13 +1,26 @@
 ﻿{
-  "name": "BatchRun",
-  "plural": "BatchRuns",
-  "base": "BaseEntity",
-  "strict": false,
-  "idInjection": true,
-  "properties": {},
-  "validations": [],
-  "relations": {
-  },
-  "acls": [],
-  "methods": {}
-}
+    "name": "BatchRun",
+    "plural": "BatchRuns",
+    "base": "BaseEntity",
+    "strict": true,
+    "idInjection": true,
+    "properties": {
+      "startTimeMillis": "number",
+      "endTimeMillis": "number",
+      "durationMillis": "number",
+      "totalRecordCount": "number",
+      "successCount": "number",
+      "failureCount": "number",
+      "startTime": "date",
+      "endTime": "date",
+      "filePath": "string",
+      "options": "object",
+      "error": "object"
+    },
+    "validations": [],
+    "relations": {
+    },
+    "acls": [],
+    "methods": {}
+  }
+  

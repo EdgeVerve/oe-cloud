@@ -1,13 +1,22 @@
 ﻿{
-  "name": "BatchStatus",
-  "plural": "BatchStatus",
-  "base": "BaseEntity",
-  "strict": false,
-  "idInjection": true,
-  "properties": {},
-  "validations": [],
-  "relations": {
-  },
-  "acls": [],
-  "methods": {}
-}
+    "name": "BatchStatus",
+    "plural": "BatchStatus",
+    "base": "BaseEntity",
+    "strict": true,
+    "idInjection": true,
+    "properties": {
+        "requestOpts": "object",
+        "response": "object",
+        "fileRecordData": "object",
+        "payload": "object",
+        "error": "object",
+        "statusText": "string",
+        "statusCode": "number"
+    },
+    "validations": [],
+    "relations": {
+    },
+    "acls": [],
+    "methods": {}
+  }
+  
