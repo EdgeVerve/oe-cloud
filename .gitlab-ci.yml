@@ -3,7 +3,7 @@ stages:
   - pre-build-test
   - push-artifacts
   - performance
-  
+
 
 image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
@@ -51,7 +51,7 @@ npminstall:
       - node_modules/
       - artifacts/
   tags:
-    - CEP_RUNNER_EE
+    - CEP_RUNNER
 
 
 mongotest:
@@ -74,7 +74,7 @@ mongotest:
       - coverage/
       - artifacts/
   tags:
-    - CEP_RUNNER_EE
+    - CEP_RUNNER
 
 postgrestest:
   stage: pre-build-test
@@ -89,8 +89,8 @@ postgrestest:
     - time npm install --no-optional
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER_EE    
-    
+    - CEP_RUNNER
+
 oracletest:
   image: $REGISTRY/debian-node-oracle-docker
   stage: pre-build-test
@@ -103,7 +103,7 @@ oracletest:
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
     - export DB_NAME=${CI_PIPELINE_ID}_pg
-    - export ENABLE_DS_AUTOUPDATE=true    
+    - export ENABLE_DS_AUTOUPDATE=true
     - npm config set registry http://10.188.25.62:9002/
     - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git --no-optional
     - time npm install --no-optional
@@ -116,7 +116,7 @@ oracletest:
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     - npm run grunt-cover
   tags:
-    - CEP_RUNNER_EE
+    - CEP_RUNNER
 
 pushartifacts:
   stage: push-artifacts
