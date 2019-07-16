@@ -17,7 +17,7 @@
     "async": "2.6.1",
     "compression": "1.7.3",
     "cookie-parser": "1.4.3",
-    "lodash": "4.17.11",
+    "lodash": "4.17.14",
     "loopback": "3.26.0",
     "loopback-boot": "2.27.1",
     "loopback-datasource-juggler": "3.24.0",
