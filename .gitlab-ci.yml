@@ -39,10 +39,9 @@ npminstall:
     - echo "Node Modules Installed"
     - npm config rm registry
     - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
-    - npm audit --json > ./artifacts/${CI_PROJECT_NAME}/vulnerabilities.json
-    - status_vulnerabilities='echo $?'
-    - npm audit
-    - if [ $status_vulnerabilities == 1 ]; then exit_status=1 && echo "Dependency vulnerabilities exist"; fi
+    - npm audit --json > ./artifacts/${CI_PROJECT_NAME}/vulnerabilities.json || true
+    - if npm audit; then status_vulnerabilities=0; else status_vulnerabilities=1; fi
+    - if [ $status_vulnerabilities == 1 ]; then echo "Dependency vulnerabilities exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
   artifacts:
     untracked: true
