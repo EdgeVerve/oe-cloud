@@ -4,22 +4,22 @@ stages:
   - push-artifacts
   - performance
 
-
-image: $REGISTRY/evfoundation-executor-docker13:node8alpine36
 variables:
   DOMAIN_NAME: oecloud.local
   PERF_DOMAIN_NAME: oecloud.perf
   REGISTRY: registry.${DOMAIN_NAME}
+  EXECUTOR_IMAGE: oecloud-executor:10.x
+  EXECUTOR_IMAGE_ORACLE: debian-node-oracle-docker:10.x
+
+image: ${REGISTRY}/${EXECUTOR_IMAGE}
 
 before_script:
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
-  - export pipelineId=${CI_PIPELINE_ID//[^[:alnum:]]/}
   - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
   - export APP_TAG=latest
-
 
 npminstall:
   stage: pre-build
@@ -59,7 +59,7 @@ mongotest:
     - export NODE_ENV=mongo
     - export MONGO_HOST="10.73.53.144"
     - export DB=mongo
-    - export DB_NAME=${CI_PIPELINE_ID}_mongo
+    - export DB_NAME=${CI_JOB_ID}_mongo
     - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
     - npm run grunt-cover
@@ -80,7 +80,7 @@ postgrestest:
     - export NODE_ENV=postgres
     - export DB=postgres
     - export POSTGRES_HOST="10.73.53.144"
-    - export DB_NAME=${CI_PIPELINE_ID}_pg
+    - export DB_NAME=${CI_JOB_ID}_pg
     - export ENABLE_DS_AUTOUPDATE=true
     - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
@@ -89,7 +89,7 @@ postgrestest:
     - CEP_RUNNER
 
 oracletest:
-  image: $REGISTRY/debian-node-oracle-docker
+  image: ${REGISTRY}/${EXECUTOR_IMAGE_ORACLE}
   stage: pre-build-test
   script:
     - echo 'Performing Oracle Test'
@@ -99,7 +99,7 @@ oracletest:
     - export ORACLE_SYSUSER=oeadmin
     - export ORACLE_SYSPASSWORD=oeadmin
     - export ORACLE_SID=ORCLCDB
-    - export DB_NAME=${CI_PIPELINE_ID}_pg
+    - export DB_NAME=${CI_JOB_ID}_pg
     - export ENABLE_DS_AUTOUPDATE=true
     - npm config set registry ${NPM_REGISTRY}
     - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git --no-optional
