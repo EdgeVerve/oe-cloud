@@ -8,8 +8,8 @@ variables:
   DOMAIN_NAME: oecloud.local
   PERF_DOMAIN_NAME: oecloud.perf
   REGISTRY: registry.${DOMAIN_NAME}
-  EXECUTOR_IMAGE: oecloud-executor:10.x
-  EXECUTOR_IMAGE_ORACLE: debian-node-oracle-docker:10.x
+  EXECUTOR_IMAGE: oecloud-executor:12.x
+  EXECUTOR_IMAGE_ORACLE: debian-node-oracle-docker:12.x
 
 image: ${REGISTRY}/${EXECUTOR_IMAGE}
 
