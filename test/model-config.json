@@ -41,5 +41,9 @@
   "Spouse": {
     "dataSource": "db",
     "public": true
+  },
+  "MarksList": {
+    "dataSource": "db",
+    "public": true
   }
 }

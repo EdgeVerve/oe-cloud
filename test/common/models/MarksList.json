@@ -1,0 +1,14 @@
+{
+  "name": "MarksList",
+  "Base": "BaseEntity",
+  "plural": "MarksLists",
+  "properties": {
+    "name": "string",
+    "maths": "number",
+    "physics": "number",
+    "chemistry": "number",
+    "section": "string",
+    "gender": "string"
+  },
+  "strict": true
+}

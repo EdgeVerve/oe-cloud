@@ -18,6 +18,7 @@ function loadModelsFromDB(app, cb) {
   // design break when used fetchAllScopes
   modelDefinition.find({where: {filebased: false}}, {fetchAllScopes: true}, (err, result) => {
     if (err) {
+      // eslint-disable-next-line no-console
       console.error('******* Could not able to load models from Database ********* ');
       return cb();
     }

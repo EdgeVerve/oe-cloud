@@ -23,7 +23,7 @@ module.exports = function GruntConfig(grunt) {
         mochaOptions: ['--exit']
       },
       coverage: {
-        src: ['test/test.js'],
+        src: ['test/test.js', 'test/aggregation-fn-groupby-test.js', 'test/aggregation-fn-having-test.js'],
         options: {
           timeout: 60000,
           check: {

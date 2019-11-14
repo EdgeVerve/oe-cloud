@@ -4,12 +4,12 @@
  * Bangalore, India. All Rights Reserved.
  *
  */
-// Atul : This script is used to enable authentication for the application
-// Also 'enableAuthCookie' is introduced. if this option is set then cookie is created when user login using user.login()
-// When user logs out, cookie is deleted. This is helpfule at least for node-red because node-red application does not
-// send access Token as part of URL / or AuthSession header
-// Atul : This script includes aboutMe() API. This API returned user information to caller including context
+
+// Author : Atul
+// This script has many user/authentication related functionalities.
 const loopback = require('loopback');
+
+// Atul : This script includes aboutMe() API. This API returned user information to caller including context
 function aboutMe() {
   var userModel = loopback.getModelByType('User');
   userModel.aboutMe = function (options, cb) {
@@ -92,6 +92,9 @@ module.exports = function enableAuthentication(server) {
     server.removeForceId('RoleMapping');
   }
 
+  // Atul : Below code will add Roles of the logged in user to AccessToken.
+  // As accessToken fields are available in context ( and henc options ), programmer can use list of Roles user belongs to
+  // roles field is added to AccessToken on load.js file
   var accessTokenModel = loopback.getModelByType('AccessToken');
   accessTokenModel.observe('before save', function (ctx, next) {
     if (!ctx.isNewInstance) {
@@ -135,7 +138,10 @@ module.exports = function enableAuthentication(server) {
     });
   });
 
-
+  // Atul : This script is used to enable authentication for the application
+  // Also 'enableAuthCookie' is introduced. if this option is set then cookie is created when user login using user.login()
+  // When user logs out, cookie is deleted. This is helpfule at least for node-red because node-red application does not
+  // send access Token as part of URL / or AuthSession header
   var enableAuthCookie = server.get('enableAuthCookie');
   if (!enableAuthCookie) {
     return;
