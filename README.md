@@ -213,6 +213,23 @@ In above model-config, MyModel will be created as public model. However, definit
   }
 ```
 * Above example will change default behavior.
+* As mixins residing in module are attached to BaseEntity by default, Module Developer can also change this specific default behavior by letting oe-cloud know about it. This can be done in **_meta** property of **model-config.json** of module. For example below entry will make MixinA not to attached to BaseEntity, while MixinB will be attached to BaseEntity with object having options { a:1, b:2 }
+ 
+```javaScript
+  "_meta": {
+    "sources": [
+      "../common/models"
+    ],
+    "mixins": [
+      "../common/mixins"
+    ],
+    "mixinProperties"  : [
+      {"MixinA" : false },
+      {"MixinB" : {"a" : 1, "b" : 2} }
+    ]
+  },
+```
+
 * you can also selectively ON/OFF the mixin attachments by calling **addModuleMixinsToBaseEntity** API as below. This can be important if you have to have some mixins from other dependent module.
 
 ```
