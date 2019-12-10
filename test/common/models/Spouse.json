@@ -9,6 +9,12 @@
     },
     "age": {
       "type": "number"
+    },
+    "MyUsers" : {
+      "type" : "[User]"
+    },
+    "SingleUser" : {
+      "type" : "User"
     }
   },
   "validations": [],
