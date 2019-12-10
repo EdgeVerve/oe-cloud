@@ -8,8 +8,9 @@
       "unique": true
     },
     "age": {
-      "type": "number"
+      "type": "string"
     }
+
   },
   "validations": [],
   "acls": [],
