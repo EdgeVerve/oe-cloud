@@ -13,6 +13,7 @@
   * [oe-cloud - Attaching mixins](#oe-cloud---attaching-mixins)
   * [oe-cloud - Boot scripts](#oe-cloud---boot-scripts)
   * [oe-cloud - Middlewares](#oe-cloud---middlewares)
+  * [oe-cloud - Model Customization](#oe-cloud---model-customization)
 - [oeCloud API Documentation](#oecloud-api-documentation)
   * [Common Utility API](#common-utility-api)
     + [IsBaseEntity(Model)](#isbaseentity-model-)
@@ -317,6 +318,40 @@ module.exports = function (options) {
 }
 ```
 
+## oe-cloud - Model Customization
+
+Typically, oeCloud based application would have its own models to fulfill business requirements. For example, there would model name **Customer** that can be used to handle Customer entity. It would help store customer data in actual database table **customer** and also expose REST API for Customer. When such application or product is to be delivered to client, client would want changes to this default implementation of existing Customer model. Those changes could be
+
+* adding new properties, hiding existing properties or changing types of existing properties
+* adding new mixin 
+* adding JS file to customized model
+
+As a developer, all of above changes can be done in customization model. Customization module is nothing but regular node_module. This node_module can be loaded into application by specifing it in **app-list.json**. oeCloud framework would load these modules in sequence of app-list.json. As a customization developer, you need to add your customized module entry into app-list.json
+
+```
+  {
+    "path": "product-customization-module",
+    "enabled": true
+  },
+```
+
+You can create any new models in customization module of yours and if they are mentioned in model-config.json of your module, those models will be loaded in application. 
+
+However, if you want to **customize** any model, you need to add **extra** property named **customModel** in model-config.json for customized model entry as shown below.
+
+```
+  "Customer": {
+    "dataSource": "db",
+    "public": true,
+    "customModel" : true
+  },
+```
+
+**customModel** flag would help identify oecloud framework that you want to customize Customer model. oeCloud framework then **merge** your customization with original model.
+
+You can also have customer.js file which is then loaded and also you can have mixin.
+
+**Note** : More importantly exports function all .js files of models are executed in sequence. There should not be any extra executable code apart from that inside module.exports () function. 
 
 # oeCloud API Documentation
 
