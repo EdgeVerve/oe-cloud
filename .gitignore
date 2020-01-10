@@ -41,3 +41,4 @@ out/
 *.zip
 package-lock.json
 /common/models/test
+oracle-user.sh
