@@ -9,12 +9,10 @@
 // Author : Atul
 // This file loads/creates models from ModelDefinition table from database
 const log = require('oe-logger')('boot-db-models');
-const loopback = require('loopback');
-const modelDefinition = loopback.findModel('ModelDefinition');
 const async = require('async');
 const _ = require('lodash');
 
-function loadModelsFromDB(app, cb) {
+function loadModelsFromDB(app, modelDefinition, cb) {
   // design break when used fetchAllScopes
   modelDefinition.find({where: {filebased: false}}, {fetchAllScopes: true}, (err, result) => {
     if (err) {
@@ -25,7 +23,7 @@ function loadModelsFromDB(app, cb) {
     if (result && result.length > 0) {
       var ds = app.dataSources.db;
       result.forEach((r) => {
-        var model = loopback.createModel(r);
+        var model = app.loopback.createModel(r);
         ds.attach(model);
         app.model(model);
       });
@@ -34,7 +32,7 @@ function loadModelsFromDB(app, cb) {
   });
 }
 
-function filterProperties(modelxDefinition, modelDefinitionObject) {
+function filterProperties(modelDefinition, modelDefinitionObject) {
   var keys = Object.keys(modelDefinitionObject);
   keys.forEach(function (k) {
     if ( k !== 'name' && !modelDefinition.definition.properties.hasOwnProperty(k)) {
@@ -45,7 +43,7 @@ function filterProperties(modelxDefinition, modelDefinitionObject) {
   return modelDefinitionObject;
 }
 
-function saveModelsToDB(app, cb) {
+function saveModelsToDB(app, modelDefinition, cb) {
   var models = Object.keys(app.models);
 
   async.eachSeries(models, (name, done) => {
@@ -79,11 +77,14 @@ function saveModelsToDB(app, cb) {
     });
   }, (err) => {
     if (err) {return cb(err);}
-    loadModelsFromDB(app, cb);
+    loadModelsFromDB(app, modelDefinition, cb);
   });
 }
 
 
 module.exports = function (app, cb) {
-  return saveModelsToDB(app, cb);
+  const loopback = app.loopback;
+  const modelDefinition = loopback.findModel('ModelDefinition');
+
+  return saveModelsToDB(app, modelDefinition, cb);
 };
