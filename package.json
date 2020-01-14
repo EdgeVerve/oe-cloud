@@ -11,7 +11,12 @@
     "test": "mocha test/test.js",
     "lint": "eslint .",
     "fix-lint": "eslint --fix .",
-    "grunt-cover": "grunt test-with-coverage"
+    "grunt-cover": "grunt test-with-coverage",
+    "clean": "if-env NODE_ENV=oracle && npm run clean:oracle || npm run clean2",
+    "clean2": "if-env NODE_ENV=postgres && npm run clean:postgres || npm run clean:mongo",
+    "clean:mongo": "mongo oe-cloud-test --eval \"db.dropDatabase();\" && mongo oe-cloud-test-newdb --eval \"db.dropDatabase();\"",
+    "clean:oracle": "node test/oracle-utility.js",
+    "checks": "eslint . && npm run clean && grunt test-with-coverage"
   },
   "dependencies": {
     "async": "2.6.1",

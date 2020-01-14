@@ -22,7 +22,9 @@
   "auth": {
     "loopback#token": {}
   },
-  "auth:after": {},
+  "auth:after": {
+    "./middleware/post-auth-context-populator": {}
+  },
   "parse": {
   },
   "routes:before": {},
