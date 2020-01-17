@@ -1,19 +1,22 @@
 # oe-cloud
 
 - [Introduction](#introduction)
-- [oe-cloud overall modules](#oe-cloud-overall-modules)
-- [oe-cloud Features and functionalities](#oe-cloud-features-and-functionalities)
-  * [oe-cloud - What it will do](#oe-cloud---what-it-will-do)
+- [oeCloud overall modules](#oecloud-overall-modules)
+- [oeCloud Features and functionalities](#oecloud-features-and-functionalities)
+  * [oeCloud What it will do](#oecloud-what-it-will-do)
   * [Usage](#usage)
-  * [oe-cloud-models](#oe-cloud-models)
+  * [oeCloud Models](#oecloud-models)
     + [BaseEntity](#baseentity)
     + [ModelDefinition](#modeldefinition)
-  * [oe-cloud - Initialization](#oe-cloud---initialization)
-  * [oe-cloud - Loading Models](#oe-cloud---loading-models)
-  * [oe-cloud - Attaching mixins](#oe-cloud---attaching-mixins)
-  * [oe-cloud - Boot scripts](#oe-cloud---boot-scripts)
-  * [oe-cloud - Middlewares](#oe-cloud---middlewares)
-  * [oe-cloud - Model Customization](#oe-cloud---model-customization)
+  * [Initialization](#initialization)
+  * [Observers](#observers)
+    + [loaded](#loaded)
+    + [boot-instructions-prepared](#boot-instructions-prepared)
+  * [Loading Models](#loading-models)
+  * [Attaching mixins](#attaching-mixins)
+  * [Boot scripts](#boot-scripts)
+  * [Middlewares](#middlewares)
+  * [Model Customization](#model-customization)
 - [oeCloud API Documentation](#oecloud-api-documentation)
   * [Common Utility API](#common-utility-api)
     + [IsBaseEntity(Model)](#isbaseentity-model-)
@@ -28,13 +31,13 @@
     + [start()](#start--)
     + [addContextField(name, property)](#addcontextfield-name--property-)
     + [removeForceId](#removeforceid)
-    + [setACLToBaseEntity](#setACLToBaseEntity)
+    + [setACLToBaseEntity](#setacltobaseentity)
     + [observers](#observers)
   * [Configurations](#configurations)
   * [Remote End point (RestAPI)](#remote-end-point--restapi-)
     + [aboutMe](#aboutme)
   * [Add fields to BaseEntity or ModelDefinition](#add-fields-to-baseentity-or-modeldefinition)
-- [oe-cloud - Difference between old and new](#oe-cloud---difference-between-old-and-new)
+- [oeCloud Difference between old and new](#oecloud-difference-between-old-and-new)
 
 # Introduction
 
@@ -57,16 +60,16 @@ To address above concerns, oeCloud is being modularized
 
 *oe-cloud* is base node module for all oeCloud base application development.
 
-# oe-cloud overall modules
+# oeCloud overall modules
 ![Modularization](http://evgit/oecloud.io/oe-cloud/raw/master/oe-modularization.png)
 
 
-# oe-cloud Features and functionalities
+# oeCloud Features and functionalities
 
 This is most important project of oeCloud. This module needs to be required in application's server.js.
 Below are responsibilities of oe-cloud
 
-## oe-cloud - What it will do
+## oeCloud What it will do
 
 * Define BaseEntity Model
 * load modules described in app-list.json in sequence.
@@ -131,7 +134,7 @@ Typical app-list.json, which would be part of application would look like
 ]
 ```
 
-## oe-cloud-models
+## oeCloud Models
 
 ### BaseEntity
 
@@ -143,7 +146,7 @@ Therefore, all functionalities of BaseEntity model is available to derived model
 ModelDefinition model stores metadata of all models in database. It will further opens up REST end point for client to get metadata of models and also can be used for runtime creation of new model.
 
 
-## oe-cloud - Initialization
+## Initialization
 
 **Note : There is possibility of loading **oe Modules** automatically. But having explicitly specified in app-list.json can be better idea and there is no ambiguity.**
 
@@ -166,7 +169,29 @@ module.exports = function(app){
 }
 ```
 
-## oe-cloud - Loading Models
+## Observers
+
+There are two observers provided. 
+
+### loaded
+
+When programmer calls boot, this even is fired to indicates **options** parameter is prepared. This options parameter will be used to pass to loopback boot. This includes list of all Models, Mixins folders, middleware and so on. Programmmer has opportunity to inspect / change this parameter.
+
+### boot-instructions-prepared
+
+oeCloud boot is two step process. Based on options passed, it prepares instructions. That is first step and then in second steps it executes instructions. By hooking into this observer, programmer has opportunity to inspect and change instructions. This is useful when programmer wants to change behavior of model. For example, programmer may want to apply mixin on some model, or add property to model. Remember, model at this point is not created. At this point, you are just modifying instructions.
+
+```
+oecloud.observe('boot-instructions-prepared', function (ctx, next) {
+  var models = ctx.instructions.models;
+  var literalModel = ctx.instructions.models.find(function(item) { return item.name === "Literal" ;})
+  literalModel.definition.mixins["SomeMixin"] = true;
+  return next();
+})
+```
+Note that, mixins are not applied to BaseEntity by default. 
+
+## Loading Models
 
 oe-cloud can load models defined in app-list.json's node_module.
 
@@ -196,13 +221,12 @@ oe-cloud can load models defined in app-list.json's node_module.
 
 In above model-config, MyModel will be created as public model. However, definition of the model (.json) should be located in common/models folder of module. so in case of data personalization node module, my-model.json file should be present in <approot>/node_modules/oe-data-personalization/commmon/models folder
 
-## oe-cloud - Attaching mixins
+## Attaching mixins
 
 
-* oeCloud will load mixins of node_modules defined in app-list.json
-* as in above case, mixins can be defined in node_modules's common/mixins folder. mixin's .js file will be loaded and attached to BaseEntity model by default.
-* thus, when this node module is loaded, all mixins defined in this module will be attached to BaseEntity and all models derived from BaseEntity will have same behavior.
-* Application developer can switch off/on mixins selectively by having entry such as following in app-list.json
+* oeCloud will load mixins of node_modules defined in app-list.json. **However, practically it will not attach these mixins to BaseEntity.** But in reality it will attached to BaseEntity with value **false**. With value false, it will have no effect and mixin will not be attached to BaseEntity. But it ensures that mixin is loaded.
+* as in above case, mixins can be defined in node_modules's common/mixins folder. mixin's .js file will be loaded and attached to BaseEntity model by default with value **false**. Therefore, mixin will not be executed - but only loaded. 
+* Application developer can turn off or turn on mixin in app-list.json as below.
 
 ```javaScript
   "OeSomeModule" : {
@@ -214,7 +238,7 @@ In above model-config, MyModel will be created as public model. However, definit
   }
 ```
 * Above example will change default behavior.
-* As mixins residing in module are attached to BaseEntity by default, Module Developer can also change this specific default behavior by letting oe-cloud know about it. This can be done in **_meta** property of **model-config.json** of module. For example below entry will make MixinA not to attached to BaseEntity, while MixinB will be attached to BaseEntity with object having options { a:1, b:2 }
+* As mixins residing in module are attached to BaseEntity by default with value **false**, Module Developer can also change this specific default behavior by letting oe-cloud know about it. This can be done in **_meta** property of **model-config.json** of module. For example below entry will make MixinA not to attached to BaseEntity, while MixinB will be attached to BaseEntity with object having options { a:1, b:2 }
  
 ```javaScript
   "_meta": {
@@ -265,7 +289,9 @@ oecloud.boot(__dirname, function(err){
   },
 ```
 
-## oe-cloud - Boot scripts
+* you can also change behavior programatically by setting mixin ON/OFF on specific module. Plesae see **observers** section of document.
+
+## Boot scripts
 
 * app-list.json's node module can have boot scripts defined in server/boot folder
 * oeCloud executes boot scripts in order same as modules are defined in app-list.json.
@@ -293,7 +319,7 @@ module.exports = function(app){
 ```
 
 
-## oe-cloud - Middlewares
+## Middlewares
 
 oeCloud would merge all middlewares in all modules defined in app-list.json and ensure execution of middleware. Each middleware should have entry in respective module's middleware.json file.
 
@@ -318,7 +344,7 @@ module.exports = function (options) {
 }
 ```
 
-## oe-cloud - Model Customization
+## Model Customization
 
 Typically, oeCloud based application would have its own models to fulfill business requirements. For example, there would model name **Customer** that can be used to handle Customer entity. It would help store customer data in actual database table **customer** and also expose REST API for Customer. When such application or product is to be delivered to client, client would want changes to this default implementation of existing Customer model. Those changes could be
 
@@ -600,7 +626,7 @@ app.observe('loaded', function(ctx, next){
 })
 ```
 
-# oe-cloud - Difference between old and new
+# oeCloud Difference between old and new
 
 | Feature | Exisiting | Proposed |
 | ------ | ------ | ------- |
