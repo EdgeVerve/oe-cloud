@@ -19,6 +19,15 @@ var defaults = require('superagent-defaults');
 var supertest = require('supertest');
 var api = defaults(supertest(oecloud));
 
+oecloud.observe('loaded', function (ctx, next) {
+  return next();
+});
+
+oecloud.observe('boot-instructions-prepared', function (ctx, next) {
+  return next();
+})
+
+
 oecloud.boot(__dirname, function (err) {
   if (err) {
     console.log(err);

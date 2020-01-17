@@ -9,7 +9,8 @@
     "trackChanges": false,
     "updateOnLoad": true,
     "isBaseEntity": true,
-    "strictObjectIDCoercion": true
+    "strictObjectIDCoercion": true,
+    "replaceOnPUT" : false
   },
   "mixins": {
     "ObserverMixin": true
