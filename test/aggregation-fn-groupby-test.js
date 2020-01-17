@@ -1,8 +1,8 @@
 /**
- * 
+ *
  * ©2016-2017 EdgeVerve Systems Limited (a fully owned Infosys subsidiary),
  * Bangalore, India. All Rights Reserved.
- * 
+ *
  */
 
 var bootstrap = require('./bootstrap.js');
@@ -18,217 +18,217 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
 
   var studentsData = [
     {
-      "name": "Rickon",
-      "maths": 14,
-      "physics": 32,
-      "chemistry": 23,
-      "section": "Bravo",
-      "gender": "Male"
+      'name': 'Rickon',
+      'maths': 14,
+      'physics': 32,
+      'chemistry': 23,
+      'section': 'Bravo',
+      'gender': 'Male'
     }, {
-      "name": "Sansa",
-      "maths": 15,
-      "physics": 16,
-      "chemistry": 51,
-      "section": "Bravo",
-      "gender": "Female"
+      'name': 'Sansa',
+      'maths': 15,
+      'physics': 16,
+      'chemistry': 51,
+      'section': 'Bravo',
+      'gender': 'Female'
     }, {
-      "name": "Bran",
-      "maths": 14,
-      "physics": 72,
-      "chemistry": 96,
-      "section": "Charlie",
-      "gender": "Male"
+      'name': 'Bran',
+      'maths': 14,
+      'physics': 72,
+      'chemistry': 96,
+      'section': 'Charlie',
+      'gender': 'Male'
     }, {
-      "name": "Cersei",
-      "maths": 17,
-      "physics": 2,
-      "chemistry": 29,
-      "section": "Charlie",
-      "gender": "Female"
+      'name': 'Cersei',
+      'maths': 17,
+      'physics': 2,
+      'chemistry': 29,
+      'section': 'Charlie',
+      'gender': 'Female'
     }, {
-      "name": "Arya",
-      "maths": 20,
-      "physics": 81,
-      "chemistry": 70,
-      "section": "Delta",
-      "gender": "Female"
+      'name': 'Arya',
+      'maths': 20,
+      'physics': 81,
+      'chemistry': 70,
+      'section': 'Delta',
+      'gender': 'Female'
     }, {
-      "name": "Eddard",
-      "maths": 33,
-      "physics": 72,
-      "chemistry": 36,
-      "section": "Charlie",
-      "gender": "Male"
+      'name': 'Eddard',
+      'maths': 33,
+      'physics': 72,
+      'chemistry': 36,
+      'section': 'Charlie',
+      'gender': 'Male'
     }, {
-      "name": "Tyrion",
-      "maths": 64,
-      "physics": 34,
-      "chemistry": 73,
-      "section": "Echo",
-      "gender": "Male"
+      'name': 'Tyrion',
+      'maths': 64,
+      'physics': 34,
+      'chemistry': 73,
+      'section': 'Echo',
+      'gender': 'Male'
     }, {
-      "name": "Jaime",
-      "maths": 20,
-      "physics": 79,
-      "chemistry": 25,
-      "section": "Delta",
-      "gender": "Male"
+      'name': 'Jaime',
+      'maths': 20,
+      'physics': 79,
+      'chemistry': 25,
+      'section': 'Delta',
+      'gender': 'Male'
     }, {
-      "name": "Shae",
-      "maths": 47,
-      "physics": 36,
-      "chemistry": 1,
-      "section": "Echo",
-      "gender": "Female"
+      'name': 'Shae',
+      'maths': 47,
+      'physics': 36,
+      'chemistry': 1,
+      'section': 'Echo',
+      'gender': 'Female'
     }, {
-      "name": "Ygritte",
-      "maths": 66,
-      "physics": 99,
-      "chemistry": 3,
-      "section": "Golf",
-      "gender": "Female"
+      'name': 'Ygritte',
+      'maths': 66,
+      'physics': 99,
+      'chemistry': 3,
+      'section': 'Golf',
+      'gender': 'Female'
     }, {
-      "name": "Ramsay",
-      "maths": 79,
-      "physics": 18,
-      "chemistry": 97,
-      "section": "Alpha",
-      "gender": "Male"
+      'name': 'Ramsay',
+      'maths': 79,
+      'physics': 18,
+      'chemistry': 97,
+      'section': 'Alpha',
+      'gender': 'Male'
     }, {
-      "name": "Daenerys",
-      "maths": 60,
-      "physics": 74,
-      "chemistry": 10,
-      "section": "Alpha",
-      "gender": "Female"
+      'name': 'Daenerys',
+      'maths': 60,
+      'physics': 74,
+      'chemistry': 10,
+      'section': 'Alpha',
+      'gender': 'Female'
     }, {
-      "name": "Samwell",
-      "maths": 19,
-      "physics": 20,
-      "chemistry": 40,
-      "section": "Golf",
-      "gender": "Male"
+      'name': 'Samwell',
+      'maths': 19,
+      'physics': 20,
+      'chemistry': 40,
+      'section': 'Golf',
+      'gender': 'Male'
     }, {
-      "name": "Jon",
-      "maths": 41,
-      "physics": 66,
-      "chemistry": 71,
-      "section": "Alpha",
-      "gender": "Male"
+      'name': 'Jon',
+      'maths': 41,
+      'physics': 66,
+      'chemistry': 71,
+      'section': 'Alpha',
+      'gender': 'Male'
     }, {
-      "name": "Davos",
-      "maths": 19,
-      "physics": 11,
-      "chemistry": 100,
-      "section": "Delta",
-      "gender": "Male"
+      'name': 'Davos',
+      'maths': 19,
+      'physics': 11,
+      'chemistry': 100,
+      'section': 'Delta',
+      'gender': 'Male'
     }, {
-      "name": "Robb",
-      "maths": 65,
-      "physics": 17,
-      "chemistry": 67,
-      "section": "Delta",
-      "gender": "Male"
+      'name': 'Robb',
+      'maths': 65,
+      'physics': 17,
+      'chemistry': 67,
+      'section': 'Delta',
+      'gender': 'Male'
     }, {
-      "name": "Robert",
-      "maths": 20,
-      "physics": 91,
-      "chemistry": 96,
-      "section": "Golf",
-      "gender": "Male"
+      'name': 'Robert',
+      'maths': 20,
+      'physics': 91,
+      'chemistry': 96,
+      'section': 'Golf',
+      'gender': 'Male'
     }, {
-      "name": "Podrick",
-      "maths": 80,
-      "physics": 1,
-      "chemistry": 79,
-      "section": "Delta",
-      "gender": "Male"
+      'name': 'Podrick',
+      'maths': 80,
+      'physics': 1,
+      'chemistry': 79,
+      'section': 'Delta',
+      'gender': 'Male'
     }, {
-      "name": "Missendei",
-      "maths": 21,
-      "physics": 5,
-      "chemistry": 5,
-      "section": "Delta",
-      "gender": "Female"
+      'name': 'Missendei',
+      'maths': 21,
+      'physics': 5,
+      'chemistry': 5,
+      'section': 'Delta',
+      'gender': 'Female'
     }, {
-      "name": "Varys",
-      "maths": 71,
-      "physics": 40,
-      "chemistry": 16,
-      "section": "Charlie",
-      "gender": "Male"
+      'name': 'Varys',
+      'maths': 71,
+      'physics': 40,
+      'chemistry': 16,
+      'section': 'Charlie',
+      'gender': 'Male'
     }, {
-      "name": "Margaery",
-      "maths": 58,
-      "physics": 69,
-      "chemistry": 86,
-      "section": "Echo",
-      "gender": "Female"
+      'name': 'Margaery',
+      'maths': 58,
+      'physics': 69,
+      'chemistry': 86,
+      'section': 'Echo',
+      'gender': 'Female'
     }, {
-      "name": "Hodor",
-      "maths": 20,
-      "physics": 84,
-      "chemistry": 97,
-      "section": "Bravo",
-      "gender": "Male"
+      'name': 'Hodor',
+      'maths': 20,
+      'physics': 84,
+      'chemistry': 97,
+      'section': 'Bravo',
+      'gender': 'Male'
     }, {
-      "name": "Theon",
-      "maths": 36,
-      "physics": 5,
-      "chemistry": 41,
-      "section": "Foxtrot",
-      "gender": "Male"
+      'name': 'Theon',
+      'maths': 36,
+      'physics': 5,
+      'chemistry': 41,
+      'section': 'Foxtrot',
+      'gender': 'Male'
     }, {
-      "name": "Jorah",
-      "maths": 42,
-      "physics": 97,
-      "chemistry": 77,
-      "section": "Bravo",
-      "gender": "Male"
+      'name': 'Jorah',
+      'maths': 42,
+      'physics': 97,
+      'chemistry': 77,
+      'section': 'Bravo',
+      'gender': 'Male'
     }, {
-      "name": "Khal",
-      "maths": 34,
-      "physics": 46,
-      "chemistry": 87,
-      "section": "Alpha",
-      "gender": "Male"
+      'name': 'Khal',
+      'maths': 34,
+      'physics': 46,
+      'chemistry': 87,
+      'section': 'Alpha',
+      'gender': 'Male'
     }, {
-      "name": "Brienne",
-      "maths": 90,
-      "physics": 2,
-      "chemistry": 23,
-      "section": "Delta",
-      "gender": "Female"
+      'name': 'Brienne',
+      'maths': 90,
+      'physics': 2,
+      'chemistry': 23,
+      'section': 'Delta',
+      'gender': 'Female'
     }, {
-      "name": "Daario",
-      "maths": 96,
-      "physics": 4,
-      "chemistry": 6,
-      "section": "Echo",
-      "gender": "Male"
+      'name': 'Daario',
+      'maths': 96,
+      'physics': 4,
+      'chemistry': 6,
+      'section': 'Echo',
+      'gender': 'Male'
     }, {
-      "name": "Joffrey",
-      "maths": 50,
-      "physics": 9,
-      "chemistry": 65,
-      "section": "Foxtrot",
-      "gender": "Male"
+      'name': 'Joffrey',
+      'maths': 50,
+      'physics': 9,
+      'chemistry': 65,
+      'section': 'Foxtrot',
+      'gender': 'Male'
     }, {
-      "name": "Melisandre",
-      "maths": 25,
-      "physics": 59,
-      "chemistry": 20,
-      "section": "Echo",
-      "gender": "Female"
+      'name': 'Melisandre',
+      'maths': 25,
+      'physics': 59,
+      'chemistry': 20,
+      'section': 'Echo',
+      'gender': 'Female'
     }, {
-      "name": "Baelish",
-      "maths": 2,
-      "physics": 13,
-      "chemistry": 77,
-      "section": "Delta",
-      "gender": "Male"
+      'name': 'Baelish',
+      'maths': 2,
+      'physics': 13,
+      'chemistry': 77,
+      'section': 'Delta',
+      'gender': 'Male'
     }
-  ]
+  ];
   var marksList = loopback.findModel('MarksList');
   before('upload test data', function (done) {
     marksList.create(studentsData, {}, function (err, res) {
@@ -243,7 +243,6 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
   });
 
   describe(chalk.green('Aggregation Functions Test --REST'), function () {
-
     var path = bootstrap.basePath + '/' + marksList.pluralModelName;
 
     it('Test for GROUP BY clause', function (done) {
@@ -625,9 +624,8 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
 
 
   describe(chalk.green('Aggregation Functions Test --Programatic'), function () {
-
     it('Test for GROUP BY clause', function (done) {
-      var filter = { "group": { "groupBy": ["section"] } };
+      var filter = { 'group': { 'groupBy': ['section'] } };
 
       marksList.find(filter, {}, function (err, res) {
         if (err) {
@@ -646,7 +644,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for MAX aggregation function', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "max": { "maths": "maxMathsMarks", "physics": "maxPhysicsMarks" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'max': { 'maths': 'maxMathsMarks', 'physics': 'maxPhysicsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -668,7 +666,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for MIN aggregation function', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "min": { "maths": "minMathsMarks", "physics": "minPhysicsMarks" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'min': { 'maths': 'minMathsMarks', 'physics': 'minPhysicsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -690,7 +688,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for AVG aggregation function', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "avg": { "chemistry": "avgChemistryMarks", "maths": "avgMathsMarks" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'avg': { 'chemistry': 'avgChemistryMarks', 'maths': 'avgMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -712,7 +710,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for COUNT aggregation function', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "count": { "gender": "noOfStudents" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'count': { 'gender': 'noOfStudents' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -732,7 +730,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for SUM aggregation function', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "sum": { "chemistry": "sumOfChemistryMarks", "physics": "sumOfPhysicsMarks", "maths": "sumOfMathsMarks" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'sum': { 'chemistry': 'sumOfChemistryMarks', 'physics': 'sumOfPhysicsMarks', 'maths': 'sumOfMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -756,7 +754,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions', function (done) {
-      var filter = { "group": { "groupBy": ["gender"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" }, "min": { "physics": "minPhysics" }, "sum": { "maths": "totalMathsMarks" }, "count": { "name": "headCount" } } };
+      var filter = { 'group': { 'groupBy': ['gender'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' }, 'min': { 'physics': 'minPhysics' }, 'sum': { 'maths': 'totalMathsMarks' }, 'count': { 'name': 'headCount' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -784,7 +782,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "where" filter', function (done) {
-      var filter = { "where": { "maths": { "gt": 35 } }, "group": { "groupBy": ["gender"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" }, "min": { "physics": "minPhysics" }, "sum": { "maths": "totalMathsMarks" }, "count": { "name": "headCount" } } };
+      var filter = { 'where': { 'maths': { 'gt': 35 } }, 'group': { 'groupBy': ['gender'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' }, 'min': { 'physics': 'minPhysics' }, 'sum': { 'maths': 'totalMathsMarks' }, 'count': { 'name': 'headCount' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -812,7 +810,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "fields" filter', function (done) {
-      var filter = { "fields": ["avgChemistryMarks", "gender"], "group": { "groupBy": ["gender"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'fields': ['avgChemistryMarks', 'gender'], 'group': { 'groupBy': ['gender'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -830,7 +828,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "order" filter', function (done) {
-      var filter = { "order": ["section DESC"], "group": { "groupBy": ["section"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'order': ['section DESC'], 'group': { 'groupBy': ['section'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -853,7 +851,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "order" filter(on non existing field)', function (done) {
-      var filter = { "order": ["section ASC", "gender DESC"], "group": { "groupBy": ["section"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'order': ['section ASC', 'gender DESC'], 'group': { 'groupBy': ['section'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -877,7 +875,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "limit" filter', function (done) {
-      var filter = { "limit": 3, "order": ["section ASC"], "group": { "groupBy": ["section"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'limit': 3, 'order': ['section ASC'], 'group': { 'groupBy': ['section'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -896,7 +894,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "skip" filter', function (done) {
-      var filter = { "limit": 3, "skip": 2, "order": ["section ASC"], "group": { "groupBy": ["section"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'limit': 3, 'skip': 2, 'order': ['section ASC'], 'group': { 'groupBy': ['section'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -915,7 +913,7 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
     });
 
     it('Test for applying multiple aggregation functions with "offset" filter', function (done) {
-      var filter = { "limit": 3, "offset": 2, "order": ["section ASC"], "group": { "groupBy": ["section"], "avg": { "chemistry": "avgChemistryMarks" }, "max": { "maths": "maxMathsMarks" } } };
+      var filter = { 'limit': 3, 'offset': 2, 'order': ['section ASC'], 'group': { 'groupBy': ['section'], 'avg': { 'chemistry': 'avgChemistryMarks' }, 'max': { 'maths': 'maxMathsMarks' } } };
       marksList.find(filter, {}, function (err, res) {
         if (err) {
           done(err);
@@ -932,7 +930,5 @@ describe(chalk.blue('Aggregation Functions with group filter test'), function ()
         }
       });
     });
-
   });
-
 });

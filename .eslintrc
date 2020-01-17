@@ -111,7 +111,7 @@
     "no-undefined": 1,               // http://eslint.org/docs/rules/no-undefined
     "no-with": 2,                    // http://eslint.org/docs/rules/no-with
     "handle-callback-err": 1,        // http://eslint.org/docs/rules/handle-callback-err
-    "radix": 2,                      // http://eslint.org/docs/rules/radix
+    "radix": 0,                      // http://eslint.org/docs/rules/radix
     "wrap-iife": [2, "any"],         // http://eslint.org/docs/rules/wrap-iife
     "yoda": 2,                       // http://eslint.org/docs/rules/yoda
 

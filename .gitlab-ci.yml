@@ -17,29 +17,31 @@ before_script:
   - export project=${CI_PROJECT_NAME//[^[:alnum:]]/}
   - export group=${CI_PROJECT_NAMESPACE//[^[:alnum:]]/}
   - export branch=${CI_BUILD_REF_NAME//[^[:alnum:]]/}
-  - if [ $branch == "master" ]; then export APP_IMAGE_NAME=$group"-"$project; else export APP_IMAGE_NAME=$group"-"$branch"-"$project; fi
+  - if [ ${group} == "oecloudio" ]; then export APP_IMAGE_NAME=$project; else export APP_IMAGE_NAME=$group"-"$project; fi
   - export APP_IMAGE_NAME=$(echo $APP_IMAGE_NAME | tr '[:upper:]' '[:lower:]')
-  - export APP_TAG=latest
+  - if [ ${branch} == "master" ]; then export APP_TAG=latest; else export APP_TAG=${branch}; fi
+  - export APP_TAG=$(echo $APP_TAG | tr '[:upper:]' '[:lower:]')
+
+  - npm config set unsafe-perm true
+  - npm config set progress false
+  - npm config set registry ${NPM_REGISTRY}
+  # - npm config set registry https://registry.npmjs.org/
 
 npminstall:
   stage: pre-build
   script:
     - echo "Performing code style check..."
-    - status_eslint=0
-    - exit_status=0
-    - npm set progress=false
-    - npm config set registry ${NPM_REGISTRY}
-    #- npm config set registry https://registry.npmjs.org/
+    - export status_eslint=0
+    - export exit_status=0
     - time npm install eslint babel-eslint --no-optional
     - if npm run lint; then status_eslint=0; else status_eslint=1; fi
-    - if [ $status_eslint == 1 ]; then exit_status=1 && echo "esLint errors exist"; fi
+    - if [ $status_eslint == 1 ]; then export exit_status=1 && echo "esLint errors exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
     - echo "Code style check done successfully"
     - time npm install --no-optional
     - echo "Node Modules Installed"
     - npm config rm registry
-    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
-    - npm audit --json > ./artifacts/${CI_PROJECT_NAME}/vulnerabilities.json || true
+    - npm audit --json > vulnerabilities.json || true
     - if npm audit; then status_vulnerabilities=0; else status_vulnerabilities=1; fi
     - if [ $status_vulnerabilities == 1 ]; then echo "Dependency vulnerabilities exist"; fi
     - if [ $exit_status == 1 ]; then exit $exit_status; fi
@@ -47,69 +49,72 @@ npminstall:
     expire_in: 2h
     paths:
       - node_modules/
-      - artifacts/
+      - vulnerabilities.json
   tags:
     - CEP_RUNNER
 
-
 mongotest:
+  coverage: /Statements.*?(\d+(?:\.\d+)?)%/
   stage: pre-build-test
+  variables:
+    NODE_ENV: mongo
+    DB: mongo
+    MONGO_HOST: 10.73.53.144
+    MONGO_PORT: '27017'
+    DB_NAME: ${CI_JOB_ID}_mongo
   script:
     - echo 'Performing MongoDB Test'
-    - export NODE_ENV=mongo
-    - export MONGO_HOST="10.73.53.144"
-    - export DB=mongo
-    - export DB_NAME=${CI_JOB_ID}_mongo
-    - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
     - npm run grunt-cover
-    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/
-    - cp -r coverage ./artifacts/${CI_PROJECT_NAME}/
   artifacts:
     expire_in: 2h
     paths:
       - coverage/
-      - artifacts/
   tags:
     - CEP_RUNNER
 
 postgrestest:
+  coverage: /Statements.*?(\d+(?:\.\d+)?)%/
   stage: pre-build-test
+  variables:
+    NODE_ENV: postgres
+    DB: postgres
+    POSTGRES_HOST: 10.73.53.144
+    POSTGRES_PORT: '5432'
+    DB_NAME: ${CI_JOB_ID}_pg
+    ENABLE_DS_AUTOUPDATE: 'true'
   script:
     - echo 'Performing PostgreSQL Test'
-    - export NODE_ENV=postgres
-    - export DB=postgres
-    - export POSTGRES_HOST="10.73.53.144"
-    - export DB_NAME=${CI_JOB_ID}_pg
-    - export ENABLE_DS_AUTOUPDATE=true
-    - npm config set registry ${NPM_REGISTRY}
     - time npm install --no-optional
     - npm run grunt-cover
   tags:
     - CEP_RUNNER
-
+    
 oracletest:
+  coverage: /Statements.*?(\d+(?:\.\d+)?)%/
   image: ${REGISTRY}/${EXECUTOR_IMAGE_ORACLE}
   stage: pre-build-test
+  variables:
+    NODE_ENV: oracle
+    DB: oracle
+    ORACLE_HOST: 10.73.53.144
+    ORACLE_PORT: '1521'
+    ORACLE_SYSUSER: oeadmin
+    ORACLE_SYSPASSWORD: oeadmin
+    ORACLE_SID: ORCLCDB
+    ENABLE_DS_AUTOUPDATE: 'true'
   script:
     - echo 'Performing Oracle Test'
-    - export APP_TAG=oracle
-    - export NODE_ENV=oracle
-    - export ORACLE_HOST=10.73.53.144
-    - export ORACLE_SYSUSER=oeadmin
-    - export ORACLE_SYSPASSWORD=oeadmin
-    - export ORACLE_SID=ORCLCDB
-    - export DB_NAME=${CI_JOB_ID}_pg
-    - export ENABLE_DS_AUTOUPDATE=true
-    - npm config set registry ${NPM_REGISTRY}
-    - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git --no-optional
+    # - export DB_NAME=${CI_JOB_ID}_pg
+    # - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git#master --no-optional
     - time npm install --no-optional
     - mv /oracledb node_modules/
-    - export CI_PROJECT_NAMESPACE=${group}
     - node test/oracle-utility.js
-    - export ORACLE_USERNAME=${CI_PROJECT_NAMESPACE}"-"${CI_PROJECT_NAME}
-    - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
-    - export ORACLE_PASSWORD=$(echo $CI_PROJECT_NAMESPACE | tr '[:upper:]' '[:lower:]')
+    # - export ORACLE_USERNAME=${group}"_"${project}
+    # - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
+    # - export ORACLE_PASSWORD=$(echo $group | tr '[:upper:]' '[:lower:]')
+    - . ./oracle-user.sh
+    - env | grep -i oracle
     - echo "Oracle user details:"${ORACLE_USERNAME}"/"${ORACLE_PASSWORD}
     - npm run grunt-cover
   tags:
@@ -119,10 +124,15 @@ pushartifacts:
   stage: push-artifacts
   script:
     - echo "Copying all artifacts"
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/${CI_BUILD_REF_NAME}/
+    - cp vulnerabilities.json ./artifacts/${CI_PROJECT_NAME}/${CI_BUILD_REF_NAME}/
+    - cp -r coverage/ ./artifacts/${CI_PROJECT_NAME}/${CI_BUILD_REF_NAME}/
     - git clone http://10.73.97.24/oecloud.io/build-tools.git
     - sh ./build-tools/push_artifacts.sh
   tags:
     - CEP_RUNNER
+  only:
+    - /^.*/@oecloud.io/oe-cloud
 
 performancejob:
   image: $REGISTRY/jmeter:docker
@@ -130,39 +140,38 @@ performancejob:
   variables:
     NODE_ENV: "mongo"
     MONGO_HOST: "10.73.97.17"
+    MONGO_PORT: "27017"
     DB_NAME: "${CI_JOB_ID}_mongo"
     APP_PROTOCOL: "https"
     APP_PORT: "443"
     PERF_USERS: "1"
     PERF_LOOPCOUNT: "50000"
   script:
-    - npm set progress=false
-    - npm config set registry ${NPM_REGISTRY}
-    #- npm config set registry https://registry.npmjs.org/
-    - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
+    - export STACK_NAME=${APP_IMAGE_NAME}-${APP_TAG}
+    - export APP_URL=${APP_IMAGE_NAME}-${APP_TAG}.${PERF_DOMAIN_NAME}
+    - if [ ${branch} == "master" ]; then export STACK_NAME=${APP_IMAGE_NAME}; export APP_URL=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}; fi
+    - if docker stack rm ${STACK_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
     - time npm install --no-optional
-    - export APP_URL=${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}
     - git clone http://10.73.97.24/oecloud.io/build-tools.git
     - sed 's/\$REGISTRY/'"$REGISTRY"'/g' ./build-tools/performance/Dockerfile > Dockerfile
-    - echo "Building ${APP_IMAGE_NAME} image and pushing to registry..."
+    - echo "Building ${APP_IMAGE_NAME}:${APP_TAG} image and pushing to registry..."
     - time docker image build -t ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG} --no-cache --pull .
     - time docker image push ${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}
     - echo "Image (${REGISTRY}/${APP_IMAGE_NAME}:${APP_TAG}) built and pushed to registry"
-    - docker stack deploy --compose-file ./build-tools/performance/docker-compose.yml ${APP_IMAGE_NAME}
+    - docker stack deploy --compose-file ./build-tools/performance/docker-compose.yml ${STACK_NAME}
     - export HTTP_RESPONSE_CODE=200
     - export countElapsed=0
     - export app_exit_status=0
-    - export no_proxy=$no_proxy,${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}
+    - export no_proxy=$no_proxy,${APP_URL}
     - export NO_PROXY=$no_proxy
-    - echo "${DOCKER_ROUTER_HOST} ${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}" >> /etc/hosts
-    - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/)
-    - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/explorer/); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
-    - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${APP_IMAGE_NAME}; docker service logs ${APP_IMAGE_NAME}_web; docker stack rm ${APP_IMAGE_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_IMAGE_NAME}.${PERF_DOMAIN_NAME}/"; fi
-    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/performance
+    - echo "${DOCKER_ROUTER_HOST} ${APP_URL}" >> /etc/hosts
+    - export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_URL}/api/ModelDefinitions)
+    - while [ ${isStarted} -ne ${HTTP_RESPONSE_CODE} ]; do let countElapsed=countElapsed+1; echo ""; sleep 10; export isStarted=$(curl -k --write-out %{http_code} --output curl.out --silent https://${APP_URL}/api/ModelDefinitions); echo -n "Waiting till the URL is up..."; echo ${isStarted}; if [ $countElapsed -eq 18 ] ; then export app_exit_status=1; export isStarted=${HTTP_RESPONSE_CODE}; fi; done
+    - if [ $app_exit_status -eq 1 ]; then echo "App failed to start....."; docker stack ps ${STACK_NAME}; docker service logs ${STACK_NAME}_web; docker stack rm ${STACK_NAME}; exit $app_exit_status; else echo "Your application URL is accessible @ https://${APP_URL}/"; fi
+    - mkdir -p ./artifacts/${CI_PROJECT_NAME}/${CI_BUILD_REF_NAME}/performance
     - sh ./build-tools/performance/performance.sh
     - sh ./build-tools/push_artifacts.sh
-    - if docker stack rm ${APP_IMAGE_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
+    - if docker stack rm ${STACK_NAME}; then echo "stack removed"; else echo "nothing found in stack"; fi
   when: manual
   tags:
     - PERF_RUNNER
-
