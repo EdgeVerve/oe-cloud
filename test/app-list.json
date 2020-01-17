@@ -1,15 +1,18 @@
 [
   {
     "path": "./",
+    "description" : "This is really oe-cloud module. but since this is test case itself for oe-cloud, therfore path is set to ./",
     "forceLoad": "index.js"
   },
   {
     "path": "oe-skeleton",
-    "enabled": true
+    "enabled": true,
+    "description" :"simulating product's node module"
   },
   {
     "path": "./",
     "enabled": true,
-    "serverDir": "test"
+    "serverDir": "test",
+    "description" :"simulating customization module module"
   }
 ]
