@@ -255,6 +255,16 @@ In above model-config, MyModel will be created as public model. However, definit
   },
 ```
 
+* As said earlier, by defualt node modules mixins are not attached to BaseEntity by default. This behavior can be changed by **autoEnableMixins**  for node module. See example below of app-list.json
+
+```javaScript
+  "OeSomeModule" : {
+      "enable" : true,
+      "autoEnableMixins" : true
+  }
+```
+above setting will ensure that all mixins of OeSomeModule are attahced to BaseEntity and therefore attach to all models derived from BaseEntity.
+ 
 * you can also selectively ON/OFF the mixin attachments by calling **addModuleMixinsToBaseEntity** API as below. This can be important if you have to have some mixins from other dependent module.
 
 ```
