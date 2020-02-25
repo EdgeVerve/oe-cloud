@@ -23,7 +23,12 @@ module.exports = function postAuthContextPopulator(middlewareOptions) {
       delete obj.created;
       delete obj.ctx;
       // Create deep-copy of roles array
-      obj.roles = JSON.parse(JSON.stringify(req.accessToken.__data.roles));
+      if (req.accessToken && req.accessToken.__data && req.accessToken.__data.roles) {
+        obj.roles = JSON.parse(JSON.stringify(req.accessToken.__data.roles));
+      } else {
+        obj.roles = [];
+      }
+
       callContext.ctx = Object.assign(callContext.ctx, obj);
 
       callContext.ctx = Object.assign(callContext.ctx, req.accessToken.ctx);
