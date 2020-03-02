@@ -1,6 +1,6 @@
 {
   "name": "oe-cloud",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "oe-cloud modularization aka oecloud.io",
   "engines": {
     "node": ">=6"

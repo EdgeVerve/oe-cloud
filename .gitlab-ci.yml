@@ -108,7 +108,7 @@ oracletest:
     # - export DB_NAME=${CI_JOB_ID}_pg
     # - time npm install git+http://evgit/oecloud.io/oe-connector-oracle.git#master --no-optional
     - time npm install --no-optional
-    - mv /oracledb node_modules/
+    # - mv /oracledb node_modules/
     - node test/oracle-utility.js
     # - export ORACLE_USERNAME=${group}"_"${project}
     # - export ORACLE_USERNAME=$(echo $ORACLE_USERNAME | tr '[:lower:]' '[:upper:]')
