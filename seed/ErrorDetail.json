@@ -214,5 +214,11 @@
     "message": "Mustache expression or data is not valid",
     "moreInformation": "Mustache expression provided in the model definition is not valid or the data posted for it is invalid.",
     "type": "invalidMustache"
+  },
+  {
+    "code": "validation-err-033",
+    "message": "Invalid date",
+    "moreInformation": "Given value is not valid date",
+    "type": "date"
   }
 ]
