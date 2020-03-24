@@ -4,6 +4,7 @@
 - [oeCloud overall modules](#oecloud-overall-modules)
 - [oeCloud Features and functionalities](#oecloud-features-and-functionalities)
   * [oeCloud What it will do](#oecloud-what-it-will-do)
+  * [app-list](#app-list)
   * [Usage](#usage)
   * [oeCloud Models](#oecloud-models)
     + [BaseEntity](#baseentity)
@@ -38,6 +39,7 @@
     + [aboutMe](#aboutme)
   * [Add fields to BaseEntity or ModelDefinition](#add-fields-to-baseentity-or-modeldefinition)
 - [oeCloud Difference between old and new](#oecloud-difference-between-old-and-new)
+
 
 # Introduction
 
@@ -80,21 +82,9 @@ Below are responsibilities of oe-cloud
 * ensure of loading of models defined in app-list module
 * expose *loopback like* APIs for application developer (eg app.boot(), app.start() etc)
 
-
-## Usage
-
-Typically, following code can be written in oeCloud application's server/server.js file
-
-```
-var oecloud = require('oe-cloud');
-
-oecloud.boot(__dirname, function(err){
-  oecloud.start();
-})
-
-```
-
-Above code should able to start application. you don't have to do require of loopback or any of it's component.
+## app-list
+This is basically javascript array of objects that contains list of node_modules that oe-cloud should load as part of application start up. This usually is JSON file with name as **app-list.json**. However, to achieve programmability, this can be also .js file like **app-list.js**. Another small improvement is, application developer can maintain different app-list for different environments which is based on **NODE_ENV** environment variable. 
+If all sources (app-list.json, app-list.js and app-list.<NODE_ENV>.js) exist, oe-cloud will merge these objects.
 Typical app-list.json, which would be part of application would look like
 
 ```
@@ -112,19 +102,7 @@ Typical app-list.json, which would be part of application would look like
     "enabled": true
   },
   {
-    "path": "oe-cache",
-    "enabled": true
-  },
-  {
-    "path": "oe-personalization",
-    "enabled": true
-  },
-  {
     "path": "oe-validation",
-    "enabled": true
-  },
-  {
-    "path": "oe-service-personalization",
     "enabled": true
   },
   {
@@ -133,6 +111,22 @@ Typical app-list.json, which would be part of application would look like
   }
 ]
 ```
+
+
+## Usage
+
+Typically, following code can be written in oeCloud application's server/server.js file
+
+```
+var oecloud = require('oe-cloud');
+
+oecloud.boot(__dirname, function(err){
+  oecloud.start();
+})
+
+```
+
+Above code should able to start application. you don't have to do require of loopback or any of it's component.
 
 ## oeCloud Models
 
@@ -655,4 +649,7 @@ app.observe('loaded', function(ctx, next){
 | Data Personalization | Mixin | [oe-personalization](http://evgit/oecloud.io/oe-personalization) |
 | Service Personalization | Mixin+Boot | Boot [oe-service=personalization](http://evgit/oecloud.io/oe-service-personalization) |
 | Cachinge | Mixin+DAO | DAO Wrapper [oe-cache](http://evgit/oecloud.io/oe-cache) |
+
+
+
 
