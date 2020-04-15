@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const loopback = require('loopback');
 const log = require('oe-logger')('context-populator-filter');
 var rootModel;
@@ -38,10 +37,11 @@ module.exports = function postAuthContextPopulator(middlewareOptions) {
 
       log.debug(req.callContext, 'postAuthContextPopulator : context setting as  = ', callContext);
     }
-    if (_.isEmpty(req.callContext) && rootModel && rootModel.setCallContext) {
+    if (rootModel && rootModel.setCallContext) {
       req.callContext = rootModel.setCallContext(req);
     }
-
+    req.callContext = req.callContext || {};
+    req.callContext.ctx = req.callContext.ctx || {};
     next();
   };
 };
