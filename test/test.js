@@ -789,10 +789,19 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         if(err){
           return done(err);
         }
-        expect(data.length).to.be.equal(1);
-        var e = data[0];
-        expect(e.__data.accountRel.length).to.be.equal(3);
-        expect(e.__data.addressRel.length).to.be.equal(1);
+        expect(data.length).to.be.equal(2);
+
+        for(var i=0; i < 2; ++i){
+          e = data[i];
+          if(e.name === 'Atul'){
+            expect(e.__data.accountRel.length).to.be.equal(3);
+            expect(e.__data.addressRel.length).to.be.equal(1);
+          }
+          else  if (e.name === 'Btul'){
+            expect(e.__data.accountRel.length).to.be.equal(1);
+            expect(e.__data.addressRel.length).to.be.equal(1);
+          }
+        }
         return done();
       })
     }
