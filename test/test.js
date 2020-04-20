@@ -796,6 +796,9 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         return done();
       })
     }
+    else{
+      return done();
+    }
 
   });
 
