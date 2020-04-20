@@ -645,4 +645,166 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         done();
       });
   });
+
+
+  it('t18 - Preparing data for join test', function (done) {
+
+    var employee = loopback.findModel('Employee');
+    var employeeAddress = loopback.findModel('EmployeeAddress');
+    var employeePhone = loopback.findModel('EmployeePhone');
+    var employeeAccount = loopback.findModel('EmployeeAccount');
+
+    employee.create([
+      {
+        id : "a",
+        name : "Atul",
+        age : 40
+      },
+      {
+        id : "b",
+        name : "Btul",
+        age : 40
+      },
+      {
+        id : "c",
+        name : "Ctul",
+        age : 40
+      },
+    ], {}, function(err, data){
+      if(err){
+        return done(err);
+      }
+      employeeAddress.create([
+        {
+          id : "aa",
+          city : "aa",
+          employeeId : "a"
+        },
+        {
+          id : "ab",
+          city : "ab",
+          employeeId : "a"
+        },
+        {
+          id : "ac",
+          city : "ac",
+          employeeId : "a"
+        },
+        {
+          id : "ba",
+          city : "ba",
+          employeeId : "b"
+        },
+        {
+          id : "ca",
+          city : "ca",
+          employeeId : "c"
+        },
+      ], {}, function(err, data){
+        if(err){
+          return done(err);
+        }
+
+        employeeAccount.create([
+          {
+            id : "aa",
+            accountId : "aa",
+            employeeId : "a"
+          },
+          {
+            id : "ab",
+            accountId : "ab",
+            employeeId : "a"
+          },
+          {
+            id : "ac",
+            accountId : "ac",
+            employeeId : "a"
+          },
+          {
+            id : "ba",
+            accountId : "ba",
+            employeeId : "b"
+          },
+        ], {}, function(err, data){
+          if(err){
+            return done(err);
+          }
+          employeePhone.create([
+            {
+              id : "aaa",
+              phone : "aaa",
+              employeeAddressId : "aa"
+            },
+            {
+              id : "aab",
+              phone : "aab",
+              employeeAddressId : "aa"
+            },
+            {
+              id : "aba",
+              phone : "aba",
+              employeeAddressId : "ab"
+            },
+            {
+              id : "baa",
+              phone : "baa",
+              employeeAddressId : "ba"
+            },
+          ], {}, function(err, data){
+              return done(err);
+          });
+        });
+      });
+    });
+  });
+
+  it('t19 - executing find using join for postgresql', function (done) {
+    var employee = loopback.findModel('Employee');
+    var ds = employee.dataSource;
+    if(ds.settings.connector.indexOf("mongo")){
+      employee.find({"useJoin" : true, "include" : [{ "relation" : "addressRel", "scope" : {"where" : { "or" : [{"city" : "aa" }, {"city" : "ba"}] }, "include" : "phoneRel" } }, {"relation" : "accountRel" ,  "scope" : {"where" : {"id" : {"neq" : "q"} } } } ]},
+      function(err, data){
+        if(err){
+          return done(err);
+        }
+        expect(data.length).to.be.equal(3);
+        for(var i=0; i < 3; ++i){
+          e = data[i];
+          if(e.name === 'Atul'){
+            expect(e.accountRel.length).to.be.equal(3);
+            expect(e.addressRel.length).to.be.equal(3);
+          }
+          else  if (e.name === 'Btul'){
+            expect(e.accountRel.length).to.be.equal(1);
+            expect(e.addressRel.length).to.be.equal(1);
+          }
+        }
+        return done();
+      })
+    }
+    else if (ds.settings.connector.indexOf("postgre")){
+      employee.find({"useJoin" : true, "include" : [{ "relation" : "addressRel", "scope" : {"where" : { "or" : [{"city" : "aa" }, {"city" : "ba"}] }, "include" : "phoneRel" } }, {"relation" : "accountRel" ,  "scope" : {"where" : {"id" : {"neq" : "q"} } } } ]},
+      function(err, data){
+        if(err){
+          return done(err);
+        }
+        expect(data.length).to.be.equal(1);
+        var e = data[0];
+        expect(e.accountRel.length).to.be.equal(3);
+        expect(e.addressRel.length).to.be.equal(1);
+        return done();
+      })
+    }
+
+  });
+
+
+
+
+
+
+
+
+
 });
