@@ -762,7 +762,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   it('t19 - executing find using join for postgresql', function (done) {
     var employee = loopback.findModel('Employee');
     var ds = employee.dataSource;
-    if(ds.settings.connector.indexOf("mongo")){
+    if(ds.settings.connector.indexOf("mongo") > 0){
       employee.find({"useJoin" : true, "include" : [{ "relation" : "addressRel", "scope" : {"where" : { "or" : [{"city" : "aa" }, {"city" : "ba"}] }, "include" : "phoneRel" } }, {"relation" : "accountRel" ,  "scope" : {"where" : {"id" : {"neq" : "q"} } } } ]},
       function(err, data){
         if(err){
@@ -772,18 +772,18 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         for(var i=0; i < 3; ++i){
           e = data[i];
           if(e.name === 'Atul'){
-            expect(e.accountRel.length).to.be.equal(3);
-            expect(e.addressRel.length).to.be.equal(3);
+            expect(e.__data.accountRel.length).to.be.equal(3);
+            expect(e.__data.addressRel.length).to.be.equal(1);
           }
           else  if (e.name === 'Btul'){
-            expect(e.accountRel.length).to.be.equal(1);
-            expect(e.addressRel.length).to.be.equal(1);
+            expect(e.__data.accountRel.length).to.be.equal(1);
+            expect(e.__data.addressRel.length).to.be.equal(1);
           }
         }
         return done();
       })
     }
-    else if (ds.settings.connector.indexOf("postgre")){
+    else if (ds.settings.connector.indexOf("postgre") > 0){
       employee.find({"useJoin" : true, "include" : [{ "relation" : "addressRel", "scope" : {"where" : { "or" : [{"city" : "aa" }, {"city" : "ba"}] }, "include" : "phoneRel" } }, {"relation" : "accountRel" ,  "scope" : {"where" : {"id" : {"neq" : "q"} } } } ]},
       function(err, data){
         if(err){
@@ -791,8 +791,8 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
         }
         expect(data.length).to.be.equal(1);
         var e = data[0];
-        expect(e.accountRel.length).to.be.equal(3);
-        expect(e.addressRel.length).to.be.equal(1);
+        expect(e.__data.accountRel.length).to.be.equal(3);
+        expect(e.__data.addressRel.length).to.be.equal(1);
         return done();
       })
     }
