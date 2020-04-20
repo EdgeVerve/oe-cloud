@@ -1,0 +1,23 @@
+{
+    "name": "EmployeeAccount",
+    "base": "BaseEntity",
+    "idInjection": true,
+    "properties": {
+      "id": {
+        "type": "string", 
+        "generated" : true, 
+        "id": true
+      },
+      "accountId": {
+        "type": "string",
+        "require" : true
+      }
+    },
+    "validations": [],
+    "relations": {},
+    "acls": [],
+    "methods": {}
+  }
+  
+  
+  
