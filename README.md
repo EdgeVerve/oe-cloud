@@ -18,6 +18,7 @@
   * [Boot scripts](#boot-scripts)
   * [Middlewares](#middlewares)
   * [Model Customization](#model-customization)
+  * [Call context and options](#call-context-options)
 - [oeCloud API Documentation](#oecloud-api-documentation)
   * [Common Utility API](#common-utility-api)
     + [IsBaseEntity(Model)](#isbaseentity-model-)
@@ -382,6 +383,76 @@ However, if you want to **customize** any model, you need to add **extra** prope
 You can also have customer.js file which is then loaded and also you can have mixin.
 
 **Note** : More importantly exports function all .js files of models are executed in sequence. There should not be any extra executable code apart from that inside module.exports () function. 
+
+## Call Context and options
+
+### Options
+When we are referring to options, we are referring to second parameter usually we pass to model.find() or model.create() functions. This options parameter flows throughout the loopback pipeline. That is all observer hooks will get context in which it has this options parameter.
+
+```
+model.find({where : {id :  "a"}}, {ctx : {somefield : "X"} }, function(err, data){
+ // results are returned in data
+});
+
+
+model.observe('access', function(ctx, next){
+
+  assert(ctx.options.somefield === 'X')
+    
+})
+
+```
+
+This is all good when find() is being called by programmer from javascript code. However when find() is called due to http GET request on model, options parameter is parepared in oe-cloud module. specifically lib/warpper.js's _newCreateOptionsFromRemotingContext() is used to build this options.
+
+options has got most important property **ctx**. All other properties are not touched by oecloud framework. 
+
+This property is now built by http request's callContext.ctx property and basically both are actually same.
+
+therefore if the request object is req and options object is options then
+
+```
+  assert(req.callContext.ctx === options.ctx);
+```
+
+With above design, if you change callContext.ctx property in middleware, that will be directly reflected in options.ctx property
+
+
+### callContext
+
+callContext property of HTTP request is created by oeCloud framework in one of it's middleware. As said above callContext.ctx is same as options.ctx. you must break this link. With this link if you modify callContext.ctx in **middleware** or **before remote** hooks, it will be available in options.ctx field in your **observer hooks**.
+
+Same way, if you change options.ctx in observer hooks, you will see that in **after remote** hook.
+
+
+```
+  model.beforeRemote( '**', function( ctx, opts, next) {
+    
+    ctx.req.callContext.someField = 'x';
+    
+    next();
+  });
+  
+  
+  model.observe('before save', function(ctx, next){
+    assert(ctx.options.ctx.someField === 'x');
+    
+    ctx.options.ctx.otherField = 'y'
+    
+    // never do this as it will break link ---->>> ctx.options.ctx = { otherField : 'y', someField : 'x' }
+  });
+
+  model.afterRemote( '**', function( ctx, opts, next) {
+    
+    assert(ctx.options.ctx.otherField === 'y');
+    
+    next();
+  });
+
+
+```
+
+
 
 # oeCloud API Documentation
 
