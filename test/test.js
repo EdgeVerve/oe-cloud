@@ -76,24 +76,24 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   });
 
   it('t1-1 create user admin/admin with /default tenant', function (done) {
-    //app.removeForceId('User');
-    //app.removeForceId('Role');
-    //app.removeForceId('RoleMapping');
+    // app.removeForceId('User');
+    // app.removeForceId('Role');
+    // app.removeForceId('RoleMapping');
     var userModel = loopback.findModel('User');
-    //userModel.settings.forceId = false;
-    //var validations = userModel.validations;
-    //if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
+    // userModel.settings.forceId = false;
+    // var validations = userModel.validations;
+    // if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
     //  validations.id.shift();
-    //}
+    // }
     var url = basePath + '/users';
     api.set('Accept', 'application/json')
       .post(url)
       .send([{ id: 'admin', username: 'admin', password: 'admin', email: 'admin@admin.com' },
-      { id: 'evuser', username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
-      { id: 'infyuser', username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
-      { id: 'bpouser', username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' },
-      { id: 'iciciuser', username: 'iciciuser', password: 'iciciuser', email: 'iciciuser@iciciuser.com' },
-      { id: 'citiuser', username: 'citiuser', password: 'citiuser', email: 'citiuser@citiuser.com' }
+        { id: 'evuser', username: 'evuser', password: 'evuser', email: 'evuser@evuser.com' },
+        { id: 'infyuser', username: 'infyuser', password: 'infyuser', email: 'infyuser@infyuser.com' },
+        { id: 'bpouser', username: 'bpouser', password: 'bpouser', email: 'bpouser@bpouser.com' },
+        { id: 'iciciuser', username: 'iciciuser', password: 'iciciuser', email: 'iciciuser@iciciuser.com' },
+        { id: 'citiuser', username: 'citiuser', password: 'citiuser', email: 'citiuser@citiuser.com' }
       ])
       .end(function (err, response) {
         var result = response.body;
@@ -109,11 +109,11 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
 
   it('t1-2 create roles', function (done) {
     var roleModel = loopback.findModel('Role');
-    //roleModel.settings.forceId = false;
-    //var validations = roleModel.validations;
-    //if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
+    // roleModel.settings.forceId = false;
+    // var validations = roleModel.validations;
+    // if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
     //  validations.id.shift();
-    //}
+    // }
     roleModel.create([
       { id: 'admin', name: 'admin' },
       { id: 'businessUser', name: 'businessUser' },
@@ -126,11 +126,11 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
 
   it('t1-3 create user role mapping', function (done) {
     var roleMapping = loopback.findModel('RoleMapping');
-    //var validations = roleMapping.validations;
-    //if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
+    // var validations = roleMapping.validations;
+    // if (validations.id && validations.id[0].validation === 'absence' && validations.id[0].if === 'isNewRecord' ) {
     //  validations.id.shift();
-    //}
-    //roleMapping.settings.forceId = false;
+    // }
+    // roleMapping.settings.forceId = false;
     roleMapping.create([
       { id: 'adminuser', principalType: roleMapping.USER, principalId: 'admin', roleId: 'admin' },
       { id: 'businessUser', principalType: roleMapping.USER, principalId: 'infyuser', roleId: 'businessUser' },
@@ -584,26 +584,25 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   });
   var tmpCustomerId;
   it('t16-1 - Testing HasOne relationship overriden functions', function (done) {
-    var customerModel = loopback.findModel("Customer");
+    var customerModel = loopback.findModel('Customer');
     customerModel.find({}, function (err, result) {
       var record = result[0];
       tmpCustomerId = record.id;
       var url = basePath + '/customers/' + tmpCustomerId + '/spouseRel?access_token=' + infyToken;
       api.set('Accept', 'application/json')
         .post(url)
-        .send({ name: "Spouse1", id: "1", customerId: tmpCustomerId })
+        .send({ name: 'Spouse1', id: '1', customerId: tmpCustomerId })
         .end(function (err, response) {
           var result = response.body;
           done(err);
         });
-    })
-
+    });
   });
   it('t16-2 - Testing HasOne relationship overriden functions(update)', function (done) {
     var url = basePath + '/customers/' + tmpCustomerId + '/spouseRel?access_token=' + infyToken;
     api.set('Accept', 'application/json')
       .put(url)
-      .send({ name: "Spouse1", id: "1", customerId: tmpCustomerId })
+      .send({ name: 'Spouse1', id: '1', customerId: tmpCustomerId })
       .end(function (err, response) {
         var result = response.body;
         done(err);
@@ -624,7 +623,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     var url = basePath + '/customers';
     api.set('Accept', 'application/json')
       .post(url)
-      .send({ name: "customer created without access token", age: 10 })
+      .send({ name: 'customer created without access token', age: 10 })
       .end(function (err, response) {
         console.log(response.error);
         done(err);
@@ -638,10 +637,10 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
     var url = basePath + '/customers';
     api.set('Accept', 'application/json')
       .post(url)
-      .send({ name: "Another customer created without access token", age: 10 })
+      .send({ name: 'Another customer created without access token', age: 10 })
       .end(function (err, response) {
         if (response.status != 401) {
-          return done(new Error("unauthorized access should not be allowed"));
+          return done(new Error('unauthorized access should not be allowed'));
         }
         done();
       });

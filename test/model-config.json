@@ -36,7 +36,8 @@
   },
   "Customer": {
     "dataSource": "db",
-    "public": true
+    "public": true,
+    "customModel" : true
   },
   "Spouse": {
     "dataSource": "db",
