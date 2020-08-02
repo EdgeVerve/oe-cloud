@@ -1,6 +1,6 @@
 {
   "name": "oe-cloud",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "oe-cloud modularization aka oecloud.io",
   "engines": {
     "node": ">=6"
@@ -20,12 +20,12 @@
     "compression": "1.7.3",
     "cookie-parser": "1.4.3",
     "cors": "2.8.5",
-    "lodash": "4.17.14",
+    "lodash": "4.17.19",
     "loopback": "3.26.0",
     "loopback-boot": "^2.28.0",
     "loopback-datasource-juggler": "3.33.2",
     "mustache": "2.3.2",
-    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#master",
+    "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#2.2.0",
     "serve-favicon": "2.5.0",
     "serve-static": "1.13.2",
     "strong-error-handler": "^3.4.0"
@@ -42,10 +42,10 @@
     "grunt-mocha-istanbul": "5.0.2",
     "istanbul": "0.4.5",
     "mocha": "5.2.0",
-    "oe-connector-mongodb": "git+http://evgit/oecloud.io/oe-connector-mongodb.git#master",
-    "oe-connector-oracle": "git+http://evgit/oecloud.io/oe-connector-oracle.git#master",
-    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#master",
-    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#master",
+    "oe-connector-mongodb": "git+http://evgit/oecloud.io/oe-connector-mongodb.git#2.2.0",
+    "oe-connector-oracle": "git+http://evgit/oecloud.io/oe-connector-oracle.git#2.3.0",
+    "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#2.3.0",
+    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#2.2.0",
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2"
   },
