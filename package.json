@@ -45,7 +45,7 @@
     "oe-connector-mongodb": "git+http://evgit/oecloud.io/oe-connector-mongodb.git#2.2.0",
     "oe-connector-oracle": "git+http://evgit/oecloud.io/oe-connector-oracle.git#2.3.0",
     "oe-connector-postgresql": "git+http://evgit/oecloud.io/oe-connector-postgresql.git#2.3.0",
-    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#2.2.0",
+    "oe-skeleton": "git+http://evgit/oecloud.io/oe-skeleton.git#2.3.0",
     "superagent-defaults": "0.1.14",
     "supertest": "3.4.2"
   },
