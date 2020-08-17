@@ -22,13 +22,13 @@
     "cors": "2.8.5",
     "lodash": "4.17.19",
     "loopback": "3.26.0",
-    "loopback-boot": "^2.28.0",
+    "loopback-boot": "2.28.0",
     "loopback-datasource-juggler": "3.33.2",
     "mustache": "2.3.2",
     "oe-logger": "git+http://evgit/oecloud.io/oe-logger.git#2.2.0",
     "serve-favicon": "2.5.0",
     "serve-static": "1.13.2",
-    "strong-error-handler": "^3.4.0"
+    "strong-error-handler": "3.5.0"
   },
   "devDependencies": {
     "babel-eslint": "7.2.3",
