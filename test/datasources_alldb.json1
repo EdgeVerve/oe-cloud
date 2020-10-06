@@ -38,7 +38,7 @@
     "name": "oradb",
     "connector": "oe-connector-oracle",
     "database": "ORCLCDB",
-    "host": "10.73.53.144",
+    "host": "localhost",
     "port": "1521",
     "password": "atul",
     "user": "ATUL_TEST"
