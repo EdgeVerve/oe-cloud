@@ -1,0 +1,35 @@
+{
+    "name": "EmployeeAddress",
+    "base": "BaseEntity",
+    "idInjection": true,
+    "properties": {
+      "id": {
+        "type": "string", 
+        "generated" : true, 
+        "id": true
+      },
+      "city": {
+        "type": "string",
+        "require" : true
+      },
+      "state": {
+        "type": "string",
+        "require" : true
+      }
+    },
+    "validations": [],
+    "relations": {
+      "phoneRel": {
+        "type": "hasMany",
+        "model": "EmployeePhone",
+        "foreignKey": "employeeAddressId"
+    }
+
+    },
+    "acls": [],
+    "hidden" : ["state"],
+    "methods": {}
+  }
+  
+  
+  

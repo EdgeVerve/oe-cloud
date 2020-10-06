@@ -4,6 +4,7 @@
 - [oeCloud overall modules](#oecloud-overall-modules)
 - [oeCloud Features and functionalities](#oecloud-features-and-functionalities)
   * [oeCloud What it will do](#oecloud-what-it-will-do)
+  * [app-list](#app-list)
   * [Usage](#usage)
   * [oeCloud Models](#oecloud-models)
     + [BaseEntity](#baseentity)
@@ -17,6 +18,7 @@
   * [Boot scripts](#boot-scripts)
   * [Middlewares](#middlewares)
   * [Model Customization](#model-customization)
+  * [Call context and options](#call-context-options)
 - [oeCloud API Documentation](#oecloud-api-documentation)
   * [Common Utility API](#common-utility-api)
     + [IsBaseEntity(Model)](#isbaseentity-model-)
@@ -38,6 +40,7 @@
     + [aboutMe](#aboutme)
   * [Add fields to BaseEntity or ModelDefinition](#add-fields-to-baseentity-or-modeldefinition)
 - [oeCloud Difference between old and new](#oecloud-difference-between-old-and-new)
+
 
 # Introduction
 
@@ -80,21 +83,9 @@ Below are responsibilities of oe-cloud
 * ensure of loading of models defined in app-list module
 * expose *loopback like* APIs for application developer (eg app.boot(), app.start() etc)
 
-
-## Usage
-
-Typically, following code can be written in oeCloud application's server/server.js file
-
-```
-var oecloud = require('oe-cloud');
-
-oecloud.boot(__dirname, function(err){
-  oecloud.start();
-})
-
-```
-
-Above code should able to start application. you don't have to do require of loopback or any of it's component.
+## app-list
+This is basically javascript array of objects that contains list of node_modules that oe-cloud should load as part of application start up. This usually is JSON file with name as **app-list.json**. However, to achieve programmability, this can be also .js file like **app-list.js**. Another small improvement is, application developer can maintain different app-list for different environments which is based on **NODE_ENV** environment variable. 
+If all sources (app-list.json, app-list.js and app-list.<NODE_ENV>.js) exist, oe-cloud will merge these objects.
 Typical app-list.json, which would be part of application would look like
 
 ```
@@ -112,19 +103,7 @@ Typical app-list.json, which would be part of application would look like
     "enabled": true
   },
   {
-    "path": "oe-cache",
-    "enabled": true
-  },
-  {
-    "path": "oe-personalization",
-    "enabled": true
-  },
-  {
     "path": "oe-validation",
-    "enabled": true
-  },
-  {
-    "path": "oe-service-personalization",
     "enabled": true
   },
   {
@@ -133,6 +112,22 @@ Typical app-list.json, which would be part of application would look like
   }
 ]
 ```
+
+
+## Usage
+
+Typically, following code can be written in oeCloud application's server/server.js file
+
+```
+var oecloud = require('oe-cloud');
+
+oecloud.boot(__dirname, function(err){
+  oecloud.start();
+})
+
+```
+
+Above code should able to start application. you don't have to do require of loopback or any of it's component.
 
 ## oeCloud Models
 
@@ -255,6 +250,16 @@ In above model-config, MyModel will be created as public model. However, definit
   },
 ```
 
+* As said earlier, by defualt node modules mixins are not attached to BaseEntity by default. This behavior can be changed by **autoEnableMixins**  for node module. See example below of app-list.json
+
+```javaScript
+  "OeSomeModule" : {
+      "enable" : true,
+      "autoEnableMixins" : true
+  }
+```
+above setting will ensure that all mixins of OeSomeModule are attahced to BaseEntity and therefore attach to all models derived from BaseEntity.
+ 
 * you can also selectively ON/OFF the mixin attachments by calling **addModuleMixinsToBaseEntity** API as below. This can be important if you have to have some mixins from other dependent module.
 
 ```
@@ -378,6 +383,76 @@ However, if you want to **customize** any model, you need to add **extra** prope
 You can also have customer.js file which is then loaded and also you can have mixin.
 
 **Note** : More importantly exports function all .js files of models are executed in sequence. There should not be any extra executable code apart from that inside module.exports () function. 
+
+## Call Context and options
+
+### Options
+When we are referring to options, we are referring to second parameter usually we pass to model.find() or model.create() functions. This options parameter flows throughout the loopback pipeline. That is all observer hooks will get context in which it has this options parameter.
+
+```
+model.find({where : {id :  "a"}}, {ctx : {somefield : "X"} }, function(err, data){
+ // results are returned in data
+});
+
+
+model.observe('access', function(ctx, next){
+
+  assert(ctx.options.somefield === 'X')
+    
+})
+
+```
+
+This is all good when find() is being called by programmer from javascript code. However when find() is called due to http GET request on model, options parameter is parepared in oe-cloud module. specifically lib/warpper.js's _newCreateOptionsFromRemotingContext() is used to build this options.
+
+options has got most important property **ctx**. All other properties are not touched by oecloud framework. 
+
+This property is now built by http request's callContext.ctx property and basically both are actually same.
+
+therefore if the request object is req and options object is options then
+
+```
+  assert(req.callContext.ctx === options.ctx);
+```
+
+With above design, if you change callContext.ctx property in middleware, that will be directly reflected in options.ctx property
+
+
+### callContext
+
+callContext property of HTTP request is created by oeCloud framework in one of it's middleware. As said above callContext.ctx is same as options.ctx. you must break this link. With this link if you modify callContext.ctx in **middleware** or **before remote** hooks, it will be available in options.ctx field in your **observer hooks**.
+
+Same way, if you change options.ctx in observer hooks, you will see that in **after remote** hook.
+
+
+```
+  model.beforeRemote( '**', function( ctx, opts, next) {
+    
+    ctx.req.callContext.someField = 'x';
+    
+    next();
+  });
+  
+  
+  model.observe('before save', function(ctx, next){
+    assert(ctx.options.ctx.someField === 'x');
+    
+    ctx.options.ctx.otherField = 'y'
+    
+    // never do this as it will break link ---->>> ctx.options.ctx = { otherField : 'y', someField : 'x' }
+  });
+
+  model.afterRemote( '**', function( ctx, opts, next) {
+    
+    assert(ctx.options.ctx.otherField === 'y');
+    
+    next();
+  });
+
+
+```
+
+
 
 # oeCloud API Documentation
 
@@ -645,4 +720,7 @@ app.observe('loaded', function(ctx, next){
 | Data Personalization | Mixin | [oe-personalization](https://github.com/EdgeVerve/oe-personalization) |
 | Service Personalization | Mixin+Boot | Boot [oe-service=personalization](https://github.com/EdgeVerve/oe-service-personalization) |
 | Cachinge | Mixin+DAO | DAO Wrapper [oe-cache](https://github.com/EdgeVerve/oe-cache) |
+
+
+
 

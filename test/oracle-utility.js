@@ -98,6 +98,8 @@ function createUser(connection, oracleUser, oraclePassword, cb) {
 }
 
 function dropTables(oracleUserConnectSettings, cb) {
+  var userName = oracleUserConnectSettings.user;
+  var password = oracleUserConnectSettings.password;
   oracledb.getConnection(oracleUserConnectSettings, function (userConnectionErr, connection) {
     if (userConnectionErr) {
       console.error(userConnectionErr);

@@ -46,5 +46,21 @@
   "MarksList": {
     "dataSource": "db",
     "public": true
+  },
+  "Employee" : {
+    "public" : true,
+    "dataSource" : "db"
+  },
+  "EmployeeAddress" : {
+    "public" : true,
+    "dataSource" : "db"
+  },
+  "EmployeeAccount" : {
+    "public" : true,
+    "dataSource" : "db"
+  },
+  "EmployeePhone" : {
+    "public" : true,
+    "dataSource" : "db"
   }
 }

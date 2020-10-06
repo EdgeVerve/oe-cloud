@@ -1,4 +1,3 @@
-const _ = require('lodash');
 const loopback = require('loopback');
 const log = require('oe-logger')('context-populator-filter');
 var rootModel;
@@ -23,7 +22,12 @@ module.exports = function postAuthContextPopulator(middlewareOptions) {
       delete obj.created;
       delete obj.ctx;
       // Create deep-copy of roles array
-      obj.roles = JSON.parse(JSON.stringify(req.accessToken.__data.roles));
+      if (req.accessToken && req.accessToken.__data && req.accessToken.__data.roles) {
+        obj.roles = JSON.parse(JSON.stringify(req.accessToken.__data.roles));
+      } else {
+        obj.roles = [];
+      }
+
       callContext.ctx = Object.assign(callContext.ctx, obj);
 
       callContext.ctx = Object.assign(callContext.ctx, req.accessToken.ctx);
@@ -33,10 +37,11 @@ module.exports = function postAuthContextPopulator(middlewareOptions) {
 
       log.debug(req.callContext, 'postAuthContextPopulator : context setting as  = ', callContext);
     }
-    if (_.isEmpty(req.callContext) && rootModel && rootModel.setCallContext) {
+    if (rootModel && rootModel.setCallContext) {
       req.callContext = rootModel.setCallContext(req);
     }
-
+    req.callContext = req.callContext || {};
+    req.callContext.ctx = req.callContext.ctx || {};
     next();
   };
 };
