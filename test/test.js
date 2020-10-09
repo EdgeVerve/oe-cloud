@@ -512,7 +512,7 @@ describe(chalk.blue('oeCloud Test Started'), function (done) {
   newds.id = 'oe-cloud-test-newdb';
 
   if (currentDB && (currentDB.toLowerCase().indexOf('mongo') >= 0 || currentDB.toLowerCase().indexOf('postgre') >= 0)) {
-    var dbname = process.env.DB_NAME || 'oe-cloud-test';
+    var dbName = process.env.DB_NAME || "dbname";
     newds.database = dbname + '-newdb';
     if (db2.db.url) {
       var y = db2.db.url.split('/');

@@ -6,7 +6,7 @@
  */
 var mongoHost = process.env.MONGO_HOST || 'localhost';
 var mongoPort = process.env.MONGO_PORT ? parseInt(process.env.MONGO_PORT) : 27017;
-var dbName = process.env.DB_NAME || 'oe-cloud-test';
+var dbName = process.env.DB_NAME || "dbname";
 module.exports = {
   'memdb': {
     'name': 'memdb',

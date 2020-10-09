@@ -5,11 +5,11 @@
  *
  */
 
-var oracleSID = process.env.ORACLE_SID || 'ORCLCDB';
+var oracleSID = process.env.ORACLE_SID;
 var oracleHost = process.env.ORACLE_HOST || 'localhost';
 var oraclePort = process.env.ORACLE_PORT ? parseInt(process.env.ORACLE_PORT) : 1521;
-var oracleUserName = process.env.ORACLE_USERNAME || 'oeadmin';
-var oracleUserPassword = process.env.ORACLE_PASSWORD || 'oeadmin';
+var oracleUserName = process.env.ORACLE_USERNAME;
+var oracleUserPassword = process.env.ORACLE_PASSWORD;
 
 module.exports = {
   'nullsrc': {
